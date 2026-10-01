@@ -1,0 +1,48 @@
+{
+  "name": "teamhub-ftc",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Open-source, bring-your-own-services team dashboard for FIRST Tech Challenge teams.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20.19"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "setup": "tsx apps/wizard/server/main.ts",
+    "generate": "tsx packages/generator/src/cli.ts generate",
+    "build": "npm run generate && npm run build -w @teamhub/dashboard",
+    "dev": "npm run generate && npm run dev -w @teamhub/dashboard",
+    "dev:demo": "tsx packages/generator/src/cli.ts generate --config examples/demo.config.json && npm run dev -w @teamhub/dashboard",
+    "build:demo": "tsx packages/generator/src/cli.ts generate --config examples/demo.config.json && npm run build -w @teamhub/dashboard",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "eslint . && tsx scripts/lint-sql.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "e2e": "playwright test",
+    "ci:matrix": "tsx scripts/ci-matrix.ts",
+    "new-module": "tsx scripts/new-module.ts",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "4.13.0",
+    "@electric-sql/pglite": "0.5.8",
+    "@eslint/js": "10.0.1",
+    "@playwright/test": "1.63.0",
+    "@types/node": "26.6.3",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@types/three": "0.186.0",
+    "eslint": "10.11.0",
+    "eslint-plugin-react-hooks": "7.1.1",
+    "prettier": "3.9.9",
+    "tsx": "4.23.15",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.71.0",
+    "vitest": "5.0.3"
+  }
+}

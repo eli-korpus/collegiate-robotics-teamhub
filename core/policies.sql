@@ -1,0 +1,129 @@
+-- Core RLS policies. Re-applied by every migration plan (the plan drops existing core policies first).
+
+alter table teamhub_modules enable row level security;
+alter table teamhub_settings enable row level security;
+alter table teamhub_storage_trash enable row level security;
+alter table teams enable row level security;
+alter table profiles enable row level security;
+alter table profiles_private enable row level security;
+alter table memberships enable row level security;
+alter table positions enable row level security;
+alter table position_holders enable row level security;
+alter table subteams enable row level security;
+alter table links enable row level security;
+alter table info_requests enable row level security;
+alter table notifications enable row level security;
+alter table comments enable row level security;
+
+-- System
+create policy core_modules_read on teamhub_modules for select to authenticated using (true);
+create policy core_settings_read on teamhub_settings for select to authenticated using (teamhub_is_active());
+create policy core_settings_update on teamhub_settings for update to authenticated
+  using (teamhub_is_admin()) with check (teamhub_is_admin());
+-- teamhub_storage_trash: no client policies (definer functions only).
+
+-- Teams: names/colors are needed by pending users too.
+create policy core_teams_read on teams for select to authenticated using (true);
+
+-- Profiles
+create policy core_profiles_read on profiles for select to authenticated using (
+  id = (select auth.uid())
+  or (teamhub_is_active() and status <> 'pending')
+  or (status = 'pending' and exists (
+        select 1 from memberships m
+        where m.user_id = profiles.id and m.status = 'pending'
+          and people_can_approve(m.team_id, coalesce(m.requested_type, 'member'))))
+);
+create policy core_profiles_update_self on profiles for update to authenticated
+  using (id = (select auth.uid())) with check (id = (select auth.uid()));
+create policy core_profiles_update_approver on profiles for update to authenticated
+  using (teamhub_is_admin() or exists (
+    select 1 from memberships m where m.user_id = profiles.id and teamhub_can('people.assign_positions', m.team_id)))
+  with check (true);
+
+create policy core_private_read on profiles_private for select to authenticated using (
+  user_id = (select auth.uid())
+  or exists (select 1 from memberships m where m.user_id = profiles_private.user_id and teamhub_can('people.view_private', m.team_id))
+);
+create policy core_private_insert on profiles_private for insert to authenticated
+  with check (user_id = (select auth.uid()));
+create policy core_private_update on profiles_private for update to authenticated
+  using (user_id = (select auth.uid()) or exists (
+    select 1 from memberships m where m.user_id = profiles_private.user_id and teamhub_can('people.view_private', m.team_id)))
+  with check (true);
+
+-- Memberships: active users see active memberships; approvers see pending ones for their team.
+create policy core_memberships_read on memberships for select to authenticated using (
+  user_id = (select auth.uid())
+  or (teamhub_is_active() and status <> 'pending')
+  or (status = 'pending' and people_can_approve(team_id, coalesce(requested_type, 'member')))
+);
+-- Ask to join another team (always pending; approval happens via people_approve()).
+create policy core_memberships_request on memberships for insert to authenticated with check (
+  user_id = (select auth.uid()) and status = 'pending' and type = coalesce(requested_type, 'member') and approved_by is null
+);
+
+-- Positions
+create policy core_positions_read on positions for select to authenticated using (teamhub_is_active());
+create policy core_positions_insert on positions for insert to authenticated with check (
+  source = 'app' and not grants_permissions and teamhub_can('people.assign_positions', team_id)
+);
+create policy core_positions_update on positions for update to authenticated
+  using (source = 'app' and teamhub_can('people.assign_positions', team_id))
+  with check (source = 'app' and not grants_permissions);
+create policy core_positions_delete on positions for delete to authenticated
+  using (source = 'app' and teamhub_can('people.assign_positions', team_id));
+
+create policy core_holders_read on position_holders for select to authenticated using (teamhub_is_active());
+create policy core_holders_insert on position_holders for insert to authenticated with check (
+  exists (select 1 from positions p where p.id = position_id and (
+    teamhub_can('people.assign_positions', p.team_id)
+    or (not p.grants_permissions and teamhub_can('people.assign_badges', p.team_id))))
+);
+create policy core_holders_delete on position_holders for delete to authenticated using (
+  exists (select 1 from positions p where p.id = position_id and (
+    teamhub_can('people.assign_positions', p.team_id)
+    or (not p.grants_permissions and teamhub_can('people.assign_badges', p.team_id))))
+);
+
+create policy core_subteams_read on subteams for select to authenticated using (teamhub_is_active());
+
+-- Links (tool links + Bulletin Board). Bulletin adds its own policies when enabled.
+create policy core_links_read on links for select to authenticated using (teamhub_in_team(team_id));
+create policy core_links_insert on links for insert to authenticated
+  with check (teamhub_can('core.edit_links', team_id) and created_by = (select auth.uid()));
+create policy core_links_update on links for update to authenticated
+  using (teamhub_can('core.edit_links', team_id)) with check (teamhub_can('core.edit_links', team_id));
+create policy core_links_delete on links for delete to authenticated using (teamhub_can('core.edit_links', team_id));
+
+-- Request info
+create policy core_info_read on info_requests for select to authenticated using (teamhub_in_team(team_id));
+create policy core_info_insert on info_requests for insert to authenticated
+  with check (teamhub_can('people.request_info', team_id) and created_by = (select auth.uid()));
+create policy core_info_delete on info_requests for delete to authenticated
+  using (created_by = (select auth.uid()) or teamhub_is_admin());
+
+-- Notifications: own only. Inserts come from definer functions.
+create policy core_notifications_read on notifications for select to authenticated using (user_id = (select auth.uid()));
+create policy core_notifications_update on notifications for update to authenticated
+  using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()));
+create policy core_notifications_delete on notifications for delete to authenticated using (user_id = (select auth.uid()));
+
+-- Comments on work items (spec §10.7).
+create policy core_comments_read on comments for select to authenticated using (teamhub_ref_visible(ref));
+create policy core_comments_insert on comments for insert to authenticated
+  with check (author = (select auth.uid()) and teamhub_is_active() and teamhub_ref_visible(ref));
+create policy core_comments_delete on comments for delete to authenticated
+  using (author = (select auth.uid()) or teamhub_is_admin());
+
+-- Avatars bucket
+create policy core_avatars_read on storage.objects for select to authenticated
+  using (bucket_id = 'avatars' and teamhub_is_active());
+create policy core_avatars_insert on storage.objects for insert to authenticated
+  with check (bucket_id = 'avatars' and split_part(name, '/', 1) = (select auth.uid())::text);
+create policy core_avatars_update on storage.objects for update to authenticated
+  using (bucket_id = 'avatars' and split_part(name, '/', 1) = (select auth.uid())::text);
+create policy core_avatars_delete on storage.objects for delete to authenticated
+  using (bucket_id = 'avatars' and (split_part(name, '/', 1) = (select auth.uid())::text or teamhub_is_admin()));
+
+select teamhub_realtime_add('notifications');

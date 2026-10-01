@@ -1,0 +1,29 @@
+{
+  "name": "@teamhub/sdk",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./define": "./src/define.ts",
+    "./ftcscout": "./src/ftcscout.ts"
+  },
+  "dependencies": {
+    "@supabase/auth-js": "2.117.2",
+    "@supabase/functions-js": "2.117.2",
+    "@supabase/postgrest-js": "2.117.2",
+    "@supabase/realtime-js": "2.117.2",
+    "@supabase/storage-js": "2.117.2",
+    "@supabase/supabase-js": "2.117.2",
+    "@tanstack/react-query": "5.104.0",
+    "@teamhub/config-schema": "1.0.0",
+    "@teamhub/ui": "1.0.0",
+    "react-router": "8.4.0",
+    "zod": "4.6.5"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "react-dom": "^19"
+  },
+  "sideEffects": false
+}

@@ -9,3 +9,9 @@ team/.wizard-draft.json
 *.log
 .vscode/
 .idea/
+apps/dashboard/public/branding/
+apps/dashboard/public/404.html
+sql/
+test-results/
+playwright-report/
+.teamhub-ci/

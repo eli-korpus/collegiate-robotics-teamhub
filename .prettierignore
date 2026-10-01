@@ -1,0 +1,4 @@
+dist
+node_modules
+apps/dashboard/src/generated
+*.md

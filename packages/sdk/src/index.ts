@@ -16,3 +16,5 @@ export * from './entity';
 export * from './comments';
 export * from './upload';
 export * from './misc';
+export * from './module';
+export * from './define-client';

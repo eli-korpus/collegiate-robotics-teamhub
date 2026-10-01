@@ -21,7 +21,7 @@ function ModuleItem({ m, onNavigate }: { m: LoadedModule; onNavigate: () => void
       count={count}
       onClick={onNavigate}
       className={({ isActive }: { isActive: boolean }) =>
-        cn('flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-[13.5px] transition-colors', isActive ? 'bg-accent-soft font-medium text-accent [&_svg]:text-accent' : 'text-fg/85 hover:bg-bg-subtle')
+        cn('flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-[13.5px] transition-colors', isActive ? 'bg-accent-soft font-medium text-fg [&_svg]:text-accent' : 'text-fg/85 hover:bg-bg-subtle')
       }
     />
   );

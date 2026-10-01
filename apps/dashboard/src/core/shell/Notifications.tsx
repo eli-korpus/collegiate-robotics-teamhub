@@ -89,7 +89,7 @@ export function NotificationsButton() {
   return (
     <>
       <IconButton label={unread ? `Notifications (${unread} unread)` : 'Notifications'} onClick={() => setOpen(true)} className="relative">
-        <Bell className="size-[18px]" />
+        <Bell className="size-[17px]" strokeWidth={1.9} />
         {unread > 0 && (
           <span className="tabular absolute right-1 top-1 grid min-w-4 place-items-center rounded-full bg-danger px-1 text-[10px] font-semibold leading-4 text-white">{unread > 9 ? '9+' : unread}</span>
         )}

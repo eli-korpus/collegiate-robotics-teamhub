@@ -40,7 +40,7 @@ export function checkBundle(enabled?: string[], allModuleIds: string[] = []): Bu
     // Each module embeds a marker string `teamhub-module:<id>` in its client file; disabled ones must be absent.
     const all = assets.map((f) => readFileSync(join(DIST, 'assets', f), 'utf8')).join('\n');
     for (const id of allModuleIds) {
-      const present = all.includes(`teamhub-module:${id}"`) || all.includes(`teamhub-module:${id}'`);
+      const present = new RegExp(`teamhub-module:${id}[\`"']`).test(all);
       if (!enabled.includes(id) && present) problems.push(`Disabled module "${id}" is present in the bundle`);
       if (enabled.includes(id) && !present) problems.push(`Enabled module "${id}" is missing from the bundle`);
     }

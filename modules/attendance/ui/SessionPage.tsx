@@ -1,0 +1,187 @@
+import { useState } from 'react';
+import { useNavigate, useParams } from 'react-router';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ArrowLeft, CheckCheck, LogOut, QrCode, Square, Trash2 } from 'lucide-react';
+import { Avatar, Banner, Button, Checkbox, EmptyState, SearchInput, Spinner, StatusPill, VisibilityNote, cn, formatDate, formatTime, matches, toDateInput, toast, useConfirm } from '@teamhub/ui';
+import { canWith, friendlyError, TeamBadge, useActivePeople, useMe, useRealtime, useSupabase } from '@teamhub/sdk';
+import { roster, sessionTitle, useAttSettings, type Presence, type Session } from '../data';
+import { CheckInForm } from './CheckIn';
+
+/** Roster checklist with big tap targets, "mark all present", live self check-ins (spec §13.1). */
+export function SessionPage() {
+  const { id } = useParams();
+  const sb = useSupabase();
+  const me = useMe();
+  const qc = useQueryClient();
+  const nav = useNavigate();
+  const confirm = useConfirm();
+  const settings = useAttSettings();
+  const [q, setQ] = useState('');
+  const session = useQuery({
+    queryKey: ['attendance', 'session', id],
+    queryFn: async () => {
+      const { data, error } = await sb.from('att_sessions').select('*').eq('id', id!).maybeSingle();
+      if (error) throw error;
+      return data as Session | null;
+    },
+  });
+  const presence = useQuery({
+    queryKey: ['attendance', 'session-presence', id],
+    queryFn: async () => {
+      const { data, error } = await sb.from('att_presence').select('*').eq('session_id', id!);
+      if (error) throw error;
+      return data as Presence[];
+    },
+  });
+  const everyone = useActivePeople(null);
+  const s = session.data;
+  const canTake = !!s && canWith(me, 'attendance.take', s.team_id);
+  const editable = !!s && ((canTake && s.date >= toDateInput(new Date(Date.now() - 86_400_000))) || canWith(me, 'attendance.edit', s.team_id));
+  useRealtime('att_presence', `session_id=eq.${id}`, () => qc.invalidateQueries({ queryKey: ['attendance', 'session-presence', id] }), canTake);
+
+  if (session.isLoading) return <Spinner className="m-8" />;
+  if (!s) return <EmptyState title="Session not found" action={<Button onClick={() => nav('/attendance')}>Back</Button>} />;
+
+  const refresh = () => qc.invalidateQueries({ queryKey: ['attendance'] });
+  const byUser = new Map((presence.data ?? []).map((p) => [p.user_id, p]));
+
+  if (!canTake && !canWith(me, 'attendance.view_all', s.team_id)) {
+    const mine = byUser.get(me.id);
+    return (
+      <div className="mx-auto max-w-md px-4 py-8">
+        <BackLink />
+        <h1 className="text-[20px] font-semibold">{sessionTitle(s)}</h1>
+        <p className="mb-5 text-[13px] text-muted">{formatDate(s.date, { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+        {mine ? <Banner tone="success" title="You're checked in">{mine.check_in && `at ${formatTime(mine.check_in)}`}</Banner> : !s.closed && settings.selfCheckIn ? <CheckInForm sessionId={s.id} onDone={refresh} /> : <Banner tone="info">You weren't marked present for this practice.</Banner>}
+      </div>
+    );
+  }
+
+  const list = roster(everyone, s, settings.includeMentors);
+  // People marked present who aren't on the roster (e.g. a guest from another team) still show.
+  const extras = (presence.data ?? []).filter((p) => !list.some((x) => x.id === p.user_id)).map((p) => everyone.find((x) => x.id === p.user_id)).filter(Boolean) as typeof list;
+  const all = [...list, ...extras].filter((p) => !q || matches(p.name, q));
+  const present = list.filter((p) => byUser.has(p.id)).length;
+
+  const toggle = async (userId: string, on: boolean) => {
+    const res = on ? await sb.from('att_presence').upsert({ session_id: s.id, user_id: userId, check_in: new Date().toISOString() }) : await sb.from('att_presence').delete().match({ session_id: s.id, user_id: userId });
+    if (res.error) toast.error(friendlyError(res.error));
+    qc.invalidateQueries({ queryKey: ['attendance', 'session-presence', id] });
+  };
+
+  return (
+    <div className="mx-auto max-w-3xl px-4 py-5 sm:px-6">
+      <BackLink />
+      <div className="mb-4 flex flex-wrap items-start gap-3">
+        <div className="min-w-0 flex-1">
+          <h1 className="text-[20px] font-semibold tracking-tight">{sessionTitle(s)}</h1>
+          <p className="text-[13px] text-muted">
+            {formatDate(s.date, { weekday: 'long', month: 'long', day: 'numeric' })} <TeamBadge teamId={s.team_id} />
+          </p>
+        </div>
+        <StatusPill label={s.closed ? 'Closed' : 'Open'} tone={s.closed ? 'neutral' : 'success'} />
+      </div>
+
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <span className="tabular mr-auto text-[15px] font-semibold">
+          {present}
+          <span className="font-normal text-muted"> / {list.length} present</span>
+        </span>
+        {!s.closed && canTake && settings.selfCheckIn && (
+          <Button icon={<QrCode className="size-4" />} onClick={() => nav(`/attendance/session/${s.id}/code`)}>
+            Show check-in code
+          </Button>
+        )}
+        {editable && (
+          <Button
+            icon={<CheckCheck className="size-4" />}
+            onClick={async () => {
+              const missing = list.filter((p) => !byUser.has(p.id));
+              if (!missing.length) return;
+              const { error } = await sb.from('att_presence').upsert(missing.map((p) => ({ session_id: s.id, user_id: p.id, check_in: new Date().toISOString() })));
+              if (error) toast.error(friendlyError(error));
+              refresh();
+            }}
+          >
+            Mark all present
+          </Button>
+        )}
+        {!s.closed && canTake && (
+          <Button
+            variant="primary"
+            icon={<Square className="size-4" />}
+            onClick={async () => {
+              const out = settings.trackHours && (await confirm({ title: 'End practice', body: 'Check everyone who is still here out now?', confirmLabel: 'End & check everyone out' }));
+              const { error } = await sb.rpc('att_close', { p_session: s.id, p_check_out: !!out });
+              if (error) return toast.error(friendlyError(error));
+              toast.success('Practice ended');
+              refresh();
+            }}
+          >
+            End practice
+          </Button>
+        )}
+      </div>
+
+      <SearchInput value={q} onChange={setQ} placeholder="Find someone…" className="mb-3" />
+      <ul className="divide-y divide-border overflow-hidden rounded-lg border border-border bg-surface">
+        {all.map((p) => {
+          const pr = byUser.get(p.id);
+          return (
+            <li key={p.id} className={cn('flex min-h-14 items-center gap-3 px-4 py-2', pr && 'bg-success-soft/40')}>
+              <Checkbox size="lg" checked={!!pr} disabled={!editable} onChange={(v) => toggle(p.id, v)} label={<span className="sr-only">{p.name} present</span>} />
+              <Avatar name={p.name} src={p.avatarUrl} size={32} />
+              <span className="min-w-0 flex-1 truncate text-[14.5px] font-medium">{p.name}</span>
+              {settings.trackHours && pr && (
+                <span className="tabular text-[12.5px] text-muted">
+                  {pr.check_in ? formatTime(pr.check_in) : '—'} → {pr.check_out ? formatTime(pr.check_out) : '…'}
+                </span>
+              )}
+              {settings.trackHours && pr && !pr.check_out && editable && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  icon={<LogOut className="size-3.5" />}
+                  onClick={async () => {
+                    const { error } = await sb.from('att_presence').update({ check_out: new Date().toISOString() }).match({ session_id: s.id, user_id: p.id });
+                    if (error) toast.error(friendlyError(error));
+                    refresh();
+                  }}
+                >
+                  Out
+                </Button>
+              )}
+            </li>
+          );
+        })}
+        {!all.length && <li className="px-4 py-8 text-center text-[13px] text-faint">No one on this roster yet.</li>}
+      </ul>
+      <VisibilityNote className="mt-3">Each person sees only their own attendance; captains and mentors see everyone's.</VisibilityNote>
+      {canWith(me, 'attendance.edit', s.team_id) && (
+        <Button
+          variant="ghost"
+          className="mt-6 text-danger"
+          icon={<Trash2 className="size-4" />}
+          onClick={async () => {
+            if (!(await confirm({ title: 'Delete this session?', body: 'Its attendance records are deleted too.', danger: true, confirmLabel: 'Delete' }))) return;
+            const { error } = await sb.from('att_sessions').delete().eq('id', s.id);
+            if (error) return toast.error(friendlyError(error));
+            refresh();
+            nav('/attendance');
+          }}
+        >
+          Delete session
+        </Button>
+      )}
+    </div>
+  );
+}
+
+function BackLink() {
+  const nav = useNavigate();
+  return (
+    <button type="button" onClick={() => nav('/attendance')} className="mb-4 inline-flex items-center gap-1 text-[13px] text-muted hover:text-fg">
+      <ArrowLeft className="size-4" /> Attendance
+    </button>
+  );
+}

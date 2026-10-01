@@ -95,7 +95,7 @@ export function SidebarItem({
       aria-current={active ? 'page' : undefined}
       className={cn(
         'flex h-8 w-full items-center gap-2.5 rounded-md px-2.5 text-[13.5px] transition-colors',
-        active ? 'bg-accent-soft font-medium text-accent' : 'text-fg/85 hover:bg-bg-subtle',
+        active ? 'bg-accent-soft font-medium text-fg' : 'text-fg/85 hover:bg-bg-subtle',
       )}
       {...rest}
     >

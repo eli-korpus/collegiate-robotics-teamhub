@@ -26,7 +26,7 @@ export default tseslint.config(
     },
   },
   { files: ['scripts/**', '**/*.mjs'], languageOptions: { globals: { process: 'readonly', console: 'readonly', URL: 'readonly' } } },
-  { files: ['modules/**/*.{ts,tsx}'], rules: { 'no-restricted-imports': ['error', moduleBoundary] } },
+  { files: ['modules/**/*.{ts,tsx}'], ignores: ['**/*.test.ts'], rules: { 'no-restricted-imports': ['error', moduleBoundary] } },
   {
     files: ['integrations/**/*.{ts,tsx}'],
     rules: {

@@ -96,7 +96,7 @@ export interface AccentSet {
 
 /**
  * Derives a WCAG-AA safe accent for a theme mode:
- * - accent vs surface ≥ 3:1 (UI components)
+ * - accent vs surface ≥ 4.5:1 (it is also used for link text; ≥ 3:1 would satisfy UI components only)
  * - text on accent ≥ 4.5:1
  */
 export function deriveAccent(hex: string, mode: 'light' | 'dark'): AccentSet {
@@ -106,7 +106,8 @@ export function deriveAccent(hex: string, mode: 'light' | 'dark'): AccentSet {
   let adjusted = false;
   const ok = (h: string) => {
     const onAccent = Math.max(contrast(h, LIGHT_TEXT), contrast(h, DARK_TEXT));
-    return contrast(h, surface) >= 3 && onAccent >= 4.5;
+    // 4.5:1 (not just 3:1) because the accent is also used for text links.
+    return contrast(h, surface) >= 4.5 && onAccent >= 4.5;
   };
   let out = oklchToHex(color);
   for (let i = 0; i < 60 && !ok(out); i++) {

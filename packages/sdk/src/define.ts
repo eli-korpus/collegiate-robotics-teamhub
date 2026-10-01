@@ -81,6 +81,8 @@ export interface ModuleManifest<S extends z.ZodType = z.ZodType> {
   seasonRollover?: { describe: string; sql: string };
   /** Module whose presence this module reads in UI only (never required). */
   docs?: string;
+  /** Edge functions (folders in supabase/functions) deployed only when this module is enabled. */
+  functions?: string[];
 }
 
 export function defineModule<S extends z.ZodType>(m: ModuleManifest<S>): ModuleManifest<S> {
@@ -121,3 +123,8 @@ export const coreLinkPermissions = definePermissions('core', {
   edit_links: { label: 'Edit team tool links', default: ['mentor'], simple: true },
 });
 export const allCorePermissions: PermissionDefs = { ...corePermissions, ...coreLinkPermissions };
+
+/** Edge functions every install gets (spec §3.4). */
+export const CORE_FUNCTIONS = ['admin-reset-link', 'admin-delete-user', 'cleanup'] as const;
+/** Functions that must be callable without a user JWT. */
+export const PUBLIC_FUNCTIONS = ['cleanup', 'ical'];

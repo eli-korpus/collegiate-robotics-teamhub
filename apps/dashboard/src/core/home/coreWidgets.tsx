@@ -207,7 +207,7 @@ function QuickLinks() {
     <Card>
       <CardHeader icon={<Link2 className="size-4" />} title="Team tools" action={canEdit ? <Link to="/admin/links" className="text-[12px] font-medium text-accent">Edit</Link> : undefined} />
       {pinned.length ? (
-        <ul className="grid grid-cols-1 gap-1 px-2 pb-3 sm:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-0.5 px-2 pb-3">
           {pinned.map((l) => (
             <li key={l.id}>
               <a href={l.url} target="_blank" rel="noreferrer noopener" className="flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] hover:bg-bg-subtle">

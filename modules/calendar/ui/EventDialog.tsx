@@ -44,7 +44,7 @@ export function EventDialog({ open, onClose, event, draft, onSaved }: { open: bo
   const save = async () => {
     if (!title.trim()) return toast.error('Give the event a title');
     const starts_at = allDay ? dateToAllDay(date) : new Date(`${date}T${from}`).toISOString();
-    let ends_at: string | null = null;
+    let ends_at: string | null;
     if (allDay) ends_at = endDate && endDate > date ? dateToAllDay(endDate) : null;
     else {
       const e = new Date(`${date}T${to}`);

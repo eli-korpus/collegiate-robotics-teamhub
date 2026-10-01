@@ -57,6 +57,11 @@ export async function generate(config: TeamhubConfig, catalog?: Catalog, root = 
   };
 }
 
+/** team/ folder (overridable for tests with TEAMHUB_TEAM_DIR). */
+export function teamDir(root = REPO_ROOT): string {
+  return process.env.TEAMHUB_TEAM_DIR ?? join(root, 'team');
+}
+
 export function configPath(root = REPO_ROOT): string {
-  return join(root, DEFAULT_CONFIG_PATH);
+  return join(teamDir(root), 'teamhub.config.json');
 }

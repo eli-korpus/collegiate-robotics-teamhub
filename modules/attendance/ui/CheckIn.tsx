@@ -80,7 +80,7 @@ export function CheckInForm({ sessionId, initialCode = '', onDone }: { sessionId
       auto.current = true;
       submit(initialCode);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, [initialCode]);
 
   if (done)

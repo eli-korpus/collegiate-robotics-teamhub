@@ -1,0 +1,15 @@
+@import '@teamhub/ui/styles.css';
+
+@source '../../../packages/ui/src';
+@source '../../../packages/sdk/src';
+
+:root {
+  --accent: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-contrast: #ffffff;
+}
+:root.dark {
+  --accent: #6b9bff;
+  --accent-hover: #8bb1ff;
+  --accent-contrast: #111113;
+}

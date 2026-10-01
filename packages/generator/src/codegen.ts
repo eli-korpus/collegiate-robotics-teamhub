@@ -139,8 +139,8 @@ export function generateDashboardFiles(r: Resolved, outDir = 'apps/dashboard/src
     content: json({
       title: c.program.name,
       base: c.hosting.basePath || '/',
-      favicon: existsSync(join(root, 'team', 'branding', 'favicon.png')) ? 'branding/favicon.png' : null,
-      appleTouchIcon: existsSync(join(root, 'team', 'branding', 'apple-touch-icon.png')) ? 'branding/apple-touch-icon.png' : null,
+      favicon: existsSync(join(process.env.TEAMHUB_TEAM_DIR ?? join(root, 'team'), 'branding', 'favicon.png')) ? 'branding/favicon.png' : null,
+      appleTouchIcon: existsSync(join(process.env.TEAMHUB_TEAM_DIR ?? join(root, 'team'), 'branding', 'apple-touch-icon.png')) ? 'branding/apple-touch-icon.png' : null,
       logo: firstLogo,
       themeColor: c.theme.accent,
       defaultMode: c.theme.defaultMode,
@@ -164,7 +164,7 @@ export function writeFiles(root: string, files: GeneratedFile[], cleanDir?: stri
 
 /** Copies team/branding → apps/dashboard/public/branding. */
 export function copyBranding(root: string): number {
-  const from = join(root, 'team', 'branding');
+  const from = join(process.env.TEAMHUB_TEAM_DIR ?? join(root, 'team'), 'branding');
   const to = join(root, 'apps', 'dashboard', 'public', 'branding');
   rmSync(to, { recursive: true, force: true });
   if (!existsSync(from)) return 0;

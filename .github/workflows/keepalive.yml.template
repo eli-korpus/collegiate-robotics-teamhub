@@ -1,0 +1,26 @@
+# Keeps the free Supabase project awake (free projects pause after 7 days without activity).
+# Installed into your fork by the TeamHub setup wizard. Reads the public project URL + publishable key
+# from team/teamhub.config.json, so no secrets are needed.
+# Note: GitHub disables scheduled workflows in repos with no commits for 60 days. If that happens,
+# open Actions → "Keep TeamHub awake" → Enable workflow.
+name: Keep TeamHub awake
+on:
+  schedule:
+    - cron: '17 9 */3 * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: team/teamhub.config.json
+          sparse-checkout-cone-mode: false
+      - name: Ping database
+        run: |
+          URL=$(jq -r '.supabase.url' team/teamhub.config.json)
+          KEY=$(jq -r '.supabase.anonKey' team/teamhub.config.json)
+          curl --fail --silent --show-error -X POST "$URL/rest/v1/rpc/teamhub_ping" \
+            -H "apikey: $KEY" -H "Content-Type: application/json" -d '{}'

@@ -109,6 +109,20 @@ $$;
 `;
 }
 
+/**
+ * Module SQL may reference wizard settings as {{settings.name}} (e.g. auto-delete days in a cron job).
+ * Numbers/booleans are inlined; strings become SQL literals.
+ */
+export function applySettings(sql: string, settings: Record<string, unknown>): string {
+  return sql.replace(/\{\{settings\.(\w+)\}\}/g, (_m, k: string) => {
+    const v = settings[k];
+    if (typeof v === "number" && Number.isFinite(v)) return String(v);
+    if (typeof v === "boolean") return v ? "true" : "false";
+    if (typeof v === "string") return lit(v);
+    throw new Error(`Setting "${k}" used in SQL must be a number, boolean or string`);
+  });
+}
+
 export function bucketSql(b: BucketDef): string {
   return `insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values (${lit(b.id)}, ${lit(b.id)}, ${b.public}, ${Math.round(b.maxFileMB * 1024 * 1024)}, ${arr(b.mime)})
@@ -281,7 +295,7 @@ export function planSql(r: Resolved, db: DbState | null, opts: PlanOptions = {})
       pol.push(`-- ${m.id} (dormant: admins can read, nobody can write)\nselect teamhub_make_dormant(${lit(man.prefix)});`);
       continue;
     }
-    pol.push(`-- ${m.id}\nselect teamhub_drop_policies(${lit(man.prefix)});\n${m.catalog.policies}`);
+    pol.push(`-- ${m.id}\nselect teamhub_drop_policies(${lit(man.prefix)});\n${applySettings(m.catalog.policies, m.settings)}`);
     for (const b of man.buckets) pol.push(bucketPoliciesSql(man.prefix, b));
   }
   const activeIx = new Set(r.activeIntegrations.map((i) => i.manifest.id));
@@ -301,7 +315,7 @@ export function planSql(r: Resolved, db: DbState | null, opts: PlanOptions = {})
     ];
     for (const m of r.modules) {
       const prefix = m.catalog.manifest.prefix;
-      if (m.state === 'active' && m.catalog.cron) cron.push(`-- ${m.id}\n${m.catalog.cron}`);
+      if (m.state === 'active' && m.catalog.cron) cron.push(`-- ${m.id}\n${applySettings(m.catalog.cron, m.settings)}`);
       else if (prefix) cron.push(`select cron.unschedule(jobname) from cron.job where starts_with(jobname, ${lit(prefix)});`);
     }
     const all = cron.join('\n\n');

@@ -320,7 +320,7 @@ export function useSignedUrls(bucket: string, paths: (string | null | undefined)
     queryFn: async () => {
       const { data, error } = await sb.storage.from(bucket).createSignedUrls(list, 60 * 60);
       if (error) throw error;
-      return new Map((data ?? []).filter((d) => d.signedUrl && d.path).map((d) => [d.path!, d.signedUrl]));
+      return new Map<string, string>((data ?? []).filter((d) => d.signedUrl && d.path).map((d) => [d.path!, d.signedUrl as string]));
     },
   });
 }
@@ -364,4 +364,22 @@ export function useLocalStorage<T>(key: string, initial: T): [T, (v: T) => void]
     window.dispatchEvent(new Event(`ls:${key}`));
   };
   return [value, set];
+}
+
+/**
+ * Query helper for module lists: `useRows<Task>(['tasks', 'list'], (sb) => sb.from('task_items').select('*'))`.
+ * Throws Supabase errors so the UI can show an ErrorState.
+ */
+export function useRows<T>(key: QueryKey, fn: (sb: ReturnType<typeof getSupabase>) => PromiseLike<{ data: unknown; error: unknown }>, opts: { enabled?: boolean; staleTime?: number; refetchInterval?: number | false } = {}) {
+  return useQuery({
+    queryKey: key,
+    queryFn: async () => unwrap(await fn(getSupabase())) as T[],
+    ...opts,
+  });
+}
+
+/** Per-device "last seen" timestamp (unread state without database rows, spec §13.4). */
+export function useLastSeen(key: string): [number, () => void] {
+  const [v, set] = useLocalStorage<number>(`teamhub-seen:${key}`, 0);
+  return [v, () => set(Date.now())];
 }

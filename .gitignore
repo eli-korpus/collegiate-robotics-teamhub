@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.DS_Store
+.env
+.env.*
+!.env.example
+apps/dashboard/src/generated/
+team/.wizard-draft.json
+*.log
+.vscode/
+.idea/

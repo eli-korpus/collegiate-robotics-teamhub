@@ -32,7 +32,7 @@ export default function ModelViewer({ data, name }: { data: ArrayBuffer; name: s
     controls.enableDamping = true;
     const material = new THREE.MeshStandardMaterial({ color: 0x4f7cff, metalness: 0.1, roughness: 0.6 });
 
-    let obj: THREE.Object3D | null = null;
+    let obj: THREE.Object3D;
     try {
       const lower = name.toLowerCase().replace(/\.gz$/, '');
       if (lower.endsWith('.stl')) obj = new THREE.Mesh(new STLLoader().parse(data), material);

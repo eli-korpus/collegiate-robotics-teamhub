@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { runtime } from '@teamhub/sdk';
 import { cn } from '@teamhub/ui';
+import { TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
 
 export function asset(path: string | null | undefined): string | null {
   if (!path) return null;
@@ -56,7 +57,7 @@ export function AuthLayout({ title, subtitle, children, wide }: { title: ReactNo
         <div className="rounded-lg border border-border bg-surface p-5 shadow-sm sm:p-6">{children}</div>
         <p className="mt-6 text-center text-[11.5px] text-faint">
           Powered by{' '}
-          <a href="https://github.com/elikorpus/teamhub-ftc" className="hover:underline" target="_blank" rel="noreferrer">
+          <a href={`https://github.com/${TEAMHUB_UPSTREAM_REPO}`} className="hover:underline" target="_blank" rel="noreferrer">
             TeamHub FTC
           </a>
         </p>

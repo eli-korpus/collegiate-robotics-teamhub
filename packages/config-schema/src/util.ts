@@ -58,3 +58,29 @@ export function isMajorUpgrade(from: string, to: string): boolean {
 export function isSecurityRelease(title: string | null | undefined): boolean {
   return /\bsecurity\b/i.test(title ?? '');
 }
+
+/**
+ * Suggested name for a team's fork: "<team or organization>-teamhub", lowercase with hyphens, e.g.
+ * "Example Robotics" → "example-robotics-teamhub". Keeps forks recognizable in a GitHub account and makes GitHub Pages
+ * addresses read well (example-robotics.github.io/example-robotics-teamhub).
+ */
+export function suggestedRepoName(teamOrOrg: string | null | undefined): string {
+  const base = (teamOrOrg ?? '')
+    .toLowerCase()
+    .normalize('NFKD')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 80)
+    .replace(/-+$/, '');
+  return base ? `${base}-teamhub` : 'my-team-teamhub';
+}
+
+/** GitHub repository names: letters, numbers, ".", "-" and "_", up to 100 characters. */
+export const isValidRepoName = (name: string) => /^[A-Za-z0-9._-]{1,100}$/.test(name) && !/^\.+$/.test(name);
+
+/** Does a git remote URL point at the original TeamHub repository (rather than a team's own copy, whatever it's named)? */
+export function isUpstreamRemote(remote: string | null | undefined): boolean {
+  const r = (remote ?? '').trim().toLowerCase().replace(/\.git$/, '').replace(/\/$/, '');
+  const up = TEAMHUB_UPSTREAM_REPO.toLowerCase();
+  return r.endsWith(`github.com/${up}`) || r.endsWith(`github.com:${up}`);
+}

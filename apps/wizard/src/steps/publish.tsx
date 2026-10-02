@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Check, CheckCircle2, Copy, ExternalLink, GitBranch, PartyPopper, Printer, RefreshCw } from 'lucide-react';
 import type { HostProvider } from '@teamhub/config-schema';
+import { isUpstreamRemote, suggestedRepoName } from '@teamhub/config-schema/util';
 import { Banner, Button, Card, Checkbox, CopyBlock, Field, Input, QRCode, Spinner, cn, toast } from '@teamhub/ui';
 import { agentPrompt } from '@teamhub/sdk/agent-prompt';
 import { api, type GitState } from '../api';
@@ -53,6 +54,7 @@ export function Publish({ onNext, onBack }: StepProps) {
   const { draft, setDraft } = useDraft();
   const { git, refresh } = useGit();
   const [forking, setForking] = useState(false);
+  const [forkName, setForkName] = useState(() => suggestedRepoName(draft.config.program.name));
   if (!git) return <Spinner className="m-10" />;
   return (
     <StepShell title="Save your settings to GitHub" subtitle="Your settings live in the team/ folder of your GitHub fork. Your website host rebuilds from it." onBack={onBack} onNext={onNext} nextDisabled={!draft.done.published} nextLabel="Continue">
@@ -69,7 +71,7 @@ export function Publish({ onNext, onBack }: StepProps) {
             <p>Branch: {git.branch}</p>
             {git.gh?.repo && <p>GitHub: {git.gh.repo} {git.gh.isFork ? <><Check className="inline size-3.5 text-success" aria-hidden /> your fork</> : git.gh.isFork === false ? '(not a fork)' : ''}</p>}
           </Card>
-          {git.gh?.installed && git.gh.authed && git.gh.isFork === false && /teamhub-ftc/.test(git.remote ?? '') && (
+          {git.gh?.installed && git.gh.authed && git.gh.isFork === false && isUpstreamRemote(git.remote) && (
             <Banner
               tone="warning"
               title="This looks like the original TeamHub repository, not your fork"
@@ -79,7 +81,7 @@ export function Publish({ onNext, onBack }: StepProps) {
                   loading={forking}
                   onClick={async () => {
                     setForking(true);
-                    const r = await api<{ ok: boolean; log: string }>('/git/fork', {});
+                    const r = await api<{ ok: boolean; log: string }>('/git/fork', { name: forkName.trim() });
                     setForking(false);
                     if (!r.ok) toast.error(r.log);
                     refresh();
@@ -89,7 +91,12 @@ export function Publish({ onNext, onBack }: StepProps) {
                 </Button>
               }
             >
-              Pushing needs your own fork. The button uses the GitHub CLI to fork and point this folder at it.
+              <p>Pushing needs your own fork. The button uses the GitHub CLI to fork and point this folder at it.</p>
+              <label className="mt-2 block space-y-1">
+                <span className="text-[12.5px] font-medium">Name for your fork</span>
+                <Input className="w-72" value={forkName} maxLength={100} onChange={(e) => setForkName(e.target.value)} />
+                <span className="block text-[12px] text-muted">We suggest your team or organization name followed by “-teamhub”, so it’s easy to recognize.</span>
+              </label>
             </Banner>
           )}
           {!git.userConfigured && (

@@ -10,28 +10,48 @@ TeamHub runs from **your own copy** of the code on GitHub (a "fork"). Your team'
 website is built from it, and TeamHub updates are merged into it.
 
 1. Sign in to [GitHub](https://github.com) (create a free account if you need one).
-2. Open [github.com/elikorpus/teamhub-ftc](https://github.com/elikorpus/teamhub-ftc), click **Fork** (top right), then
-   **Create fork**. Leave the name as `teamhub-ftc`.
-3. Copy your fork's address. On your fork's page, click the green **Code** button and copy the HTTPS link. It looks
-   like `https://github.com/YOUR-USERNAME/teamhub-ftc.git`, where `YOUR-USERNAME` is your GitHub username.
-4. Download it to your computer, in a terminal:
+2. Open [github.com/elikorpus/teamhub-ftc](https://github.com/elikorpus/teamhub-ftc) and click **Fork** (top right).
+3. On the "Create a new fork" page:
+   - **Owner:** pick your team's or school's GitHub organization if you have one (so other mentors and captains can
+     help manage it), otherwise your own account.
+   - **Repository name:** name it after your team or organization, ending in `-teamhub`. See the naming suggestions
+     below.
+   - Click **Create fork**.
+4. Copy your fork's address: on your fork's page, click the green **Code** button and copy the HTTPS link.
+5. Download it to your computer, in a terminal:
 
    ```sh
-   git clone https://github.com/YOUR-USERNAME/teamhub-ftc.git
-   cd teamhub-ftc
+   git clone https://github.com/OWNER/REPOSITORY-NAME.git
+   cd REPOSITORY-NAME
    npm install
    npm run setup
    ```
 
-**What goes in place of `YOUR-USERNAME`:**
+### Naming your copy
 
-| If you forked to… | Use | Example |
-|---|---|---|
-| Your personal GitHub account | your GitHub username | `https://github.com/sam-rivera/teamhub-ftc.git` |
-| A team or school organization | the organization's name | `https://github.com/example-robotics/teamhub-ftc.git` |
-| …and renamed the fork | the new name instead of `teamhub-ftc` | `https://github.com/example-robotics/team-dashboard.git` |
+We suggest **`<your team or organization>-teamhub`**, in lowercase with hyphens. It makes your copy easy to spot
+among your repositories, tells people what it is at a glance, and gives a tidy address if you host on GitHub Pages.
 
-The easiest way to get it exactly right is to copy the link from your fork's green **Code** button.
+| Your program | Suggested repository name |
+|---|---|
+| A school club with several teams, "Example Robotics" | `example-robotics-teamhub` |
+| A single team, #23209 "Gear Grinders" | `gear-grinders-teamhub` or `team-23209-teamhub` |
+| An organization's account, "Example High School" | `example-hs-robotics-teamhub` |
+
+**What goes in the clone address:** `OWNER` is the account you forked to (your GitHub username, or your
+organization's name), and `REPOSITORY-NAME` is the name you chose. For example, Example Robotics forking to its
+organization would run:
+
+```sh
+git clone https://github.com/example-robotics/example-robotics-teamhub.git
+cd example-robotics-teamhub
+```
+
+Already forked with the default name `teamhub-ftc`? That works fine. Nothing in TeamHub depends on the repository or
+folder name, so you can rename it on GitHub any time (your fork's **Settings > General > Repository name**). GitHub
+redirects the old address, so your copy keeps working. One exception: if you host on **GitHub Pages**, your site's
+address includes the repository name, so after renaming, run `npm run setup` > Edit > **Host it** and paste the new
+address.
 
 **Prefer not to use a terminal for this?** In [GitHub Desktop](https://desktop.github.com), choose **File > Clone
 repository**, pick your fork from the list, then open a terminal in that folder (**Repository > Open in Terminal**)

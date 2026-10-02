@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { compareVersions, isMajorUpgrade, isNewerVersion, isSecurityRelease, parseVersion } from '@teamhub/config-schema/util';
+import { compareVersions, isMajorUpgrade, isNewerVersion, isSecurityRelease, isUpstreamRemote, isValidRepoName, parseVersion, suggestedRepoName } from '@teamhub/config-schema/util';
 import { bumpVersion, changelogSections, cutRelease, hasSecuritySection, notesBetween, notesFor } from '@teamhub/generator';
 
 const md = `# Changelog
@@ -64,5 +64,21 @@ describe('changelog', () => {
     const real = readFileSync('CHANGELOG.md', 'utf8');
     const released = changelogSections(real).filter((s) => s.version !== 'Unreleased');
     expect(released[0].version).toBe(JSON.parse(readFileSync('package.json', 'utf8')).version);
+  });
+});
+
+describe('fork names', () => {
+  it('suggests "<team or organization>-teamhub" and accepts any valid name', () => {
+    expect(suggestedRepoName('Example Robotics')).toBe('example-robotics-teamhub');
+    expect(suggestedRepoName('Gear Grinders #23209!')).toBe('gear-grinders-23209-teamhub');
+    expect(suggestedRepoName('')).toBe('my-team-teamhub');
+    expect(isValidRepoName('example-robotics-teamhub')).toBe(true);
+    expect(isValidRepoName('has space')).toBe(false);
+  });
+  it('recognizes only the original TeamHub repository, whatever a team named its copy', () => {
+    expect(isUpstreamRemote('https://github.com/elikorpus/teamhub-ftc.git')).toBe(true);
+    expect(isUpstreamRemote('git@github.com:elikorpus/teamhub-ftc.git')).toBe(true);
+    expect(isUpstreamRemote('https://github.com/example-robotics/teamhub-ftc.git')).toBe(false);
+    expect(isUpstreamRemote('https://github.com/example-robotics/example-robotics-teamhub.git')).toBe(false);
   });
 });

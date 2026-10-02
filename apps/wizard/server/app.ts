@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { Hono, type MiddlewareHandler } from 'hono';
 import { z } from 'zod';
 import { parseConfig, type TeamhubConfig } from '@teamhub/config-schema';
+import { isValidRepoName } from '@teamhub/config-schema/util';
 import {
   configPath,
   describePlan,
@@ -413,7 +414,9 @@ export function createApp(deps: AppDeps = {}) {
     return c.json({ ok: res.ok, log: (res.stdout + res.stderr).trim() });
   });
   app.post('/git/fork', async (c) => {
-    const res = await sh('gh', ['repo', 'fork', '--remote', '--remote-name', 'origin'], { timeout: 180_000 });
+    const { name } = await c.req.json<{ name?: string }>().catch(() => ({ name: undefined }));
+    if (name && !isValidRepoName(name)) throw new MgmtError('Repository names can use letters, numbers, "-", "_" and "." only.', 400);
+    const res = await sh('gh', ['repo', 'fork', '--remote', '--remote-name', 'origin', ...(name ? ['--fork-name', name] : [])], { timeout: 180_000 });
     return c.json({ ok: res.ok, log: (res.stdout + res.stderr).trim() });
   });
 

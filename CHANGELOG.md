@@ -15,6 +15,8 @@ How to update your dashboard: [docs/updating.md](docs/updating.md).
 
 ### Added
 
+- Home greets people with more variety: greetings change with the time of day, the day of the week and the date
+  ("Rise and build", "Happy Friday", "Working late"), and stay the same through each part of the day.
 - Update system: an "Update available" notice for admins (Admin page and sidebar), a one-button **Update** in the
   setup wizard (backup, get the new version, update the database, build, publish), an **Undo update** button, and an
   optional weekly GitHub check that opens an issue when a new version is out.

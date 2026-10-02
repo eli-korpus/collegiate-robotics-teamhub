@@ -108,9 +108,34 @@ export function dueBucket(date: string | Date | null | undefined): SmartBucket {
   return 'later';
 }
 
+/** Greetings by time of day. Each one reads as "<greeting>, Sam". */
+const GREETINGS = {
+  late: ['Working late', 'Still going', 'Up late', 'Night shift'],
+  morning: ['Good morning', 'Morning', 'Rise and build', 'Fresh start today', 'Welcome back'],
+  afternoon: ['Good afternoon', 'Welcome back', 'Hey there', 'Ready to build', 'Back at it'],
+  evening: ['Good evening', 'Evening', 'Welcome back', 'Hey there', 'Nice to see you'],
+};
+
+/** Extra greetings for certain days of the week (0 = Sunday). */
+const WEEKDAY_GREETINGS: Record<number, string[]> = {
+  0: ['Happy Sunday'],
+  1: ['Happy Monday', 'New week'],
+  3: ['Halfway there'],
+  5: ['Happy Friday'],
+  6: ['Happy Saturday'],
+};
+
+/**
+ * A friendly greeting for Home. It changes with the time of day and the date, but stays the same for a whole
+ * morning, afternoon or evening so it doesn't flicker on every reload.
+ */
 export function greeting(d = new Date()): string {
   const h = d.getHours();
-  return h < 5 ? 'Good evening' : h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening';
+  const part = h < 5 ? 'late' : h < 12 ? 'morning' : h < 18 ? 'afternoon' : h < 22 ? 'evening' : 'late';
+  const pool = part === 'late' ? GREETINGS.late : [...GREETINGS[part], ...(WEEKDAY_GREETINGS[d.getDay()] ?? [])];
+  const day = Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86_400_000);
+  const seed = (day * 31 + part.length * 7) % 9973;
+  return pool[seed % pool.length]!;
 }
 
 export function durationLabel(ms: number): string {

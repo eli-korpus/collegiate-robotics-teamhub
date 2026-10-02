@@ -1,6 +1,6 @@
 import { NavLink, useLocation, useNavigate } from 'react-router';
-import { Check, ChevronsUpDown, Home as HomeIcon, LogOut, Monitor, Moon, Search, Settings, Shield, Sun, User, Users, MessagesSquare } from 'lucide-react';
-import { Avatar, Kbd, Menu, SidebarItem, SidebarSection, TeamDot, cn, useMediaQuery } from '@teamhub/ui';
+import { Check, ChevronsUpDown, ExternalLink, Home as HomeIcon, LogOut, MessagesSquare, Monitor, Moon, Search, Settings, Shield, Sun, User, Users } from 'lucide-react';
+import { Avatar, Kbd, Menu, ModKey, SidebarItem, SidebarSection, TeamDot, cn, useMediaQuery } from '@teamhub/ui';
 import { canWith, isMultiTeam, runtime, setTeamScope, useCan, useLinks, useMe, usePeople, useSession, useTeamScope, type LoadedModule } from '@teamhub/sdk';
 import { nav } from '../../generated/nav';
 import { ProgramLogo, TeamLogo } from '../auth/AuthLayout';
@@ -52,7 +52,9 @@ export function Sidebar({ onNavigate, onSearch }: { onNavigate: () => void; onSe
         >
           <Search className="size-4" />
           <span className="flex-1 text-left">Search…</span>
-          <Kbd>⌘K</Kbd>
+          <Kbd>
+            <ModKey />K
+          </Kbd>
         </button>
       </div>
       <div className="min-h-0 flex-1 overflow-y-auto pb-3">
@@ -83,7 +85,7 @@ export function Sidebar({ onNavigate, onSearch }: { onNavigate: () => void; onSe
           >
             <MessagesSquare className="size-[17px] text-muted" />
             <span className="flex-1 truncate">{chat.label}</span>
-            <span className="text-[11px] text-faint">↗</span>
+            <ExternalLink className="size-3 text-faint" aria-hidden />
           </a>
         )}
         <div className="flex items-center gap-1">

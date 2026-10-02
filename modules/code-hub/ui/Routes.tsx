@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Code2, GitCommitHorizontal, GitPullRequest, Gamepad2, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Code2, ExternalLink, Gamepad2, GitCommitHorizontal, GitPullRequest, Pencil, Plus, Trash2 } from 'lucide-react';
 import {
   Badge,
   Banner,
@@ -121,7 +121,7 @@ export default function CodeHubRoutes() {
           <CardHeader icon={<GitCommitHorizontal className="size-4" />} title="Repository" subtitle={gh.data?.repo ?? undefined} />
           <div className="px-4 pb-4 text-[13px]">
             {!repoUrl ? (
-              <p className="text-muted">Add your GitHub repository as the “Code repository” tool link (Admin → Tool links) to see recent commits here.</p>
+              <p className="text-muted">Add your GitHub repository as the “Code repository” tool link (Admin &gt; Tool links) to see recent commits here.</p>
             ) : !gh.data && gh.isLoading ? (
               <Spinner />
             ) : gh.error ? (
@@ -130,7 +130,7 @@ export default function CodeHubRoutes() {
               <p className="text-muted">
                 This repository is private (or not on GitHub), so activity can't be shown.{' '}
                 <a className="text-accent hover:underline" href={repoUrl} target="_blank" rel="noreferrer">
-                  Open it ↗
+                  Open it <ExternalLink className="inline size-3" aria-hidden />
                 </a>
               </p>
             ) : (

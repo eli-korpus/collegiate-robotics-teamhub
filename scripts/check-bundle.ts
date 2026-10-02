@@ -60,7 +60,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   else {
     console.log(`Initial JS: ${(r.initial / 1024).toFixed(1)} KB gzip`);
     for (const f of r.initialFiles.sort((a, b) => b.gzip - a.gzip)) console.log(`  ${(f.gzip / 1024).toFixed(1).padStart(6)} KB  ${f.file}`);
-    for (const p of r.problems) console.error(`✗ ${p}`);
+    for (const p of r.problems) console.error(`error: ${p}`);
   }
   process.exit(r.problems.length ? 1 : 0);
 }

@@ -1,6 +1,6 @@
 import { lazy, Suspense, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { AlertTriangle, Box, Check, Eye, Pause, Play, Printer, Trash2, X } from 'lucide-react';
+import { AlertTriangle, Box, Check, ExternalLink, Eye, Pause, Play, Printer, Trash2, X } from 'lucide-react';
 import {
   AvatarStack,
   Badge,
@@ -426,7 +426,7 @@ function JobSheet({ job: j, files, onClose }: { job: Job; files: MfgFile[]; onCl
               <dt className="text-muted">CAD</dt>
               <dd>
                 <a className="text-accent hover:underline" href={j.onshape_url} target="_blank" rel="noreferrer">
-                  Open link ↗
+                  Open link <ExternalLink className="inline size-3" aria-hidden />
                 </a>
               </dd>
             </>

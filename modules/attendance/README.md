@@ -8,7 +8,7 @@
 - Members see only their own record and percentage. Captains and mentors see a sortable team report with CSV export.
 - Only presence is stored — absence is implied — so a full season uses well under 1 MB.
 
-**Not for:** planning who will come (use Polls → availability), scheduling (use Calendar; with Calendar enabled, today's
+**Not for:** planning who will come (use Polls > availability), scheduling (use Calendar; with Calendar enabled, today's
 practices offer a one-tap "Take attendance").
 
 **Permissions:** take attendance (Captains, Mentors), edit past attendance (Mentors), see everyone's attendance

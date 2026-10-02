@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { BarChart3, CalendarRange, Eye, EyeOff, Lock, MessageSquareText, Plus, Trash2, Vote, X } from 'lucide-react';
+import { ArrowRight, BarChart3, CalendarRange, Check, Eye, EyeOff, Lock, MessageSquareText, Plus, Trash2, Vote, X } from 'lucide-react';
 import {
   Avatar,
   Banner,
@@ -151,7 +151,7 @@ export default function PollsRoutes() {
         )}
       </div>
       {creating && <CreatePoll eventRef={params.get('ref')} onClose={() => setCreating(false)} />}
-      {current && <PollDialog poll={current} myVote={votes.data?.find((v) => v.poll_id === current.id) ?? null} onClose={() => setSelected(null)} />}
+      {current && votes.isSuccess && <PollDialog key={current.id} poll={current} myVote={votes.data?.find((v) => v.poll_id === current.id) ?? null} onClose={() => setSelected(null)} />}
     </div>
   );
 }
@@ -231,9 +231,9 @@ function CreatePoll({ eventRef, onClose }: { eventRef: string | null; onClose: (
           <Field label="Question">{(id) => <Input id={id} autoFocus maxLength={300} value={question} onChange={(e) => setQuestion(e.target.value)} placeholder={kind === 'availability' ? 'When can everyone come to the build session?' : 'What should we…'} />}</Field>
           {personal && (
             <Banner tone="warning" title="This looks like personal info">
-              Collect it with <strong>People → Request info</strong> instead — answers save privately to each profile and you'll see who's missing.{' '}
+              Collect it with <strong>People &gt; Request info</strong> instead — answers save privately to each profile and you'll see who's missing.{' '}
               <a href="/people?tab=request-info" className="font-medium text-accent hover:underline">
-                Use Request info →
+                Use Request info <ArrowRight className="inline size-3.5" aria-hidden />
               </a>
             </Banner>
           )}
@@ -380,7 +380,7 @@ function PollDialog({ poll: p, myVote, onClose }: { poll: Poll; myVote: VoteRow 
                   >
                     {t && <span className="absolute inset-y-0 left-0 bg-accent-soft" style={{ width: `${(n / max) * 100}%` }} />}
                     <span className="relative flex items-center gap-2">
-                      <span className={cn('grid size-5 place-items-center border-2', p.multi ? 'rounded' : 'rounded-full', on ? 'border-accent bg-accent text-accent-fg' : 'border-border-strong')}>{on && '✓'}</span>
+                      <span className={cn('grid size-5 place-items-center border-2', p.multi ? 'rounded' : 'rounded-full', on ? 'border-accent bg-accent text-accent-fg' : 'border-border-strong')}>{on && <Check className="size-3.5" aria-hidden />}</span>
                       <span className="flex-1 font-medium">{o}</span>
                       {t && <span className="tabular text-muted">{n}</span>}
                     </span>

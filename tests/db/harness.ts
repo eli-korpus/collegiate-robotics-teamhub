@@ -4,7 +4,7 @@
  */
 import { PGlite } from '@electric-sql/pglite';
 import { parseConfig, type TeamhubConfig, type TeamhubConfigInput } from '@teamhub/config-schema';
-import { loadCatalog, planSql, planToSql, resolveConfig, type DbState, type Plan } from '@teamhub/generator';
+import { loadCatalog, planSql, planToSql, resolveConfig, type Catalog, type DbState, type Plan } from '@teamhub/generator';
 
 export const SUPABASE_STUB = `
 create role anon nologin;
@@ -92,8 +92,9 @@ export class TestDb {
     return { versions: Object.fromEntries(rows.map((r) => [r.id, { version: r.version, state: r.state }])) };
   }
 
-  async applyConfig(config: TeamhubConfig, fresh = false): Promise<Plan> {
-    const catalog = await loadCatalog();
+  /** Applies the plan for `config` (pass a catalog to simulate another release's modules). */
+  async applyConfig(config: TeamhubConfig, fresh = false, catalog?: Catalog): Promise<Plan> {
+    catalog ??= await loadCatalog();
     const r = resolveConfig(config, catalog);
     const plan = planSql(r, fresh ? null : await this.dbState().catch(() => null), { cron: false });
     await this.exec(planToSql(plan, true));

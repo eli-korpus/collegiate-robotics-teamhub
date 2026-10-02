@@ -57,7 +57,7 @@ export async function applyConfig(
 
   const plan = computePlan(catalog, config, db);
   await m.query(ref, planToSql(plan, true));
-  log.push({ step: 'Database updated', ok: true, detail: `${plan.summary.migrations.map((x) => `${x.id} v${x.from}→v${x.to}`).join(', ') || 'no schema changes'}` });
+  log.push({ step: 'Database updated', ok: true, detail: `${plan.summary.migrations.map((x) => `${x.id} v${x.from} to v${x.to}`).join(', ') || 'no schema changes'}` });
 
   if (plan.bucketsToDelete.length) {
     await deleteBuckets(m, ref, keys.secret, plan.bucketsToDelete);

@@ -118,7 +118,7 @@ export function Review({ onBack }: StepProps) {
           2. Test build
         </Button>
       </div>
-      {!server.supabase.connected && <Banner tone="warning">Connect Supabase first (wizard home → Connect).</Banner>}
+      {!server.supabase.connected && <Banner tone="warning">Connect Supabase first (wizard home &gt; Connect).</Banner>}
       {log && <ApplyLog log={log} />}
       {buildLog && (
         <div className={cn('rounded-md border p-3 text-[12.5px]', buildLog.ok ? 'border-success/40' : 'border-danger/40')}>

@@ -1,6 +1,6 @@
 # Social Media Planner
 
-**Purpose:** plan posts: **Idea → Draft → Needs approval → Scheduled → Posted**.
+**Purpose:** plan posts: **Idea > Draft > Needs approval > Scheduled > Posted**.
 
 - Board (drag between stages) and calendar views.
 - Anyone with *draft* can suggest and write posts and ask for approval. Only approvers (mentors, or the “Media Lead”

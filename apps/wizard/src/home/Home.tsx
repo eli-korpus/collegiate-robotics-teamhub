@@ -112,7 +112,7 @@ function UpdateDialog({ server, onClose }: { server: ServerState; onClose: () =>
     <Dialog open onOpenChange={(v) => !v && onClose()} title="Update" description="Get the newest TeamHub and update your database." size="lg">
       <div className="space-y-4 text-[13.5px]">
         <ol className="list-decimal space-y-1 pl-5">
-          <li>On GitHub, open your fork and click <strong>Sync fork → Update branch</strong>.</li>
+          <li>On GitHub, open your fork and click <strong>Sync fork &gt; Update branch</strong>.</li>
           <li>
             Pull it to this computer:{' '}
             <Button
@@ -144,7 +144,7 @@ function UpdateDialog({ server, onClose }: { server: ServerState; onClose: () =>
               <ul className="list-disc pl-5">
                 {plan.summary.migrations.map((m) => (
                   <li key={m.id}>
-                    {m.id}: version {m.from} → {m.to}
+                    {m.id}: version {m.from} to {m.to}
                   </li>
                 ))}
               </ul>
@@ -285,7 +285,7 @@ function SeasonDialog({ server, catalog, onClose, refresh }: { server: ServerSta
           </Button>
           {done && (
             <Banner tone="success" title={`Welcome to ${label}!`}>
-              Backup: <span className="break-all">{done}</span>. To free storage from last season's files, use Admin → Storage → Delete old files in the dashboard.
+              Backup: <span className="break-all">{done}</span>. To free storage from last season's files, use Admin &gt; Storage &gt; Delete old files in the dashboard.
             </Banner>
           )}
         </div>
@@ -301,7 +301,7 @@ function EmailDialog({ server, onClose, refresh }: { server: ServerState; onClos
     <Dialog open onOpenChange={(v) => !v && onClose()} title="Email" description="Supabase's built-in email only reaches your own Supabase team members, so TeamHub works without email by default.">
       <div className="space-y-4 text-[13.5px]">
         <ol className="list-decimal space-y-1 pl-5 text-muted">
-          <li>In the Supabase dashboard → Authentication → Emails → SMTP Settings, add an email provider (e.g. Resend, SendGrid, your school's SMTP).</li>
+          <li>In the Supabase dashboard &gt; Authentication &gt; Emails &gt; SMTP Settings, add an email provider (e.g. Resend, SendGrid, your school's SMTP).</li>
           <li>Turn this on. New signups then confirm their email, and the login page offers “Forgot your password?”.</li>
         </ol>
         <Switch checked={on} onChange={setOn} label="Email confirmation & self-serve password reset" />
@@ -313,7 +313,7 @@ function EmailDialog({ server, onClose, refresh }: { server: ServerState; onClos
             try {
               await api('/email', { on });
               await refresh();
-              toast.success('Saved — push your config (Edit → Review) so the login page updates.');
+              toast.success('Saved — push your config (Edit > Review) so the login page updates.');
               onClose();
             } catch (e) {
               toast.error((e as Error).message);

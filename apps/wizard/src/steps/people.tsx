@@ -105,7 +105,7 @@ export function People({ onNext, onBack }: StepProps) {
         <p className="text-[12.5px] text-muted">Mentors can also create badge-only positions later in the dashboard. Proven abilities (“Certified driver”) belong in Skills & Training.</p>
       </Section>
 
-      <Section title="Profile fields" description="Optional extra info on each profile. Mentors can ask for missing values with People → Request info — the safe way to collect personal info.">
+      <Section title="Profile fields" description="Optional extra info on each profile. Mentors can ask for missing values with People > Request info — the safe way to collect personal info.">
         <div className="space-y-2">
           {SUGGESTED_FIELDS.map((f) => {
             const on = c.profileFields.some((x) => x.id === f.id);

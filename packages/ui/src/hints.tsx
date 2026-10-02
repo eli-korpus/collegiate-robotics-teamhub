@@ -39,8 +39,7 @@ export function PurposeHint({ purpose, notFor, className, compact }: { purpose: 
               Not for {n.text.charAt(0).toLowerCase() + n.text.slice(1)}
               {n.href && (
                 <>
-                  {' '}
-                  →{' '}
+                  {': '}
                   <a href={n.href} target={n.external ? '_blank' : undefined} rel={n.external ? 'noreferrer' : undefined} className="font-medium text-accent hover:underline">
                     {n.label ?? 'go there'}
                   </a>

@@ -78,7 +78,7 @@ function Overview() {
     return (
       <div>
         <ModuleHeader moduleId="events" />
-        <EmptyState icon={<Trophy />} title="No team numbers yet" body="Add your FTC team number in the setup wizard (Edit → Teams) to see results." />
+        <EmptyState icon={<Trophy />} title="No team numbers yet" body="Add your FTC team number in the setup wizard (Edit > Teams) to see results." />
       </div>
     );
   return (

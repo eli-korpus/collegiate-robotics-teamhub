@@ -69,18 +69,18 @@ export function diffConfigs(before: TeamhubConfig, after: TeamhubConfig, catalog
     const p = before.teams.find((x) => x.id === t.id);
     if (!p) out.push({ kind: '+', text: `Team: ${t.name}` });
     else {
-      if (p.color !== t.color) out.push({ kind: '~', text: `${t.name} color: ${p.color} → ${t.color}` });
-      if (p.name !== t.name) out.push({ kind: '~', text: `Team name: ${p.name} → ${t.name}` });
+      if (p.color !== t.color) out.push({ kind: '~', text: `${t.name} color: ${p.color} to ${t.color}` });
+      if (p.name !== t.name) out.push({ kind: '~', text: `Team name: ${p.name} to ${t.name}` });
       if (p.logo !== t.logo) out.push({ kind: '~', text: `${t.name} logo updated` });
     }
   }
   for (const t of before.teams) {
     if (!after.teams.find((x) => x.id === t.id)) out.push({ kind: '-', text: `Team: ${t.name}`, detail: 'archived; its data is kept' });
   }
-  if (before.theme.accent !== after.theme.accent) out.push({ kind: '~', text: `Accent: ${before.theme.accent} → ${after.theme.accent}` });
+  if (before.theme.accent !== after.theme.accent) out.push({ kind: '~', text: `Accent: ${before.theme.accent} to ${after.theme.accent}` });
   if (before.theme.corners !== after.theme.corners || before.theme.defaultMode !== after.theme.defaultMode)
     out.push({ kind: '~', text: 'Look & feel updated' });
-  if (before.program.name !== after.program.name) out.push({ kind: '~', text: `Program name: ${before.program.name} → ${after.program.name}` });
+  if (before.program.name !== after.program.name) out.push({ kind: '~', text: `Program name: ${before.program.name} to ${after.program.name}` });
   const ids = (xs: { id: string }[]) => xs.map((x) => x.id).join(',');
   if (ids(before.positions) !== ids(after.positions) || JSON.stringify(before.positions) !== JSON.stringify(after.positions))
     out.push({ kind: '~', text: 'Positions updated' });

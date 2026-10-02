@@ -1,3 +1,4 @@
+import { ExternalLink } from 'lucide-react';
 import { type ReactNode } from 'react';
 import { FileDrop, type FileKind, type ProcessedFile } from '@teamhub/ui';
 import { useLinks, useStorageFull } from './hooks';
@@ -39,12 +40,12 @@ export function Upload({
             File storage is almost full, so uploads are paused.{' '}
             {drive ? (
               <a className="font-medium text-accent" href={drive.url} target="_blank" rel="noreferrer">
-                Put it in {drive.label} ↗
+                Put it in {drive.label} <ExternalLink className="inline size-3" aria-hidden />
               </a>
             ) : (
               'Paste a link to the file instead.'
             )}{' '}
-            An admin can free space in Admin → Storage.
+            An admin can free space in Admin &gt; Storage.
           </>
         ) : undefined
       }
@@ -53,7 +54,7 @@ export function Upload({
           <>
             Big files and videos belong in{' '}
             <a href={drive.url} target="_blank" rel="noreferrer" className="font-medium text-accent hover:underline">
-              {drive.label} ↗
+              {drive.label} <ExternalLink className="inline size-3" aria-hidden />
             </a>
           </>
         ) : undefined

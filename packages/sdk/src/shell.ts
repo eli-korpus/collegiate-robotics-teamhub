@@ -76,7 +76,7 @@ export function useListNav<T>(items: T[], selected: T | null | undefined, select
 }
 
 export const SHORTCUTS: [string, string][] = [
-  ['⌘ K', 'Open the command bar (search, go to, actions)'],
+  ['Mod K', 'Open the command bar (search, go to, actions)'],
   ['/', 'Search'],
   ['c', 'Create something new in this tab'],
   ['j / k', 'Next / previous item in a list'],

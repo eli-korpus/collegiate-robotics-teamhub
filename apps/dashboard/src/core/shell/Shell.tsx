@@ -1,7 +1,7 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router';
 import { AlertTriangle, Search } from 'lucide-react';
-import { AppShell, Banner, Dialog, ErrorState, IconButton, Kbd, Spinner } from '@teamhub/ui';
+import { AppShell, Banner, Dialog, ErrorState, IconButton, Kbd, ModKey, Spinner } from '@teamhub/ui';
 import { runtime, SHORTCUTS, useSchemaStatus, useSession, useSettingsRow, useShortcut } from '@teamhub/sdk';
 import { Sidebar } from './Sidebar';
 import { CommandMenu } from './CommandMenu';
@@ -85,7 +85,7 @@ export function Shell() {
           {SHORTCUTS.map(([k, d]) => (
             <li key={k} className="flex items-center justify-between gap-4">
               <span className="text-muted">{d}</span>
-              <Kbd>{k}</Kbd>
+              <Kbd>{k.startsWith('Mod ') ? <><ModKey /> {k.slice(4)}</> : k}</Kbd>
             </li>
           ))}
         </ul>
@@ -109,7 +109,7 @@ function AdminBanners() {
         title="Database update available"
         className="rounded-none"
       >
-        Your site was updated but the database wasn't yet ({schema.problems.join(', ')}). On your computer run <code>npm run setup</code> → <strong>Update</strong>.
+        Your site was updated but the database wasn't yet ({schema.problems.join(', ')}). On your computer run <code>npm run setup</code> &gt; <strong>Update</strong>.
       </Banner>,
     );
   }
@@ -117,7 +117,7 @@ function AdminBanners() {
   if (settings.data && (!last || Date.now() - new Date(last).getTime() > 6 * 86_400_000)) {
     banners.push(
       <Banner key="ka" tone="info" className="rounded-none" title="Keep-alive hasn't pinged recently">
-        Free Supabase projects pause after 7 days without activity. Check the keep-alive workflow in Admin → Keep-alive.
+        Free Supabase projects pause after 7 days without activity. Check the keep-alive workflow in Admin &gt; Keep-alive.
       </Banner>,
     );
   }
@@ -130,7 +130,7 @@ export function DbBehind({ name }: { name: string }) {
       <AlertTriangle className="mx-auto size-8 text-warning" />
       <p className="mt-3 font-semibold">{name} needs a database update</p>
       <p className="mt-1 text-[13px] text-muted">
-        The site has a newer version of this tab than the database. An admin can fix this by running <code>npm run setup</code> → Update. Other tabs keep working.
+        The site has a newer version of this tab than the database. An admin can fix this by running <code>npm run setup</code> &gt; Update. Other tabs keep working.
       </p>
     </div>
   );

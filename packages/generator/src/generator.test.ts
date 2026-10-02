@@ -51,6 +51,6 @@ describe('generator', async () => {
     const b = cfg({ theme: { accent: '#10B981' } });
     b.teams[1].color = '#000000';
     const d = diffConfigs(a, b, catalog);
-    expect(d.map((x) => x.text)).toEqual(expect.arrayContaining(['Accent: #3B82F6 → #10B981', 'B color: #FACC15 → #000000']));
+    expect(d.map((x) => x.text)).toEqual(expect.arrayContaining(['Accent: #3B82F6 to #10B981', 'B color: #FACC15 to #000000']));
   });
 });

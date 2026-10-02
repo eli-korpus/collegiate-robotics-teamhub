@@ -62,7 +62,7 @@ export function CodeScreen() {
           </p>
           {code && <QRCode value={url} size={220} label="Scan to check in" />}
           <p className="text-[15px] text-muted">
-            Open TeamHub → Attendance → <strong>Check in</strong> and type the code, or scan the QR. New code in <span className="tabular">{left}s</span>.
+            Open TeamHub &gt; Attendance &gt; <strong>Check in</strong> and type the code, or scan the QR. New code in <span className="tabular">{left}s</span>.
           </p>
         </>
       )}

@@ -26,7 +26,8 @@
     "e2e": "playwright test",
     "ci:matrix": "tsx scripts/ci-matrix.ts",
     "new-module": "tsx scripts/new-module.ts",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "docs:modules": "tsx scripts/docs-modules.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

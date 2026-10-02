@@ -11,6 +11,6 @@
   after the drive closes — both enforced in the database.
 - New Season deletes orders older than one year (export first).
 
-**Not for:** collecting sizes for other reasons (People → Request info), payments.
+**Not for:** collecting sizes for other reasons (People > Request info), payments.
 
 **Permissions:** order (everyone), manage drives and see all orders (Captains, Mentors), mark paid (Mentors).

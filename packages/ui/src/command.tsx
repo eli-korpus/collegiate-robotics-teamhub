@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { Dialog as RDialog } from 'radix-ui';
-import { Search, CornerDownLeft } from 'lucide-react';
+import { ArrowDown, ArrowUp, CornerDownLeft, Search } from 'lucide-react';
 import { cn } from './cn';
 import { Kbd, Spinner } from './primitives';
 
@@ -123,11 +123,11 @@ export function CommandBar({
           </div>
           <div className="flex items-center gap-3 border-t border-border px-3 py-2 text-[11.5px] text-faint">
             <span className="inline-flex items-center gap-1">
-              <Kbd>↑</Kbd>
-              <Kbd>↓</Kbd> navigate
+              <Kbd><ArrowUp className="size-3" aria-label="Up" /></Kbd>
+              <Kbd><ArrowDown className="size-3" aria-label="Down" /></Kbd> navigate
             </span>
             <span className="inline-flex items-center gap-1">
-              <Kbd>↵</Kbd> open
+              <Kbd><CornerDownLeft className="size-3" aria-label="Enter" /></Kbd> open
             </span>
             <span className="inline-flex items-center gap-1">
               <Kbd>esc</Kbd> close

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { MessagesSquare } from 'lucide-react';
+import { ExternalLink, MessagesSquare } from 'lucide-react';
 import { Button, Favicon, Input, Select, cn, hostOf } from '@teamhub/ui';
 import { useLinks, type LinkRow } from './hooks';
 import { TeamScopePicker } from './teams';
@@ -37,7 +37,7 @@ export function TeamChatLink({ prefix = 'Questions? Ask in', className }: { pref
     <p className={cn('flex items-center gap-1.5 text-[12.5px] text-muted', className)}>
       <MessagesSquare className="size-3.5" /> {prefix}{' '}
       <a href={chat.url} target="_blank" rel="noreferrer noopener" className="font-medium text-accent hover:underline">
-        {chat.label} ↗
+        {chat.label} <ExternalLink className="inline size-3" aria-hidden />
       </a>
     </p>
   );

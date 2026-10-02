@@ -3,6 +3,7 @@ export * from './types';
 export * from './runtime';
 export * from './session';
 export * from './hooks';
+export * from './files';
 export * from './refs';
 export * from './components';
 export * from './ftcscout';

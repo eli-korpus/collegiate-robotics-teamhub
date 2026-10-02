@@ -231,7 +231,7 @@ function PostDialog({ post, draft, onClose }: { post: Post | null; draft: string
         <Field label="Caption" hint={`${v.caption.length} characters`}>
           {(id) => (
             <div className="relative">
-              <Textarea id={id} rows={5} maxLength={5000} value={v.caption} onChange={(e) => setV({ ...v, caption: e.target.value })} placeholder="Idea: show the intake prototype eating 3 samples in a row 🔥" />
+              <Textarea id={id} rows={5} maxLength={5000} value={v.caption} onChange={(e) => setV({ ...v, caption: e.target.value })} placeholder="Idea: show the intake prototype eating 3 samples in a row" />
               {v.caption && (
                 <button
                   type="button"
@@ -273,7 +273,7 @@ function PostDialog({ post, draft, onClose }: { post: Post | null; draft: string
                 {' '}
                 ·{' '}
                 <a href={social.url} target="_blank" rel="noreferrer" className="text-accent hover:underline">
-                  Open {social.label} ↗
+                  Open {social.label} <ExternalLink className="inline size-3" aria-hidden />
                 </a>
               </>
             )}

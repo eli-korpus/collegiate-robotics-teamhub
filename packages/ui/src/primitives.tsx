@@ -1,5 +1,5 @@
 import { forwardRef, useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
-import { Check, Info, AlertTriangle, XCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import { Check, Command, Info, AlertTriangle, XCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { cn } from './cn';
 
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'soft';
@@ -88,12 +88,13 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
   ref,
 ) {
   return (
-    <select ref={ref} className={cn(field, w(className), 'h-9 pr-8 appearance-none bg-no-repeat', className)} style={{ backgroundImage: CHEVRON, backgroundPosition: 'right 0.6rem center', backgroundSize: '12px' }} {...rest}>
+    <select ref={ref} className={cn(field, w(className), 'h-9 pr-8 appearance-none bg-no-repeat', className)} style={{ backgroundImage: CHEVRON, backgroundPosition: 'right 0.6rem center', backgroundSize: '14px' }} {...rest}>
       {children}
     </select>
   );
 });
-const CHEVRON = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12'%3E%3Cpath d='M3 4.5l3 3 3-3' stroke='%238e8e98' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E")`;
+// Lucide 'chevron-down' (24×24) as a background so the native <select> keeps its accessibility and mobile pickers.
+const CHEVRON = `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238e8e98' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E")`;
 
 export function Label({ children, htmlFor, className }: { children: ReactNode; htmlFor?: string; className?: string }) {
   return (
@@ -286,8 +287,15 @@ export function Skeleton({ className }: { className?: string }) {
   return <div aria-hidden className={cn('animate-pulse rounded-md bg-bg-subtle', className)} />;
 }
 
+const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+
+/** The platform modifier key: the Command icon on Apple devices, “Ctrl” elsewhere. */
+export function ModKey() {
+  return isMac ? <Command className="size-3" aria-label="Command" /> : <>Ctrl</>;
+}
+
 export function Kbd({ children }: { children: ReactNode }) {
-  return <kbd className="inline-flex h-5 min-w-5 items-center justify-center rounded border border-border bg-bg-subtle px-1 font-sans text-[11px] text-muted">{children}</kbd>;
+  return <kbd className="inline-flex h-5 min-w-5 items-center justify-center gap-0.5 rounded border border-border bg-bg-subtle px-1 font-sans text-[11px] text-muted">{children}</kbd>;
 }
 
 export function Banner({

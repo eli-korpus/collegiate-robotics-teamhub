@@ -174,7 +174,7 @@ function Storage() {
           Bandwidth (egress, 5 GB/month on the free plan) can’t be measured from the database.{' '}
           {ref && (
             <a className="font-medium text-accent hover:underline" href={`https://supabase.com/dashboard/project/${ref}/usage`} target="_blank" rel="noreferrer">
-              See it on the Supabase usage page ↗
+              See it on the Supabase usage page <ExternalLink className="inline size-3" aria-hidden />
             </a>
           )}
         </p>
@@ -561,7 +561,7 @@ function KeepAlive() {
       </p>
       <p className="text-muted">
         Free Supabase projects pause after 7 days without activity. The <code>keepalive</code> GitHub Action in your fork pings the database every 3 days. GitHub turns off scheduled
-        workflows in repositories with no commits for 60 days — if pings stop, open your fork on GitHub → <strong>Actions</strong> → <strong>Keep TeamHub awake</strong> →{' '}
+        workflows in repositories with no commits for 60 days — if pings stop, open your fork on GitHub &gt; <strong>Actions</strong> &gt; <strong>Keep TeamHub awake</strong> &gt;{' '}
         <strong>Enable workflow</strong>, or push any small change.
       </p>
       {projectRef() && (
@@ -593,16 +593,16 @@ function Help() {
       <Card className="space-y-2 p-4">
         <p className="font-semibold">Getting updates</p>
         <p className="text-muted">
-          On GitHub, open your fork and click <strong>Sync fork</strong>. If the new version needs database changes, admins see a banner here — run <code>npm run setup</code> →{' '}
+          On GitHub, open your fork and click <strong>Sync fork</strong>. If the new version needs database changes, admins see a banner here — run <code>npm run setup</code> &gt;{' '}
           <strong>Update</strong>.
         </p>
       </Card>
       <Card className="space-y-2 p-4">
         <p className="font-semibold">Things that live in Supabase or the wizard</p>
         <ul className="list-disc space-y-1 pl-5 text-muted">
-          <li>Data backups and restore: wizard → Backup &amp; Export.</li>
-          <li>New season rollover: wizard → New Season.</li>
-          <li>Email (self-serve password reset): add SMTP in Supabase, then wizard → Enable email.</li>
+          <li>Data backups and restore: wizard &gt; Backup &amp; Export.</li>
+          <li>New season rollover: wizard &gt; New Season.</li>
+          <li>Email (self-serve password reset): add SMTP in Supabase, then wizard &gt; Enable email.</li>
         </ul>
       </Card>
       <p className="text-muted">

@@ -14,7 +14,7 @@ export default defineModule({
   category: 'outreach',
   icon: 'Megaphone',
   summary: 'Plan posts from idea to approval to “posted” — nothing is posted automatically.',
-  purpose: 'Plan posts: Idea → Draft → Needs approval → Scheduled → Posted.',
+  purpose: 'Plan posts from idea to draft, approval, scheduled and posted.',
   notFor: [
     { text: 'Storing photos and videos', goTo: 'media' },
     { text: 'Posting automatically (copy the caption and post it yourself)', goTo: 'link:social' },

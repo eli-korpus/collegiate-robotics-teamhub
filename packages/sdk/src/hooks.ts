@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useSyncExternalStore } from 'react';
 import { useMutation, useQuery, useQueryClient, type QueryKey } from '@tanstack/react-query';
-import { toast, type ProcessedFile, gunzipBlob, downloadBlob } from '@teamhub/ui';
+import { toast } from '@teamhub/ui';
 import { getSupabase, moduleSettings, runtime } from './runtime';
 import { getRealtime } from './client';
 import { useSession } from './session';
@@ -223,7 +223,7 @@ export function friendlyError(e: unknown): string {
   if (err?.code === '23514') return 'Some values are not allowed (check lengths and formats).';
   if (err?.code === 'PGRST116') return 'Not found.';
   if (/Failed to fetch|NetworkError/i.test(msg)) return "Can't reach the server. Check your connection.";
-  if (/relation .* does not exist|Could not find the table/i.test(msg)) return 'This tab needs a database update. Ask an admin to run the setup wizard → Update.';
+  if (/relation .* does not exist|Could not find the table/i.test(msg)) return 'This tab needs a database update. Ask an admin to run the setup wizard > Update.';
   return msg;
 }
 
@@ -289,27 +289,6 @@ export function usePageVisible(): boolean {
 }
 
 // ── Files ─────────────────────────────────────────────────────────────────
-/** `<team_id|program>/<entity_id>/<uuid>.<ext>` (spec §11.2). */
-export function storagePath(teamId: string | null, entityId: string | number, fileName: string): string {
-  const ext = fileName.includes('.') ? fileName.slice(fileName.indexOf('.') + 1).toLowerCase() : 'bin';
-  return `${teamId ?? 'program'}/${entityId}/${crypto.randomUUID()}.${ext}`;
-}
-
-export async function uploadFile(bucket: string, path: string, f: ProcessedFile): Promise<string> {
-  const { error } = await getSupabase().storage.from(bucket).upload(path, f.blob, { contentType: f.contentType, upsert: false });
-  if (error) throw error;
-  return path;
-}
-
-/** Downloads a stored file; transparently un-gzips files stored as `.gz` (spec §11.2). */
-export async function downloadFile(bucket: string, path: string, name: string) {
-  const { data, error } = await getSupabase().storage.from(bucket).download(path);
-  if (error) throw error;
-  const isGz = path.endsWith('.gz') || name.endsWith('.gz');
-  const blob = isGz ? await gunzipBlob(data) : data;
-  downloadBlob(blob, name.replace(/\.gz$/, ''));
-}
-
 export function useSignedUrls(bucket: string, paths: (string | null | undefined)[]) {
   const sb = useSupabase();
   const list = paths.filter(Boolean) as string[];

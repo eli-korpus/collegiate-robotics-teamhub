@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2, Copy, ExternalLink, GitBranch, PartyPopper, Printer, RefreshCw } from 'lucide-react';
+import { Check, CheckCircle2, Copy, ExternalLink, GitBranch, PartyPopper, Printer, RefreshCw } from 'lucide-react';
 import type { HostProvider } from '@teamhub/config-schema';
 import { Banner, Button, Card, Field, Input, QRCode, Spinner, cn, toast } from '@teamhub/ui';
 import { api, type GitState } from '../api';
@@ -57,7 +57,7 @@ export function Publish({ onNext, onBack }: StepProps) {
     <StepShell title="Save your settings to GitHub" subtitle="Your settings live in the team/ folder of your GitHub fork. Your website host rebuilds from it." onBack={onBack} onNext={onNext} nextDisabled={!draft.done.published} nextLabel="Continue">
       {!git.isRepo ? (
         <Banner tone="danger" title="This folder isn't a git repository">
-          Fork TeamHub on GitHub, then clone your fork (GitHub Desktop: File → Clone repository) and run <code>npm run setup</code> from there.
+          Fork TeamHub on GitHub, then clone your fork (GitHub Desktop: File &gt; Clone repository) and run <code>npm run setup</code> from there.
         </Banner>
       ) : (
         <>
@@ -66,7 +66,7 @@ export function Publish({ onNext, onBack }: StepProps) {
               Repository: <code>{git.remote ?? 'no remote'}</code>
             </p>
             <p>Branch: {git.branch}</p>
-            {git.gh?.repo && <p>GitHub: {git.gh.repo} {git.gh.isFork ? '(your fork ✓)' : git.gh.isFork === false ? '(not a fork)' : ''}</p>}
+            {git.gh?.repo && <p>GitHub: {git.gh.repo} {git.gh.isFork ? <><Check className="inline size-3.5 text-success" aria-hidden /> your fork</> : git.gh.isFork === false ? '(not a fork)' : ''}</p>}
           </Card>
           {git.gh?.installed && git.gh.authed && git.gh.isFork === false && /teamhub-ftc/.test(git.remote ?? '') && (
             <Banner
@@ -127,7 +127,7 @@ const HOSTS: { id: HostProvider; name: string; blurb: string }[] = [
 
 const GUIDES: Record<HostProvider, string[]> = {
   cloudflare: [
-    'Go to dash.cloudflare.com → Compute (Workers) → Create → Import a repository, and connect GitHub.',
+    'Go to dash.cloudflare.com > Compute (Workers) > Create > Import a repository, and connect GitHub.',
     'Pick your TeamHub fork. Build command: npm run build. Deploy command: npx wrangler deploy (the wrangler.jsonc file we added tells it where the site is).',
     'Click Deploy. After a minute or two you get a URL like https://<name>.<account>.workers.dev — paste it below.',
   ],
@@ -137,12 +137,12 @@ const GUIDES: Record<HostProvider, string[]> = {
     'Click Deploy, then copy the production URL (https://<name>.vercel.app) and paste it below.',
   ],
   netlify: [
-    'Go to app.netlify.com → Add new site → Import an existing project → GitHub, and choose your fork.',
+    'Go to app.netlify.com > Add new site > Import an existing project > GitHub, and choose your fork.',
     'The netlify.toml we added sets everything; just click Deploy.',
     'Copy the site URL (https://<name>.netlify.app) and paste it below.',
   ],
   'github-pages': [
-    'On GitHub open your fork → Settings → Pages. Under “Build and deployment”, set Source to “GitHub Actions”.',
+    'On GitHub open your fork > Settings > Pages. Under “Build and deployment”, set Source to “GitHub Actions”.',
     'The workflow we added (.github/workflows/pages.yml) builds and publishes on every push. Watch it under the Actions tab.',
     'Your URL is https://<your-username>.github.io/<repository-name>/ — paste it below.',
   ],
@@ -258,12 +258,12 @@ export function KeepAlive({ onNext, onBack }: StepProps) {
         )}
         {draft.done.keepalive && (
           <p className="flex items-center gap-1.5 text-[13px] text-success">
-            <CheckCircle2 className="size-4" /> Installed. Admins see “last keep-alive ping” in Admin → Keep-alive.
+            <CheckCircle2 className="size-4" /> Installed. Admins see “last keep-alive ping” in Admin &gt; Keep-alive.
           </p>
         )}
       </Section>
       <Banner tone="info" title="One thing to know">
-        GitHub turns off scheduled workflows in repositories with no commits for 60 days. If that happens, open your fork → Actions → “Keep TeamHub awake” → Enable workflow. If the project
+        GitHub turns off scheduled workflows in repositories with no commits for 60 days. If that happens, open your fork &gt; Actions &gt; “Keep TeamHub awake” &gt; Enable workflow. If the project
         does pause, open it in the Supabase dashboard and click Restore — your data is kept.
       </Banner>
     </StepShell>
@@ -288,7 +288,7 @@ export function Done() {
           ) : (
             <p>Your site will be live once your host finishes deploying.</p>
           )}
-          <p className="text-muted">Sign in with your admin account, then approve people as they join (People → Requests).</p>
+          <p className="text-muted">Sign in with your admin account, then approve people as they join (People &gt; Requests).</p>
         </div>
       </Card>
       <Section title="Invite your team">
@@ -316,7 +316,7 @@ export function Done() {
           <li>
             Run <code>npm run setup</code> again any time to add or remove tabs, rebrand, or change permissions (Edit mode).
           </li>
-          <li>When TeamHub releases updates: click “Sync fork” on GitHub, then run setup → Update.</li>
+          <li>When TeamHub releases updates: click “Sync fork” on GitHub, then run setup &gt; Update.</li>
         </ul>
       </Section>
       <Button

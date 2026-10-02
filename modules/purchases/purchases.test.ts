@@ -19,7 +19,7 @@ describe('purchase requests', () => {
     expect(await db.denied(member, `update pur_requests set status = 'ordered' where id = $1 returning id`, [id])).toBe(true);
     expect(await db.denied(captain, `update pur_requests set status = 'ordered' where id = $1 returning id`, [id])).toBe(true);
   });
-  it('mentor orders → timestamps + requester notified; requester can no longer edit', async () => {
+  it('mentor orders then timestamps + requester notified; requester can no longer edit', async () => {
     await db.as(mentor, `update pur_requests set status = 'ordered' where id = $1`, [id]);
     const [r] = await db.admin(`select ordered_at, handled_by from pur_requests where id = $1`, [id]);
     expect(r.ordered_at).toBeTruthy();

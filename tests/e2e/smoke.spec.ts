@@ -35,7 +35,7 @@ test.describe('dashboard smoke', () => {
     });
   }
 
-  test('command bar opens with ⌘K and lists tabs', async ({ page }) => {
+  test('command bar opens with the shortcut and lists tabs', async ({ page }) => {
     await mockSupabase(page);
     await page.goto('/');
     await expect(page.getByRole('heading', { name: /Good/ })).toBeVisible();

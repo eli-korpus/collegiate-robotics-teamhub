@@ -1,5 +1,5 @@
 import { useState, type ReactNode } from 'react';
-import { ChevronDown, ChevronRight, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, ChevronDown, ChevronRight, X } from 'lucide-react';
 import { cn } from './cn';
 import { IconButton } from './primitives';
 import { Sheet, useMediaQuery } from './overlays';
@@ -245,7 +245,7 @@ export function DataTable<T>({
                     onClick={() => setSort(sort?.id === c.id ? { id: c.id, dir: (sort.dir * -1) as 1 | -1 } : { id: c.id, dir: 1 })}
                   >
                     {c.header}
-                    {sort?.id === c.id && (sort.dir === 1 ? '↑' : '↓')}
+                    {sort?.id === c.id && (sort.dir === 1 ? <ArrowUp className="inline size-3" aria-label="ascending" /> : <ArrowDown className="inline size-3" aria-label="descending" />)}
                   </button>
                 ) : (
                   c.header

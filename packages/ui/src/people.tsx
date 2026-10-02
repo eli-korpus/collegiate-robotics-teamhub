@@ -1,3 +1,4 @@
+import { Check } from 'lucide-react';
 import { cn } from './cn';
 import { readableOn } from './color';
 
@@ -49,7 +50,7 @@ export function TeamDot({ color, label, className }: { color: string; label?: st
 
 export function PositionBadge({ name, kind = 'position' }: { name: string; kind?: 'position' | 'skill' }) {
   return kind === 'skill' ? (
-    <span className="inline-flex items-center gap-1 rounded-md border border-success/30 bg-success-soft px-1.5 py-0.5 text-[11.5px] font-medium text-success">✓ {name}</span>
+    <span className="inline-flex items-center gap-1 rounded-md border border-success/30 bg-success-soft px-1.5 py-0.5 text-[11.5px] font-medium text-success"><Check className="size-3" aria-hidden /> {name}</span>
   ) : (
     <span className="inline-flex items-center rounded-md border border-border bg-bg-subtle px-1.5 py-0.5 text-[11.5px] font-medium text-fg">{name}</span>
   );

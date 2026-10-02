@@ -169,7 +169,7 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
               <li>
                 Open{' '}
                 <a className="font-medium text-accent hover:underline" href="https://supabase.com/dashboard/account/tokens" target="_blank" rel="noreferrer">
-                  Account → Access Tokens <ExternalLink className="inline size-3" />
+                  Account &gt; Access Tokens <ExternalLink className="inline size-3" />
                 </a>
                 .
               </li>

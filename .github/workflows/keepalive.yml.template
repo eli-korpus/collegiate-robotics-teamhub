@@ -2,7 +2,7 @@
 # Installed into your fork by the TeamHub setup wizard. Reads the public project URL + publishable key
 # from team/teamhub.config.json, so no secrets are needed.
 # Note: GitHub disables scheduled workflows in repos with no commits for 60 days. If that happens,
-# open Actions → "Keep TeamHub awake" → Enable workflow.
+# open Actions > "Keep TeamHub awake" > Enable workflow.
 name: Keep TeamHub awake
 on:
   schedule:

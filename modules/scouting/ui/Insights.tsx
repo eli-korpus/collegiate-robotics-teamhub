@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Eye, Minus, TrendingDown, TrendingUp, Trash2 } from 'lucide-react';
+import { Check, ExternalLink, Eye, Minus, Trash2, TrendingDown, TrendingUp, Trophy } from 'lucide-react';
 import { Badge, Banner, Card, CardHeader, DataTable, Dialog, EmptyState, IconButton, MiniBarChart, RelativeTime, Sparkline, StatTile, cn, useConfirm } from '@teamhub/ui';
 import { awardLabel, canWith, ftcscoutTeamUrl, ordinal, PersonName, useMe, useSupabase } from '@teamhub/sdk';
 import { coverage, highlights, matchHistory, mean, stdev, trend } from '../insights';
@@ -93,7 +93,7 @@ export function Insights({ ctx, stats, onTeam, compare, setCompare }: { ctx: Eve
             header: '',
             cell: (r) => (
               <button className={cn('text-[12px] font-medium', compare.includes(r.t.number) ? 'text-accent' : 'text-muted hover:text-fg')} onClick={() => setCompare(compare.includes(r.t.number) ? compare.filter((x) => x !== r.t.number) : [...compare, r.t.number].slice(-3))}>
-                {compare.includes(r.t.number) ? '✓ Comparing' : 'Compare'}
+                {compare.includes(r.t.number) ? <><Check className="inline size-3.5" aria-hidden /> Comparing</> : 'Compare'}
               </button>
             ),
           },
@@ -176,7 +176,7 @@ export function TeamProfile({ n, ctx, stats, templates, onClose }: { n: number; 
           <div className="flex flex-wrap gap-1.5">
             {awards.map((a) => (
               <Badge key={a.type + a.placement} tone="warning">
-                🏆 {awardLabel(a)}
+                <Trophy className="inline size-3.5 text-warning" aria-hidden /> {awardLabel(a)}
               </Badge>
             ))}
           </div>
@@ -275,7 +275,7 @@ export function TeamProfile({ n, ctx, stats, templates, onClose }: { n: number; 
           })}
         </section>
         <a href={ftcscoutTeamUrl(n)} target="_blank" rel="noreferrer" className="text-[12.5px] text-accent hover:underline">
-          Full history on FTCScout ↗
+          Full history on FTCScout <ExternalLink className="inline size-3" aria-hidden />
         </a>
       </div>
     </Dialog>

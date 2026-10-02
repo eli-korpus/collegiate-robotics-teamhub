@@ -7,7 +7,7 @@ const b = { id: 'b', team_id: null, label: 'B1', type: null, purchased: null, re
 const log = (kind: string, hoursAgo: number, voltage: number | null = null) => ({ id: Math.random(), battery_id: 'b', kind, voltage, note: null, at: new Date(Date.now() - hoursAgo * 3_600_000).toISOString(), by: null }) as never;
 
 describe('battery status', () => {
-  it('charged → used → needs charge; stale charge; weak test', () => {
+  it('charged then used then needs charge; stale charge; weak test', () => {
     expect(batteryStatus(b, [log('charged', 1)], S).state).toBe('charged');
     expect(batteryStatus(b, [log('used', 0.5), log('charged', 1)], S).state).toBe('needs_charge');
     expect(batteryStatus(b, [log('charged', 72)], S).state).toBe('needs_charge');

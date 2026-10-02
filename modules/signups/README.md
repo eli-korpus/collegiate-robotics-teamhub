@@ -8,6 +8,6 @@
 - Sheet creators and people with *manage claims* can add or remove anyone.
 - With Calendar enabled, a sheet can be attached to an event (`signups+calendar`).
 
-**Not for:** opinions or availability (Polls), collecting info (People → Request info), assigning work (Tasks).
+**Not for:** opinions or availability (Polls), collecting info (People > Request info), assigning work (Tasks).
 
 **Permissions:** create (Captains, Mentors), claim (everyone), manage claims (Captains, Mentors).

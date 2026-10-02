@@ -9,6 +9,6 @@
 - A competition with an **FTC event code** merges with its FTCScout results.
 - **Family feeds:** admins can create secret iCal links that parents subscribe to without an account.
 
-**Not for:** RSVPs or finding a time (use Polls → availability), claiming slots (Sign-ups), discussion (your Team chat link).
+**Not for:** RSVPs or finding a time (use Polls > availability), claiming slots (Sign-ups), discussion (your Team chat link).
 
 **Permissions:** create events (Captains, Mentors), edit anyone's events (Mentors).

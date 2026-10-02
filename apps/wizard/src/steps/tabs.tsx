@@ -120,12 +120,12 @@ export function ChooseTabs({ onNext, onBack }: StepProps) {
       {files.length > 0 && (
         <Banner tone="info" title="About file storage">
           {files.join(', ')} can store files. The free plan has 1 GB, so photos are compressed automatically, files have size limits, and every upload offers “paste a link
-          instead”. You can watch usage in Admin → Storage.
+          instead”. You can watch usage in Admin &gt; Storage.
         </Banner>
       )}
       <Why title="Why not just pick everything?">
         <p>Each tab adds screens to learn and a little to your database. Teams that start small and add tabs when they need them tend to actually use them.</p>
-        <p>Every tab has one clear job (e.g. Polls are not for collecting shirt sizes — People → Request info is). The details show what each tab is and is not for.</p>
+        <p>Every tab has one clear job (e.g. Polls are not for collecting shirt sizes — People &gt; Request info is). The details show what each tab is and is not for.</p>
       </Why>
       <Dialog open={!!info} onOpenChange={(v) => !v && setInfo(null)} title={info?.name} description={info?.summary} size="lg">
         {info && (
@@ -137,7 +137,7 @@ export function ChooseTabs({ onNext, onBack }: StepProps) {
               <ul className="list-disc space-y-0.5 pl-5 text-muted">
                 {info.notFor.map((n) => (
                   <li key={n.text}>
-                    Not for {n.text.charAt(0).toLowerCase() + n.text.slice(1)} → {n.goTo.startsWith('link:') ? 'your tool links' : n.goTo.startsWith('core:') ? 'People' : byId.get(n.goTo)?.name ?? n.goTo}
+                    Not for {n.text.charAt(0).toLowerCase() + n.text.slice(1)}: use {n.goTo.startsWith('link:') ? 'your tool links' : n.goTo.startsWith('core:') ? 'People' : byId.get(n.goTo)?.name ?? n.goTo}
                   </li>
                 ))}
               </ul>

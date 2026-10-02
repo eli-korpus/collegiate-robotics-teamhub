@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { CheckCircle2, Circle, ClipboardPen, Eye } from 'lucide-react';
+import { CheckCircle2, Circle, CircleCheckBig, ClipboardPen, Eye } from 'lucide-react';
 import { Badge, Button, Card, Meter, RelativeTime, SearchInput, Segmented, cn, matches as textMatches } from '@teamhub/ui';
 import { PersonName } from '@teamhub/sdk';
 import type { EventContext } from './event';
@@ -48,7 +48,7 @@ export function TeamChecklist({ ctx, stats, onScout, onTeam }: { ctx: EventConte
         <Meter label={mode === 'pit' ? 'Teams interviewed' : 'Teams fully scouted (every played match)'} value={doneCount} max={Math.max(1, teams.length)} format={(n) => String(Math.round(n))} />
       </Card>
       {!list.length ? (
-        <p className="py-8 text-center text-[13.5px] text-muted">{filter === 'todo' ? '🎉 Every team is done!' : 'No teams here.'}</p>
+        <p className="py-8 text-center text-[13.5px] text-muted">{filter === 'todo' ? <><CircleCheckBig className="mx-auto mb-2 size-6 text-success" aria-hidden />Every team is done!</> : 'No teams here.'}</p>
       ) : (
         <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((t) => {

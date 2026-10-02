@@ -45,7 +45,7 @@ export function CommentThread({ refStr, visibility }: { refStr: string; visibili
         <h3 className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wider text-faint">
           <MessageSquare className="size-3.5" /> Comments on this item
         </h3>
-        <TeamChatLink prefix="General discussion →" />
+        <TeamChatLink prefix="General discussion:" />
       </div>
       {q.isLoading ? (
         <Spinner />

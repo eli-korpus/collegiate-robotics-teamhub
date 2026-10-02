@@ -79,7 +79,7 @@ export function Scout({ ctx, stats, templates, canForms, goForms, initial }: { c
                       >
                         <span className="tabular block text-[18px] font-bold">{x.teamNumber}</span>
                         <span className="block truncate text-[12px] text-muted">
-                          {teamName(x.teamNumber)} {already(x.teamNumber) && '· ✓ scouted'}
+                          {teamName(x.teamNumber)} {already(x.teamNumber) && '(scouted)'}
                         </span>
                       </button>
                     ))}

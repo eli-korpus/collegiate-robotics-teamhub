@@ -129,7 +129,7 @@ function BatteryCard({ b, st, logs, onEdit }: { b: Battery; st: ReturnType<typeo
           </Button>
         </div>
       )}
-      {logs.find((l) => l.kind === 'note') && <p className="mt-2 truncate text-[12px] text-muted">📝 {logs.find((l) => l.kind === 'note')!.note}</p>}
+      {logs.find((l) => l.kind === 'note') && <p className="mt-2 truncate text-[12px] text-muted"><StickyNote className="mr-1 inline size-3.5" aria-hidden />{logs.find((l) => l.kind === 'note')!.note}</p>}
       <Dialog
         open={!!testing}
         onOpenChange={(v) => !v && setTesting(null)}

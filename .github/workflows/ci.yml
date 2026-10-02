@@ -1,0 +1,109 @@
+# Upstream quality gates (spec §16). Team forks have team/teamhub.config.json and skip all of this —
+# they only need the keep-alive (and, on GitHub Pages, the deploy) workflow the wizard installs.
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      seed:
+        description: Random-subset seed (blank = random)
+        required: false
+permissions:
+  contents: read
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    runs-on: ubuntu-latest
+    outputs:
+      upstream: ${{ steps.check.outputs.upstream }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: team
+      - id: check
+        run: echo "upstream=$([ -f team/teamhub.config.json ] && echo false || echo true)" >> "$GITHUB_OUTPUT"
+
+  checks:
+    needs: gate
+    if: needs.gate.outputs.upstream == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx tsx packages/generator/src/cli.ts generate --config examples/demo.config.json
+      - name: Typecheck
+        run: npm run typecheck
+      - name: Lint (ESLint boundaries + SQL identifiers)
+        run: npm run lint
+      - name: Unit, generator, wizard and PGlite RLS tests (incl. upgrade + DB budget)
+        run: npm test
+      - name: Build (all tabs)
+        run: npm run build -w @teamhub/dashboard
+      - name: Bundle budget
+        run: npx tsx scripts/check-bundle.ts --enabled "$(jq -r '.modules | keys | join(",")' examples/demo.config.json)"
+      - run: npx playwright install --with-deps chromium
+      - name: Smoke + accessibility (every tab, light/dark, desktop/phone)
+        run: npx playwright test tests/e2e/smoke.spec.ts
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-traces
+          path: test-results/
+          retention-days: 7
+
+  matrix-singles:
+    needs: gate
+    if: needs.gate.outputs.upstream == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Each tab alone (shard ${{ matrix.shard }}/4)
+        run: npm run ci:matrix -- --only singles --shard ${{ matrix.shard }}/4 --smoke
+
+  matrix-combos:
+    needs: gate
+    if: needs.gate.outputs.upstream == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Core only, all tabs, 10 random subsets
+        run: npm run ci:matrix -- --only core,all,random --count 10 --smoke ${{ github.event.inputs.seed && format('--seed {0}', github.event.inputs.seed) || '' }}
+
+  wizard:
+    needs: gate
+    if: needs.gate.outputs.upstream == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Build the setup wizard
+        run: npm run build -w @teamhub/wizard

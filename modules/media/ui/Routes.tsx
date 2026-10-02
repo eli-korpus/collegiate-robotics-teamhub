@@ -200,7 +200,7 @@ function AlbumPage() {
       <div className="mx-auto max-w-6xl space-y-5 px-4 py-5 sm:px-6">
         {album.external_url && (
           <a href={album.external_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-border bg-surface p-3 text-[13.5px] font-medium hover:border-accent">
-            <ExternalLink className="size-4 text-accent" /> Full album (Google Photos / Drive) ↗
+            <ExternalLink className="size-4 text-accent" /> Full album (Google Photos / Drive)
           </a>
         )}
         {canUpload && (

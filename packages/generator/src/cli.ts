@@ -16,7 +16,7 @@ async function main() {
 
   if (cmd === 'generate') {
     const res = await generate(config);
-    console.log(`✓ TeamHub generated for "${config.program.name}"`);
+    console.log(`Done: TeamHub generated for "${config.program.name}"`);
     console.log(`  tabs: ${res.modules.join(', ') || '(core only)'}`);
     if (res.integrations.length) console.log(`  integrations: ${res.integrations.join(', ')}`);
     for (const n of res.themeNotes) console.log(`  note: ${n}`);
@@ -28,7 +28,7 @@ async function main() {
     const out = join(REPO_ROOT, 'sql', 'plan.sql');
     mkdirSync(join(REPO_ROOT, 'sql'), { recursive: true });
     writeFileSync(out, planToSql(plan));
-    console.log(`✓ Wrote ${out}`);
+    console.log(`Wrote ${out}`);
     return;
   }
   console.error(`Unknown command "${cmd}". Use: generate | sql`);
@@ -37,7 +37,7 @@ async function main() {
 
 main().catch((e) => {
   if (e instanceof ConfigError) {
-    console.error(`\n✗ ${e.message}`);
+    console.error(`\nError: ${e.message}`);
   } else {
     console.error(e);
   }

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { CheckCircle2, Image as ImageIcon, Megaphone, Pencil, Pin, Trash2, X } from 'lucide-react';
+import { Check, CheckCircle2, Image as ImageIcon, Megaphone, Pencil, Pin, Trash2, X } from 'lucide-react';
 import {
   Avatar,
   Badge,
@@ -144,7 +144,7 @@ export default function AnnouncementsRoutes() {
                       <p className="line-clamp-2 text-[12.5px] text-muted">{markdownExcerpt(p.body, 160)}</p>
                       <p className="mt-1 flex items-center gap-2 text-[11.5px] text-faint">
                         <PersonName id={p.created_by} /> · <RelativeTime date={p.created_at} /> <TeamBadge teamId={p.team_id} />
-                        {p.require_ack && (acked.has(p.id) ? <span className="text-success">✓ read</span> : <Badge tone="warning">Must read</Badge>)}
+                        {p.require_ack && (acked.has(p.id) ? <span className="inline-flex items-center gap-1 text-success"><Check className="size-3.5" aria-hidden /> read</span> : <Badge tone="warning">Must read</Badge>)}
                       </p>
                     </div>
                   </ListRow>

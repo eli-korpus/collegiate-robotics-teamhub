@@ -18,7 +18,7 @@ export function loadGenerated() {
   return { config, schema };
 }
 
-export async function mockSupabase(page: Page, opts: { tables?: Record<string, unknown[]>; rpc?: Record<string, unknown>; role?: 'mentor' | 'member'; admin?: boolean } = {}) {
+export async function mockSupabase(page: Page, opts: { tables?: Record<string, unknown[]>; rpc?: Record<string, unknown>; role?: 'mentor' | 'member'; admin?: boolean; realFtcScout?: boolean } = {}) {
   const { config, schema } = loadGenerated();
   const base = config.supabase.url as string;
   const ref = new URL(base).hostname.split('.')[0];
@@ -75,7 +75,7 @@ export async function mockSupabase(page: Page, opts: { tables?: Record<string, u
   });
   // Avoid flaky third-party requests (favicons, FTCScout) in smoke tests.
   await page.route('https://www.google.com/s2/**', (r) => r.fulfill({ status: 404, body: '' }));
-  await page.route('https://api.ftcscout.org/**', (r) => r.fulfill({ json: { data: { teamByNumber: null, eventByCode: null, eventsSearch: [], __type: { possibleTypes: [] } } } }));
+  if (!opts.realFtcScout) await page.route('https://api.ftcscout.org/**', (r) => r.fulfill({ json: { data: { teamByNumber: null, eventByCode: null, eventsSearch: [], __type: { possibleTypes: [] } } } }));
   return { config, schema };
 }
 

@@ -63,6 +63,42 @@
     "purchases": {
       "state": "active",
       "settings": {}
+    },
+    "checklists": {
+      "state": "active",
+      "settings": {}
+    },
+    "batteries": {
+      "state": "active",
+      "settings": {}
+    },
+    "inventory": {
+      "state": "active",
+      "settings": {}
+    },
+    "repairs": {
+      "state": "active",
+      "settings": {}
+    },
+    "driver-practice": {
+      "state": "active",
+      "settings": {}
+    },
+    "rules": {
+      "state": "active",
+      "settings": {}
+    },
+    "code-hub": {
+      "state": "active",
+      "settings": {}
+    },
+    "judging": {
+      "state": "active",
+      "settings": {}
+    },
+    "scouting": {
+      "state": "active",
+      "settings": {}
     }
   },
   "subteams": [

@@ -187,6 +187,30 @@ export async function getQuickStats(number: number, season: number) {
   return d.teamByNumber?.quickStats ?? null;
 }
 
+export interface TeamSeasonSummary {
+  number: number;
+  name: string | null;
+  city: string | null;
+  rookieYear: number | null;
+  quick: { tot: { value: number; rank: number } | null; count: number } | null;
+}
+
+/** Names + season quick stats (world OPR rank) for many teams in ONE request (GraphQL aliases, 40 per batch). */
+export async function getTeamsSummary(numbers: number[], season: number): Promise<Map<number, TeamSeasonSummary>> {
+  const out = new Map<number, TeamSeasonSummary>();
+  const uniq = [...new Set(numbers.filter((n) => Number.isInteger(n) && n > 0))];
+  for (let i = 0; i < uniq.length; i += 40) {
+    const chunk = uniq.slice(i, i + 40);
+    const fields = chunk.map((n) => `t${n}: teamByNumber(number: ${n}) { number name rookieYear location { city state } quickStats(season: ${season}) { tot { value rank } count } }`).join("\n");
+    const d = await gql<Record<string, { number: number; name: string; rookieYear: number | null; location: FtcLocation | null; quickStats: TeamSeasonSummary['quick'] } | null>>(`{ ${fields} }`);
+    for (const n of chunk) {
+      const t = d[`t${n}`];
+      out.set(n, { number: n, name: t?.name ?? null, city: [t?.location?.city, t?.location?.state].filter(Boolean).join(', ') || null, rookieYear: t?.rookieYear ?? null, quick: t?.quickStats ?? null });
+    }
+  }
+  return out;
+}
+
 const AWARD_NAMES: Record<string, string> = {
   DeansListFinalist: "Dean's List Finalist",
   DeansListSemiFinalist: "Dean's List Semi-Finalist",

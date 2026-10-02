@@ -21,3 +21,6 @@ create policy cal_exceptions_write on cal_exceptions for all to authenticated
     ((e.created_by = (select auth.uid()) and teamhub_can('calendar.create', e.team_id)) or teamhub_can('calendar.edit_any', e.team_id))));
 
 create policy cal_feeds_admin on cal_feeds for all to authenticated using (teamhub_is_admin()) with check (teamhub_is_admin());
+
+-- The iCal feed is served by the ical edge function (service role); members never call it directly.
+revoke execute on function cal_ical(text) from public, anon, authenticated;

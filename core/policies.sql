@@ -131,6 +131,20 @@ create policy core_avatars_delete on storage.objects for delete to authenticated
 
 select teamhub_realtime_add('notifications');
 
+-- Data API access. TeamHub grants exactly what it needs on every plan, so it works whether or not the Supabase
+-- project's "Automatically expose new tables" setting is on. Row-level security still decides which rows anyone sees.
+grant usage on schema public to anon, authenticated, service_role;
+grant select, insert, update, delete on all tables in schema public to authenticated;
+grant all on all tables in schema public to service_role;
+grant usage, select on all sequences in schema public to authenticated, service_role;
+grant execute on all functions in schema public to authenticated, service_role;
+-- Signed-out visitors only need the keep-alive ping (tables are never readable without signing in).
+grant execute on function teamhub_ping() to anon;
+-- Internal helpers stay locked (re-applied because the grant above covers every function).
+revoke execute on function teamhub_drop_policies(text), teamhub_make_dormant(text), teamhub_drop_prefix(text),
+  teamhub_trash(text, text[]), teamhub_notify(uuid[], text, text), teamhub_realtime_add(text)
+  from public, anon, authenticated;
+
 -- Defense in depth: TRUNCATE bypasses RLS, so client roles never get it (PostgREST doesn't expose it, but direct
 -- connections might). Re-applied every plan so new module tables are covered.
 revoke truncate, references, trigger on all tables in schema public from anon, authenticated;

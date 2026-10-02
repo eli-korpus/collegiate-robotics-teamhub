@@ -145,8 +145,26 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
             (sign up with GitHub if you don’t have an account).
           </li>
           <li>Name it after your program, set a strong database password (save it in your password manager) and pick the region closest to you.</li>
+          <li>
+            Under the security options:
+            <ul className="mt-1 list-disc space-y-0.5 pl-5">
+              <li>
+                <strong>Enable Data API</strong>: <strong>on</strong> (required, the dashboard talks to your database through it).
+              </li>
+              <li>
+                <strong>Automatically expose new tables</strong>: <strong>off</strong> is recommended. TeamHub gives its tables exactly the access they need either way.
+              </li>
+              <li>
+                <strong>Enable automatic RLS</strong>: <strong>on</strong>. TeamHub turns on row-level security for every table anyway; this is an extra safety net.
+              </li>
+            </ul>
+          </li>
           <li>Wait a minute or two until the project says it is ready.</li>
         </ol>
+        <Why title="Already created the project with different choices?">
+          That's fine as long as the Data API is on. If it's off, turn it on in the Supabase dashboard under Project Settings &gt; Data API. The other two settings don't
+          change anything for TeamHub.
+        </Why>
       </Section>
       <Section title="2. Let this wizard talk to Supabase" description="A personal access token lets the wizard set up your database. It stays on this computer.">
         {server.supabase.connected ? (

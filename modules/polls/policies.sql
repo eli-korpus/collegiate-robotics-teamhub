@@ -15,3 +15,6 @@ create policy poll_votes_write on poll_votes for all to authenticated
   with check (user_id = (select auth.uid()) and exists (
     select 1 from poll_polls p where p.id = poll_id and teamhub_in_team(p.team_id) and teamhub_can('polls.vote', p.team_id)
       and (p.closes_at is null or p.closes_at > now())));
+
+-- Run by the daily scheduled job only.
+revoke execute on function poll_finalize() from public, anon, authenticated;

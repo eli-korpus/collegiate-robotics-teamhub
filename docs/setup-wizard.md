@@ -53,7 +53,9 @@ Your team chat, Drive folder, CAD, code repository and other links. Tabs use the
 
 ## 10. Connect Supabase
 
-Create a free Supabase project and paste a personal access token. The wizard shows exactly what it will create, then
+Create a free Supabase project and paste a personal access token. When creating the project, keep **Enable Data API**
+on (required), turn **Automatically expose new tables** off (recommended; TeamHub grants its own access) and turn
+**Enable automatic RLS** on. The wizard shows exactly what it will create, then
 builds your database for only the tabs you picked. The token stays on your computer.
 
 ![Connect Supabase step](screenshots/wizard-supabase.png)

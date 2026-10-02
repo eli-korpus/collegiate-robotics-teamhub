@@ -19,6 +19,16 @@ function useAllWidgets(): HomeWidget[] {
   }, [me]);
 }
 
+/**
+ * A tab can replace the normal greeting (e.g. Events: "3 days to the qualifier"). The list of tabs is fixed when the
+ * site is built, so these hooks always run in the same order.
+ */
+function Greeting({ teamId }: { teamId: string | null }) {
+  let special: string | null = null;
+  for (const m of runtime().modules) special = m.client.useGreeting?.(teamId) ?? special;
+  return <>{special ?? greeting()}</>;
+}
+
 /** Highest profile type → default widget order set in the wizard (spec §12.1). */
 function defaultOrder(me: ReturnType<typeof useMe>): string[] {
   const types = me.memberships.filter((m) => m.status === 'active').map((m) => m.type);
@@ -47,7 +57,7 @@ export function Home() {
         <ProgramLogo size={44} />
         <div className="min-w-0 flex-1">
           <h1 className="text-[22px] font-semibold tracking-tight">
-            {greeting()}, {first}
+            <Greeting teamId={teamId} />, {first}
           </h1>
           <p className="text-[13px] text-muted">
             {formatDate(new Date(), { weekday: 'long', month: 'long', day: 'numeric' })} · {runtime().config.program.name} · Season {season}

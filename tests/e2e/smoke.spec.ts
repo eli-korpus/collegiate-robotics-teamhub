@@ -10,7 +10,7 @@ test.describe('dashboard smoke', () => {
     const errors = watchErrors(page);
     await mockSupabase(page);
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: /^[A-Z][a-z ]+, Sam$/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /^[A-Z0-9][A-Za-z0-9 -]+, Sam$/ })).toBeVisible();
     expect(errors).toEqual([]);
   });
 

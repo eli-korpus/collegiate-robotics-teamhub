@@ -7,6 +7,7 @@
 - Compare all teams in your program, including a 4-season OPR trend.
 - Short team notes per event (travel details belong on the Calendar event, which merges with the FTCScout event
   when you give it the event code).
+- Countdown greeting on Home during the week before a competition ("3 days to the qualifier", "Competition day").
 - Nothing is entered by hand and nothing is copied into your database. Season changes need no setup.
 
 **Not for:** entering results manually, travel chat (Team chat).

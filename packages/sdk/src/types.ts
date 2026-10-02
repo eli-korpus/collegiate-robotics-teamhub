@@ -176,6 +176,11 @@ export interface ModuleClient {
   calendarOverlays?: CalendarOverlay[];
   /** Badge count for the sidebar item (e.g. unread announcements). */
   useBadge?: () => number | undefined;
+  /**
+   * Optional greeting for the top of Home (e.g. "Competition day"), or null to use the normal one. Called as a hook
+   * on every Home render, so keep it cheap and share cached queries.
+   */
+  useGreeting?: (teamId: string | null) => string | null;
 }
 
 export interface IntegrationClient {

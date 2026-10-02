@@ -4,13 +4,15 @@ import { loadGenerated, mockSupabase, watchErrors } from './mock';
 
 const { schema } = loadGenerated();
 const modules = Object.keys(schema.modules);
+/** Home's greeting changes by time and date ("Good morning, Sam", "Happy Friday, Sam", "3 days to the qualifier, Sam"). */
+const HOME_GREETING = /^[A-Z0-9][A-Za-z0-9 -]+, Sam$/;
 
 test.describe('dashboard smoke', () => {
   test('home renders with greeting and sidebar @phone', async ({ page }) => {
     const errors = watchErrors(page);
     await mockSupabase(page);
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: /^[A-Z0-9][A-Za-z0-9 -]+, Sam$/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: HOME_GREETING })).toBeVisible();
     expect(errors).toEqual([]);
   });
 
@@ -38,7 +40,7 @@ test.describe('dashboard smoke', () => {
   test('command bar opens with the shortcut and lists tabs', async ({ page }) => {
     await mockSupabase(page);
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: /Good/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: HOME_GREETING })).toBeVisible();
     await page.keyboard.press('ControlOrMeta+k');
     await expect(page.getByRole('combobox')).toBeVisible();
     await expect(page.getByRole('option', { name: /People/ })).toBeVisible();
@@ -47,7 +49,7 @@ test.describe('dashboard smoke', () => {
   test('members do not see Admin', async ({ page }) => {
     await mockSupabase(page, { admin: false, role: 'member' });
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: /Good/ })).toBeVisible();
+    await expect(page.getByRole('heading', { name: HOME_GREETING })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Admin' })).toHaveCount(0);
   });
 
@@ -56,7 +58,7 @@ test.describe('dashboard smoke', () => {
       await page.addInitScript((m) => localStorage.setItem('teamhub-theme', m), mode);
       await mockSupabase(page);
       await page.goto('/');
-      await expect(page.getByRole('heading', { name: /Good/ })).toBeVisible();
+      await expect(page.getByRole('heading', { name: HOME_GREETING })).toBeVisible();
       const res = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
       const serious = res.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
       expect(serious.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).slice(0, 3).join(', ')}`)).toEqual([]);

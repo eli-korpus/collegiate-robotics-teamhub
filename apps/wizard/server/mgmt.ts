@@ -98,6 +98,20 @@ export class Mgmt {
     return this.req(`/projects/${ref}/functions/deploy?slug=${encodeURIComponent(slug)}`, { method: 'POST', body: form });
   }
 
+  /** Data API (PostgREST) settings: db_schema is the comma-separated list of schemas the API serves. */
+  getPostgrest(ref: string) {
+    return this.req<{ db_schema?: string | null }>(`/projects/${ref}/postgrest`);
+  }
+
+  updatePostgrest(ref: string, patch: { db_schema: string }) {
+    return this.req(`/projects/${ref}/postgrest`, { method: 'PATCH', body: JSON.stringify(patch) });
+  }
+
+  /** Plain request to the project itself (not the Management API), e.g. the live Data API check. */
+  fetchProject(url: string, init: RequestInit) {
+    return this.f(url, init);
+  }
+
   health(ref: string) {
     return this.req<{ name: string; status: string }[]>(`/projects/${ref}/health?services=db&services=auth&services=rest&services=storage`);
   }

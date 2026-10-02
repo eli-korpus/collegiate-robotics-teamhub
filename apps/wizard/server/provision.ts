@@ -99,7 +99,54 @@ export async function applyConfig(
 
   await configureAuth(m, ref, config, opts.siteUrl ?? config.hosting.url);
   log.push({ step: 'Sign-in settings configured', ok: true, detail: config.features.email ? 'email confirmation on' : 'no email needed (approval is the gate)' });
+
+  // Last: prove the website will be able to talk to the database.
+  const keysForPing = await m.apiKeys(ref).catch(() => null);
+  if (keysForPing) {
+    const ping = await pingDataApi(m, ref, keysForPing.publishable);
+    log.push({ step: ping.ok ? 'Data API check passed' : 'Data API check failed', ok: ping.ok, detail: ping.detail });
+  }
   return { log, backup };
+}
+
+export interface DataApiStatus {
+  /** Schemas the Data API serves (empty = Data API turned off). */
+  schemas: string[];
+  /** TeamHub needs the public schema exposed. */
+  ok: boolean;
+}
+
+/** Is the project's Data API on and serving the public schema? (Supabase lets new projects turn it off or use "api".) */
+export async function dataApiStatus(m: Mgmt, ref: string): Promise<DataApiStatus> {
+  const cfg = await m.getPostgrest(ref);
+  const schemas = (cfg.db_schema ?? '').split(',').map((s) => s.trim()).filter(Boolean);
+  return { schemas, ok: schemas.includes('public') };
+}
+
+/** Adds the public schema to the Data API (keeping any others, e.g. graphql_public). */
+export async function exposePublicSchema(m: Mgmt, ref: string): Promise<DataApiStatus> {
+  const { schemas } = await dataApiStatus(m, ref);
+  await m.updatePostgrest(ref, { db_schema: ['public', ...schemas.filter((s) => s !== 'public')].join(', ') });
+  return dataApiStatus(m, ref);
+}
+
+/** End-to-end check the website will depend on: call the keep-alive function through the Data API, signed out. */
+export async function pingDataApi(m: Mgmt, ref: string, publishableKey: string): Promise<{ ok: boolean; detail: string }> {
+  try {
+    const res = await m.fetchProject(`${projectUrl(ref)}/rest/v1/rpc/teamhub_ping`, {
+      method: 'POST',
+      headers: { apikey: publishableKey, Authorization: `Bearer ${publishableKey}`, 'Content-Type': 'application/json' },
+      body: '{}',
+    });
+    if (res.ok) return { ok: true, detail: 'the website can reach your database' };
+    const text = await res.text().catch(() => '');
+    return {
+      ok: false,
+      detail: `The Data API answered ${res.status}. In Supabase, open Project Settings > Data API (or Integrations > Data API), make sure it is enabled and that "public" is an exposed schema, then click Apply again. ${text.slice(0, 200)}`,
+    };
+  } catch (e) {
+    return { ok: false, detail: `Could not reach the Data API: ${(e as Error).message}` };
+  }
 }
 
 /** Email/password on, signups on, confirmation off unless the team added SMTP (spec §7.5); site URL + redirects. */

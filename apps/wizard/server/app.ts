@@ -22,7 +22,7 @@ import { Mgmt, MgmtError, projectRefOf, projectUrl, type FetchLike } from './mgm
 import { gitStatus, publish, sh } from './git';
 import { checkSite, existingHostPaths, hostFiles, keepaliveFile, writeHostFiles } from './hosting';
 import { BACKUP_ROOT, exportData, importData } from './backup';
-import { applyConfig, computePlan, configureAuth, createAdmin, newSeason, readDbState, removeEverything } from './provision';
+import { applyConfig, computePlan, configureAuth, createAdmin, dataApiStatus, exposePublicSchema, newSeason, readDbState, removeEverything } from './provision';
 
 /** Hostnames the wizard answers to. Anything else is a DNS-rebinding attempt (a website pointing its own domain at 127.0.0.1). */
 export const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
@@ -198,8 +198,11 @@ export function createApp(deps: AppDeps = {}) {
     const keys = await mgmt().apiKeys(ref);
     setCreds({ projectRef: ref }, !!remember || rememberedOnDisk());
     const db = await readDbState(mgmt(), ref).catch(() => null);
-    return c.json({ url: projectUrl(ref), anonKey: keys.publishable, projectRef: ref, existingInstall: !!db, versions: db?.versions ?? null });
+    const dataApi = await dataApiStatus(mgmt(), ref).catch(() => null);
+    return c.json({ url: projectUrl(ref), anonKey: keys.publishable, projectRef: ref, existingInstall: !!db, versions: db?.versions ?? null, dataApi });
   });
+  // Turn on the Data API for the public schema (new Supabase projects can be created with it off or pointed elsewhere).
+  app.post('/supabase/data-api/fix', async (c) => c.json(await exposePublicSchema(mgmt(), projectRef(readConfig()))));
   app.get('/supabase/db-state', async (c) => c.json(await readDbState(mgmt(), projectRef(readConfig()))));
 
   /** Apply config to the database (and write config + generated code). */

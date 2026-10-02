@@ -53,10 +53,22 @@ Your team chat, Drive folder, CAD, code repository and other links. Tabs use the
 
 ## 10. Connect Supabase
 
-Create a free Supabase project and paste a personal access token. When creating the project, keep **Enable Data API**
-on (required), turn **Automatically expose new tables** off (recommended; TeamHub grants its own access) and turn
-**Enable automatic RLS** on. The wizard shows exactly what it will create, then
-builds your database for only the tabs you picked. The token stays on your computer.
+Create a free Supabase project, then paste a personal access token. When creating the project:
+
+| Option | Choose |
+|---|---|
+| Organization | Your own. The free plan includes two free projects, so give TeamHub its own. |
+| Project name, region | Your program's name; the region closest to your team. |
+| Database password | Generate one and save it in a password manager. TeamHub never needs it. |
+| Compute size | The free one (Nano). |
+| Enable Data API | **On**, serving the **public** schema (required). |
+| Automatically expose new tables and functions | **Off** (recommended). TeamHub grants its own access either way. |
+| Enable automatic RLS | **On**. An extra safety net; TeamHub enables row-level security on every table anyway. |
+| Postgres type (Advanced) | Regular **Postgres**, not OrioleDB. |
+
+After you pick the project, the wizard checks that the Data API serves the public schema and offers to fix it. It
+shows exactly what it will create, builds your database for only the tabs you picked, and finally tests that your
+website will be able to reach it. The token stays on your computer.
 
 ![Connect Supabase step](screenshots/wizard-supabase.png)
 

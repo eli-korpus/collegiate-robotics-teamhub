@@ -16,6 +16,7 @@ process.env.TEAMHUB_BACKUPS = join(tmp, 'backups');
 const REF = 'abcdefghijklmnopqrst';
 let db: TestDb;
 const calls: { method: string; path: string; body?: unknown }[] = [];
+let postgrestSchemas = 'public, graphql_public';
 
 async function fakeFetch(input: string | URL | Request, init?: RequestInit): Promise<Response> {
   const url = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url);
@@ -23,6 +24,10 @@ async function fakeFetch(input: string | URL | Request, init?: RequestInit): Pro
   const body = typeof init?.body === 'string' ? JSON.parse(init.body) : undefined;
   calls.push({ method, path: url.pathname, body });
   const json = (v: unknown, status = 200) => new Response(JSON.stringify(v), { status, headers: { 'content-type': 'application/json' } });
+  // The project's own Data API (what the website uses): answers only when the public schema is exposed.
+  if (url.hostname === `${REF}.supabase.co` && url.pathname === '/rest/v1/rpc/teamhub_ping') {
+    return postgrestSchemas.includes('public') ? json(new Date().toISOString()) : json({ message: 'schema not exposed' }, 404);
+  }
   if (init?.headers && (init.headers as Record<string, string>).Authorization !== 'Bearer sbp_test123') return json({ message: 'unauthorized' }, 401);
   const p = url.pathname.replace('/v1', '');
   if (p === '/projects') return json([{ id: REF, name: 'Robotics', region: 'us-east-1', status: 'ACTIVE_HEALTHY' }]);
@@ -40,6 +45,10 @@ async function fakeFetch(input: string | URL | Request, init?: RequestInit): Pro
   if (p.startsWith(`/projects/${REF}/functions/deploy`)) return json({ id: 'fn' }, 201);
   if (p === `/projects/${REF}/secrets`) return json(null, 201);
   if (p === `/projects/${REF}/config/auth`) return json({});
+  if (p === `/projects/${REF}/postgrest`) {
+    if (method === 'PATCH') postgrestSchemas = body.db_schema;
+    return json({ db_schema: postgrestSchemas, max_rows: 1000 });
+  }
   return json({ message: `unhandled ${method} ${p}` }, 404);
 }
 
@@ -124,6 +133,22 @@ describe('wizard API', () => {
     await call('POST', '/email', { on: true });
     const last = calls.filter((c) => c.path.endsWith('/config/auth')).at(-1);
     expect(last?.body).toMatchObject({ mailer_autoconfirm: false });
+  });
+
+  it('detects a Data API that does not serve "public", fixes it, and checks the live API after applying', async () => {
+    postgrestSchemas = 'api';
+    const sel = await call('POST', '/supabase/select', { ref: REF });
+    expect(sel.body.dataApi).toEqual({ schemas: ['api'], ok: false });
+    const fixed = await call('POST', '/supabase/data-api/fix', {});
+    expect(fixed.body).toEqual({ schemas: ['public', 'api'], ok: true });
+    expect(calls.some((c) => c.method === 'PATCH' && c.path.endsWith('/postgrest'))).toBe(true);
+    const state = await call('GET', '/state');
+    const applied = await call('POST', '/apply', { config: state.body.config });
+    expect(applied.body.log.find((l: { step: string }) => l.step.startsWith('Data API check'))).toMatchObject({ ok: true });
+    postgrestSchemas = '';
+    const off = await call('POST', '/apply', { config: state.body.config });
+    expect(off.body.log.find((l: { step: string }) => l.step.startsWith('Data API check'))).toMatchObject({ ok: false });
+    postgrestSchemas = 'public, graphql_public';
   });
 
   it('sees an existing install', async () => {

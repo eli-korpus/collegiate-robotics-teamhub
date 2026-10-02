@@ -84,6 +84,7 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
   const [showSql, setShowSql] = useState(false);
   const [log, setLog] = useState<{ step: string; ok: boolean; detail?: string }[] | null>(null);
   const [existing, setExisting] = useState(false);
+  const [dataApi, setDataApi] = useState<{ schemas: string[]; ok: boolean } | null>(null);
 
   useEffect(() => {
     if (server.supabase.connected && !projects) api<{ projects: ProjectRow[] }>('/supabase/projects').then((r) => setProjects(r.projects)).catch(() => {});
@@ -108,8 +109,9 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
   const select = async (ref: string) => {
     setBusy(true);
     try {
-      const r = await api<{ url: string; anonKey: string; projectRef: string; existingInstall: boolean }>('/supabase/select', { ref, remember });
+      const r = await api<{ url: string; anonKey: string; projectRef: string; existingInstall: boolean; dataApi: { schemas: string[]; ok: boolean } | null }>('/supabase/select', { ref, remember });
       setExisting(r.existingInstall);
+      setDataApi(r.dataApi);
       update((x) => void (x.supabase = { url: r.url, anonKey: r.anonKey, projectRef: r.projectRef }));
     } catch (e) {
       toast.error((e as Error).message);
@@ -144,26 +146,44 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
             </a>{' '}
             (sign up with GitHub if you don’t have an account).
           </li>
-          <li>Name it after your program, set a strong database password (save it in your password manager) and pick the region closest to you.</li>
           <li>
-            Under the security options:
+            <strong>Organization</strong>: use your own (or create one). The free plan includes two free projects, so give TeamHub its own.
+          </li>
+          <li>
+            <strong>Project name</strong>: your program’s name. <strong>Database password</strong>: click Generate and save it in a password manager (TeamHub
+            never needs it). <strong>Region</strong>: the one closest to your team.
+          </li>
+          <li>
+            <strong>Compute size</strong> (if shown): the free one (Nano) is plenty.
+          </li>
+          <li>
+            Under <strong>Security</strong>:
             <ul className="mt-1 list-disc space-y-0.5 pl-5">
               <li>
-                <strong>Enable Data API</strong>: <strong>on</strong> (required, the dashboard talks to your database through it).
+                <strong>Enable Data API</strong>: <strong>on</strong> (required, the website talks to your database through it), and keep it on the{' '}
+                <strong>public</strong> schema. Don’t switch it to a separate “api” schema.
               </li>
               <li>
-                <strong>Automatically expose new tables</strong>: <strong>off</strong> is recommended. TeamHub gives its tables exactly the access they need either way.
+                <strong>Automatically expose new tables and functions</strong>: <strong>off</strong> is recommended. TeamHub gives its tables exactly the access they
+                need either way.
               </li>
               <li>
                 <strong>Enable automatic RLS</strong>: <strong>on</strong>. TeamHub turns on row-level security for every table anyway; this is an extra safety net.
               </li>
             </ul>
           </li>
-          <li>Wait a minute or two until the project says it is ready.</li>
+          <li>
+            Under <strong>Advanced configuration</strong> (if shown): keep <strong>Postgres type</strong> on regular <strong>Postgres</strong>, not OrioleDB (a beta storage
+            engine TeamHub isn’t tested with). Leave everything else as it is.
+          </li>
+          <li>Click Create, then wait a minute or two until the project says it is ready.</li>
         </ol>
         <Why title="Already created the project with different choices?">
-          That's fine as long as the Data API is on. If it's off, turn it on in the Supabase dashboard under Project Settings &gt; Data API. The other two settings don't
-          change anything for TeamHub.
+          <p>
+            The only thing that matters is the Data API serving the <strong>public</strong> schema. After you pick your project below, the wizard checks this and can fix it
+            for you. After setting up the database it also tests that your website will be able to reach it.
+          </p>
+          <p>The other choices (automatic exposure, automatic RLS, region, compute) don’t change how TeamHub works.</p>
         </Why>
       </Section>
       <Section title="2. Let this wizard talk to Supabase" description="A personal access token lets the wizard set up your database. It stays on this computer.">
@@ -215,6 +235,34 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
               </Select>
             )}
           </Field>
+        )}
+        {dataApi && !dataApi.ok && (
+          <Banner tone="danger" title={dataApi.schemas.length ? 'The Data API isn’t serving the "public" schema' : 'The Data API is turned off'}>
+            <p>
+              TeamHub’s website talks to your database through Supabase’s Data API, using the <code>public</code> schema.
+              {dataApi.schemas.length ? ` Right now it only serves: ${dataApi.schemas.join(', ')}.` : ''} The wizard can fix this for you.
+            </p>
+            <Button
+              size="sm"
+              className="mt-2"
+              loading={busy}
+              onClick={async () => {
+                setBusy(true);
+                try {
+                  const r = await api<{ schemas: string[]; ok: boolean }>('/supabase/data-api/fix', {});
+                  setDataApi(r);
+                  if (r.ok) toast.success('Data API now serves the public schema');
+                  else toast.error('Supabase didn’t accept the change. Turn on the Data API in Project Settings > Data API, then pick the project again.');
+                } catch (e) {
+                  toast.error((e as Error).message);
+                } finally {
+                  setBusy(false);
+                }
+              }}
+            >
+              Fix it for me
+            </Button>
+          </Banner>
         )}
         {existing && draft.flow === 'setup' && (
           <Banner tone="warning" title="This project already has TeamHub">

@@ -8,6 +8,7 @@ import {
   Dialog,
   EmptyState,
   Field,
+  IconButton,
   Input,
   ListRow,
   MiniBarChart,
@@ -210,6 +211,13 @@ function EventDialog({ event: e, hours, onEdit, onClose }: { event: OutEvent; ho
     toast.success(approver ? 'Hours saved' : 'Hours logged — waiting for approval');
     refresh();
   };
+  const removeHours = async (user: string) => {
+    if (!(await confirm({ title: user === me.id ? 'Remove your hours for this event?' : 'Remove these hours?', confirmLabel: 'Remove', danger: true }))) return;
+    const { error } = await sb.from('out_hours').delete().match({ event_id: e.id, user_id: user });
+    if (error) return toast.error(friendlyError(error));
+    if (user === me.id) setH('');
+    refresh();
+  };
   const approve = async (user: string, on: boolean) => {
     const { error } = await sb.from('out_hours').update({ approved: on }).match({ event_id: e.id, user_id: user });
     if (error) return toast.error(friendlyError(error));
@@ -269,6 +277,11 @@ function EventDialog({ event: e, hours, onEdit, onClose }: { event: OutEvent; ho
               {mine ? 'Update' : 'Log hours'}
             </Button>
             {mine && <StatusPill label={mine.approved ? 'Approved' : 'Waiting for approval'} tone={mine.approved ? 'success' : 'warning'} />}
+            {mine && (
+              <Button variant="ghost" size="sm" className="text-danger" onClick={() => removeHours(me.id)}>
+                Remove my hours
+              </Button>
+            )}
           </div>
         )}
         <section>
@@ -281,6 +294,11 @@ function EventDialog({ event: e, hours, onEdit, onClose }: { event: OutEvent; ho
                   <Avatar name={p?.name ?? '?'} src={p?.avatarUrl} size={22} />
                   <span className="flex-1">{p?.name ?? 'Former member'}</span>
                   <span className="tabular">{Number(x.hours)} h</span>
+                  {approver && x.user_id !== me.id && (
+                    <IconButton label={`Remove ${p?.name ?? 'these'} hours`} size="sm" onClick={() => removeHours(x.user_id)}>
+                      <Trash2 className="size-3.5" />
+                    </IconButton>
+                  )}
                   {approver ? (
                     <Button size="sm" variant={x.approved ? 'ghost' : 'secondary'} icon={x.approved ? <Check className="size-4 text-success" /> : undefined} onClick={() => approve(x.user_id, !x.approved)}>
                       {x.approved ? 'Approved' : 'Approve'}

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowRight, BarChart3, CalendarRange, Check, Eye, EyeOff, Lock, MessageSquareText, Plus, Trash2, Vote, X } from 'lucide-react';
+import { ArrowRight, BarChart3, CalendarRange, Check, Eye, EyeOff, Lock, MessageSquareText, Pencil, Plus, Trash2, Vote, X } from 'lucide-react';
 import {
   Avatar,
   Banner,
@@ -312,6 +312,7 @@ function PollDialog({ poll: p, myVote, onClose }: { poll: Poll; myVote: VoteRow 
     refresh();
   };
   const t = totals.data;
+  const [editing, setEditing] = useState(false);
   const max = Math.max(1, ...(t?.counts ?? [0]));
   const voterNames = useMemo(() => new Map([...(people.data?.values() ?? [])].map((x) => [x.id, x])), [people.data]);
   return (
@@ -346,6 +347,11 @@ function PollDialog({ poll: p, myVote, onClose }: { poll: Poll; myVote: VoteRow 
                   }}
                 >
                   Close now
+                </Button>
+              )}
+              {open && t && t.voters === 0 && (
+                <Button icon={<Pencil className="size-4" />} onClick={() => setEditing(true)}>
+                  Edit
                 </Button>
               )}
             </>
@@ -457,6 +463,54 @@ function PollDialog({ poll: p, myVote, onClose }: { poll: Poll; myVote: VoteRow 
         <p className="text-[11.5px] text-faint">
           Individual answers are deleted 30 days after the poll closes; totals stay. Created <RelativeTime date={p.created_at} />.
         </p>
+      </div>
+      {editing && <EditPoll poll={p} onClose={() => setEditing(false)} />}
+    </Dialog>
+  );
+}
+
+/** Fix a typo in the question or choices — only until someone answers (the database enforces this too). */
+function EditPoll({ poll: p, onClose }: { poll: Poll; onClose: () => void }) {
+  const sb = useSupabase();
+  const qc = useQueryClient();
+  const [question, setQuestion] = useState(p.question);
+  const [options, setOptions] = useState<string[]>(Array.isArray(p.options) ? p.options : []);
+  const [closes, setCloses] = useState(p.closes_at ? toDateTimeInput(new Date(p.closes_at)) : '');
+  const save = async () => {
+    const clean = options.map((o) => o.trim()).filter(Boolean);
+    if (!question.trim()) return toast.error('Write the question');
+    if (p.kind === 'choice' && clean.length < 2) return toast.error('Keep at least two options');
+    const { error } = await sb
+      .from('poll_polls')
+      .update({ question: question.trim(), ...(p.kind === 'choice' ? { options: clean } : {}), closes_at: closes ? new Date(closes).toISOString() : null })
+      .eq('id', p.id);
+    if (error) return toast.error(friendlyError(error));
+    qc.invalidateQueries({ queryKey: ['polls'] });
+    toast.success('Poll updated');
+    onClose();
+  };
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()} title="Edit poll" description="You can change the question and choices until someone answers." footer={<Button variant="primary" onClick={save}>Save</Button>}>
+      <div className="space-y-3">
+        <Field label="Question">{(id) => <Input id={id} maxLength={300} value={question} onChange={(e) => setQuestion(e.target.value)} />}</Field>
+        {p.kind === 'choice' && (
+          <div className="space-y-2">
+            {options.map((o, i) => (
+              <div key={i} className="flex gap-2">
+                <Input value={o} maxLength={120} aria-label={`Option ${i + 1}`} onChange={(e) => setOptions(options.map((x, j) => (j === i ? e.target.value : x)))} />
+                {options.length > 2 && (
+                  <IconButton label="Remove option" onClick={() => setOptions(options.filter((_, j) => j !== i))}>
+                    <X className="size-4" />
+                  </IconButton>
+                )}
+              </div>
+            ))}
+            <Button size="sm" icon={<Plus className="size-4" />} onClick={() => setOptions([...options, ''])} disabled={options.length >= 12}>
+              Add option
+            </Button>
+          </div>
+        )}
+        <Field label="Closes" optional>{(id) => <Input id={id} type="datetime-local" value={closes} onChange={(e) => setCloses(e.target.value)} />}</Field>
       </div>
     </Dialog>
   );

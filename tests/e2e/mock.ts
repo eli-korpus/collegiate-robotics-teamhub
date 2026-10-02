@@ -64,7 +64,13 @@ export async function mockSupabase(page: Page, opts: { tables?: Record<string, u
     }
     if (path.startsWith('/rest/v1/')) {
       const table = path.split('/').pop()!;
-      const rows = tables[table] ?? [];
+      // Apply simple PostgREST filters (col=eq.x, col=is.null) so single-row reads like "my profile" work with several rows.
+      let rows = (tables[table] ?? []) as Record<string, unknown>[];
+      for (const [col, v] of url.searchParams) {
+        if (['select', 'order', 'limit', 'offset', 'or', 'and', 'on_conflict', 'columns'].includes(col)) continue;
+        if (v.startsWith('eq.')) rows = rows.filter((r) => String(r[col]) === v.slice(3));
+        else if (v === 'is.null') rows = rows.filter((r) => r[col] == null);
+      }
       if (req.method() === 'HEAD') return route.fulfill({ status: 200, headers: { 'content-range': `0-0/${rows.length}` }, body: '' });
       if (req.method() !== 'GET') return route.fulfill({ status: 201, json: [] });
       const single = (req.headers()['accept'] ?? '').includes('vnd.pgrst.object');

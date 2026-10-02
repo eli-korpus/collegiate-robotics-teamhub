@@ -47,6 +47,7 @@ import {
   useSignedUrls,
   useSupabase,
   useTeamScope,
+  InlineEditText,
 } from '@teamhub/sdk';
 import { matrixTotals, toMarkdown, useEntries, useImages, useNbSettings, useSubsystems, type Entry } from './data';
 import { EntryEditor } from './Editor';
@@ -213,7 +214,18 @@ function ManageSubsystemsButton({ open, setOpen }: { open: boolean; setOpen: (v:
         <ul className="mb-3 divide-y divide-border rounded-md border border-border">
           {(subsystems.data ?? []).map((s) => (
             <li key={s.id} className="flex items-center gap-2 px-3 py-1.5 text-[13px]">
-              <span className="flex-1">{s.name}</span>
+              <span className="flex-1">
+                <InlineEditText
+                  label={`${s.name} name`}
+                  value={s.name}
+                  onSave={async (v) => {
+                    if (!v.trim()) return;
+                    const { error } = await sb.from('nb_subsystems').update({ name: v.trim().slice(0, 60) }).eq('id', s.id);
+                    if (error) toast.error(friendlyError(error));
+                    qc.invalidateQueries({ queryKey: ['notebook'] });
+                  }}
+                />
+              </span>
               <TeamBadge teamId={s.team_id} />
               <IconButton
                 label={`Delete ${s.name}`}
@@ -411,6 +423,21 @@ function EntryDetail({ entry: e, onEdit, onDeleted }: { entry: Entry; onEdit: ()
                 >
                   <Trash2 className="size-3.5" />
                 </IconButton>
+              )}
+              {canEdit ? (
+                <figcaption className="mt-1 text-[12px]">
+                  <InlineEditText
+                    label="Photo caption"
+                    value={img.caption ?? ''}
+                    onSave={async (v) => {
+                      const { error } = await sb.from('nb_images').update({ caption: v.trim().slice(0, 200) || null }).eq('id', img.id);
+                      if (error) toast.error(friendlyError(error));
+                      qc.invalidateQueries({ queryKey: ['notebook'] });
+                    }}
+                  />
+                </figcaption>
+              ) : (
+                img.caption && <figcaption className="mt-1 text-[12px] text-muted">{img.caption}</figcaption>
               )}
             </figure>
           ))}

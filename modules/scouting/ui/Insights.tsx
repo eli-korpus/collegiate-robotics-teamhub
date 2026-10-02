@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Check, ExternalLink, Eye, Minus, Trash2, TrendingDown, TrendingUp, Trophy } from 'lucide-react';
-import { Badge, Banner, Card, CardHeader, DataTable, Dialog, EmptyState, IconButton, MiniBarChart, RelativeTime, Sparkline, StatTile, cn, useConfirm } from '@teamhub/ui';
-import { awardLabel, canWith, ftcscoutTeamUrl, ordinal, PersonName, useMe, useSupabase } from '@teamhub/sdk';
+import { Check, ExternalLink, Eye, Minus, Pencil, Trash2, TrendingDown, TrendingUp, Trophy } from 'lucide-react';
+import { Badge, Banner, Button, Card, CardHeader, DataTable, Dialog, EmptyState, FormRenderer, IconButton, Input, MiniBarChart, RelativeTime, Sparkline, StatTile, cn, toast, useConfirm, type FieldDef, type FormValues } from '@teamhub/ui';
+import { awardLabel, canWith, friendlyError, ftcscoutTeamUrl, ordinal, PersonName, useMe, useSupabase } from '@teamhub/sdk';
 import { coverage, highlights, matchHistory, mean, stdev, trend } from '../insights';
 import type { EventContext } from './event';
-import type { Template, useScoutingStats } from './stats';
+import type { Entry, Template, useScoutingStats } from './stats';
 
 const fmt = (v: unknown) => (v == null || v === '' ? '—' : typeof v === 'boolean' ? (v ? 'Yes' : 'No') : Array.isArray(v) ? v.join(', ') : String(v));
 
@@ -163,6 +163,7 @@ export function TeamProfile({ n, ctx, stats, templates, onClose }: { n: number; 
   const awards = ctx.awards.filter((a) => a.teamNumber === n);
   const textFields = [...templates.flatMap((x) => x.fields)].filter((f) => f.type === 'text');
   const upcoming = ctx.matches.filter((m) => !m.hasBeenPlayed && m.teams.some((x) => x.teamNumber === n)).sort((a, b) => a.id - b.id);
+  const [editing, setEditing] = useState<{ e: Entry; fields: FieldDef[] } | null>(null);
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()} title={`${n} ${t?.name ?? ''}`} description={[t?.city, t?.season?.tot && `Season OPR ${t.season.tot.value.toFixed(1)} · ${ordinal(t.season.tot.rank)} worldwide`].filter(Boolean).join(' · ')} size="xl">
       <div className="space-y-4">
@@ -248,10 +249,14 @@ export function TeamProfile({ n, ctx, stats, templates, onClose }: { n: number; 
                     <PersonName id={e.scout} /> · <RelativeTime date={e.created_at} />
                   </span>
                   {(e.scout === me.id || canWith(me, 'scouting.delete_entries')) && (
+                    <IconButton label="Edit entry" size="sm" className="ml-auto" onClick={() => setEditing({ e, fields: tf })}>
+                      <Pencil className="size-3.5" />
+                    </IconButton>
+                  )}
+                  {(e.scout === me.id || canWith(me, 'scouting.delete_entries')) && (
                     <IconButton
                       label="Delete entry"
                       size="sm"
-                      className="ml-auto"
                       onClick={async () => {
                         if (!(await confirm({ title: 'Delete this entry?', danger: true, confirmLabel: 'Delete' }))) return;
                         await sb.from('sct_entries').delete().eq('id', e.id);
@@ -277,6 +282,38 @@ export function TeamProfile({ n, ctx, stats, templates, onClose }: { n: number; 
         <a href={ftcscoutTeamUrl(n)} target="_blank" rel="noreferrer" className="text-[12.5px] text-accent hover:underline">
           Full history on FTCScout <ExternalLink className="inline size-3" aria-hidden />
         </a>
+      </div>
+      {editing && <EditEntry entry={editing.e} fields={editing.fields} onClose={() => setEditing(null)} />}
+    </Dialog>
+  );
+}
+
+/** Fix a submitted scouting answer (the scout who entered it, or people who can delete entries). */
+function EditEntry({ entry, fields, onClose }: { entry: Entry; fields: FieldDef[]; onClose: () => void }) {
+  const sb = useSupabase();
+  const qc = useQueryClient();
+  const [values, setValues] = useState<FormValues>(entry.data);
+  const [match, setMatch] = useState(entry.match_label ?? '');
+  const [busy, setBusy] = useState(false);
+  const save = async () => {
+    setBusy(true);
+    const { error } = await sb.from('sct_entries').update({ data: values, match_label: entry.kind === 'match' ? match.trim().toUpperCase() || null : null }).eq('id', entry.id);
+    setBusy(false);
+    if (error) return toast.error(friendlyError(error));
+    toast.success('Entry updated');
+    qc.invalidateQueries({ queryKey: ['scouting', 'entries'] });
+    onClose();
+  };
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()} title={`Edit ${entry.kind === 'pit' ? 'pit' : 'match'} entry for #${entry.team_number}`} size="lg" footer={<Button variant="primary" loading={busy} onClick={save}>Save changes</Button>}>
+      <div className="space-y-4">
+        {entry.kind === 'match' && (
+          <label className="block space-y-1">
+            <span className="text-[13px] font-medium">Match</span>
+            <Input className="w-32" value={match} maxLength={20} onChange={(e) => setMatch(e.target.value.toUpperCase())} />
+          </label>
+        )}
+        {fields.length ? <FormRenderer fields={fields} values={values} onChange={setValues} /> : <p className="text-[13px] text-muted">This entry's form was deleted, so its answers can't be edited.</p>}
       </div>
     </Dialog>
   );

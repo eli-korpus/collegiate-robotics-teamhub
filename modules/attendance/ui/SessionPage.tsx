@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ArrowLeft, CheckCheck, LogOut, QrCode, Square, Trash2 } from 'lucide-react';
-import { Avatar, Banner, Button, Checkbox, EmptyState, SearchInput, Spinner, StatusPill, VisibilityNote, cn, formatDate, formatTime, matches, toDateInput, toast, useConfirm } from '@teamhub/ui';
+import { ArrowLeft, CheckCheck, LogOut, Pencil, QrCode, Square, Trash2 } from 'lucide-react';
+import { Avatar, Banner, Button, Checkbox, Dialog, EmptyState, Field, Input, SearchInput, Spinner, StatusPill, VisibilityNote, cn, formatDate, formatTime, matches, toDateInput, toast, useConfirm } from '@teamhub/ui';
 import { canWith, friendlyError, TeamBadge, useActivePeople, useMe, useRealtime, useSupabase } from '@teamhub/sdk';
 import { roster, sessionTitle, useAttSettings, type Presence, type Session } from '../data';
 import { CheckInForm } from './CheckIn';
@@ -17,6 +17,7 @@ export function SessionPage() {
   const confirm = useConfirm();
   const settings = useAttSettings();
   const [q, setQ] = useState('');
+  const [editing, setEditing] = useState(false);
   const session = useQuery({
     queryKey: ['attendance', 'session', id],
     queryFn: async () => {
@@ -157,10 +158,16 @@ export function SessionPage() {
         {!all.length && <li className="px-4 py-8 text-center text-[13px] text-faint">No one on this roster yet.</li>}
       </ul>
       <VisibilityNote className="mt-3">Each person sees only their own attendance; captains and mentors see everyone's.</VisibilityNote>
+      <div className="mt-6 flex flex-wrap gap-2">
+      {(canWith(me, 'attendance.edit', s.team_id) || (canTake && s.date >= toDateInput(new Date(Date.now() - 864e5)))) && (
+        <Button variant="ghost" icon={<Pencil className="size-4" />} onClick={() => setEditing(true)}>
+          Edit details
+        </Button>
+      )}
       {canWith(me, 'attendance.edit', s.team_id) && (
         <Button
           variant="ghost"
-          className="mt-6 text-danger"
+          className="text-danger"
           icon={<Trash2 className="size-4" />}
           onClick={async () => {
             if (!(await confirm({ title: 'Delete this session?', body: 'Its attendance records are deleted too.', danger: true, confirmLabel: 'Delete' }))) return;
@@ -173,7 +180,37 @@ export function SessionPage() {
           Delete session
         </Button>
       )}
+      </div>
+      {editing && <EditSession session={s} onClose={() => (setEditing(false), refresh())} />}
     </div>
+  );
+}
+
+const timeOf = (iso: string | null) => (iso ? new Date(iso).toTimeString().slice(0, 5) : '');
+const at = (date: string, time: string) => (time ? new Date(`${date}T${time}`).toISOString() : null);
+
+/** Fix a session's name, date or times (e.g. it was started on the wrong day). */
+function EditSession({ session: s, onClose }: { session: Session; onClose: () => void }) {
+  const sb = useSupabase();
+  const [v, setV] = useState({ title: s.title ?? '', date: s.date, start: timeOf(s.starts_at), end: timeOf(s.ends_at) });
+  const save = async () => {
+    if (v.start && v.end && v.end <= v.start) return toast.error('The end time must be after the start time');
+    const { error } = await sb.from('att_sessions').update({ title: v.title.trim() || null, date: v.date, starts_at: at(v.date, v.start), ends_at: at(v.date, v.end) }).eq('id', s.id);
+    if (error) return toast.error(friendlyError(error));
+    toast.success('Session updated');
+    onClose();
+  };
+  return (
+    <Dialog open onOpenChange={(o) => !o && onClose()} title="Edit practice session" footer={<Button variant="primary" onClick={save}>Save</Button>}>
+      <div className="space-y-3">
+        <Field label="Name" optional>{(id) => <Input id={id} maxLength={120} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="Practice" />}</Field>
+        <Field label="Date">{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Start" optional>{(id) => <Input id={id} type="time" value={v.start} onChange={(e) => setV({ ...v, start: e.target.value })} />}</Field>
+          <Field label="End" optional>{(id) => <Input id={id} type="time" value={v.end} onChange={(e) => setV({ ...v, end: e.target.value })} />}</Field>
+        </div>
+      </div>
+    </Dialog>
   );
 }
 

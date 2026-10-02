@@ -84,6 +84,15 @@ function BatteryCard({ b, st, logs, onEdit }: { b: Battery; st: ReturnType<typeo
     qc.invalidateQueries({ queryKey: ['batteries'] });
   };
   const L = STATE_LABEL[st.state];
+  // Logs arrive newest first; the latest one can be undone by whoever logged it (or a manager).
+  const latest = logs[0];
+  const canUndo = !!latest && (latest.by === me.id || canWith(me, 'batteries.manage', b.team_id));
+  const undo = async () => {
+    const { error } = await sb.from('bat_logs').delete().eq('id', latest!.id);
+    if (error) return toast.error(friendlyError(error));
+    toast.success('Log entry removed');
+    qc.invalidateQueries({ queryKey: ['batteries'] });
+  };
   return (
     <Card className="p-4">
       <div className="flex items-start gap-3">
@@ -128,6 +137,14 @@ function BatteryCard({ b, st, logs, onEdit }: { b: Battery; st: ReturnType<typeo
             Note
           </Button>
         </div>
+      )}
+      {canUndo && (
+        <p className="mt-2 text-[12px] text-muted">
+          Last: {latest!.kind === 'charged' ? 'charged' : latest!.kind === 'tested' ? `tested${latest!.voltage != null ? ` at ${latest!.voltage.toFixed(2)} V` : ''}` : latest!.kind === 'used' ? 'used' : 'note'} <RelativeTime date={latest!.at} />{' '}
+          <button type="button" className="font-medium text-accent hover:underline" onClick={undo}>
+            Undo
+          </button>
+        </p>
       )}
       {logs.find((l) => l.kind === 'note') && <p className="mt-2 truncate text-[12px] text-muted"><StickyNote className="mr-1 inline size-3.5" aria-hidden />{logs.find((l) => l.kind === 'note')!.note}</p>}
       <Dialog

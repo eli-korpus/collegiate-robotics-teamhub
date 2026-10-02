@@ -32,3 +32,18 @@ describe('polls visibility', () => {
     expect(await db.denied(a, `insert into poll_votes (poll_id, user_id, value) values ($1, $2, '[0]')`, [id, a])).toBe(true);
   });
 });
+
+describe('editing polls', () => {
+  it('the question can be fixed until someone answers', async () => {
+    const { createTestDb, TEAM_A, withModules } = await import('../../tests/db/harness');
+    const db = await createTestDb();
+    await db.applyConfig(withModules(['polls']), true);
+    const cap = await db.user('Cap', { [TEAM_A]: 'captain' });
+    const a = await db.user('A', { [TEAM_A]: 'member' });
+    const [{ id }] = await db.as(cap, `insert into poll_polls (kind, question, options, visibility, created_by) values ('choice', 'Pizza or tacoz?', '["Pizza","Tacoz"]', 'public', $1) returning id`, [cap]);
+    await db.as(cap, `update poll_polls set question = 'Pizza or tacos?', options = '["Pizza","Tacos"]' where id = $1`, [id]);
+    await db.as(a, `insert into poll_votes (poll_id, user_id, value) values ($1, $2, '[1]')`, [id, a]);
+    await expect(db.as(cap, `update poll_polls set options = '["Pizza","Burgers"]' where id = $1`, [id])).rejects.toThrow(/already answered/);
+    await db.as(cap, `update poll_polls set closes_at = now() + interval '1 day' where id = $1`, [id]);
+  });
+});

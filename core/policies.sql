@@ -47,7 +47,8 @@ create policy core_private_read on profiles_private for select to authenticated 
   or exists (select 1 from memberships m where m.user_id = profiles_private.user_id and teamhub_can('people.view_private', m.team_id))
 );
 create policy core_private_insert on profiles_private for insert to authenticated
-  with check (user_id = (select auth.uid()));
+  with check (user_id = (select auth.uid()) or exists (
+    select 1 from memberships m where m.user_id = profiles_private.user_id and teamhub_can('people.view_private', m.team_id)));
 create policy core_private_update on profiles_private for update to authenticated
   using (user_id = (select auth.uid()) or exists (
     select 1 from memberships m where m.user_id = profiles_private.user_id and teamhub_can('people.view_private', m.team_id)))

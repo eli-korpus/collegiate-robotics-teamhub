@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { BadgeCheck, Lock, Plus, Trash2, X } from 'lucide-react';
+import { BadgeCheck, Lock, Pencil, Plus, Trash2, X } from 'lucide-react';
 import { Avatar, Banner, Button, Card, Dialog, EmptyState, IconButton, Input, Tooltip, toast, useConfirm } from '@teamhub/ui';
 import { canWith, friendlyError, isMultiTeam, runtime, useMe, usePeople, usePositions, useSupabase, PersonPicker, TeamBadge, TeamScopePicker } from '@teamhub/sdk';
 
@@ -17,6 +17,7 @@ export function Positions() {
   const [newName, setNewName] = useState('');
   const [newTeam, setNewTeam] = useState<string | null>(null);
   const [pick, setPick] = useState<string[]>([]);
+  const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
   const canCreate = canWith(me, 'people.assign_positions');
   const holders = (id: string) => [...(people.data?.values() ?? [])].filter((p) => p.positionIds.includes(id) && p.status === 'active');
   const refresh = () => qc.invalidateQueries({ queryKey: ['core'] });
@@ -65,6 +66,11 @@ export function Positions() {
                       )}
                     </p>
                   </div>
+                  {pos.source === 'app' && canWith(me, 'people.assign_positions', pos.team_id) && (
+                    <IconButton label="Rename position" size="sm" onClick={() => setRenaming({ id: pos.id, name: pos.name })}>
+                      <Pencil className="size-4" />
+                    </IconButton>
+                  )}
                   {pos.source === 'app' && canWith(me, 'people.assign_positions', pos.team_id) && (
                     <IconButton
                       label="Delete position"
@@ -175,6 +181,30 @@ export function Positions() {
           <TeamScopePicker value={newTeam} onChange={setNewTeam} perm="people.assign_positions" label="Applies to" />
         </div>
       </Dialog>
+      {renaming && (
+        <Dialog
+          open
+          onOpenChange={(o) => !o && setRenaming(null)}
+          title="Rename position"
+          description="Everyone who holds it keeps it."
+          footer={
+            <Button
+              variant="primary"
+              onClick={async () => {
+                if (!renaming.name.trim()) return toast.error('Enter a name');
+                const { error } = await sb.from('positions').update({ name: renaming.name.trim().slice(0, 60) }).eq('id', renaming.id);
+                if (error) return toast.error(friendlyError(error));
+                setRenaming(null);
+                refresh();
+              }}
+            >
+              Save
+            </Button>
+          }
+        >
+          <Input autoFocus aria-label="Position name" maxLength={60} value={renaming.name} onChange={(e) => setRenaming({ ...renaming, name: e.target.value })} />
+        </Dialog>
+      )}
     </div>
   );
 }

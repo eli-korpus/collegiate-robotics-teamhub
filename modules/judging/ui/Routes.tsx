@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { Award, Link2, Pause, Play, Plus, Shuffle, Trash2, X } from 'lucide-react';
+import { Award, Link2, Pause, Pencil, Play, Plus, Shuffle, Trash2, X } from 'lucide-react';
 import { Badge, Button, Card, CardHeader, Dialog, EmptyState, Field, IconButton, Input, Markdown, ProgressRing, Segmented, Spinner, Textarea, toast } from '@teamhub/ui';
 import { EntityLink, friendlyError, ModuleHeader, ModulePurpose, Person, PersonPicker, Slot, useCan, useRows, useSeason, useSupabase, useTeamScope } from '@teamhub/sdk';
 
@@ -59,6 +59,7 @@ function Practice() {
   const [running, setRunning] = useState(false);
   const [adding, setAdding] = useState(false);
   const [v, setV] = useState({ question: '', notes: '', owner: [] as string[] });
+  const [editId, setEditId] = useState<string | null>(null);
   useEffect(() => {
     if (!running) return;
     const t = setInterval(() => setSecs((s) => s + 1), 1000);
@@ -111,7 +112,7 @@ function Practice() {
       <div className="flex items-center justify-between">
         <h2 className="text-[12px] font-semibold uppercase tracking-wider text-faint">Question bank ({list.length})</h2>
         {canManage && (
-          <Button size="sm" icon={<Plus className="size-4" />} onClick={() => setAdding(true)}>
+          <Button size="sm" icon={<Plus className="size-4" />} onClick={() => (setEditId(null), setV({ question: '', notes: '', owner: [] }), setAdding(true))}>
             Add question
           </Button>
         )}
@@ -124,6 +125,19 @@ function Practice() {
             <li key={q.id} className="flex items-start gap-3 px-4 py-2.5 text-[13.5px]">
               <span className="flex-1">{q.question}</span>
               {q.owner && <Person id={q.owner} size="sm" />}
+              {canManage && (
+                <IconButton
+                  label="Edit question"
+                  size="sm"
+                  onClick={() => {
+                    setEditId(q.id);
+                    setV({ question: q.question, notes: q.notes ?? '', owner: q.owner ? [q.owner] : [] });
+                    setAdding(true);
+                  }}
+                >
+                  <Pencil className="size-4" />
+                </IconButton>
+              )}
               {canManage && (
                 <IconButton
                   label="Delete question"
@@ -144,20 +158,22 @@ function Practice() {
       <Dialog
         open={adding}
         onOpenChange={setAdding}
-        title="Add an interview question"
+        title={editId ? 'Edit interview question' : 'Add an interview question'}
         footer={
           <Button
             variant="primary"
             onClick={async () => {
               if (!v.question.trim()) return;
-              const { error } = await sb.from('jdg_questions').insert({ question: v.question.trim(), notes: v.notes || null, owner: v.owner[0] ?? null, team_id: scope });
+              const body = { question: v.question.trim(), notes: v.notes || null, owner: v.owner[0] ?? null };
+              const { error } = editId ? await sb.from('jdg_questions').update(body).eq('id', editId) : await sb.from('jdg_questions').insert({ ...body, team_id: scope });
               if (error) return toast.error(friendlyError(error));
               setV({ question: '', notes: '', owner: [] });
               setAdding(false);
+              setEditId(null);
               qc.invalidateQueries({ queryKey: ['judging'] });
             }}
           >
-            Add
+            {editId ? 'Save' : 'Add'}
           </Button>
         }
       >

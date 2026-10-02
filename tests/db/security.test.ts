@@ -81,3 +81,44 @@ describe('security review', () => {
     expect((await db.admin('select qty from inv_items where id = $1', [partA]))[0].qty).toBe(8);
   });
 });
+
+describe('changing which teams someone is on', () => {
+  it('admins and approvers add, move and remove people between teams, within their rank', async () => {
+    const db = await createTestDb();
+    await db.applyConfig(withModules([]), true);
+    const admin = await db.user('Admin', { [TEAM_A]: 'mentor' }, { admin: true });
+    const mentorB = await db.user('MentorB', { [TEAM_B]: 'mentor' });
+    const captainA = await db.user('CaptainA', { [TEAM_A]: 'captain' });
+    const student = await db.user('Student', { [TEAM_A]: 'member' });
+    const otherMentor = await db.user('OtherMentor', { [TEAM_A]: 'mentor' });
+
+    // Move a student from A to B: add to B, then remove from A.
+    await db.as(admin, `select people_add_to_team($1, $2, 'member')`, [student, TEAM_B]);
+    await db.as(admin, 'select people_remove_from_team($1, $2)', [student, TEAM_A]);
+    expect((await db.admin('select team_id from memberships where user_id = $1', [student])).map((r) => r.team_id)).toEqual([TEAM_B]);
+    // Can't remove their last team (deactivate instead).
+    await expect(db.as(admin, 'select people_remove_from_team($1, $2)', [student, TEAM_B])).rejects.toThrow(/only team/);
+    // A team's mentor can add members to their team; a captain can't add a captain, and nobody but admins manages mentors.
+    await db.as(mentorB, `select people_add_to_team($1, $2, 'member')`, [captainA, TEAM_B]);
+    await expect(db.as(captainA, `select people_add_to_team($1, $2, 'captain')`, [student, TEAM_A])).rejects.toThrow();
+    await expect(db.as(mentorB, `select people_add_to_team($1, $2, 'member')`, [otherMentor, TEAM_B])).rejects.toThrow();
+    await expect(db.as(mentorB, 'select people_remove_from_team($1, $2)', [captainA, TEAM_A])).rejects.toThrow();
+    // Members can't add themselves to teams.
+    await expect(db.as(student, `select people_add_to_team($1, $2, 'member')`, [student, TEAM_A])).rejects.toThrow();
+  });
+});
+
+describe('editing other people’s profiles', () => {
+  it('mentors fix names and fill private fields for their team; members cannot', async () => {
+    const db = await createTestDb();
+    await db.applyConfig(withModules([]), true);
+    const mentor = await db.user('Mentor', { [TEAM_A]: 'mentor' });
+    const student = await db.user('Studnet', { [TEAM_A]: 'member' });
+    const other = await db.user('Other', { [TEAM_B]: 'member' });
+    await db.as(mentor, `update profiles set display_name = 'Student' where id = $1`, [student]);
+    expect((await db.admin('select display_name from profiles where id = $1', [student]))[0].display_name).toBe('Student');
+    await db.as(mentor, `insert into profiles_private (user_id, data) values ($1, '{"emergency_contact":"555-0100"}')`, [student]);
+    expect(await db.denied(other, `update profiles set display_name = 'Hacked' where id = $1 returning id`, [student])).toBe(true);
+    expect(await db.denied(other, `insert into profiles_private (user_id, data) values ($1, '{}')`, [mentor])).toBe(true);
+  });
+});

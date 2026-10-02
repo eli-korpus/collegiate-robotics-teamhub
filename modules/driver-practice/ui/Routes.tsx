@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Gamepad2, Plus, Settings2, Trash2 } from 'lucide-react';
+import { Gamepad2, Pencil, Plus, Settings2, Trash2 } from 'lucide-react';
 import {
   Button,
   CHART_COLORS,
@@ -86,6 +86,7 @@ export default function DriverPracticeRoutes() {
   const canLog = useCan('driver-practice.log');
   const canFields = useCan('driver-practice.manage_fields');
   const [logging, setLogging] = useNewParam();
+  const [editingRun, setEditingRun] = useState<DrvRun | null>(null);
   const [editFields, setEditFields] = useState(false);
   const [kind, setKind] = useState('full');
   useCreateShortcut(() => setLogging(true), canLog);
@@ -179,6 +180,11 @@ export default function DriverPracticeRoutes() {
                     <span className="tabular font-semibold">{r.score ?? '—'}</span>
                     <Slot name="driver-practice.run.actions" props={{ run: r }} />
                     {(r.created_by === me.id || canWith(me, 'driver-practice.manage_fields', r.team_id)) && (
+                      <IconButton label="Edit run" size="sm" onClick={() => setEditingRun(r)}>
+                        <Pencil className="size-3.5" />
+                      </IconButton>
+                    )}
+                    {(r.created_by === me.id || canWith(me, 'driver-practice.manage_fields', r.team_id)) && (
                       <IconButton
                         label="Delete run"
                         size="sm"
@@ -199,29 +205,35 @@ export default function DriverPracticeRoutes() {
         )}
       </div>
       {logging && <LogDialog fields={fields.data ?? []} onClose={() => setLogging(false)} />}
+      {editingRun && <LogDialog run={editingRun} fields={fields.data ?? []} onClose={() => setEditingRun(null)} />}
       {editFields && <FieldsDialog fields={fields.data ?? []} onClose={() => setEditFields(false)} />}
     </div>
   );
 }
 
-function LogDialog({ fields, onClose }: { fields: FieldDef[]; onClose: () => void }) {
+/** Log a new run, or fix one (pass `run`). */
+function LogDialog({ fields, onClose, run }: { fields: FieldDef[]; onClose: () => void; run?: DrvRun }) {
   const sb = useSupabase();
   const me = useMe();
   const qc = useQueryClient();
   const scope = useTeamScope();
-  const [v, setV] = useState({ date: toDateInput(new Date()), driver: [me.id], operator: [] as string[], kind: 'full', score: '', auto_score: '', notes: '', team_id: scope });
-  const [metrics, setMetrics] = useState<FormValues>(emptyValues(fields));
+  const [v, setV] = useState(
+    run
+      ? { date: run.date, driver: run.driver ? [run.driver] : [], operator: run.operator ? [run.operator] : [], kind: run.kind, score: run.score == null ? '' : String(run.score), auto_score: run.auto_score == null ? '' : String(run.auto_score), notes: run.notes ?? '', team_id: run.team_id }
+      : { date: toDateInput(new Date()), driver: [me.id], operator: [] as string[], kind: 'full', score: '', auto_score: '', notes: '', team_id: scope },
+  );
+  const [metrics, setMetrics] = useState<FormValues>(run ? { ...emptyValues(fields), ...run.metrics } : emptyValues(fields));
   return (
     <Dialog
       open
       onOpenChange={(x) => !x && onClose()}
-      title="Log a practice run"
+      title={run ? 'Edit practice run' : 'Log a practice run'}
       size="lg"
       footer={
         <Button
           variant="primary"
           onClick={async () => {
-            const { error } = await sb.from('drv_runs').insert({
+            const body = {
               date: v.date,
               driver: v.driver[0] ?? null,
               operator: v.operator[0] ?? null,
@@ -231,14 +243,14 @@ function LogDialog({ fields, onClose }: { fields: FieldDef[]; onClose: () => voi
               notes: v.notes || null,
               metrics,
               team_id: v.team_id,
-              created_by: me.id,
-            });
+            };
+            const { error } = run ? await sb.from('drv_runs').update(body).eq('id', run.id) : await sb.from('drv_runs').insert({ ...body, created_by: me.id });
             if (error) return toast.error(friendlyError(error));
             qc.invalidateQueries({ queryKey: ['driver-practice'] });
             onClose();
           }}
         >
-          Save run
+          {run ? 'Save changes' : 'Save run'}
         </Button>
       }
     >

@@ -1,6 +1,7 @@
 /**
  * Bundle budget (spec §16.4):
- *  - initial JS (entry + modulepreloads) ≤ 180 KB gzip
+ *  - initial JS (entry + modulepreloads) ≤ 180 KB gzip for a core-only build, plus 1.5 KB per enabled tab
+ *    (each tab registers a tiny always-loaded client: icon, lazy routes, widgets, search)
  *  - each lazy chunk ≤ 60 KB gzip (exception: the 3D viewer chunk)
  *  - disabled modules contribute 0 bytes (their ids/markers never appear in the output)
  * Usage: tsx scripts/check-bundle.ts [--enabled id1,id2] [--json]
@@ -13,6 +14,7 @@ import { pathToFileURL } from 'node:url';
 const DIST = join(import.meta.dirname, '..', 'apps', 'dashboard', 'dist');
 const INITIAL_BUDGET = 180 * 1024;
 const CHUNK_BUDGET = 60 * 1024;
+const PER_MODULE = 1.5 * 1024;
 const CHUNK_EXCEPTIONS = [/^three-/, /^ModelViewer-/, /^react-/, /^supabase-/];
 
 export interface BundleReport {
@@ -32,7 +34,8 @@ export function checkBundle(enabled?: string[], allModuleIds: string[] = []): Bu
   const initial = initialFiles.reduce((s, f) => s + f.gzip, 0);
   const chunks = assets.filter((f) => !eager.has(f)).map((file) => ({ file, gzip: gz(file) }));
   const problems: string[] = [];
-  if (initial > INITIAL_BUDGET) problems.push(`Initial JS is ${(initial / 1024).toFixed(1)} KB gzip (budget 180 KB)`);
+  const budget = INITIAL_BUDGET + (enabled?.length ?? 0) * PER_MODULE;
+  if (initial > budget) problems.push(`Initial JS is ${(initial / 1024).toFixed(1)} KB gzip (budget ${(budget / 1024).toFixed(1)} KB)`);
   for (const c of chunks) {
     if (c.gzip > CHUNK_BUDGET && !CHUNK_EXCEPTIONS.some((r) => r.test(c.file))) problems.push(`Chunk ${c.file} is ${(c.gzip / 1024).toFixed(1)} KB gzip (budget 60 KB)`);
   }

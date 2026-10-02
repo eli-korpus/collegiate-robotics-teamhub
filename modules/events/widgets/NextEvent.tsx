@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { Trophy } from 'lucide-react';
-import { seasonYear } from '@teamhub/config-schema';
+import { seasonYear } from '@teamhub/config-schema/util';
 import { Card, CardHeader, daysBetween, formatDate, parseDate } from '@teamhub/ui';
 import { runtime, useFtcTeamEvents, useSeason } from '@teamhub/sdk';
 

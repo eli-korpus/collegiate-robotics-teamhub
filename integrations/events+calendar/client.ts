@@ -1,7 +1,7 @@
 import { createElement } from 'react';
 import { Trophy } from 'lucide-react';
-import { seasonYear } from '@teamhub/config-schema';
-import { getTeamEvents, runtime, type CalendarOverlayItem, type IntegrationClient } from '@teamhub/sdk';
+import { seasonYear } from '@teamhub/config-schema/util';
+import { runtime, type CalendarOverlayItem, type IntegrationClient } from '@teamhub/sdk';
 import { parseDate } from '@teamhub/ui';
 
 const client: IntegrationClient = {
@@ -10,6 +10,8 @@ const client: IntegrationClient = {
     async (sb, { from, to }) => {
       const { data } = await sb.from('teamhub_settings').select('season_label').eq('id', 1).maybeSingle();
       const season = seasonYear(data?.season_label ?? runtime().config.season);
+      // Loaded on demand so FTCScout code stays out of the first page load.
+      const { getTeamEvents } = await import('@teamhub/sdk/ftcscout');
       const out: CalendarOverlayItem[] = [];
       for (const t of runtime().config.teams.filter((x) => x.number)) {
         for (const e of await getTeamEvents(t.number!, season)) {

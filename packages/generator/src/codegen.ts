@@ -63,8 +63,9 @@ export function generateDashboardFiles(r: Resolved, outDir = 'apps/dashboard/src
   // Manifests are inlined as plain data so zod (used by settings schemas) never reaches the browser bundle.
   const mImports = active.map((m, i) => `import c${i} from '${rel(join(m.catalog.dir, 'client.tsx'))}';`).join('\n');
   const meta = (m: (typeof active)[number]) => {
-    const { settings: _s, dynamicPermissions: _d, seasonRollover: _r, refVisibility: _v, ...rest } = m.catalog.manifest;
-    return { ...rest, permissions: m.permissions };
+    const x = m.catalog.manifest;
+    // Only what the dashboard uses at runtime (keeps the first page load small).
+    return { id: x.id, prefix: x.prefix, name: x.name, category: x.category, icon: x.icon, summary: x.summary, purpose: x.purpose, notFor: x.notFor, toolLinkSlots: x.toolLinkSlots };
   };
   files.push({
     path: `${outDir}/modules.ts`,

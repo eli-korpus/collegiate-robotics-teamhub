@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Route, Routes, useNavigate, useParams } from 'react-router';
 import { useQueries, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Award, CalendarDays, ExternalLink, MapPin, Trophy } from 'lucide-react';
-import { seasonYear } from '@teamhub/config-schema';
+import { seasonYear } from '@teamhub/config-schema/util';
 import {
   Badge,
   Banner,

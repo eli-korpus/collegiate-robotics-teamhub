@@ -1,44 +1,208 @@
 {
-  "program": { "name": "Example Robotics", "multiTeam": true },
+  "program": {
+    "name": "Example Robotics",
+    "multiTeam": true
+  },
   "teams": [
-    { "id": "11111111-1111-4111-8111-111111111111", "number": 23209, "name": "Example A", "shortCode": "A", "color": "#2563EB" },
-    { "id": "22222222-2222-4222-8222-222222222222", "number": 23210, "name": "Example B", "shortCode": "B", "color": "#16A34A" }
+    {
+      "id": "11111111-1111-4111-8111-111111111111",
+      "number": 23209,
+      "name": "Example A",
+      "shortCode": "A",
+      "color": "#2563EB"
+    },
+    {
+      "id": "22222222-2222-4222-8222-222222222222",
+      "number": 23210,
+      "name": "Example B",
+      "shortCode": "B",
+      "color": "#16A34A"
+    }
   ],
-  "theme": { "accent": "#2563EB", "corners": "soft", "defaultMode": "system" },
+  "theme": {
+    "accent": "#2563EB",
+    "corners": "soft",
+    "defaultMode": "system"
+  },
   "season": "2026–27",
   "modules": {
-    "calendar": { "state": "active", "settings": {} },
-    "attendance": { "state": "active", "settings": { "trackHours": true } }
+    "calendar": {
+      "state": "active",
+      "settings": {}
+    },
+    "attendance": {
+      "state": "active",
+      "settings": {
+        "trackHours": true
+      }
+    },
+    "bulletin": {
+      "state": "active",
+      "settings": {}
+    },
+    "announcements": {
+      "state": "active",
+      "settings": {}
+    },
+    "tasks": {
+      "state": "active",
+      "settings": {}
+    },
+    "notebook": {
+      "state": "active",
+      "settings": {}
+    },
+    "events": {
+      "state": "active",
+      "settings": {}
+    },
+    "manufacture": {
+      "state": "active",
+      "settings": {}
+    },
+    "purchases": {
+      "state": "active",
+      "settings": {}
+    }
   },
   "subteams": [
-    { "id": "build", "name": "Build" },
-    { "id": "programming", "name": "Programming" },
-    { "id": "cad", "name": "CAD" },
-    { "id": "outreach", "name": "Outreach" }
+    {
+      "id": "build",
+      "name": "Build"
+    },
+    {
+      "id": "programming",
+      "name": "Programming"
+    },
+    {
+      "id": "cad",
+      "name": "CAD"
+    },
+    {
+      "id": "outreach",
+      "name": "Outreach"
+    }
   ],
   "positions": [
-    { "id": "pos_lead_programmer", "name": "Lead Programmer", "grantsPermissions": true },
-    { "id": "pos_3d_print_farm_manager", "name": "3D Print Farm Manager", "grantsPermissions": true },
-    { "id": "pos_outreach_lead", "name": "Outreach Lead", "grantsPermissions": true },
-    { "id": "pos_scouting_lead", "name": "Scouting Lead", "grantsPermissions": true },
-    { "id": "pos_inventory_manager", "name": "Inventory Manager", "grantsPermissions": true },
-    { "id": "pos_media_lead", "name": "Media Lead", "grantsPermissions": true },
-    { "id": "pos_safety_captain", "name": "Safety Captain", "grantsPermissions": true }
+    {
+      "id": "pos_lead_programmer",
+      "name": "Lead Programmer",
+      "grantsPermissions": true
+    },
+    {
+      "id": "pos_3d_print_farm_manager",
+      "name": "3D Print Farm Manager",
+      "grantsPermissions": true
+    },
+    {
+      "id": "pos_outreach_lead",
+      "name": "Outreach Lead",
+      "grantsPermissions": true
+    },
+    {
+      "id": "pos_scouting_lead",
+      "name": "Scouting Lead",
+      "grantsPermissions": true
+    },
+    {
+      "id": "pos_inventory_manager",
+      "name": "Inventory Manager",
+      "grantsPermissions": true
+    },
+    {
+      "id": "pos_media_lead",
+      "name": "Media Lead",
+      "grantsPermissions": true
+    },
+    {
+      "id": "pos_safety_captain",
+      "name": "Safety Captain",
+      "grantsPermissions": true
+    }
   ],
   "profileFields": [
-    { "id": "grade", "label": "Grade", "type": "select", "options": ["9", "10", "11", "12"] },
-    { "id": "subteam", "label": "Subteam", "type": "select", "options": ["Build", "Programming", "CAD", "Outreach"] },
-    { "id": "shirt_size", "label": "Shirt size", "type": "select", "options": ["XS", "S", "M", "L", "XL", "XXL"] },
-    { "id": "emergency_contact", "label": "Emergency contact", "type": "text", "private": true }
+    {
+      "id": "grade",
+      "label": "Grade",
+      "type": "select",
+      "options": [
+        "9",
+        "10",
+        "11",
+        "12"
+      ]
+    },
+    {
+      "id": "subteam",
+      "label": "Subteam",
+      "type": "select",
+      "options": [
+        "Build",
+        "Programming",
+        "CAD",
+        "Outreach"
+      ]
+    },
+    {
+      "id": "shirt_size",
+      "label": "Shirt size",
+      "type": "select",
+      "options": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ]
+    },
+    {
+      "id": "emergency_contact",
+      "label": "Emergency contact",
+      "type": "text",
+      "private": true
+    }
   ],
   "toolLinks": [
-    { "slot": "team_chat", "label": "Discord", "url": "https://discord.com" },
-    { "slot": "portfolio", "label": "Portfolio", "url": "https://docs.google.com" },
-    { "slot": "code_repo", "label": "GitHub", "url": "https://github.com" },
-    { "slot": "cad", "label": "Onshape", "url": "https://cad.onshape.com" },
-    { "slot": "drive", "label": "Team Drive", "url": "https://drive.google.com" },
-    { "slot": "gm0", "label": "Game Manual 0", "url": "https://gm0.org" },
-    { "slot": "ftc_docs", "label": "FTC Docs", "url": "https://ftc-docs.firstinspires.org" }
+    {
+      "slot": "team_chat",
+      "label": "Discord",
+      "url": "https://discord.com"
+    },
+    {
+      "slot": "portfolio",
+      "label": "Portfolio",
+      "url": "https://docs.google.com"
+    },
+    {
+      "slot": "code_repo",
+      "label": "GitHub",
+      "url": "https://github.com"
+    },
+    {
+      "slot": "cad",
+      "label": "Onshape",
+      "url": "https://cad.onshape.com"
+    },
+    {
+      "slot": "drive",
+      "label": "Team Drive",
+      "url": "https://drive.google.com"
+    },
+    {
+      "slot": "gm0",
+      "label": "Game Manual 0",
+      "url": "https://gm0.org"
+    },
+    {
+      "slot": "ftc_docs",
+      "label": "FTC Docs",
+      "url": "https://ftc-docs.firstinspires.org"
+    }
   ],
-  "supabase": { "url": "https://example.supabase.co", "anonKey": "public-anon-key", "projectRef": "example" }
+  "supabase": {
+    "url": "https://example.supabase.co",
+    "anonKey": "public-anon-key",
+    "projectRef": "example"
+  }
 }

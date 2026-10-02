@@ -91,7 +91,7 @@ export default function AnnouncementsRoutes() {
     markSeen();
     // mark as seen when leaving too, so posts read now don't count as unread next time
     return markSeen;
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+     
   }, []);
   useCreateShortcut(() => setComposing(true), canPost);
 

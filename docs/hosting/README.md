@@ -17,7 +17,7 @@ Every host uses the same build:
 | Build command | `npm run build` |
 | Output directory | `apps/dashboard/dist` |
 | Node version | 20.19 or newer (22 or 24 recommended) |
-| Environment variables | none — the public Supabase URL and publishable key are in `team/teamhub.config.json` |
+| Environment variables | none: the public Supabase URL and publishable key are in `team/teamhub.config.json` |
 
 ![The wizard's Host it step](../screenshots/wizard-host.png)
 
@@ -49,4 +49,4 @@ All four hosts support a custom domain (e.g. `hub.exampleRobotics.org`) from the
 ## Manual fallback
 
 Run `npm run build` on your computer and upload `apps/dashboard/dist` by drag-and-drop to Cloudflare or Netlify. This
-works, but you'll have to repeat it after every change — prefer a Git-connected deploy.
+works, but you'll have to repeat it after every change. Prefer a Git-connected deploy.

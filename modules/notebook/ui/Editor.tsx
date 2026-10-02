@@ -108,8 +108,8 @@ export function EntryEditor({ entry, draft, onClose, imageCount = 0 }: { entry?:
           value={kind}
           onChange={setKind}
           options={[
-            { value: 'log', label: 'Log entry — what we did & learned' },
-            { value: 'iteration', label: 'Design iteration — a new version' },
+            { value: 'log', label: 'Log entry: what we did & learned' },
+            { value: 'iteration', label: 'Design iteration: a new version' },
           ]}
         />
         <div className="grid gap-3 sm:grid-cols-[1fr_160px]">
@@ -121,7 +121,7 @@ export function EntryEditor({ entry, draft, onClose, imageCount = 0 }: { entry?:
           <Field label="Subsystem" optional>
             {(id) => (
               <Select id={id} value={v.subsystem_id} onChange={(e) => setV({ ...v, subsystem_id: e.target.value })}>
-                <option value="">—</option>
+                <option value="">None</option>
                 {(subsystems.data ?? []).map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name}

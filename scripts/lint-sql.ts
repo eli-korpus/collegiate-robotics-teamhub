@@ -57,12 +57,12 @@ export function lintSql(catalog: Catalog): SqlProblem[] {
     for (const [prefix, owner] of prefixes) {
       if (allowed.has(prefix)) continue;
       const hit = new RegExp(`(?<![\\w.])${prefix}[a-z]\\w*`, 'i').exec(words);
-      if (hit) problems.push({ where, message: `references "${hit[0]}" from module "${owner}" — use an integration unit instead` });
+      if (hit) problems.push({ where, message: `references "${hit[0]}" from module "${owner}". Use an integration unit instead` });
     }
     for (const f of functionBodies(clean)) {
       if (/\bsecurity\s+definer\b/i.test(f.header)) {
         if (!/\bset\s+search_path\b/i.test(f.header)) problems.push({ where, message: `security definer function ${f.name} must "set search_path = public"` });
-        if (/\bcurrent_user\b/i.test(f.body)) problems.push({ where, message: `security definer function ${f.name} tests current_user, which is always the owner inside it — drop "security definer"` });
+        if (/\bcurrent_user\b/i.test(f.body)) problems.push({ where, message: `security definer function ${f.name} tests current_user, which is always the owner inside it: drop "security definer"` });
       }
     }
     for (const m of sql.matchAll(SETTING)) {

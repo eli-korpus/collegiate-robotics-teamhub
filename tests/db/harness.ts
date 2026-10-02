@@ -1,6 +1,6 @@
 /**
  * In-process Postgres (PGlite) with just enough of Supabase stubbed (auth, storage, roles, default grants)
- * to apply generated migration plans and test RLS. Not identical to Supabase — see docs/testing.md.
+ * to apply generated migration plans and test RLS. Not identical to Supabase. See docs/testing.md.
  */
 import { PGlite } from '@electric-sql/pglite';
 import { parseConfig, type TeamhubConfig, type TeamhubConfigInput } from '@teamhub/config-schema';

@@ -51,7 +51,7 @@ export function Positions() {
                     <p className="flex items-center gap-1.5 font-semibold">
                       {pos.name}
                       {pos.source === 'config' && (
-                        <Tooltip content="Defined in setup — edit via the wizard">
+                        <Tooltip content="Defined in setup (edit it with the wizard)">
                           <Lock className="size-3.5 text-faint" aria-label="Defined in setup" />
                         </Tooltip>
                       )}

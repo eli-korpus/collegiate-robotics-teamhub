@@ -73,7 +73,7 @@ export function compileFunctions(r: Resolved): string {
     if (inner) refCases.push(`      when ${lit(m.id)} then case split_part(p_ref, ':', 2)\n${inner}\n        else false end`);
   }
 
-  return `-- Compiled from teamhub.config.json — do not edit by hand.
+  return `-- Compiled from teamhub.config.json. Do not edit by hand.
 create or replace function teamhub_can(perm text, p_team uuid default null) returns boolean
 language sql stable security definer set search_path = public as $$
   select teamhub_is_admin() or coalesce(case perm

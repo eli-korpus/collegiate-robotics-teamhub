@@ -105,7 +105,7 @@ export function People({ onNext, onBack }: StepProps) {
         <p className="text-[12.5px] text-muted">Mentors can also create badge-only positions later in the dashboard. Proven abilities (“Certified driver”) belong in Skills & Training.</p>
       </Section>
 
-      <Section title="Profile fields" description="Optional extra info on each profile. Mentors can ask for missing values with People > Request info — the safe way to collect personal info.">
+      <Section title="Profile fields" description="Optional extra info on each profile. Mentors can ask for missing values with People > Request info: the safe way to collect personal info.">
         <div className="space-y-2">
           {SUGGESTED_FIELDS.map((f) => {
             const on = c.profileFields.some((x) => x.id === f.id);
@@ -130,7 +130,7 @@ export function People({ onNext, onBack }: StepProps) {
             );
           })}
         </div>
-        <p className="text-[12.5px] text-muted">TeamHub never asks for birthdays, addresses or phone numbers by default — keep personal data to what you really need (FIRST Youth Protection).</p>
+        <p className="text-[12.5px] text-muted">TeamHub never asks for birthdays, addresses or phone numbers by default. Keep personal data to what you really need (FIRST Youth Protection).</p>
       </Section>
     </StepShell>
   );
@@ -175,8 +175,8 @@ export function Permissions({ onNext, onBack }: StepProps) {
         value={view}
         onChange={setView}
         options={[
-          { value: 'simple', label: 'Simple — the key decisions' },
-          { value: 'advanced', label: 'Advanced — everything' },
+          { value: 'simple', label: 'Simple: the key decisions' },
+          { value: 'advanced', label: 'Advanced: everything' },
         ]}
       />
       {[...groups.entries()].map(([mod, keys]) => (
@@ -235,10 +235,10 @@ export function Permissions({ onNext, onBack }: StepProps) {
         </Section>
       ))}
       <Why title="How are permissions enforced?">
-        <p>Your choices are compiled into the database’s access rules, so they can’t be bypassed — the dashboard only hides buttons you can’t use. Changing them later is just an Edit in this wizard.</p>
+        <p>Your choices are compiled into the database’s access rules, so they can’t be bypassed: the dashboard only hides buttons you can’t use. Changing them later is just an Edit in this wizard.</p>
         <p>Approvals are tiered: captains and mentors approve members; only mentors and admins approve captains and mentors.</p>
       </Why>
-      <Switch checked={c.features.email} onChange={() => {}} disabled label="Email confirmation" description="Off: no email provider needed — a captain or mentor approves every signup. Turn on later from the wizard home after adding SMTP in Supabase." />
+      <Switch checked={c.features.email} onChange={() => {}} disabled label="Email confirmation" description="Off: no email provider needed. A captain or mentor approves every signup. Turn on later from the wizard home after adding SMTP in Supabase." />
     </StepShell>
   );
 }

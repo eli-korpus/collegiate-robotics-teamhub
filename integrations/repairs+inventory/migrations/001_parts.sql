@@ -1,4 +1,4 @@
--- Parts used by a repair (durable link, so it lives in the integration — spec §4.4).
+-- Parts used by a repair (durable link, so it lives in the integration, spec §4.4).
 create table ix_repinv_parts (
   issue_id uuid not null references rep_issues (id) on delete cascade,
   item_id uuid not null references inv_items (id) on delete cascade,

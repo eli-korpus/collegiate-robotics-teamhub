@@ -12,7 +12,7 @@ export default defineModule({
   name: 'Skills & Training',
   category: 'team',
   icon: 'GraduationCap',
-  summary: 'Who is trained on what — “Drill press safety”, “Onshape basics”, “Certified driver” — with sign-offs.',
+  summary: 'Who is trained on what (“Drill press safety”, “Onshape basics”, “Certified driver”) with sign-offs.',
   purpose: 'Record proven abilities with a sign-off.',
   notFor: [
     { text: 'Job titles and responsibilities', goTo: 'core:positions' },

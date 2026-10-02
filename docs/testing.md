@@ -30,7 +30,7 @@ await db.as(mentor, 'insert into task_items …');                  // runs as t
 expect(await db.denied(member, 'delete from task_items …')).toBe(true);
 ```
 
-Every module has a `<id>.test.ts` next to it covering who can read, write and delete — including cross-team
+Every module has a `<id>.test.ts` next to it covering who can read, write and delete, including cross-team
 isolation and pending users.
 
 **What PGlite doesn't cover:** Supabase's real auth server, Storage API, Realtime, `pg_cron`/`pg_net` (cron SQL is
@@ -49,8 +49,8 @@ TEAMHUB_PREV_ROOT=../prev npx vitest run tests/db/upgrade.test.ts
 
 ### DB budget test
 
-`tests/db/budget.test.ts` seeds a generous "typical season" — 20 people and every tab (100 practices, 300 tasks, 200
-notebook entries, 670 scouting entries, 3,000 notifications…) — and asserts the database stays under **25 MB**
+`tests/db/budget.test.ts` seeds a generous "typical season" (20 people and every tab: 100 practices, 300 tasks, 200
+notebook entries, 670 scouting entries, 3,000 notifications…) and asserts the database stays under **25 MB**
 (it measures about 5 MB), so a free 500 MB Supabase project lasts for years.
 
 ## Module matrix
@@ -70,7 +70,7 @@ Playwright smoke test per config), `--no-typecheck`.
 
 `scripts/check-bundle.ts` enforces: initial JavaScript ≤ 180 KB gzip for core only, plus 1.5 KB per enabled tab
 (each tab adds a tiny always-loaded client); every lazy chunk ≤ 60 KB gzip (except the 3D model viewer); and
-**disabled tabs contribute zero bytes** — each tab's client contains the marker `teamhub-module:<id>`, which must be
+**disabled tabs contribute zero bytes**: each tab's client contains the marker `teamhub-module:<id>`, which must be
 absent from the build when the tab is off.
 
 ## SQL linter

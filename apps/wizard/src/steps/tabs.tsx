@@ -45,7 +45,7 @@ export function ChooseTabs({ onNext, onBack }: StepProps) {
   return (
     <StepShell
       title="Choose your tabs"
-      subtitle="Pick only what your team will use — every tab works on its own, and you can add or remove tabs later without losing data. Unpicked tabs add nothing to your site or database."
+      subtitle="Pick only what your team will use: every tab works on its own, and you can add or remove tabs later without losing data. Unpicked tabs add nothing to your site or database."
       onBack={onBack}
       onNext={onNext}
     >
@@ -104,7 +104,7 @@ export function ChooseTabs({ onNext, onBack }: StepProps) {
         </section>
       ))}
       {unlocked.length > 0 && (
-        <Section title="Connections unlocked by your picks" description="These only exist because both tabs are enabled — nothing breaks if you remove one later.">
+        <Section title="Connections unlocked by your picks" description="These only exist because both tabs are enabled. Nothing breaks if you remove one later.">
           <ul className="space-y-1.5 text-[13px]">
             {unlocked.map((i) => (
               <li key={i.id} className="flex items-start gap-2">
@@ -125,7 +125,7 @@ export function ChooseTabs({ onNext, onBack }: StepProps) {
       )}
       <Why title="Why not just pick everything?">
         <p>Each tab adds screens to learn and a little to your database. Teams that start small and add tabs when they need them tend to actually use them.</p>
-        <p>Every tab has one clear job (e.g. Polls are not for collecting shirt sizes — People &gt; Request info is). The details show what each tab is and is not for.</p>
+        <p>Every tab has one clear job (e.g. Polls are not for collecting shirt sizes; People &gt; Request info is). The details show what each tab is and is not for.</p>
       </Why>
       <Dialog open={!!info} onOpenChange={(v) => !v && setInfo(null)} title={info?.name} description={info?.summary} size="lg">
         {info && (
@@ -188,8 +188,8 @@ export function TabOptions({ onNext, onBack }: StepProps) {
     });
 
   return (
-    <StepShell title="Tab options" subtitle="Each tab has a few choices. The defaults work well — change only what you need." onBack={onBack} onNext={onNext}>
-      {withOptions.length === 0 && <p className="text-[13.5px] text-muted">{chosen.length ? 'Your tabs have no options to set.' : 'You haven’t picked any tabs — that’s fine, the core (Home, People, Admin) always works.'}</p>}
+    <StepShell title="Tab options" subtitle="Each tab has a few choices. The defaults work well. Change only what you need." onBack={onBack} onNext={onNext}>
+      {withOptions.length === 0 && <p className="text-[13.5px] text-muted">{chosen.length ? 'Your tabs have no options to set.' : 'You haven’t picked any tabs. That’s fine: the core (Home, People, Admin) always works.'}</p>}
       {withOptions.map((m) => (
         <Section key={m.id} title={m.name} description={m.purpose}>
           <SchemaForm

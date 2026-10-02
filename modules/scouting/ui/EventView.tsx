@@ -32,7 +32,7 @@ export function LiveBadge({ ctx }: { ctx: EventContext }) {
   );
 }
 
-/** Rankings, schedule/results and awards — everything you'd otherwise look up on the FTC website. */
+/** Rankings, schedule/results and awards: everything you'd otherwise look up on the FTC website. */
 export function EventView({ ctx, stats, onTeam }: { ctx: EventContext; stats: ReturnType<typeof useScoutingStats>; onTeam: (n: number) => void }) {
   const [view, setView] = useState<'rankings' | 'matches' | 'awards'>('rankings');
   const [filter, setFilter] = useState<string>(ctx.ours[0] ? String(ctx.ours[0]) : 'all');
@@ -68,7 +68,7 @@ export function EventView({ ctx, stats, onTeam }: { ctx: EventContext; stats: Re
           keyOf={(t) => t.number}
           empty={<EmptyState title="Rankings appear once qualification matches are played" />}
           columns={[
-            { id: 'rank', header: '#', align: 'right', sort: (t) => t.stats?.rank ?? 999, cell: (t) => t.stats?.rank ?? '—' },
+            { id: 'rank', header: '#', align: 'right', sort: (t) => t.stats?.rank ?? 999, cell: (t) => t.stats?.rank ?? '–' },
             {
               id: 'team',
               header: 'Team',
@@ -79,10 +79,10 @@ export function EventView({ ctx, stats, onTeam }: { ctx: EventContext; stats: Re
                 </button>
               ),
             },
-            { id: 'rp', header: 'RP', align: 'right', sort: (t) => t.stats?.rp ?? -1, cell: (t) => t.stats?.rp?.toFixed(2) ?? '—' },
-            { id: 'rec', header: 'W-L-T', align: 'right', sort: (t) => t.stats?.wins ?? -1, cell: (t) => (t.stats ? `${t.stats.wins}-${t.stats.losses}-${t.stats.ties}` : '—') },
-            { id: 'opr', header: 'OPR', align: 'right', sort: (t) => t.stats?.opr?.totalPointsNp ?? -1, cell: (t) => t.stats?.opr?.totalPointsNp.toFixed(1) ?? '—' },
-            { id: 'avg', header: 'Avg', align: 'right', sort: (t) => t.stats?.avg?.totalPointsNp ?? -1, cell: (t) => t.stats?.avg?.totalPointsNp.toFixed(1) ?? '—' },
+            { id: 'rp', header: 'RP', align: 'right', sort: (t) => t.stats?.rp ?? -1, cell: (t) => t.stats?.rp?.toFixed(2) ?? '–' },
+            { id: 'rec', header: 'W-L-T', align: 'right', sort: (t) => t.stats?.wins ?? -1, cell: (t) => (t.stats ? `${t.stats.wins}-${t.stats.losses}-${t.stats.ties}` : '–') },
+            { id: 'opr', header: 'OPR', align: 'right', sort: (t) => t.stats?.opr?.totalPointsNp ?? -1, cell: (t) => t.stats?.opr?.totalPointsNp.toFixed(1) ?? '–' },
+            { id: 'avg', header: 'Avg', align: 'right', sort: (t) => t.stats?.avg?.totalPointsNp ?? -1, cell: (t) => t.stats?.avg?.totalPointsNp.toFixed(1) ?? '–' },
             { id: 'mp', header: 'Played', align: 'right', cell: (t) => t.stats?.qualMatchesPlayed ?? 0 },
             {
               id: 'score',
@@ -91,7 +91,7 @@ export function EventView({ ctx, stats, onTeam }: { ctx: EventContext; stats: Re
               sort: (t) => stats.composite.get(t.number) ?? -99,
               cell: (t) => {
                 const s = stats.composite.get(t.number);
-                return s == null ? '—' : <span className={s > 0.5 ? 'text-success font-medium' : s < -0.5 ? 'text-danger' : ''}>{s > 0 ? '+' : ''}{s.toFixed(2)}</span>;
+                return s == null ? '–' : <span className={s > 0.5 ? 'text-success font-medium' : s < -0.5 ? 'text-danger' : ''}>{s > 0 ? '+' : ''}{s.toFixed(2)}</span>;
               },
             },
           ]}

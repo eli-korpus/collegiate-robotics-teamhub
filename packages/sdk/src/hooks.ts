@@ -276,7 +276,7 @@ export function useRealtime(table: string, filter: string | null, onChange: () =
   }, [sb, table, filter, enabled]);
 }
 
-/** True while the browser tab is visible (pause polling when hidden — be a good FTCScout citizen). */
+/** True while the browser tab is visible (pause polling when hidden: be a good FTCScout citizen). */
 export function usePageVisible(): boolean {
   return useSyncExternalStore(
     (l) => {
@@ -304,7 +304,7 @@ export function useSignedUrls(bucket: string, paths: (string | null | undefined)
   });
 }
 
-/** Files storage usage vs. limit — FileDrop refuses uploads at ≥ 98 % (spec §11.4). */
+/** Files storage usage vs. limit: FileDrop refuses uploads at ≥ 98 % (spec §11.4). */
 export function useStorageFull(): boolean {
   const sb = useSupabase();
   const { me } = useSession();

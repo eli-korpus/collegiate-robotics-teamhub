@@ -97,7 +97,7 @@ const VIS: Record<Visibility, { title: string; body: string; icon: typeof Eye; e
 export function pollVisibility(p: Pick<Poll, 'visibility' | 'team_id'>): { text: string; locked: boolean } {
   const scope = teamById(p.team_id)?.name ?? runtime().config.program.name;
   if (p.visibility === 'public') return { text: `Public: everyone in ${scope} sees your answer`, locked: false };
-  if (p.visibility === 'results') return { text: 'Only totals are shown to others — your answer is visible to you, the poll creator and mentors', locked: true };
+  if (p.visibility === 'results') return { text: 'Only totals are shown to others. Your answer is visible to you, the poll creator and mentors', locked: true };
   return { text: 'Private: only you, the poll creator and mentors see your answer', locked: true };
 }
 
@@ -231,7 +231,7 @@ function CreatePoll({ eventRef, onClose }: { eventRef: string | null; onClose: (
           <Field label="Question">{(id) => <Input id={id} autoFocus maxLength={300} value={question} onChange={(e) => setQuestion(e.target.value)} placeholder={kind === 'availability' ? 'When can everyone come to the build session?' : 'What should we…'} />}</Field>
           {personal && (
             <Banner tone="warning" title="This looks like personal info">
-              Collect it with <strong>People &gt; Request info</strong> instead — answers save privately to each profile and you'll see who's missing.{' '}
+              Collect it with <strong>People &gt; Request info</strong> instead: answers save privately to each profile and you'll see who's missing.{' '}
               <a href="/people?tab=request-info" className="font-medium text-accent hover:underline">
                 Use Request info <ArrowRight className="inline size-3.5" aria-hidden />
               </a>
@@ -469,7 +469,7 @@ function PollDialog({ poll: p, myVote, onClose }: { poll: Poll; myVote: VoteRow 
   );
 }
 
-/** Fix a typo in the question or choices — only until someone answers (the database enforces this too). */
+/** Fix a typo in the question or choices: only until someone answers (the database enforces this too). */
 function EditPoll({ poll: p, onClose }: { poll: Poll; onClose: () => void }) {
   const sb = useSupabase();
   const qc = useQueryClient();

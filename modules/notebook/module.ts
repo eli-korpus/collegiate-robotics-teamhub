@@ -12,7 +12,7 @@ export const settings = z.object({
   tags: z
     .array(z.string())
     .default(['design', 'build', 'programming', 'testing', 'outreach', 'strategy'])
-    .meta({ title: 'Tags', description: 'Team-editable. Award names are not built in — add your own.' }),
+    .meta({ title: 'Tags', description: 'Team-editable. Award names are not built in. Add your own.' }),
   maxPhotos: z.number().int().min(0).max(12).default(6).meta({ title: 'Photos per entry' }),
 });
 
@@ -22,7 +22,7 @@ export default defineModule({
   name: 'Engineering Notebook',
   category: 'engineering',
   icon: 'NotebookPen',
-  summary: 'Document engineering work, design iterations and decisions — feeds your portfolio.',
+  summary: 'Document engineering work, design iterations and decisions: feeds your portfolio.',
   purpose: 'The single place to document engineering work, design versions and decisions.',
   notFor: [
     { text: 'To-dos', goTo: 'tasks' },

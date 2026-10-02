@@ -84,7 +84,7 @@ async function fetchReleases(root: string): Promise<{ ok: boolean; error?: strin
   const has = await git(root, ['remote', 'get-url', UPDATE_REMOTE]);
   const set = has.ok ? await git(root, ['remote', 'set-url', UPDATE_REMOTE, url]) : await git(root, ['remote', 'add', UPDATE_REMOTE, url]);
   if (!set.ok) return { ok: false, error: set.stderr };
-  // Only tags (and the history they need) — the team's branches are never touched.
+  // Only tags (and the history they need): the team's branches are never touched.
   const f = await git(root, ['fetch', '--no-tags', UPDATE_REMOTE, '+refs/tags/v*:refs/tags/v*'], 300_000);
   return f.ok ? { ok: true } : { ok: false, error: f.stderr.trim() || f.stdout.trim() };
 }

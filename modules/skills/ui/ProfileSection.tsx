@@ -1,7 +1,7 @@
 import { PositionBadge } from '@teamhub/ui';
 import { useSignoffs, useSkills } from './Routes';
 
-/** Skill badges on a profile — styled differently from position badges (spec §13.9). */
+/** Skill badges on a profile: styled differently from position badges (spec §13.9). */
 export default function SkillBadges({ userId }: { userId: string }) {
   const skills = useSkills();
   const signoffs = useSignoffs();

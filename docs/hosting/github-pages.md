@@ -17,7 +17,7 @@ it runs `npm run build`, copies `index.html` to `404.html` (so refreshing `/cale
 ### Project pages vs. user pages
 
 A project page lives under a path (`/teamhub-ftc/`). The wizard sets `hosting.basePath` in your config so links and
-assets work under that path. With a custom domain the base path is `/` again — update the URL in the wizard after
+assets work under that path. With a custom domain the base path is `/` again. Update the URL in the wizard after
 adding the domain.
 
 ## Custom domain
@@ -27,4 +27,4 @@ adding the domain.
 ## Limits
 
 GitHub Pages is free for public repositories. Your config only contains public values (the Supabase URL and
-publishable key), so a public fork is safe — the database is protected by row-level security, not by hiding the URL.
+publishable key), so a public fork is safe: the database is protected by row-level security, not by hiding the URL.

@@ -31,7 +31,7 @@ const [shardN, shardOf] = (arg('shard') ?? '1/1').split('/').map(Number);
 const ALL = readdirSync(join(REPO_ROOT, 'modules')).filter((d) => !d.startsWith('.')).sort();
 const base = JSON.parse(readFileSync(join(REPO_ROOT, 'examples/demo.config.json'), 'utf8'));
 
-/** Mulberry32 — tiny seeded PRNG so random subsets are reproducible from the logged seed. */
+/** Mulberry32: tiny seeded PRNG so random subsets are reproducible from the logged seed. */
 function rng(s: number) {
   return () => {
     s |= 0;
@@ -58,7 +58,7 @@ if (only.has('random')) {
     const ids = ALL.filter(() => r() < 0.4);
     matrix.push({ name: `random#${i + 1}(seed ${seed})`, ids });
   }
-  console.log(`Random subsets use seed ${seed} — reproduce with: npm run ci:matrix -- --only random --seed ${seed} --count ${count}`);
+  console.log(`Random subsets use seed ${seed}. Reproduce with: npm run ci:matrix -- --only random --seed ${seed} --count ${count}`);
 }
 
 const run = (cmd: string, args: string[]) => execFileSync(cmd, args, { cwd: REPO_ROOT, stdio: 'pipe', encoding: 'utf8', env: { ...process.env, CI: '1' } });

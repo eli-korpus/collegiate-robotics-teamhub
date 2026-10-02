@@ -13,7 +13,7 @@ export default defineModule({
   name: 'Sign-up Sheets',
   category: 'team',
   icon: 'ClipboardPen',
-  summary: 'Volunteer slots, snack duty, drivers, pit shifts — first come, first served.',
+  summary: 'Volunteer slots, snack duty, drivers, pit shifts: first come, first served.',
   purpose: 'Claim one of a limited number of slots.',
   notFor: [
     { text: 'Opinions or availability', goTo: 'polls' },

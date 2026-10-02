@@ -319,7 +319,7 @@ function AllOrders({ drive: d, orders }: { drive: Drive; orders: Order[] }) {
             <li key={o.id} className="flex flex-wrap items-center gap-3 px-3 py-2 text-[13px]">
               <Avatar name={p?.name ?? '?'} src={p?.avatarUrl} size={22} />
               <span className="min-w-0 flex-1">
-                <span className="font-medium">{name(o.user_id)}</span> <span className="text-muted">— {describe(o)}</span>
+                <span className="font-medium">{name(o.user_id)}</span> <span className="text-muted">· {describe(o)}</span>
               </span>
               <Checkbox checked={o.paid} disabled={!canPaid} onChange={(v) => set(o, { paid: v })} label="Paid" />
               <Checkbox checked={o.delivered} disabled={!canManage} onChange={(v) => set(o, { delivered: v })} label="Delivered" />
@@ -422,7 +422,7 @@ function DriveEditor({ drive, onClose }: { drive: Drive | null; onClose: () => v
           )}
         </div>
         <TeamScopePicker value={v.team_id} onChange={(t) => setV({ ...v, team_id: t })} perm="merch.manage" />
-        <ScopeVisibility teamId={v.team_id} suffix="(the drive — each person's order is visible only to them and managers)" />
+        <ScopeVisibility teamId={v.team_id} suffix="(the drive: each person's order is visible only to them and managers)" />
       </div>
     </Dialog>
   );

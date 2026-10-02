@@ -341,7 +341,7 @@ function Composer({ post, onClose }: { post: Post | null; onClose: () => void })
         </div>
         <Switch checked={pinned} onChange={setPinned} label="Pin to the top" />
         <Switch checked={requireAck} onChange={setRequireAck} label="Must read" description="Everyone gets a notification and taps “I've read this”. Use for travel info, deadlines and safety." />
-        <ScopeVisibility teamId={teamId} suffix="— there are no replies; questions go to your team chat." />
+        <ScopeVisibility teamId={teamId} suffix="(there are no replies; questions go to your team chat)" />
         {requireAck && <Banner tone="info">Captains and mentors can see who hasn't read it yet.</Banner>}
       </div>
     </Dialog>

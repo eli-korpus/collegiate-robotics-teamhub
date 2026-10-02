@@ -110,7 +110,7 @@ export default function SponsorsRoutes() {
         </div>
       </ModuleHeader>
       <p className="flex items-center gap-1.5 px-4 pt-3 text-[12.5px] text-muted sm:px-6">
-        <Lock className="size-3.5" /> Only captains and mentors can see this tab. Track what sponsors gave in words — TeamHub doesn't do money accounting.
+        <Lock className="size-3.5" /> Only captains and mentors can see this tab. Track what sponsors gave in words: TeamHub doesn't do money accounting.
       </p>
       {list.isLoading ? (
         <Spinner className="m-8" />
@@ -168,7 +168,7 @@ function FollowUps({ rows, onOpen }: { rows: Sponsor[]; onOpen: (id: string) => 
             <button className="flex w-full items-center gap-3 px-4 py-2.5 text-left hover:bg-bg-subtle" onClick={() => onOpen(s.id)}>
               <span className="min-w-0 flex-1">
                 <span className="block text-[13.5px] font-medium">{s.name}</span>
-                <span className="block text-[12.5px] text-muted">{s.next_step || '—'}</span>
+                <span className="block text-[12.5px] text-muted">{s.next_step || '–'}</span>
               </span>
               {s.owner && (
                 <span className="text-[12px] text-muted">
@@ -264,12 +264,12 @@ function SponsorDialog({ sponsor, canManage, onClose }: { sponsor: Sponsor | nul
             )}
           </Field>
           <Field label="Tier" optional hint="e.g. Gold, In-kind">{(id) => <Input id={id} maxLength={40} value={v.tier} onChange={set('tier')} />}</Field>
-          <Field label="What they gave" optional hint="In words — “$500 + machine time”">{(id) => <Input id={id} maxLength={300} value={v.gave} onChange={set('gave')} />}</Field>
+          <Field label="What they gave" optional hint="In words: “$500 + machine time”">{(id) => <Input id={id} maxLength={300} value={v.gave} onChange={set('gave')} />}</Field>
         </div>
         <Checkbox checked={v.thanked} onChange={(c) => setV({ ...v, thanked: c })} label="Thank-you sent" />
         <div className="rounded-lg border border-border p-3">
           <p className="mb-2 flex items-center gap-1.5 text-[12.5px] font-medium text-muted">
-            <Lock className="size-3.5" /> Contact — visible to captains and mentors only
+            <Lock className="size-3.5" /> Contact: visible to captains and mentors only
           </p>
           <div className="grid gap-3 sm:grid-cols-3">
             <Field label="Contact name" optional>{(id) => <Input id={id} maxLength={120} value={v.contact_name} onChange={set('contact_name')} />}</Field>

@@ -9,7 +9,7 @@ create table poll_polls (
   visibility text not null check (visibility in ('public', 'results', 'private')),
   closes_at timestamptz,
   result jsonb,
-  -- optional entity ref (e.g. calendar:event:<id>) — shown with EntityLink; no FK so modules stay independent
+  -- optional entity ref (e.g. calendar:event:<id>): shown with EntityLink; no FK so modules stay independent
   ref text check (char_length(ref) <= 120),
   created_by uuid references profiles (id) on delete set null,
   created_at timestamptz not null default now(),

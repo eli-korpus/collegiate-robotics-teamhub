@@ -1,6 +1,6 @@
 /**
  * Registries (spec §4.5). The dashboard calls initRuntime() once with the generated module list; modules and the
- * shell then ask the registries — modules never import each other.
+ * shell then ask the registries: modules never import each other.
  */
 import type { ComponentType } from 'react';
 import type {

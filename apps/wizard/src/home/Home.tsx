@@ -153,7 +153,7 @@ function BackupDialog({ server, onClose }: { server: ServerState; onClose: () =>
             {Object.values(res.tables).reduce((a, b) => a + b, 0)} rows, {res.files} files
           </Banner>
         )}
-        <p className="text-[12.5px] text-muted">Logins (passwords) can't be exported — after restoring into a new project, people sign up again and are re-approved; their history is kept.</p>
+        <p className="text-[12.5px] text-muted">Logins (passwords) can't be exported: after restoring into a new project, people sign up again and are re-approved; their history is kept.</p>
       </div>
     </Dialog>
   );
@@ -262,7 +262,7 @@ function EmailDialog({ server, onClose, refresh }: { server: ServerState; onClos
             try {
               await api('/email', { on });
               await refresh();
-              toast.success('Saved — push your config (Edit > Review) so the login page updates.');
+              toast.success('Saved. Push your config (Edit > Review) so the login page updates.');
               onClose();
             } catch (e) {
               toast.error((e as Error).message);

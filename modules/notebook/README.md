@@ -1,6 +1,6 @@
 # Engineering Notebook
 
-**Purpose:** the single place to document engineering work, design versions and decisions — and the source for your portfolio.
+**Purpose:** the single place to document engineering work, design versions and decisions, and the source for your portfolio.
 
 - **Log entries:** what we did and learned, with photos, tags, subsystem and authors.
 - **Design iterations:** version (v1, v2…), what changed, *why*, Onshape link and an optional weighted **decision matrix**.

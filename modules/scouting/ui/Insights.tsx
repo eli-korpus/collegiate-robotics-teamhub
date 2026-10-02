@@ -7,10 +7,10 @@ import { coverage, highlights, matchHistory, mean, stdev, trend } from '../insig
 import type { EventContext } from './event';
 import type { Entry, Template, useScoutingStats } from './stats';
 
-const fmt = (v: unknown) => (v == null || v === '' ? '—' : typeof v === 'boolean' ? (v ? 'Yes' : 'No') : Array.isArray(v) ? v.join(', ') : String(v));
+const fmt = (v: unknown) => (v == null || v === '' ? '–' : typeof v === 'boolean' ? (v ? 'Yes' : 'No') : Array.isArray(v) ? v.join(', ') : String(v));
 
 export function TrendIcon({ slope }: { slope: number | null }) {
-  if (slope == null) return <span className="text-faint">—</span>;
+  if (slope == null) return <span className="text-faint">–</span>;
   if (slope > 2) return <TrendingUp className="inline size-4 text-success" aria-label="Improving" />;
   if (slope < -2) return <TrendingDown className="inline size-4 text-danger" aria-label="Declining" />;
   return <Minus className="inline size-4 text-muted" aria-label="Steady" />;
@@ -31,13 +31,13 @@ export function Insights({ ctx, stats, onTeam, compare, setCompare }: { ctx: Eve
     <div className="space-y-4">
       <div className="grid gap-3 sm:grid-cols-4">
         <StatTile label="Teams" value={ctx.teams.length} />
-        <StatTile label="Matches played" value={`${ctx.matches.filter((m) => m.hasBeenPlayed).length}/${ctx.matches.length || '—'}`} />
+        <StatTile label="Matches played" value={`${ctx.matches.filter((m) => m.hasBeenPlayed).length}/${ctx.matches.length || '–'}`} />
         <StatTile label="Scouting entries" value={stats.entries.length} />
         <StatTile label="Teams not scouted" value={cov.unscouted.length} tone={cov.unscouted.length ? 'warning' : 'success'} />
       </div>
       {cov.unscouted.length > 0 && (
         <Card>
-          <CardHeader icon={<Eye className="size-4" />} title="Scouting coverage" subtitle="Teams nobody has scouted yet — catch them in these matches" />
+          <CardHeader icon={<Eye className="size-4" />} title="Scouting coverage" subtitle="Teams nobody has scouted yet: catch them in these matches" />
           <div className="space-y-2 px-4 pb-4 text-[13px]">
             {cov.upcoming.length > 0 ? (
               <ul className="space-y-1">
@@ -69,10 +69,10 @@ export function Insights({ ctx, stats, onTeam, compare, setCompare }: { ctx: Eve
               </button>
             ),
           },
-          { id: 'rank', header: 'Rank', align: 'right', sort: (r) => r.t.stats?.rank ?? 999, cell: (r) => r.t.stats?.rank ?? '—' },
-          { id: 'opr', header: 'OPR', align: 'right', sort: (r) => r.t.stats?.opr?.totalPointsNp ?? -1, cell: (r) => r.t.stats?.opr?.totalPointsNp.toFixed(1) ?? '—' },
-          { id: 'season', header: 'Season OPR', align: 'right', sort: (r) => r.t.season?.tot?.value ?? -1, cell: (r) => (r.t.season?.tot ? <span title={`World rank ${r.t.season.tot.rank}`}>{r.t.season.tot.value.toFixed(1)} <span className="text-[11px] text-faint">#{r.t.season.tot.rank}</span></span> : '—') },
-          { id: 'cons', header: 'Consistency', align: 'right', sort: (r) => (r.sd == null ? 999 : r.sd), cell: (r) => (r.sd == null ? '—' : `±${r.sd.toFixed(0)}`) },
+          { id: 'rank', header: 'Rank', align: 'right', sort: (r) => r.t.stats?.rank ?? 999, cell: (r) => r.t.stats?.rank ?? '–' },
+          { id: 'opr', header: 'OPR', align: 'right', sort: (r) => r.t.stats?.opr?.totalPointsNp ?? -1, cell: (r) => r.t.stats?.opr?.totalPointsNp.toFixed(1) ?? '–' },
+          { id: 'season', header: 'Season OPR', align: 'right', sort: (r) => r.t.season?.tot?.value ?? -1, cell: (r) => (r.t.season?.tot ? <span title={`World rank ${r.t.season.tot.rank}`}>{r.t.season.tot.value.toFixed(1)} <span className="text-[11px] text-faint">#{r.t.season.tot.rank}</span></span> : '–') },
+          { id: 'cons', header: 'Consistency', align: 'right', sort: (r) => (r.sd == null ? 999 : r.sd), cell: (r) => (r.sd == null ? '–' : `±${r.sd.toFixed(0)}`) },
           { id: 'trend', header: 'Trend', align: 'center', sort: (r) => r.slope ?? 0, cell: (r) => <TrendIcon slope={r.slope} /> },
           ...fields.slice(0, 4).map((f) => ({
             id: f.id,
@@ -82,12 +82,12 @@ export function Insights({ ctx, stats, onTeam, compare, setCompare }: { ctx: Eve
             cell: (r: (typeof rows)[number]) => {
               const v = stats.teamAvg.get(r.t.number)?.[f.id];
               const e = stats.eventAvg[f.id];
-              if (v == null) return <span className="text-faint">—</span>;
+              if (v == null) return <span className="text-faint">–</span>;
               return <span className={cn(e && v >= e * 1.25 && 'font-medium text-success', e && v <= e * 0.75 && 'text-danger')}>{f.type === 'checkbox' ? `${Math.round(v * 100)}%` : v.toFixed(1)}</span>;
             },
           })),
           { id: 'n', header: 'Scouted', align: 'right', sort: (r) => r.n, cell: (r) => (r.n ? r.n : <Badge tone="warning">0</Badge>) },
-          { id: 'score', header: 'Pick score', align: 'right', sort: (r) => r.score ?? -99, cell: (r) => (r.score == null ? '—' : `${r.score > 0 ? '+' : ''}${r.score.toFixed(2)}`) },
+          { id: 'score', header: 'Pick score', align: 'right', sort: (r) => r.score ?? -99, cell: (r) => (r.score == null ? '–' : `${r.score > 0 ? '+' : ''}${r.score.toFixed(2)}`) },
           {
             id: 'cmp',
             header: '',
@@ -109,13 +109,13 @@ export function Insights({ ctx, stats, onTeam, compare, setCompare }: { ctx: Eve
 function Compare({ ctx, stats, teams, onClear }: { ctx: EventContext; stats: ReturnType<typeof useScoutingStats>; teams: number[]; onClear: () => void }) {
   const t = (n: number) => ctx.teams.find((x) => x.number === n);
   const rows: [string, (n: number) => string][] = [
-    ['Rank', (n) => String(t(n)?.stats?.rank ?? '—')],
-    ['Record', (n) => (t(n)?.stats ? `${t(n)!.stats!.wins}-${t(n)!.stats!.losses}-${t(n)!.stats!.ties}` : '—')],
-    ['Event OPR', (n) => t(n)?.stats?.opr?.totalPointsNp.toFixed(1) ?? '—'],
-    ['Season OPR (world rank)', (n) => (t(n)?.season?.tot ? `${t(n)!.season!.tot!.value.toFixed(1)} (#${t(n)!.season!.tot!.rank})` : '—')],
-    ['Avg alliance score', (n) => mean(matchHistory(ctx.matches, n).map((x) => x.score))?.toFixed(1) ?? '—'],
-    ...stats.fields.map((f): [string, (n: number) => string] => [f.label, (n) => { const v = stats.teamAvg.get(n)?.[f.id]; return v == null ? '—' : f.type === 'checkbox' ? `${Math.round(v * 100)}%` : v.toFixed(1); }]),
-    ['Pick score', (n) => stats.composite.get(n)?.toFixed(2) ?? '—'],
+    ['Rank', (n) => String(t(n)?.stats?.rank ?? '–')],
+    ['Record', (n) => (t(n)?.stats ? `${t(n)!.stats!.wins}-${t(n)!.stats!.losses}-${t(n)!.stats!.ties}` : '–')],
+    ['Event OPR', (n) => t(n)?.stats?.opr?.totalPointsNp.toFixed(1) ?? '–'],
+    ['Season OPR (world rank)', (n) => (t(n)?.season?.tot ? `${t(n)!.season!.tot!.value.toFixed(1)} (#${t(n)!.season!.tot!.rank})` : '–')],
+    ['Avg alliance score', (n) => mean(matchHistory(ctx.matches, n).map((x) => x.score))?.toFixed(1) ?? '–'],
+    ...stats.fields.map((f): [string, (n: number) => string] => [f.label, (n) => { const v = stats.teamAvg.get(n)?.[f.id]; return v == null ? '–' : f.type === 'checkbox' ? `${Math.round(v * 100)}%` : v.toFixed(1); }]),
+    ['Pick score', (n) => stats.composite.get(n)?.toFixed(2) ?? '–'],
   ];
   return (
     <Card>
@@ -168,10 +168,10 @@ export function TeamProfile({ n, ctx, stats, templates, onClose }: { n: number; 
     <Dialog open onOpenChange={(v) => !v && onClose()} title={`${n} ${t?.name ?? ''}`} description={[t?.city, t?.season?.tot && `Season OPR ${t.season.tot.value.toFixed(1)} · ${ordinal(t.season.tot.rank)} worldwide`].filter(Boolean).join(' · ')} size="xl">
       <div className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-4">
-          <StatTile label="Rank" value={t?.stats?.rank ?? '—'} hint={t?.stats ? `${t.stats.rp?.toFixed(2) ?? '—'} RP` : undefined} />
-          <StatTile label="Record" value={t?.stats ? `${t.stats.wins}-${t.stats.losses}-${t.stats.ties}` : '—'} />
-          <StatTile label="OPR (no penalties)" value={t?.stats?.opr?.totalPointsNp.toFixed(1) ?? '—'} />
-          <StatTile label="Avg alliance score" value={mean(hist.map((h) => h.score))?.toFixed(1) ?? '—'} hint={stdev(hist.map((h) => h.score)) != null ? `±${stdev(hist.map((h) => h.score))!.toFixed(0)} · ${trend(hist.map((h) => h.score))! > 0 ? 'improving' : 'not improving'}` : undefined} />
+          <StatTile label="Rank" value={t?.stats?.rank ?? '–'} hint={t?.stats ? `${t.stats.rp?.toFixed(2) ?? '–'} RP` : undefined} />
+          <StatTile label="Record" value={t?.stats ? `${t.stats.wins}-${t.stats.losses}-${t.stats.ties}` : '–'} />
+          <StatTile label="OPR (no penalties)" value={t?.stats?.opr?.totalPointsNp.toFixed(1) ?? '–'} />
+          <StatTile label="Avg alliance score" value={mean(hist.map((h) => h.score))?.toFixed(1) ?? '–'} hint={stdev(hist.map((h) => h.score)) != null ? `±${stdev(hist.map((h) => h.score))!.toFixed(0)} · ${trend(hist.map((h) => h.score))! > 0 ? 'improving' : 'not improving'}` : undefined} />
         </div>
         {awards.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
@@ -238,7 +238,7 @@ export function TeamProfile({ n, ctx, stats, templates, onClose }: { n: number; 
         )}
         <section className="space-y-2">
           <h3 className="text-[12px] font-semibold uppercase tracking-wider text-faint">Scouting entries ({entries.length})</h3>
-          {!entries.length && <Banner tone="info">Nobody has scouted this team yet{upcoming[0] ? ` — they play ${upcoming[0].tournamentLevel === 'Quals' ? `Q${upcoming[0].matchNum}` : 'soon'}` : ''}.</Banner>}
+          {!entries.length && <Banner tone="info">Nobody has scouted this team yet{upcoming[0] ? `. They play ${upcoming[0].tournamentLevel === 'Quals' ? `Q${upcoming[0].matchNum}` : 'soon'}` : ''}.</Banner>}
           {entries.map((e) => {
             const tf = templates.find((x) => x.id === e.template_id)?.fields ?? [];
             return (

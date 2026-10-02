@@ -203,7 +203,7 @@ function render(img: HTMLImageElement, size: number, type: string, padBg?: strin
 }
 
 export async function processLogo(file: File): Promise<ProcessedLogo> {
-  if (file.size > 8 * 1024 * 1024) throw new Error('That image is over 8 MB — try a smaller one.');
+  if (file.size > 8 * 1024 * 1024) throw new Error('That image is over 8 MB. Try a smaller one.');
   const dataUrl = await new Promise<string>((res) => {
     const r = new FileReader();
     r.onload = () => res(r.result as string);

@@ -135,7 +135,7 @@ export function SessionPage() {
               <span className="min-w-0 flex-1 truncate text-[14.5px] font-medium">{p.name}</span>
               {settings.trackHours && pr && (
                 <span className="tabular text-[12.5px] text-muted">
-                  {pr.check_in ? formatTime(pr.check_in) : '—'} – {pr.check_out ? formatTime(pr.check_out) : '…'}
+                  {pr.check_in ? formatTime(pr.check_in) : '–'} – {pr.check_out ? formatTime(pr.check_out) : '…'}
                 </span>
               )}
               {settings.trackHours && pr && !pr.check_out && editable && (

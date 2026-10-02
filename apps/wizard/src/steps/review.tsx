@@ -52,7 +52,7 @@ export function Review({ onBack }: StepProps) {
       setLog(r.log);
       setDraft((d) => ({ ...d, done: { ...d.done, applied: true } }));
     } catch (e) {
-      setLog([{ step: 'Nothing was changed — the update runs as one transaction and was rolled back.', ok: false, detail: (e as Error).message }]);
+      setLog([{ step: 'Nothing was changed: the update runs as one transaction and was rolled back.', ok: false, detail: (e as Error).message }]);
     } finally {
       setBusy(null);
     }
@@ -128,7 +128,7 @@ export function Review({ onBack }: StepProps) {
                 <CheckCircle2 className="size-4 text-success" /> The site builds. Push to publish it.
               </>
             ) : (
-              'The build failed — your live site is untouched. Details:'
+              'The build failed. Your live site is untouched. Details:'
             )}
           </p>
           {!buildLog.ok && <pre className="max-h-60 overflow-auto text-[11px]">{buildLog.log}</pre>}

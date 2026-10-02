@@ -7,7 +7,7 @@ import { useSupabase } from './hooks';
 import { parseRef } from './refs';
 
 // ── Entity links (spec §10.4) ──────────────────────────────────────────────
-/** Renders a reference to an item in any module; degrades to a neutral chip when unavailable — never throws. */
+/** Renders a reference to an item in any module; degrades to a neutral chip when unavailable. Never throws. */
 export function EntityLink({ refStr, className }: { refStr: string | null | undefined; className?: string }) {
   const sb = useSupabase();
   const ref = parseRef(refStr);

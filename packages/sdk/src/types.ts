@@ -23,7 +23,7 @@ export interface RuntimeConfig {
   features: TeamhubConfig['features'];
   moduleSettings: Record<string, Record<string, unknown>>;
   dormantModules: string[];
-  /** Every installed module (active + dormant) — used by Admin storage/status views. */
+  /** Every installed module (active + dormant): used by Admin storage/status views. */
   installed: { id: string; name: string; prefix: string; state: 'active' | 'dormant'; buckets: string[] }[];
 }
 
@@ -149,7 +149,7 @@ export interface ActivityItem {
 export type ActivityProvider = (sb: Sb, limit: number) => Promise<ActivityItem[]>;
 
 export interface NotificationDef {
-  /** "assigned you a task" — rendered after the actor name. */
+  /** "assigned you a task": rendered after the actor name. */
   text: string;
 }
 

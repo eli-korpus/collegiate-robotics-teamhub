@@ -6,7 +6,7 @@
  *
  * Checks you're on a clean main branch, runs typecheck/lint/tests, bumps package.json, moves the CHANGELOG
  * "Unreleased" notes under the new version, commits "Release vX.Y.Z" and creates the tag. Then push with
- * `git push && git push --tags` — the release workflow publishes the GitHub Release (see docs/releasing.md).
+ * `git push && git push --tags`: the release workflow publishes the GitHub Release (see docs/releasing.md).
  */
 import { execFileSync } from 'node:child_process';
 import { readFileSync, writeFileSync } from 'node:fs';
@@ -36,7 +36,7 @@ const changelogPath = join(root, 'CHANGELOG.md');
 const changelog = cutRelease(readFileSync(changelogPath, 'utf8'), next, today);
 const notes = notesFor(changelog, next);
 
-console.log(`Release v${next} (was v${pkg.version})${hasSecuritySection(notes) ? ' — SECURITY RELEASE' : ''}\n\n${notes}\n`);
+console.log(`Release v${next} (was v${pkg.version})${hasSecuritySection(notes) ? ' (SECURITY RELEASE)' : ''}\n\n${notes}\n`);
 if (dry) process.exit(0);
 
 if (!skipChecks) {

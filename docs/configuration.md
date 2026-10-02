@@ -1,13 +1,13 @@
 # Configuration (`team/teamhub.config.json`)
 
 Everything that makes a dashboard *yours* lives in one JSON file in your fork, `team/teamhub.config.json`, plus your
-logos in `team/branding/`. The setup wizard (`npm run setup`) writes both — you normally never edit them by hand. This
+logos in `team/branding/`. The setup wizard (`npm run setup`) writes both. You normally never edit them by hand. This
 page documents the format for when you want to look, review a change in a pull request, or fix something manually.
 
 The file is validated by `packages/config-schema` (zod) every time the app is generated or built.
 
 > **Everything in this file is public.** It contains your Supabase project URL and *publishable* key, which are meant
-> to be shipped to browsers — your data is protected by row-level security in the database. Never put the service-role
+> to be shipped to browsers. Your data is protected by row-level security in the database. Never put the service-role
 > key, a personal access token, or your database password in it. The wizard keeps those in memory or in
 > `~/.teamhub/credentials.json` on your computer only.
 
@@ -21,7 +21,7 @@ The file is validated by `packages/config-schema` (zod) every time the app is ge
 | `theme` | object | `accent` (hex), `secondary` (hex or null), `corners` (`soft`/`sharp`), `defaultMode` (`light`/`dark`/`system`). Accents are automatically adjusted to meet WCAG AA contrast; the generator prints a note when it does. |
 | `season` | string | Initial season label like `2026–27`. The live value is in the database and changes with the wizard's **New Season** tool. |
 | `modules` | object | Tabs, keyed by id: `{ "state": "active" \| "dormant", "settings": { … } }`. Missing = not installed. See [modules/README.md](modules/README.md). |
-| `subteams` | array | `{ id, name }` — one list used by People, Tasks, Notebook and Skills. |
+| `subteams` | array | `{ id, name }`: one list used by People, Tasks, Notebook and Skills. |
 | `positions` | array | `{ id: "pos_…", name, teamId (null = program-wide), grantsPermissions }`. |
 | `profileFields` | array | Extra profile fields: `{ id, label, type: "text" \| "select", options, private }`. Private fields are visible only to the person and mentors. A field with id `shirt_size` is used by Merch & Orders. |
 | `permissions` | object | Overrides of the default permission matrix: `{ "tasks.assign": { "types": ["captain", "mentor"], "positions": ["pos_lead_programmer"] } }`. Anything missing uses the tab's defaults. Admins always have every permission. |
@@ -34,16 +34,16 @@ The file is validated by `packages/config-schema` (zod) every time the app is ge
 
 ## Module states
 
-- **active** — the tab is in the sidebar and its database policies are live.
-- **dormant** — the tab is hidden; its tables and files stay, readable by admins only. Switching back to `active`
+- **active**: the tab is in the sidebar and its database policies are live.
+- **dormant**: the tab is hidden; its tables and files stay, readable by admins only. Switching back to `active`
   restores everything instantly.
-- **removed from the file** — after the wizard exports the data, its tables, functions, buckets and integration
+- **removed from the file**: after the wizard exports the data, its tables, functions, buckets and integration
   columns are dropped. Only do this through the wizard (Edit > remove tab > "Delete data & free space").
 
 ## Editing by hand
 
 1. Edit the file.
-2. `npm run generate` — validates the file and regenerates the app. Errors name the exact path, e.g.
+2. `npm run generate`: validates the file and regenerates the app. Errors name the exact path, e.g.
    `teams.0.color: Use a 6-digit hex color like #3B82F6`.
 3. If you changed `modules`, `positions`, `subteams` or `permissions`, the **database** must be updated too:
    run `npm run setup` > **Edit** > **Apply**. The dashboard shows admins a "needs a database update" banner until then.

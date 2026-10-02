@@ -158,8 +158,8 @@ export default function InventoryRoutes() {
                   </span>
                 ),
               },
-              { id: 'cat', header: 'Category', sort: (p) => p.category ?? '', cell: (p) => p.category ?? '—' },
-              { id: 'loc', header: 'Bin', sort: (p) => p.location ?? '', cell: (p) => p.location ?? '—' },
+              { id: 'cat', header: 'Category', sort: (p) => p.category ?? '', cell: (p) => p.category ?? '–' },
+              { id: 'loc', header: 'Bin', sort: (p) => p.location ?? '', cell: (p) => p.location ?? '–' },
               {
                 id: 'qty',
                 header: 'Qty',

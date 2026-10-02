@@ -133,7 +133,7 @@ function RequestInfoCards() {
   if (!missing.length) return null;
   return (
     <Card className="border-warning/40">
-      <CardHeader icon={<ClipboardList className="size-4" />} title={`Please add your ${missing.map((f) => f.label.toLowerCase()).join(', ')}`} subtitle={open[0].message ? `“${open[0].message}” — ` : undefined} />
+      <CardHeader icon={<ClipboardList className="size-4" />} title={`Please add your ${missing.map((f) => f.label.toLowerCase()).join(', ')}`} subtitle={open[0].message ? `“${open[0].message}” · ` : undefined} />
       <form
         className="space-y-2.5 px-4 pb-4"
         onSubmit={async (e) => {
@@ -225,7 +225,7 @@ function QuickLinks() {
   );
 }
 
-// ── Recent activity (no activity table — composed from modules, spec §10.3) ─
+// ── Recent activity (no activity table: composed from modules, spec §10.3) ─
 function RecentActivity() {
   const sb = useSupabase();
   const providers = runtime().modules.filter((m) => m.client.activity);
@@ -264,7 +264,7 @@ function RecentActivity() {
           ))}
         </ul>
       ) : (
-        <p className="px-4 pb-4 text-[12.5px] text-faint">Nothing yet — activity from your tabs shows up here.</p>
+        <p className="px-4 pb-4 text-[12.5px] text-faint">Nothing yet: activity from your tabs shows up here.</p>
       )}
     </Card>
   );

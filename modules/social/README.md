@@ -6,7 +6,7 @@
 - Anyone with *draft* can suggest and write posts and ask for approval. Only approvers (mentors, or the “Media Lead”
   position) can move a post to *Scheduled*; changing an approved caption sends it back for approval. Both rules are
   enforced in the database.
-- TeamHub never posts anything — copy the caption, post it yourself, then mark it posted with the live link.
+- TeamHub never posts anything: copy the caption, post it yourself, then mark it posted with the live link.
 - Media is linked (Drive, Canva, or a Media Gallery item), never stored here.
 - With Calendar enabled, scheduled posts show on the main calendar (`social+calendar` overlay).
 

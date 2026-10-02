@@ -13,7 +13,7 @@ export default defineModule({
   name: 'Social Media Planner',
   category: 'outreach',
   icon: 'Megaphone',
-  summary: 'Plan posts from idea to approval to “posted” — nothing is posted automatically.',
+  summary: 'Plan posts from idea to approval to “posted”. Nothing is posted automatically.',
   purpose: 'Plan posts from idea to draft, approval, scheduled and posted.',
   notFor: [
     { text: 'Storing photos and videos', goTo: 'media' },

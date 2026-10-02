@@ -133,7 +133,7 @@ export function EventPicker({ value, name, onChange }: { value: string; name?: s
             </section>
             {canScout && (
               <Button variant="ghost" icon={<Plus className="size-4" />} onClick={() => setManualForm(true)}>
-                It's not on FTCScout — add it myself
+                It's not on FTCScout: add it myself
               </Button>
             )}
           </div>

@@ -1,5 +1,5 @@
 /**
- * `npm run setup` — starts the local wizard (spec §5.1): Hono API + Vite-served UI on http://localhost:4747.
+ * `npm run setup` starts the local wizard (spec §5.1): Hono API + Vite-served UI on http://localhost:4747.
  * Everything runs on this computer; secrets never leave it except to Supabase's own API.
  */
 import { createServer as createHttpServer } from 'node:http';
@@ -74,7 +74,7 @@ async function main() {
   server.on('error', (e: NodeJS.ErrnoException) => {
     // Right after a restart the old process may still be releasing the port.
     if (e.code === 'EADDRINUSE' && process.env.TEAMHUB_RESTARTED && retries++ < 40) return void setTimeout(listen, 250);
-    if (e.code === 'EADDRINUSE') console.error(`\n  Port ${PORT} is busy — is the wizard already open? Set TEAMHUB_WIZARD_PORT to use another port.\n`);
+    if (e.code === 'EADDRINUSE') console.error(`\n  Port ${PORT} is busy: is the wizard already open? Set TEAMHUB_WIZARD_PORT to use another port.\n`);
     else console.error(e);
     process.exit(1);
   });

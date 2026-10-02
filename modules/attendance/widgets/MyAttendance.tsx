@@ -19,7 +19,7 @@ export default function MyAttendance() {
       <CardHeader icon={<UserCheck className="size-4" />} title="Your attendance" action={<Link to="/attendance" className="text-[12px] font-medium text-accent">Details</Link>} />
       <div className="flex items-center gap-4 px-4 pb-4">
         <ProgressRing value={st.pct ?? 0} size={60}>
-          {st.pct == null ? '—' : `${Math.round(st.pct * 100)}%`}
+          {st.pct == null ? '–' : `${Math.round(st.pct * 100)}%`}
         </ProgressRing>
         <p className="text-[13px] text-muted">
           {st.attended} of {st.expected} practices this season

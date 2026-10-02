@@ -13,7 +13,7 @@ const HINTS: Record<string, string> = {
   portfolio: 'Your engineering portfolio (Google Doc / Slides).',
   code_repo: 'Your robot code on GitHub.',
   cad: 'Your Onshape document or workspace.',
-  drive: 'Shared Google Drive / OneDrive folder — big files go here, not in TeamHub.',
+  drive: 'Shared Google Drive / OneDrive folder: big files go here, not in TeamHub.',
   manual: 'Paste this season’s competition manual URL.',
 };
 const PREFILL: Record<string, { label: string; url: string }> = {
@@ -129,14 +129,14 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
       setDraft((d) => ({ ...d, done: { ...d.done, applied: true } }));
       toast.success('Your database is ready');
     } catch (e) {
-      setLog([{ step: 'Apply failed — nothing was changed (the whole update runs in one transaction).', ok: false, detail: (e as Error).message }]);
+      setLog([{ step: 'Apply failed. Nothing was changed (the whole update runs in one transaction).', ok: false, detail: (e as Error).message }]);
     } finally {
       setBusy(false);
     }
   };
 
   return (
-    <StepShell title="Connect Supabase" subtitle="Supabase is your team's database, logins and file storage — on your own free account." onBack={onBack} onNext={onNext} nextDisabled={!draft.done.applied} nextLabel="Continue">
+    <StepShell title="Connect Supabase" subtitle="Supabase is your team's database, logins and file storage: on your own free account." onBack={onBack} onNext={onNext} nextDisabled={!draft.done.applied} nextLabel="Continue">
       <Section title="1. Create a free Supabase project" description="Skip this if you already made one for TeamHub.">
         <ol className="list-decimal space-y-1 pl-5 text-[13.5px] text-muted">
           <li>
@@ -229,7 +229,7 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
                 <option value="">Choose a project…</option>
                 {projects.map((p) => (
                   <option key={p.ref} value={p.ref}>
-                    {p.name} ({p.region}){p.status !== 'ACTIVE_HEALTHY' ? ` — ${p.status.toLowerCase()}` : ''}
+                    {p.name} ({p.region}){p.status !== 'ACTIVE_HEALTHY' ? ` (${p.status.toLowerCase()})` : ''}
                   </option>
                 ))}
               </Select>
@@ -271,11 +271,11 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
         )}
         <Why>
           <p>The wizard uses the token to create tables and access rules, deploy three tiny server functions (password reset links, account deletion, file cleanup) and set sign-in options. It never sends the token anywhere else.</p>
-          <p>Students can sign up without email confirmation because a captain or mentor approves every new account — Supabase’s built-in email only reaches your own Supabase team members.</p>
+          <p>Students can sign up without email confirmation because a captain or mentor approves every new account: Supabase’s built-in email only reaches your own Supabase team members.</p>
         </Why>
       </Section>
       {c.supabase.projectRef && (
-        <Section title="3. Build your database" description="Review what will be created, then apply it. It runs as one transaction — if anything fails, nothing changes.">
+        <Section title="3. Build your database" description="Review what will be created, then apply it. It runs as one transaction. If anything fails, nothing changes.">
           {!plan ? (
             <Spinner />
           ) : (
@@ -369,7 +369,7 @@ export function AdminAccount({ onNext, onBack }: StepProps) {
           try {
             await api('/admin', { name: name.trim(), email: email.trim(), password, types });
             setDraft((d) => ({ ...d, done: { ...d.done, admin: true } }));
-            toast.success('Admin account created — you can sign in with it once your site is live.');
+            toast.success('Admin account created. You can sign in with it once your site is live.');
           } catch (e) {
             toast.error((e as Error).message);
           } finally {

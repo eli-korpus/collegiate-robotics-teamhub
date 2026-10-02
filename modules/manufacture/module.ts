@@ -34,7 +34,7 @@ export default defineModule({
   name: 'To Manufacture',
   category: 'engineering',
   icon: 'Printer',
-  summary: 'Queue parts for 3D printing, CNC, laser cutting and more — routed to whoever runs each machine.',
+  summary: 'Queue parts for 3D printing, CNC, laser cutting and more: routed to whoever runs each machine.',
   purpose: 'Get a part made by the person responsible for that machine.',
   notFor: [
     { text: 'Buying parts', goTo: 'purchases' },

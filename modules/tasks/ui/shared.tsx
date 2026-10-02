@@ -178,7 +178,7 @@ export function TaskDialog({ task, onClose, draft }: { task?: Task | null; onClo
             <Field label="Subteam" optional>
               {(id) => (
                 <Select id={id} value={v.subteam_id} onChange={(e) => setV({ ...v, subteam_id: e.target.value })}>
-                  <option value="">—</option>
+                  <option value="">None</option>
                   {subteams.map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.name}
@@ -192,7 +192,7 @@ export function TaskDialog({ task, onClose, draft }: { task?: Task | null; onClo
             <Field label="Owned by position" optional hint="e.g. Lead Programmer">
               {(id) => (
                 <Select id={id} value={v.position_id} onChange={(e) => setV({ ...v, position_id: e.target.value })}>
-                  <option value="">—</option>
+                  <option value="">None</option>
                   {positions.data!.map((p) => (
                     <option key={p.id} value={p.id}>
                       {p.name}

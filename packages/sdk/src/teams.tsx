@@ -49,7 +49,7 @@ export function TeamScopePicker({
   );
 }
 
-/** "Visible to everyone on Team A" etc. — derived from the item's team scope (spec §10.8). */
+/** "Visible to everyone on Team A" etc.: derived from the item's team scope (spec §10.8). */
 export function ScopeVisibility({ teamId, suffix, locked }: { teamId: string | null | undefined; suffix?: string; locked?: boolean }) {
   const t = teamById(teamId);
   const base = t && isMultiTeam() ? `Visible to everyone on ${t.name}` : `Visible to everyone in ${runtime().config.program.name}`;

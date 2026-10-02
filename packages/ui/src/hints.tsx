@@ -5,7 +5,7 @@ import { Button } from './primitives';
 import { Menu, type MenuItem } from './overlays';
 
 /**
- * "Who will see this?" — rendered next to every composer, field group, upload and response UI (spec P6, §10.8).
+ * "Who will see this?": rendered next to every composer, field group, upload and response UI (spec P6, §10.8).
  */
 export function VisibilityNote({ children, locked, className }: { children: ReactNode; locked?: boolean; className?: string }) {
   return (

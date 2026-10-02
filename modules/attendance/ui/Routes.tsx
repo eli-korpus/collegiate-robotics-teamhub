@@ -171,7 +171,7 @@ function Mine() {
       <div className="grid gap-3 sm:grid-cols-3">
         <Card className="flex items-center gap-4 p-4">
           <ProgressRing value={st.pct ?? 0} size={64} label="Your attendance this season">
-            {st.pct == null ? '—' : `${Math.round(st.pct * 100)}%`}
+            {st.pct == null ? '–' : `${Math.round(st.pct * 100)}%`}
           </ProgressRing>
           <div>
             <p className="font-semibold">Season {season}</p>
@@ -291,7 +291,7 @@ function Report() {
             header: '%',
             align: 'right',
             sort: (r) => r.st.pct ?? -1,
-            cell: (r) => <span className={r.st.pct != null && r.st.pct < 0.6 ? 'text-danger' : r.st.pct != null && r.st.pct < 0.8 ? 'text-warning' : ''}>{r.st.pct == null ? '—' : `${Math.round(r.st.pct * 100)}%`}</span>,
+            cell: (r) => <span className={r.st.pct != null && r.st.pct < 0.6 ? 'text-danger' : r.st.pct != null && r.st.pct < 0.8 ? 'text-warning' : ''}>{r.st.pct == null ? '–' : `${Math.round(r.st.pct * 100)}%`}</span>,
           },
           ...(settings.trackHours ? [{ id: 'h', header: 'Hours', align: 'right' as const, cell: (r: (typeof rows)[number]) => hours(r.st.hoursMs), sort: (r: (typeof rows)[number]) => r.st.hoursMs }] : []),
         ]}

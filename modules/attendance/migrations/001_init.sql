@@ -58,7 +58,7 @@ begin
     raise exception 'You are not on this team';
   end if;
   if not exists (select 1 from att_codes where session_id = p_session and code = trim(p_code) and expires_at > now()) then
-    raise exception 'That code is wrong or has expired — use the one on the screen now';
+    raise exception 'That code is wrong or has expired. Use the one on the screen now';
   end if;
   insert into att_presence (session_id, user_id, check_in) values (p_session, auth.uid(), now())
   on conflict (session_id, user_id) do update set check_in = coalesce(att_presence.check_in, excluded.check_in);

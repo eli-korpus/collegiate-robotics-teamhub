@@ -31,7 +31,7 @@ export const useTemplates = (season: string) => useRows<Template>(['scouting', '
 export const useEntries = (event: string | null) =>
   useRows<Entry>(['scouting', 'entries', event], (sb) => sb.from('sct_entries').select('*').eq('event_code', event ?? '').order('created_at'), { enabled: !!event, refetchInterval: 60_000 });
 
-/** Per-team scouting averages, event averages and the data-driven pick score — recomputed as data arrives. */
+/** Per-team scouting averages, event averages and the data-driven pick score: recomputed as data arrives. */
 export function useScoutingStats(ctx: EventContext, templates: Template[]) {
   const entries = useEntries(ctx.code);
   const fields = (templates.find((t) => t.kind === 'match')?.fields ?? []).filter(isNumericField);

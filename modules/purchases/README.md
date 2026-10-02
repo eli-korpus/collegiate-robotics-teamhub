@@ -7,6 +7,6 @@
 - Requesters are notified of every status change. Comments on each request.
 - With Parts Inventory enabled, a received item can be added to inventory in one tap.
 
-**Not for:** budgets or accounting (owner decision — keep those in your Drive), general to-dos (Tasks), getting parts made (To Manufacture).
+**Not for:** budgets or accounting (owner decision; keep those in your Drive), general to-dos (Tasks), getting parts made (To Manufacture).
 
 **Permissions:** request (everyone), order/receive (Mentors), decline (Mentors).

@@ -10,7 +10,7 @@ export function hostOf(url: string): string {
   }
 }
 
-/** Favicon from Google's s2 service (spec §14.4) — no storage used. Falls back to a link icon. */
+/** Favicon from Google's s2 service (spec §14.4): no storage used. Falls back to a link icon. */
 export function Favicon({ url, size = 16, className }: { url: string; size?: number; className?: string }) {
   const [failed, setFailed] = useState(false);
   if (failed) return <Link2 className={cn('shrink-0 text-muted', className)} style={{ width: size, height: size }} />;

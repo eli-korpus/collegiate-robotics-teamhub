@@ -15,7 +15,7 @@ export function Welcome({ onNext }: StepProps) {
   return (
     <StepShell
       title="Welcome to TeamHub FTC"
-      subtitle="An open-source team dashboard for FIRST Tech Challenge teams. This wizard sets everything up — your teams, your tabs, your database and your website — and you can change any of it later."
+      subtitle="An open-source team dashboard for FIRST Tech Challenge teams. This wizard sets everything up (your teams, your tabs, your database and your website) and you can change any of it later."
       onNext={onNext}
       nextLabel="Let's start"
     >
@@ -23,7 +23,7 @@ export function Welcome({ onNext }: StepProps) {
         {[
           { icon: GitBranch, title: 'A GitHub account', body: 'Your copy (fork) of TeamHub lives there. Your website rebuilds from it automatically.' },
           { icon: Database, title: 'A Supabase account', body: 'Your team’s own database and logins, on the free plan. Nobody else can see your data.' },
-          { icon: Clock, title: 'About 30 minutes', body: 'You can stop any time — progress saves automatically and you’ll resume where you left off.' },
+          { icon: Clock, title: 'About 30 minutes', body: 'You can stop any time: progress saves automatically and you’ll resume where you left off.' },
           { icon: Wallet, title: '$0 on free plans', body: 'Supabase free + Cloudflare, Vercel, Netlify or GitHub Pages hosting. No credit card needed.' },
         ].map(({ icon: I, title, body }) => (
           <Card key={title} className="flex gap-3 p-4">
@@ -53,8 +53,8 @@ export function Program({ onNext, onBack }: StepProps) {
   const c = draft.config;
   const [busy, setBusy] = useState(false);
   return (
-    <StepShell title="Your program" subtitle="A program is your whole club — one school or organization. It can have one FTC team or several." onBack={onBack} onNext={onNext} nextDisabled={!c.program.name.trim()}>
-      <Field label="Program name" hint='e.g. "Collegiate Robotics" — shown at the top of the dashboard and on the login page.'>
+    <StepShell title="Your program" subtitle="A program is your whole club: one school or organization. It can have one FTC team or several." onBack={onBack} onNext={onNext} nextDisabled={!c.program.name.trim()}>
+      <Field label="Program name" hint='e.g. "Collegiate Robotics": shown at the top of the dashboard and on the login page.'>
         {(id) => <Input id={id} autoFocus value={c.program.name} maxLength={80} onChange={(e) => update((x) => void (x.program.name = e.target.value))} />}
       </Field>
       <div className="space-y-1.5">
@@ -166,7 +166,7 @@ export function Teams({ onNext, onBack }: StepProps) {
         setFound({ ...found, [num]: `${t.name}${t.schoolName ? ` · ${t.schoolName}` : ''}${t.location?.city ? ` · ${t.location.city}` : ''}` });
       } else setFound({ ...found, [num]: 'Not found on FTCScout (that’s OK for new teams).' });
     } catch {
-      setFound({ ...found, [num]: 'FTCScout is unavailable — fill in the name yourself.' });
+      setFound({ ...found, [num]: 'FTCScout is unavailable. Fill in the name yourself.' });
     } finally {
       setLooking(null);
     }
@@ -225,7 +225,7 @@ export function Teams({ onNext, onBack }: StepProps) {
                       x.teams[i].logo = `${res.path}?v=${Date.now().toString(36)}`;
                       if (p.suggestedColor) x.teams[i].color = p.suggestedColor.toUpperCase();
                     });
-                    if (p.suggestedColor) toast.info('Picked the team color from the logo — change it if you like.');
+                    if (p.suggestedColor) toast.info('Picked the team color from the logo. Change it if you like.');
                   } catch (e) {
                     toast.error((e as Error).message);
                   }

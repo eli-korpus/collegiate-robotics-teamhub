@@ -1,6 +1,6 @@
 /**
  * Scouting insights: pure functions combining FTCScout match data with your own scouting entries.
- * Nothing here is game-specific — numeric fields are whatever your team defined this season.
+ * Nothing here is game-specific: numeric fields are whatever your team defined this season.
  */
 import type { FieldDef, FormValues } from '@teamhub/ui';
 import type { FtcMatch } from '@teamhub/sdk/ftcscout';

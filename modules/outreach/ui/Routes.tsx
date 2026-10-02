@@ -208,7 +208,7 @@ function EventDialog({ event: e, hours, onEdit, onClose }: { event: OutEvent; ho
     if (!(n > 0 && n <= 24)) return toast.error('Enter hours between 0.5 and 24');
     const { error } = await sb.from('out_hours').upsert({ event_id: e.id, user_id: me.id, hours: Math.round(n * 10) / 10 });
     if (error) return toast.error(friendlyError(error));
-    toast.success(approver ? 'Hours saved' : 'Hours logged — waiting for approval');
+    toast.success(approver ? 'Hours saved' : 'Hours logged: waiting for approval');
     refresh();
   };
   const removeHours = async (user: string) => {

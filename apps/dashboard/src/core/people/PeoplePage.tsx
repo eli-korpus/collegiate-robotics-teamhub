@@ -159,7 +159,7 @@ function PersonCard({ p, teamId, onClick }: { p: PersonInfo; teamId?: string; on
         <span className="min-w-0 flex-1">
           <span className="block truncate text-[14px] font-semibold">{p.name}</span>
           <span className="block text-[12px] text-muted">
-            {m ? TYPE_LABEL[m.type] : '—'}
+            {m ? TYPE_LABEL[m.type] : '–'}
             {p.isAdmin && ' · Admin'}
           </span>
           {p.positions.length > 0 && (

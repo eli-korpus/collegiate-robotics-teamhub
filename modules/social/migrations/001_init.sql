@@ -28,7 +28,7 @@ begin
     raise exception 'You can''t mark posts as posted' using errcode = '42501';
   end if;
   if new.status = 'scheduled' and (tg_op = 'INSERT' or old.status not in ('scheduled', 'posted')) then
-    if not v_approver then raise exception 'Only approvers can schedule a post — move it to "Needs approval"' using errcode = '42501'; end if;
+    if not v_approver then raise exception 'Only approvers can schedule a post: move it to "Needs approval"' using errcode = '42501'; end if;
     new.approved_by := auth.uid();
   end if;
   if tg_op = 'UPDATE' and new.status = 'scheduled' and not v_approver and (new.caption <> old.caption or new.media_ref is distinct from old.media_ref) then

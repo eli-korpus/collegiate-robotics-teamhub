@@ -13,7 +13,7 @@ export default defineModule({
   category: 'engineering',
   icon: 'Wrench',
   summary: 'Record what broke, why, and how it was fixed.',
-  purpose: 'Record what broke, why, and how it was fixed — history and portfolio material.',
+  purpose: 'Record what broke, why, and how it was fixed: history and portfolio material.',
   notFor: [{ text: 'Assigning the fix to someone', goTo: 'tasks' }],
   footprint: 'Tiny text; one compressed photo per issue',
   usesFiles: true,

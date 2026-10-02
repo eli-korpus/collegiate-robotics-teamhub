@@ -1,6 +1,6 @@
 # Scouting
 
-**Purpose:** scout other teams and build a pick list — fully season-agnostic.
+**Purpose:** scout other teams and build a pick list: fully season-agnostic.
 
 - **Forms:** your scouting lead builds this season's match and pit forms with counters, numbers, yes/no, choices,
   ratings, timers and notes, grouped in sections. "Copy last season's form" on New Season. Edits are versioned.
@@ -8,7 +8,7 @@
   the venue Wi-Fi drops). Match numbers advance automatically.
 - **Teams:** per-team averages from your scouting next to FTCScout OPR and rank; compare up to 3 teams side by side.
 - **Pick list:** drag-and-drop ranking per event with notes and "do not pick".
-- Scouting data is internal to your program — never public.
+- Scouting data is internal to your program. Never public.
 
 **Not for:** our own practice data (Driver Practice).
 

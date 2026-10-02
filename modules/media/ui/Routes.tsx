@@ -206,7 +206,7 @@ function AlbumPage() {
         {canUpload && (
           <div className="grid gap-3 md:grid-cols-[2fr_1fr]">
             {left > 0 ? (
-              <Upload kind="photo" maxFiles={Math.min(20, left)} onFiles={upload} busy={busy} label={`Add photos (${left} left in this album — compressed to ≤ 400 KB)`} />
+              <Upload kind="photo" maxFiles={Math.min(20, left)} onFiles={upload} busy={busy} label={`Add photos (${left} left in this album: compressed to ≤ 400 KB)`} />
             ) : (
               <p className="rounded-lg border border-dashed border-border p-4 text-[13px] text-muted">This album is full ({maxPhotosPerAlbum} photos). Start a new album, or link a Google Photos/Drive album above.</p>
             )}
@@ -363,7 +363,7 @@ function AlbumEditor({ album, onClose }: { album: Album | null; onClose: (id?: s
       <div className="space-y-4">
         <Field label="Album">{(id) => <Input id={id} autoFocus maxLength={120} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="League meet 2" />}</Field>
         <Field label="Date">{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
-        <Field label="Link to the full album" optional hint="Google Photos or Drive — great for lots of photos or videos">
+        <Field label="Link to the full album" optional hint="Google Photos or Drive: great for lots of photos or videos">
           {(id) => <Input id={id} type="url" value={v.external_url} onChange={(e) => setV({ ...v, external_url: e.target.value })} placeholder="https://photos.app.goo.gl/…" />}
         </Field>
         <TeamScopePicker value={v.team_id} onChange={(t) => setV({ ...v, team_id: t })} perm="media.upload" />

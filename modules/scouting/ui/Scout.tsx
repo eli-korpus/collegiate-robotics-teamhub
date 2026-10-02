@@ -27,7 +27,7 @@ export function Scout({ ctx, stats, templates, canForms, goForms, initial }: { c
      
   }, [t?.id, kind]);
 
-  if (!canWith(me, 'scouting.scout')) return <Banner tone="info">You don't have scouting access — ask a captain.</Banner>;
+  if (!canWith(me, 'scouting.scout')) return <Banner tone="info">You don't have scouting access. Ask a captain.</Banner>;
   if (!t || !t.fields.length)
     return <EmptyState icon={<ClipboardCheck />} title={`No ${kind} scouting form yet`} body="Your scouting lead builds this season's form first." action={canForms && <Button onClick={goForms}>Build the form</Button>} />;
 
@@ -111,7 +111,7 @@ export function Scout({ ctx, stats, templates, canForms, goForms, initial }: { c
       </div>
       {team && already(Number(team)) && <Banner tone="warning">Someone already scouted #{team}{kind === 'match' ? ` in ${match}` : "'s pit"}. Submitting adds a second entry.</Banner>}
       <FormRenderer fields={t.fields} values={values} onChange={setValues} />
-      <VisibilityNote>Visible to your program's scouts and mentors — keep it respectful.</VisibilityNote>
+      <VisibilityNote>Visible to your program's scouts and mentors. Keep it respectful.</VisibilityNote>
       <div className="flex gap-2">
         <Button
           variant="primary"
@@ -123,7 +123,7 @@ export function Scout({ ctx, stats, templates, canForms, goForms, initial }: { c
             setBusy(true);
             const { error } = await sb.from('sct_entries').insert({ template_id: t.id, template_version: t.version, kind, season: t.season, event_code: ctx.code, match_label: kind === 'match' ? match || null : null, team_number: Number(team), data: values, scout: me.id });
             setBusy(false);
-            if (error) return toast.error(`${friendlyError(error)} — your answers are saved on this device; try again.`);
+            if (error) return toast.error(`${friendlyError(error)}. Your answers are saved on this device; try again.`);
             toast.success(`Saved ${kind === 'match' ? match : 'pit'} for #${team}`);
             setDraft(null);
             setTeam('');

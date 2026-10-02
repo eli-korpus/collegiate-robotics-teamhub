@@ -1,4 +1,4 @@
--- Scouting (spec §13.21): fully season-agnostic — teams build their own fields each season.
+-- Scouting (spec §13.21): fully season-agnostic; teams build their own fields each season.
 create table sct_templates (
   id uuid primary key default gen_random_uuid(),
   kind text not null check (kind in ('match', 'pit')),

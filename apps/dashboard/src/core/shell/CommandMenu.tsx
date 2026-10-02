@@ -4,7 +4,7 @@ import { FileText, Home, Shield, User, Users, Zap } from 'lucide-react';
 import { Avatar, CommandBar, matches, type CommandSection } from '@teamhub/ui';
 import { allQuickActions, canWith, runtime, useActivePeople, useSession, useSupabase, type SearchResult } from '@teamhub/sdk';
 
-/** ⌘K: Go to (tabs, people) · Actions (quickActions, permission-filtered) · Search (providers) — spec §10.2. */
+/** ⌘K: Go to (tabs, people) · Actions (quickActions, permission-filtered) · Search (providers) (spec §10.2). */
 export function CommandMenu({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const nav = useNavigate();
   const sb = useSupabase();

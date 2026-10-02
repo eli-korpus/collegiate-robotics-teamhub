@@ -4,7 +4,7 @@
 
 - Add an event (kind, date, place, people reached, what happened). Members log their own hours on it.
 - Hours count once an approver (mentors, or the “Outreach Lead” position) approves them. Editing your hours after
-  approval sends them back for approval — enforced in the database.
+  approval sends them back for approval: enforced in the database.
 - **Totals:** hours by kind and by person for the season, people reached, and a CSV export for award submissions.
 - Profile section shows each person's season hours. Home widget: “Season outreach: 132 h, 1,240 people”.
 - With Calendar enabled, outreach events show on the calendar (`outreach+calendar`). With Engineering Notebook,

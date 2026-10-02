@@ -41,7 +41,7 @@ export function PickList({ ctx, stats, onTeam }: { ctx: EventContext; stats: Ret
   };
   const name = (n: number) => ctx.teams.find((t) => t.number === n)?.name;
   const t = (n: number) => ctx.teams.find((x) => x.number === n);
-  // Best available by the data: pick score, then OPR — excluding our own team and already-ranked teams.
+  // Best available by the data: pick score, then OPR, excluding our own team and already-ranked teams.
   const suggestions = ctx.teams
     .filter((x) => x.number !== ours.number && !list.some((p) => p.team === x.number))
     .map((x) => ({ n: x.number, s: stats.composite.get(x.number) ?? null, opr: x.stats?.opr?.totalPointsNp ?? null }))
@@ -49,7 +49,7 @@ export function PickList({ ctx, stats, onTeam }: { ctx: EventContext; stats: Ret
   return (
     <div className="grid gap-4 md:grid-cols-[3fr_2fr]">
       <Card>
-        <CardHeader title={`Pick list — ${ours.name}`} subtitle={canEdit ? 'Drag to reorder · notes save automatically' : undefined} />
+        <CardHeader title={`Pick list: ${ours.name}`} subtitle={canEdit ? 'Drag to reorder · notes save automatically' : undefined} />
         <ol className="space-y-1 px-2 pb-3">
           {list.map((p, i) => (
             <li
@@ -117,7 +117,7 @@ export function PickList({ ctx, stats, onTeam }: { ctx: EventContext; stats: Ret
               <button className="flex-1 text-left" onClick={() => onTeam(s.n)}>
                 <span className="font-medium">{s.n}</span> <span className="text-muted">{name(s.n)}</span>
               </button>
-              <span className="tabular text-[12px] text-muted">{s.s != null ? `${s.s > 0 ? '+' : ''}${s.s.toFixed(2)}` : s.opr != null ? `OPR ${s.opr.toFixed(0)}` : '—'}</span>
+              <span className="tabular text-[12px] text-muted">{s.s != null ? `${s.s > 0 ? '+' : ''}${s.s.toFixed(2)}` : s.opr != null ? `OPR ${s.opr.toFixed(0)}` : '–'}</span>
               {canEdit && (
                 <Button size="sm" variant="ghost" onClick={() => save([...list, { team: s.n }])}>
                   Add

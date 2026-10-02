@@ -168,7 +168,7 @@ function MySkills({ skills, signoffs, userId, onEdit, onSign }: { skills: Skill[
           <ul className="space-y-1 text-[13px] text-muted">
             {locked.map((s) => (
               <li key={s.id}>
-                <span className="font-medium text-fg">{s.name}</span> — after {s.requires.map((r) => name.get(r)).filter(Boolean).join(', ')}
+                <span className="font-medium text-fg">{s.name}</span>: after {s.requires.map((r) => name.get(r)).filter(Boolean).join(', ')}
               </li>
             ))}
           </ul>
@@ -353,7 +353,7 @@ function SkillEditor({ skill, all, onClose }: { skill: Skill | null; all: Skill[
       }
     >
       <div className="space-y-4">
-        {!skill && <Banner tone="info">Skills are proven abilities (“Drill press safety”), not job titles — those are Positions in People.</Banner>}
+        {!skill && <Banner tone="info">Skills are proven abilities (“Drill press safety”), not job titles: those are Positions in People.</Banner>}
         <Field label="Skill">{(id) => <Input id={id} autoFocus maxLength={80} value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} placeholder="Drill press safety" />}</Field>
         <Field label="Category" optional>
           {(id) => (
@@ -367,7 +367,7 @@ function SkillEditor({ skill, all, onClose }: { skill: Skill | null; all: Skill[
           <Field label="Subteam" optional>
             {(id) => (
               <Select id={id} value={v.subteam_id} onChange={(e) => setV({ ...v, subteam_id: e.target.value })}>
-                <option value="">—</option>
+                <option value="">None</option>
                 {subteams.map((s) => (
                   <option key={s.id} value={s.id}>{s.name}</option>
                 ))}

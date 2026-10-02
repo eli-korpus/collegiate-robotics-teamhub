@@ -1,6 +1,6 @@
 # Skills & Training
 
-**Purpose:** record proven abilities with a sign-off — “Drill press safety”, “Onshape basics”, “Certified driver”.
+**Purpose:** record proven abilities with a sign-off: “Drill press safety”, “Onshape basics”, “Certified driver”.
 
 - **My skills:** your badges, “Skills you can learn next” (skills whose prerequisites you have), and what comes later.
 - **Everyone:** a people × skills matrix, filterable by subteam, with CSV export.

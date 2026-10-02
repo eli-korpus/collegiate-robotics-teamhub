@@ -23,7 +23,7 @@ begin
   end if;
   select failures into tries from att_attempts where session_id = p_session and user_id = auth.uid();
   if coalesce(tries, 0) >= 5 then
-    raise exception 'Too many wrong codes — ask the person taking attendance to check you in' using errcode = '42501';
+    raise exception 'Too many wrong codes. Ask the person taking attendance to check you in' using errcode = '42501';
   end if;
   if not exists (select 1 from att_codes where session_id = p_session and code = trim(p_code) and expires_at > now()) then
     insert into att_attempts (session_id, user_id, failures) values (p_session, auth.uid(), 1)

@@ -1,4 +1,4 @@
--- Security hardening (v1 review). Function replacements only — expand-only rule holds.
+-- Security hardening (v1 review). Function replacements only: expand-only rule holds.
 
 -- Rank of a profile type, for "you can only manage people below you" checks.
 create or replace function people_rank(p_type text) returns int

@@ -26,9 +26,9 @@ export async function gql<T>(query: string, variables: Record<string, unknown> =
         body: JSON.stringify({ query, variables }),
       });
     } catch {
-      throw new FtcScoutError('FTCScout is unavailable — try again later.');
+      throw new FtcScoutError('FTCScout is unavailable. Try again later.');
     }
-    if (!res.ok) throw new FtcScoutError(`FTCScout is unavailable (HTTP ${res.status}) — try again later.`);
+    if (!res.ok) throw new FtcScoutError(`FTCScout is unavailable (HTTP ${res.status}). Try again later.`);
     const body = (await res.json()) as { data?: T; errors?: { message: string }[] };
     if (body.errors?.length && !body.data) throw new FtcScoutError(body.errors[0].message);
     return body.data as T;

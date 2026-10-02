@@ -48,7 +48,7 @@ function useGithub(url: string | undefined) {
     queryFn: async () => {
       const [c, p] = await Promise.all([fetch(`https://api.github.com/repos/${repo}/commits?per_page=8`), fetch(`https://api.github.com/repos/${repo}/pulls?state=open&per_page=5`)]);
       if (c.status === 404) return { repo, private: true as const, commits: [], pulls: [] };
-      if (!c.ok) throw new Error(c.status === 403 ? 'GitHub rate limit reached — try again in a few minutes.' : `GitHub error ${c.status}`);
+      if (!c.ok) throw new Error(c.status === 403 ? 'GitHub rate limit reached. Try again in a few minutes.' : `GitHub error ${c.status}`);
       return {
         repo,
         private: false as const,
@@ -104,7 +104,7 @@ export default function CodeHubRoutes() {
             <Card>
               <CardHeader
                 icon={<Gamepad2 className="size-4" />}
-                title={`Controls — ${current.name}`}
+                title={`Controls: ${current.name}`}
                 action={canWith(me, 'code-hub.edit', current.team_id) && <Button size="sm" variant="ghost" icon={<Pencil className="size-3.5" />} onClick={() => setEditing(current)}>Edit</Button>}
               />
               <div className="space-y-4 px-4 pb-4">
@@ -256,7 +256,7 @@ function OpModeDialog({ op, onClose }: { op: OpMode | null; onClose: () => void 
               {CONTROLS.map((c) => (
                 <label key={c} className="flex items-center gap-2 text-[12.5px]">
                   <span className="w-32 shrink-0 text-muted">{CONTROL_LABEL[c]}</span>
-                  <Input className="h-8" value={map[pad]?.[c] ?? ''} placeholder="—" onChange={(e) => setMap({ ...map, [pad]: { ...map[pad], [c]: e.target.value || undefined } })} />
+                  <Input className="h-8" value={map[pad]?.[c] ?? ''} placeholder="Not used" onChange={(e) => setMap({ ...map, [pad]: { ...map[pad], [c]: e.target.value || undefined } })} />
                 </label>
               ))}
             </div>

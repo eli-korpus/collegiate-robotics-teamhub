@@ -34,7 +34,7 @@ export const useDrives = () => useRows<Drive>(['merch', 'drives'], (sb) => sb.fr
 export const useOrders = () => useRows<Order>(['merch', 'orders'], (sb) => sb.from('mer_orders').select('*'));
 export const isOpen = (d: Drive) => d.status === 'open' && (!d.closes_at || new Date(d.closes_at) > new Date());
 
-/** Quantities per item+size — what to order from the vendor. */
+/** Quantities per item+size: what to order from the vendor. */
 export function tally(drive: Drive, orders: Order[]): { item: MerchItem; size: string | null; qty: number }[] {
   const m = new Map<string, number>();
   for (const o of orders) for (const l of o.lines) m.set(`${l.item}\u0000${l.size ?? ''}`, (m.get(`${l.item}\u0000${l.size ?? ''}`) ?? 0) + l.qty);

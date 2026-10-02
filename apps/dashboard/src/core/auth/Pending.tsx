@@ -18,7 +18,7 @@ export function PendingScreen({ missingProfile }: { missingProfile?: boolean }) 
           <p className="text-muted">
             {missingProfile
               ? "Your account exists but your profile couldn't be loaded. If this persists, ask an admin."
-              : 'A captain or mentor needs to approve your account. Let them know you signed up — this page updates once you are in.'}
+              : 'A captain or mentor needs to approve your account. Let them know you signed up. This page updates once you are in.'}
           </p>
         </div>
         {requests.length > 0 && (

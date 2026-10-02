@@ -1,6 +1,6 @@
 # Calendar
 
-**Purpose:** when things happen — practices, meetings, competitions, deadlines and socials.
+**Purpose:** when things happen: practices, meetings, competitions, deadlines and socials.
 
 - Month, Week and Agenda views (Agenda is the default on phones). Filter by event kind and by team.
 - Repeating events (daily, weekly on chosen days, every 2 weeks, monthly) with "cancel this date" for one-off changes.

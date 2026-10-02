@@ -13,7 +13,7 @@ export default defineModule({
   name: 'Merch & Orders',
   category: 'outreach',
   icon: 'Shirt',
-  summary: 'Collect team shirt and hoodie orders — sizes come from profiles.',
+  summary: 'Collect team shirt and hoodie orders: sizes come from profiles.',
   purpose: 'Collect team merch orders.',
   notFor: [
     { text: 'Collecting sizes for other reasons', goTo: 'core:request-info' },

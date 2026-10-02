@@ -17,7 +17,7 @@ interface InfoRequest {
 
 /**
  * THE way to collect personal info (spec §12.2): members get a Home card and answers are written to their profile.
- * No response rows — completion is derived from the profile itself.
+ * No response rows: completion is derived from the profile itself.
  */
 export function RequestInfo() {
   const sb = useSupabase();
@@ -85,7 +85,7 @@ export function RequestInfo() {
                 created_by: me.id,
               });
               if (error) return toast.error(friendlyError(error));
-              toast.success('Request sent — members will see it on Home');
+              toast.success('Request sent. Members will see it on Home');
               setOpen(false);
               setPicked([]);
               setMessage('');

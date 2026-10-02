@@ -131,7 +131,7 @@ function SeasonTimeline({ teamNumber, season }: { teamNumber: number; season: nu
     <>
       <div className="grid gap-3 sm:grid-cols-4">
         <StatTile label="Events" value={list.length} />
-        <StatTile label="Best rank" value={best ?? '—'} />
+        <StatTile label="Best rank" value={best ?? '–'} />
         <StatTile label="Qual record" value={`${wins}–${losses}`} />
         <StatTile label="Awards" value={awards.length} icon={<Award />} />
       </div>
@@ -163,7 +163,7 @@ function SeasonTimeline({ teamNumber, season }: { teamNumber: number; season: nu
                   {e.stats && (
                     <div className="tabular flex gap-4 text-center text-[12px]">
                       <div>
-                        <p className="text-[18px] font-semibold">{e.stats.rank ?? '—'}</p>
+                        <p className="text-[18px] font-semibold">{e.stats.rank ?? '–'}</p>
                         <p className="text-muted">rank</p>
                       </div>
                       <div>
@@ -206,9 +206,9 @@ function Compare({ season }: { season: number }) {
       keyOf={(r) => r.t.id}
       columns={[
         { id: 'team', header: 'Team', cell: (r) => <span className="font-medium">{r.t.name} #{r.t.number}</span> },
-        { id: 'opr', header: 'Season OPR', align: 'right', sort: (r) => r.q?.tot?.value ?? -1, cell: (r) => r.q?.tot?.value?.toFixed(1) ?? '—' },
-        { id: 'rank', header: 'World OPR rank', align: 'right', sort: (r) => r.q?.tot?.rank ?? 1e9, cell: (r) => r.q?.tot?.rank ?? '—' },
-        { id: 'played', header: 'Matches', align: 'right', cell: (r) => r.q?.count ?? '—' },
+        { id: 'opr', header: 'Season OPR', align: 'right', sort: (r) => r.q?.tot?.value ?? -1, cell: (r) => r.q?.tot?.value?.toFixed(1) ?? '–' },
+        { id: 'rank', header: 'World OPR rank', align: 'right', sort: (r) => r.q?.tot?.rank ?? 1e9, cell: (r) => r.q?.tot?.rank ?? '–' },
+        { id: 'played', header: 'Matches', align: 'right', cell: (r) => r.q?.count ?? '–' },
         { id: 'trend', header: 'OPR over 4 seasons', cell: (r) => <Sparkline values={r.trend.filter((v): v is number => v != null)} width={110} height={26} /> },
       ]}
     />
@@ -254,10 +254,10 @@ function EventPage() {
         <Banner tone="info">Team #{teamNumber} isn't registered for this event.</Banner>
       ) : (
         <div className="grid gap-3 sm:grid-cols-4">
-          <StatTile label="Rank" value={us.stats?.rank ?? '—'} hint={`of ${e.teams.length}`} />
-          <StatTile label="Record" value={us.stats ? `${us.stats.wins}-${us.stats.losses}-${us.stats.ties}` : '—'} />
-          <StatTile label="OPR (no penalties)" value={us.stats?.opr?.totalPointsNp.toFixed(1) ?? '—'} />
-          <StatTile label="Average score" value={us.stats?.avg?.totalPointsNp.toFixed(1) ?? '—'} />
+          <StatTile label="Rank" value={us.stats?.rank ?? '–'} hint={`of ${e.teams.length}`} />
+          <StatTile label="Record" value={us.stats ? `${us.stats.wins}-${us.stats.losses}-${us.stats.ties}` : '–'} />
+          <StatTile label="OPR (no penalties)" value={us.stats?.opr?.totalPointsNp.toFixed(1) ?? '–'} />
+          <StatTile label="Average score" value={us.stats?.avg?.totalPointsNp.toFixed(1) ?? '–'} />
         </div>
       )}
       {e.awards.filter((a) => a.teamNumber === teamNumber).length > 0 && (
@@ -331,7 +331,7 @@ export function MatchTable({ matches, us }: { matches: FtcMatch[]; us: number })
               <td className="py-1.5 text-red-600 dark:text-red-400">{side('Red')}</td>
               <td className="py-1.5 text-blue-600 dark:text-blue-400">{side('Blue')}</td>
               <td className={cn('tabular py-1.5 text-right', won && 'text-success font-semibold', lost && 'text-danger')}>
-                {m.hasBeenPlayed && red != null ? `${red}–${blue}` : m.scheduledStartTime ? new Date(m.scheduledStartTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '—'}
+                {m.hasBeenPlayed && red != null ? `${red}–${blue}` : m.scheduledStartTime ? new Date(m.scheduledStartTime).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }) : '–'}
               </td>
             </tr>
           );

@@ -23,7 +23,7 @@ export default function PublicHelp() {
             Scan the code or go to <strong className="break-all">{url}</strong>
           </li>
           <li>Enter your name, email and a password, and pick your team.</li>
-          <li>Tell a captain or mentor you signed up — they'll approve you.</li>
+          <li>Tell a captain or mentor you signed up. They'll approve you.</li>
           <li>Sign in and you're in!</li>
         </ol>
       </div>

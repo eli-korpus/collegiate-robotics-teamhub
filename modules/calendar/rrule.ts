@@ -1,5 +1,5 @@
 /**
- * Small RRULE subset (RFC 5545) — enough for team schedules, expanded client-side (spec §13.2):
+ * Small RRULE subset (RFC 5545): enough for team schedules, expanded client-side (spec §13.2):
  * FREQ=DAILY|WEEKLY|MONTHLY, INTERVAL, BYDAY (weekly), UNTIL (date or UTC datetime), COUNT.
  */
 export const WEEKDAYS = ['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA'] as const;

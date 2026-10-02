@@ -25,11 +25,11 @@ export function personChipData(p: PersonInfo): PersonChipData {
   };
 }
 
-/** <PersonChip> for a user id — the one way to show a person (spec P1). */
+/** <PersonChip> for a user id: the one way to show a person (spec P1). */
 export function Person({ id, size = 'md', showRole, fallback = 'Someone' }: { id: string | null | undefined; size?: 'sm' | 'md'; showRole?: boolean; fallback?: string }) {
   const p = usePerson(id);
   const nav = useNavigate();
-  if (!id) return <span className="text-[13px] text-faint">—</span>;
+  if (!id) return <span className="text-[13px] text-faint">–</span>;
   if (!p)
     return (
       <span className="inline-flex items-center gap-1.5 text-[13px] text-muted">

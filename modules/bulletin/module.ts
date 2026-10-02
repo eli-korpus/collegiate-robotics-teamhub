@@ -21,7 +21,7 @@ export default defineModule({
     { text: 'Storing files', goTo: 'link:drive' },
     { text: 'Discussion', goTo: 'link:team_chat' },
   ],
-  footprint: 'Uses the shared links list — no extra tables',
+  footprint: 'Uses the shared links list: no extra tables',
   stores: 'Nothing new: it shows and organizes the program’s single links list.',
   settings: z.object({}),
   permissions,

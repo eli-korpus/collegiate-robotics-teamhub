@@ -184,7 +184,7 @@ function SheetDialog({ sheet: s, slots, claims, onClose }: { sheet: Sheet; slots
       }
     >
       <div className="space-y-4">
-        <ScopeVisibility teamId={s.team_id} suffix="— including who signed up for what" />
+        <ScopeVisibility teamId={s.team_id} suffix="(including who signed up for what)" />
         {s.description && <p className="whitespace-pre-wrap text-[13.5px]">{s.description}</p>}
         {s.event_ref && (
           <p className="text-[13px] text-muted">
@@ -340,7 +340,7 @@ function SheetEditor({ sheet, slots = [], eventRef, title, onClose }: { sheet: S
         </div>
         <Field label="Closes" optional>{(id) => <Input id={id} type="datetime-local" value={v.closes_at} onChange={(e) => setV({ ...v, closes_at: e.target.value })} />}</Field>
         <TeamScopePicker value={v.team_id} onChange={(t) => setV({ ...v, team_id: t })} perm="signups.create" />
-        <ScopeVisibility teamId={v.team_id} suffix="— including who signed up" />
+        <ScopeVisibility teamId={v.team_id} suffix="(including who signed up)" />
       </div>
     </Dialog>
   );

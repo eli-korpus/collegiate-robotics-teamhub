@@ -29,7 +29,7 @@ export default function NextMatch() {
         )}
         {us?.stats && (
           <p className="text-[13px] text-muted">
-            Rank {us.stats.rank ?? '—'} · {us.stats.wins}-{us.stats.losses}-{us.stats.ties}
+            Rank {us.stats.rank ?? '–'} · {us.stats.wins}-{us.stats.losses}-{us.stats.ties}
           </p>
         )}
       </div>

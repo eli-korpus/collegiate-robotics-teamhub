@@ -235,7 +235,7 @@ export function FormRenderer({ fields, values, onChange }: { fields: FieldDef[];
 /** Aggregate one field across many entries: numbers → average, yes/no → %, choice → most common. */
 export function summarizeField(f: FieldDef, values: FieldValue[]): string {
   const vals = values.filter((v) => v != null && v !== '');
-  if (!vals.length) return '—';
+  if (!vals.length) return '–';
   switch (f.type) {
     case 'counter':
     case 'number':
@@ -252,7 +252,7 @@ export function summarizeField(f: FieldDef, values: FieldValue[]): string {
       const counts = new Map<string, number>();
       for (const v of vals.flatMap((x) => (Array.isArray(x) ? x : [x as string]))) counts.set(v, (counts.get(v) ?? 0) + 1);
       const top = [...counts.entries()].sort((a, b) => b[1] - a[1])[0];
-      return top ? `${top[0]} (${top[1]})` : '—';
+      return top ? `${top[0]} (${top[1]})` : '–';
     }
     case 'text':
       return `${vals.length} note${vals.length === 1 ? '' : 's'}`;

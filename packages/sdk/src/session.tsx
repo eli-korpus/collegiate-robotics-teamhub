@@ -92,7 +92,7 @@ export function useMe(): Me {
   return me;
 }
 
-/** Client mirror of teamhub_can() — UI gating only; RLS is the real gate (spec §3.4). */
+/** Client mirror of teamhub_can(): UI gating only; RLS is the real gate (spec §3.4). */
 export function canWith(me: Me | null, perm: string, teamId?: string | null): boolean {
   if (!me || !me.isActive) return false;
   if (me.isAdmin) return true;

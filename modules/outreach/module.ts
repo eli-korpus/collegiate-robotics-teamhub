@@ -13,7 +13,7 @@ export default defineModule({
   name: 'Outreach Log',
   category: 'outreach',
   icon: 'HeartHandshake',
-  summary: 'Log outreach events, volunteer hours and people reached — totals ready for awards and grants.',
+  summary: 'Log outreach events, volunteer hours and people reached: totals ready for awards and grants.',
   purpose: 'Log outreach events, hours and people reached.',
   notFor: [
     { text: 'Scheduling in general (outreach shows on the calendar automatically)', goTo: 'calendar' },

@@ -240,7 +240,7 @@ function SubmitDialog({ onClose, draftTitle }: { onClose: () => void; draftTitle
         if (res.error) throw res.error;
       }
       qc.invalidateQueries({ queryKey: ['manufacture'] });
-      toast.success('Part submitted — the right people were notified');
+      toast.success('Part submitted: the right people were notified');
       onClose();
     } catch (e) {
       toast.error(friendlyError(e));
@@ -286,7 +286,7 @@ function SubmitDialog({ onClose, draftTitle }: { onClose: () => void; draftTitle
               <>Goes to: {holders.map((h) => h.name).join(', ')}</>
             ) : (
               <span className="inline-flex items-center gap-1 text-warning">
-                <AlertTriangle className="size-3.5" /> Nobody holds the position for {method.name} yet — mentors will get this job.
+                <AlertTriangle className="size-3.5" /> Nobody holds the position for {method.name} yet: mentors will get this job.
               </span>
             )}
           </p>

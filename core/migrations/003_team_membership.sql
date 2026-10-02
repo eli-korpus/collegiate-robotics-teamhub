@@ -9,7 +9,7 @@ begin
   if p_type not in ('member', 'captain', 'mentor') then raise exception 'Invalid type'; end if;
   if not exists (select 1 from teams where id = p_team and not archived) then raise exception 'Unknown team'; end if;
   if not exists (select 1 from profiles where id = p_user and status = 'active') then
-    raise exception 'Only active people can be added to a team — approve their sign-up first' using errcode = 'P0001';
+    raise exception 'Only active people can be added to a team. Approve their sign-up first' using errcode = 'P0001';
   end if;
   if not (teamhub_is_admin() or (people_can_approve(p_team, p_type) and people_outranks(p_user, p_team))) then
     raise exception 'Not allowed' using errcode = '42501';
@@ -30,7 +30,7 @@ begin
     raise exception 'Not allowed' using errcode = '42501';
   end if;
   if not exists (select 1 from memberships where user_id = p_user and team_id <> p_team and status = 'active') then
-    raise exception 'This is their only team — deactivate them instead' using errcode = 'P0001';
+    raise exception 'This is their only team. Deactivate them instead' using errcode = 'P0001';
   end if;
   delete from memberships where user_id = p_user and team_id = p_team;
   delete from position_holders where user_id = p_user and team_id = p_team;

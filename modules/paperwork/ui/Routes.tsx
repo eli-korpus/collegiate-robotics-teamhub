@@ -53,7 +53,7 @@ export default function PaperworkRoutes() {
     <div>
       <ModuleHeader moduleId="paperwork" actions={canManage && <Button variant="primary" icon={<Plus className="size-4" />} onClick={() => setEditing('new')}>Add required form</Button>} />
       <div className="mx-auto max-w-6xl space-y-5 px-4 py-5 sm:px-6">
-        <Banner tone="info">Hand in the paper copy or submit through the form's link — a mentor will check you off here. Never upload documents to TeamHub.</Banner>
+        <Banner tone="info">Hand in the paper copy or submit through the form's link. A mentor will check you off here. Never upload documents to TeamHub.</Banner>
         {!list.length ? (
           <EmptyState icon={<FileCheck2 />} title="No required paperwork this season" body={<ModulePurpose moduleId="paperwork" compact className="mt-2 text-left" />} />
         ) : (
@@ -129,7 +129,7 @@ export default function PaperworkRoutes() {
                                   label={<span className="sr-only">{`${p.name}: ${i.name}`}</span>}
                                 />
                               ) : (
-                                <span className="text-faint">—</span>
+                                <span className="text-faint">–</span>
                               )}
                             </td>
                           ))}

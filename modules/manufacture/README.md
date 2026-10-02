@@ -3,7 +3,7 @@
 **Purpose:** get a part made by the person responsible for that machine.
 
 - Submit a part with its files (STL, OBJ, 3MF, STEP, DXF, SVG, PDF) or an Onshape link, method, quantity, material and due date.
-- Each **method** (FDM, resin, CNC, laser, outsourced, machine shop — editable in setup) maps to **positions** such as
+- Each **method** (FDM, resin, CNC, laser, outsourced, machine shop: editable in setup) maps to **positions** such as
   "3D Print Farm Manager". New jobs notify whoever holds them (mentors if nobody does).
 - Pipeline board: Submitted > Queued > In progress > Done (Failed/Cancelled on a separate filter).
 - Model files are gzip-compressed in the browser and **auto-deleted N days after the part is done** (default 14),

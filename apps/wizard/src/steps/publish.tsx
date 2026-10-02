@@ -34,7 +34,7 @@ export function PublishButton({ message, onDone, label = 'Commit & push to GitHu
             if (r.ok) {
               toast.success('Pushed to GitHub');
               onDone?.();
-            } else toast.error('Git push failed — see the details below.');
+            } else toast.error('Git push failed. See the details below.');
           } catch (e) {
             toast.error((e as Error).message);
           } finally {
@@ -99,7 +99,7 @@ export function Publish({ onNext, onBack }: StepProps) {
           )}
           <Section title="What gets committed" description="Only TeamHub's team folder and host settings, so TeamHub updates never conflict with them and you always get new tabs and fixes.">
             <ul className="list-disc pl-5 text-[13px] text-muted">
-              <li>team/teamhub.config.json (no secrets — the Supabase URL and publishable key are public by design)</li>
+              <li>team/teamhub.config.json (no secrets: the Supabase URL and publishable key are public by design)</li>
               <li>team/branding/ (logos)</li>
             </ul>
           </Section>
@@ -130,7 +130,7 @@ const GUIDES: Record<HostProvider, string[]> = {
   cloudflare: [
     'Go to dash.cloudflare.com > Compute (Workers) > Create > Import a repository, and connect GitHub.',
     'Pick your TeamHub fork. Build command: npm run build. Deploy command: npx wrangler deploy (the wrangler.jsonc file we added tells it where the site is).',
-    'Click Deploy. After a minute or two you get a URL like https://<name>.<account>.workers.dev — paste it below.',
+    'Click Deploy. After a minute or two you get a URL like https://<name>.<account>.workers.dev. Paste it below.',
   ],
   vercel: [
     'Go to vercel.com/new and import your TeamHub fork from GitHub.',
@@ -145,7 +145,7 @@ const GUIDES: Record<HostProvider, string[]> = {
   'github-pages': [
     'On GitHub open your fork > Settings > Pages. Under “Build and deployment”, set Source to “GitHub Actions”.',
     'The workflow we added (.github/workflows/pages.yml) builds and publishes on every push. Watch it under the Actions tab.',
-    'Your URL is https://<your-username>.github.io/<repository-name>/ — paste it below.',
+    'Your URL is https://<your-username>.github.io/<repository-name>/. Paste it below.',
   ],
 };
 
@@ -203,7 +203,7 @@ export function Host({ onNext, onBack }: StepProps) {
                       const path = new URL(clean).pathname;
                       if (path !== c.hosting.basePath) {
                         update((x) => void (x.hosting.basePath = path.endsWith('/') ? path : `${path}/`));
-                        toast.info('Your site lives in a sub-folder — we updated the build. Push again after this step.');
+                        toast.info('Your site lives in a sub-folder. We updated the build. Push again after this step.');
                       }
                     }
                     await api('/config', { ...c, hosting: { ...c.hosting, provider, url: clean.replace(/\/$/, '') } });
@@ -225,7 +225,7 @@ export function Host({ onNext, onBack }: StepProps) {
             {result && <Banner tone={result.ok ? 'success' : 'warning'}>{result.message}</Banner>}
             {result && !result.ok && (
               <Button size="sm" variant="ghost" onClick={() => setDraft((d) => ({ ...d, done: { ...d.done, hosted: true } }))}>
-                Skip the check — I'll fix it later
+                Skip the check. I'll fix it later
               </Button>
             )}
             <Why title="What happens with the address?">
@@ -243,8 +243,8 @@ export function KeepAlive({ onNext, onBack }: StepProps) {
   const [written, setWritten] = useState(false);
   const [updates, setUpdates] = useState(true);
   return (
-    <StepShell title="Keep your database awake" subtitle="Free Supabase projects pause after 7 days without activity — for example over a long break." onBack={onBack} onNext={onNext} nextLabel={draft.done.keepalive ? 'Continue' : 'Skip for now'}>
-      <Section title="A tiny scheduled ping" description="We add a GitHub Action to your fork that pings your database every 3 days. It needs no secrets — it reads the public address from your config.">
+    <StepShell title="Keep your database awake" subtitle="Free Supabase projects pause after 7 days without activity, for example over a long break." onBack={onBack} onNext={onNext} nextLabel={draft.done.keepalive ? 'Continue' : 'Skip for now'}>
+      <Section title="A tiny scheduled ping" description="We add a GitHub Action to your fork that pings your database every 3 days. It needs no secrets. It reads the public address from your config.">
         {!written ? (
           <div className="space-y-3">
             <Checkbox
@@ -274,7 +274,7 @@ export function KeepAlive({ onNext, onBack }: StepProps) {
       </Section>
       <Banner tone="info" title="One thing to know">
         GitHub turns off scheduled workflows in repositories with no commits for 60 days. If that happens, open your fork &gt; Actions &gt; “Keep TeamHub awake” &gt; Enable workflow. If the project
-        does pause, open it in the Supabase dashboard and click Restore — your data is kept.
+        does pause, open it in the Supabase dashboard and click Restore. Your data is kept.
       </Banner>
     </StepShell>
   );
@@ -285,7 +285,7 @@ export function Done() {
   const c = draft.config;
   const site = c.hosting.url;
   const join = site ? `${site}/join` : null;
-  const invite = `Join ${c.program.name} on TeamHub: ${join ?? '(your site)/join'} — sign up with your name, email and a password, pick your team, and a captain or mentor will approve you.`;
+  const invite = `Join ${c.program.name} on TeamHub: ${join ?? '(your site)/join'}. Sign up with your name, email and a password, pick your team, and a captain or mentor will approve you.`;
   return (
     <StepShell title="You're all set!" subtitle="Your dashboard is live. Here's how to bring your team in.">
       <Card className="flex items-start gap-3 p-4">

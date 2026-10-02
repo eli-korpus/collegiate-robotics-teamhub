@@ -26,7 +26,7 @@ export default function NextEvent({ teamId }: { teamId: string | null }) {
           </p>
         ) : (
           <p className="text-[13px] text-muted">
-            Rank {last!.stats!.rank ?? '—'} · {last!.stats!.wins}-{last!.stats!.losses}
+            Rank {last!.stats!.rank ?? '–'} · {last!.stats!.wins}-{last!.stats!.losses}
             {last!.awards.length ? ` · ${last!.awards.length} award${last!.awards.length > 1 ? 's' : ''}` : ''}
           </p>
         )}

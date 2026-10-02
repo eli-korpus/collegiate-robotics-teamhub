@@ -24,7 +24,7 @@ export function ResetPassword() {
     <AuthLayout title="Set a new password">
       {hashError ? (
         <Banner tone="danger" title="This reset link didn't work">
-          {hashError}. Reset links expire quickly — ask a mentor or admin for a new one.
+          {hashError}. Reset links expire quickly. Ask a mentor or admin for a new one.
         </Banner>
       ) : !session && !loading && waited ? (
         <Banner tone="warning" title="Open your reset link first">

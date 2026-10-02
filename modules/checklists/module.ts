@@ -12,7 +12,7 @@ export default defineModule({
   name: 'Checklists',
   category: 'competition',
   icon: 'ListChecks',
-  summary: 'Pre-match, pit, packing, inspection, judging and portfolio checklists — run again and again.',
+  summary: 'Pre-match, pit, packing, inspection, judging and portfolio checklists. Run again and again.',
   purpose: 'Run through a list of steps, again and again.',
   notFor: [
     { text: 'Assigning work to people', goTo: 'tasks' },

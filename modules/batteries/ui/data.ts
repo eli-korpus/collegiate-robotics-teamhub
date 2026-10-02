@@ -54,7 +54,7 @@ export function batteryStatus(b: Battery, logs: BatLog[], s: BatSettings): { sta
 export const STATE_LABEL: Record<BatState, { label: string; tone: 'success' | 'warning' | 'danger' | 'neutral' }> = {
   charged: { label: 'Charged', tone: 'success' },
   needs_charge: { label: 'Needs charging', tone: 'warning' },
-  weak: { label: 'Weak — consider retiring', tone: 'danger' },
+  weak: { label: 'Weak (consider retiring)', tone: 'danger' },
   unknown: { label: 'Unknown', tone: 'neutral' },
   retired: { label: 'Retired', tone: 'neutral' },
 };

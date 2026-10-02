@@ -311,7 +311,7 @@ function FeedsDialog({ onClose }: { onClose: () => void }) {
   const rows = [{ team_id: null as string | null, name: `Everything in ${runtime().config.program.name}` }, ...(isMultiTeam() ? teams.map((t) => ({ team_id: t.id as string | null, name: t.name })) : [])];
   const refresh = () => qc.invalidateQueries({ queryKey: ['calendar', 'feeds'] });
   return (
-    <Dialog open onOpenChange={(v) => !v && onClose()} title="Family calendar feeds" description="Parents can subscribe to these links in Google Calendar, Apple Calendar or Outlook — no account needed. Anyone with a link can see those events, so share them only with families. Rotate a link to turn the old one off." size="lg">
+    <Dialog open onOpenChange={(v) => !v && onClose()} title="Family calendar feeds" description="Parents can subscribe to these links in Google Calendar, Apple Calendar or Outlook: no account needed. Anyone with a link can see those events, so share them only with families. Rotate a link to turn the old one off." size="lg">
       <ul className="space-y-3">
         {rows.map((r) => {
           const feed = q.data?.find((f) => f.team_id === r.team_id);

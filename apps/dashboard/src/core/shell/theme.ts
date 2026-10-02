@@ -18,7 +18,7 @@ function apply(pref: Pref) {
   document.documentElement.classList.toggle('dark', dark);
 }
 
-/** Light / Dark / System per device (localStorage, no DB row — spec §9.2). */
+/** Light / Dark / System per device (localStorage, no DB row, spec §9.2). */
 export function useTheme() {
   const pref = useSyncExternalStore(
     (l) => {

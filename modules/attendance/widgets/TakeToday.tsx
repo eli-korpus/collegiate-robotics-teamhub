@@ -7,7 +7,7 @@ import { Slot, useSupabase } from '@teamhub/sdk';
 import { sessionTitle, type Session } from '../data';
 import { StartDialog } from '../ui/Routes';
 
-/** Today strip: "Practice today — take attendance" for takers. */
+/** Today strip: "Practice today: take attendance" for takers. */
 export default function TakeToday() {
   const sb = useSupabase();
   const [starting, setStarting] = useState(false);

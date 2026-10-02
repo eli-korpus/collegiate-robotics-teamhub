@@ -71,7 +71,7 @@ export function CheckInForm({ sessionId, initialCode = '', onDone }: { sessionId
     const { data, error } = await sb.rpc('att_check_in', { p_session: sessionId, p_code: c });
     setBusy(false);
     if (error) return setError(friendlyError(error));
-    if (data === 'wrong_code') return setError('That code is wrong or has expired — use the one on the screen now.');
+    if (data === 'wrong_code') return setError('That code is wrong or has expired. Use the one on the screen now.');
     setDone(true);
     qc.invalidateQueries({ queryKey: ['attendance'] });
     onDone?.();
@@ -95,7 +95,7 @@ export function CheckInForm({ sessionId, initialCode = '', onDone }: { sessionId
             onClick={async () => {
               const { error } = await sb.rpc('att_check_out', { p_session: sessionId });
               if (error) return toast.error(friendlyError(error));
-              toast.success('Checked out — see you next time');
+              toast.success('Checked out. See you next time');
             }}
           >
             Check out when you leave

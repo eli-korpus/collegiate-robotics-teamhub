@@ -228,14 +228,14 @@ function Live({ active, teamNumber }: { active: Active; teamNumber: number }) {
         </Card>
       ) : (
         <Banner tone="success" title={ours.length ? 'No more scheduled matches for us' : 'Our schedule isn’t published yet'}>
-          {ours.length ? 'Watch for alliance selection and elimination matches — they appear here automatically.' : 'It appears here as soon as the event publishes it.'}
+          {ours.length ? 'Watch for alliance selection and elimination matches. They appear here automatically.' : 'It appears here as soon as the event publishes it.'}
         </Banner>
       )}
       <div className="grid gap-3 sm:grid-cols-4">
-        <StatTile label="Our rank" value={us?.stats?.rank ?? '—'} hint={`of ${e.teams.length}`} />
-        <StatTile label="Record" value={us?.stats ? `${us.stats.wins}-${us.stats.losses}-${us.stats.ties}` : '—'} />
-        <StatTile label="Ranking points" value={us?.stats?.rp?.toFixed(2) ?? '—'} />
-        <StatTile label="OPR" value={us?.stats?.opr?.totalPointsNp.toFixed(1) ?? '—'} />
+        <StatTile label="Our rank" value={us?.stats?.rank ?? '–'} hint={`of ${e.teams.length}`} />
+        <StatTile label="Record" value={us?.stats ? `${us.stats.wins}-${us.stats.losses}-${us.stats.ties}` : '–'} />
+        <StatTile label="Ranking points" value={us?.stats?.rp?.toFixed(2) ?? '–'} />
+        <StatTile label="OPR" value={us?.stats?.opr?.totalPointsNp.toFixed(1) ?? '–'} />
       </div>
       {awards.length > 0 && (
         <div className="flex flex-wrap gap-1.5">
@@ -315,7 +315,7 @@ function PitNotes({ active }: { active: Active }) {
           maxLength={2000}
           disabled={!can}
           value={v}
-          placeholder="e.g. Intake servo replaced — test before Q14"
+          placeholder="e.g. Intake servo replaced. Test before Q14"
           onFocus={() => (editing.current = true)}
           onChange={(e) => setV(e.target.value)}
           onBlur={async () => {
@@ -345,7 +345,7 @@ function PastEvents({ teamId, teamNumber }: { teamId: string; teamNumber: number
     queryFn: async () => (await Promise.all(seasons.map((s) => getTeamEvents(teamNumber, s).catch(() => [])))).flat(),
   });
   if (hist.isLoading) return <Spinner />;
-  if (!hist.data?.length) return <EmptyState icon={<History />} title="No past events yet" body="When your team moves on to its next event, the last one — with its pit notes and final results — is kept here." />;
+  if (!hist.data?.length) return <EmptyState icon={<History />} title="No past events yet" body="When your team moves on to its next event, the last one (with its pit notes and final results) is kept here." />;
   return (
     <ul className="space-y-3">
       {hist.data.map((h) => {
@@ -363,7 +363,7 @@ function PastEvents({ teamId, teamNumber }: { teamId: string; teamNumber: number
                 {r?.stats && (
                   <div className="tabular flex gap-3 text-center text-[12px]">
                     <div>
-                      <p className="text-[16px] font-semibold">{r.stats.rank ?? '—'}</p>
+                      <p className="text-[16px] font-semibold">{r.stats.rank ?? '–'}</p>
                       <p className="text-muted">rank</p>
                     </div>
                     <div>

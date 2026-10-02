@@ -206,7 +206,7 @@ function PostDialog({ post, draft, onClose }: { post: Post | null; draft: string
       <fieldset disabled={!canEdit} className="space-y-4">
         <div className="flex flex-wrap items-center gap-2">
           <StatusPill label={STAGES.find((s) => s.id === status)!.label} tone={status === 'approval' ? 'warning' : status === 'scheduled' ? 'info' : status === 'posted' ? 'success' : 'neutral'} />
-          <span className="text-[12px] text-faint">TeamHub never posts for you — copy the caption and post it yourself.</span>
+          <span className="text-[12px] text-faint">TeamHub never posts for you: copy the caption and post it yourself.</span>
         </div>
         {approvedEdit && <Banner tone="warning">Changing the caption sends this post back for approval.</Banner>}
         <fieldset>

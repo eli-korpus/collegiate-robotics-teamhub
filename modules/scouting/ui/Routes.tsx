@@ -50,7 +50,7 @@ export default function ScoutingRoutes() {
         {tab === 'forms' ? (
           <Forms templates={templates.data ?? []} season={season} />
         ) : !event ? (
-          <EmptyState icon={<ScanSearch />} title="Choose the competition" body={<>Pick your event above — teams, rankings, matches and awards load automatically.<ModulePurpose moduleId="scouting" compact className="mt-3 text-left" /></>} />
+          <EmptyState icon={<ScanSearch />} title="Choose the competition" body={<>Pick your event above: teams, rankings, matches and awards load automatically.<ModulePurpose moduleId="scouting" compact className="mt-3 text-left" /></>} />
         ) : ctx.loading || templates.isLoading ? (
           <Spinner />
         ) : (

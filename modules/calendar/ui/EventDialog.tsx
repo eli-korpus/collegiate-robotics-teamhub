@@ -155,7 +155,7 @@ export function EventDialog({ open, onClose, event, draft, onSaved }: { open: bo
         )}
         <Field label="Location" optional>{(id) => <Input id={id} value={location} maxLength={200} onChange={(e) => setLocation(e.target.value)} />}</Field>
         {kind === 'competition' && (
-          <Field label="FTC event code" optional hint="e.g. USNYNYBRQ2 — merges this event with its FTCScout results (keep your travel notes here).">
+          <Field label="FTC event code" optional hint="e.g. USNYNYBRQ2: merges this event with its FTCScout results (keep your travel notes here).">
             {(id) => <Input id={id} value={eventCode} maxLength={20} onChange={(e) => setEventCode(e.target.value)} />}
           </Field>
         )}

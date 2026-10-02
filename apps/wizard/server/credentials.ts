@@ -1,6 +1,6 @@
 /**
  * Secrets stay on this computer (spec §6.2, §15): held in memory for the session; "remember" writes
- * ~/.teamhub/credentials.json with 0600 permissions — outside the repo, never committed.
+ * ~/.teamhub/credentials.json with 0600 permissions: outside the repo, never committed.
  */
 import { chmodSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';

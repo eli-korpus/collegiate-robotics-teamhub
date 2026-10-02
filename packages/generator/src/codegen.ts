@@ -36,7 +36,7 @@ export function themeCss(r: Resolved): { css: string; adjusted: string[] } {
       `  --secondary-contrast: ${(s ?? a).contrast};`,
       teamVars(mode),
     ].join('\n');
-  const css = `/* Generated from team/teamhub.config.json — do not edit. */
+  const css = `/* Generated from team/teamhub.config.json. Do not edit. */
 :root {
 ${radius}
 ${block(light, sec?.l ?? null, 'light')}
@@ -59,7 +59,7 @@ export function generateDashboardFiles(r: Resolved, outDir = 'apps/dashboard/src
   const c = r.config;
   const files: GeneratedFile[] = [];
 
-  // modules.ts — static imports of ONLY enabled modules (spec P3). Clients lazy-load their routes/widgets.
+  // modules.ts: static imports of ONLY enabled modules (spec P3). Clients lazy-load their routes/widgets.
   // Manifests are inlined as plain data so zod (used by settings schemas) never reaches the browser bundle.
   const mImports = active.map((m, i) => `import c${i} from '${rel(join(m.catalog.dir, 'client.tsx'))}';`).join('\n');
   const meta = (m: (typeof active)[number]) => {
@@ -69,7 +69,7 @@ export function generateDashboardFiles(r: Resolved, outDir = 'apps/dashboard/src
   };
   files.push({
     path: `${outDir}/modules.ts`,
-    content: `// Generated — do not edit.\nimport type { LoadedModule } from '@teamhub/sdk';\n${mImports}\n\nexport const modules: LoadedModule[] = [\n${active
+    content: `// Generated. Do not edit.\nimport type { LoadedModule } from '@teamhub/sdk';\n${mImports}\n\nexport const modules: LoadedModule[] = [\n${active
       .map((m, i) => `  { manifest: ${JSON.stringify(meta(m))}, client: c${i} },`)
       .join('\n')}\n];\n`,
   });
@@ -77,7 +77,7 @@ export function generateDashboardFiles(r: Resolved, outDir = 'apps/dashboard/src
   const ixClients = r.activeIntegrations.filter((i) => i.hasClient);
   files.push({
     path: `${outDir}/integrations.ts`,
-    content: `// Generated — do not edit.\nimport type { IntegrationClient } from '@teamhub/sdk';\n${ixClients
+    content: `// Generated. Do not edit.\nimport type { IntegrationClient } from '@teamhub/sdk';\n${ixClients
       .map((ix, i) => `import i${i} from '${rel(join(ix.dir, existsSync(join(ix.dir, 'client.tsx')) ? 'client.tsx' : 'client.ts'))}';`)
       .join('\n')}\n\nexport const integrations: IntegrationClient[] = [${ixClients.map((_, i) => `i${i}`).join(', ')}];\nexport const integrationIds: string[] = ${json(
       r.activeIntegrations.map((i) => i.manifest.id),
@@ -87,7 +87,7 @@ export function generateDashboardFiles(r: Resolved, outDir = 'apps/dashboard/src
   const permissions = Object.fromEntries(Object.entries(r.matrix).sort(([a], [b]) => a.localeCompare(b)));
   files.push({
     path: `${outDir}/permissions.ts`,
-    content: `// Generated — do not edit. Mirrors the compiled teamhub_can() for UI gating only; RLS is the real gate.\nexport const permissions: Record<string, { types: string[]; positions: string[] }> = ${json(permissions)};\n`,
+    content: `// Generated. Do not edit. Mirrors the compiled teamhub_can() for UI gating only; RLS is the real gate.\nexport const permissions: Record<string, { types: string[]; positions: string[] }> = ${json(permissions)};\n`,
   });
 
   const order = c.nav.order;
@@ -99,7 +99,7 @@ export function generateDashboardFiles(r: Resolved, outDir = 'apps/dashboard/src
       .sort((a, b) => sortIdx(a.id) - sortIdx(b.id) || a.catalog.manifest.name.localeCompare(b.catalog.manifest.name))
       .map((m) => m.id),
   })).filter((s) => s.items.length);
-  files.push({ path: `${outDir}/nav.ts`, content: `// Generated — do not edit.\nexport const nav: { category: string; items: string[] }[] = ${json(nav)};\n` });
+  files.push({ path: `${outDir}/nav.ts`, content: `// Generated. Do not edit.\nexport const nav: { category: string; items: string[] }[] = ${json(nav)};\n` });
 
   const expectations = {
     core: r.catalog.core.version,
@@ -108,7 +108,7 @@ export function generateDashboardFiles(r: Resolved, outDir = 'apps/dashboard/src
   };
   files.push({
     path: `${outDir}/schema-expectations.ts`,
-    content: `// Generated — do not edit.\nexport const schemaExpectations = ${json(expectations)};\n`,
+    content: `// Generated. Do not edit.\nexport const schemaExpectations = ${json(expectations)};\n`,
   });
 
   const runtime = {
@@ -131,7 +131,7 @@ export function generateDashboardFiles(r: Resolved, outDir = 'apps/dashboard/src
   };
   files.push({
     path: `${outDir}/config.ts`,
-    content: `// Generated — do not edit.\nimport type { RuntimeConfig } from '@teamhub/sdk';\nexport const config: RuntimeConfig = ${json(runtime)};\n`,
+    content: `// Generated. Do not edit.\nimport type { RuntimeConfig } from '@teamhub/sdk';\nexport const config: RuntimeConfig = ${json(runtime)};\n`,
   });
 
   files.push({ path: `${outDir}/theme.css`, content: themeCss(r).css });

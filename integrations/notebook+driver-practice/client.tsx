@@ -11,7 +11,7 @@ function AddToNotebook({ run }: { run: { id: string; date: string; score: number
     <IconButton
       label="Add to notebook"
       size="sm"
-      onClick={() => nav(`/notebook?new=1&ref=${encodeURIComponent(`driver-practice:run:${run.id}`)}&title=${encodeURIComponent(`Driver practice ${run.date}`)}&body=${encodeURIComponent(`Score: ${run.score ?? '—'}\n\n${run.notes ?? ''}`)}`)}
+      onClick={() => nav(`/notebook?new=1&ref=${encodeURIComponent(`driver-practice:run:${run.id}`)}&title=${encodeURIComponent(`Driver practice ${run.date}`)}&body=${encodeURIComponent(`Score: ${run.score ?? '–'}\n\n${run.notes ?? ''}`)}`)}
     >
       <NotebookPen className="size-3.5" />
     </IconButton>

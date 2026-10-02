@@ -1,6 +1,6 @@
 # Sign-up Sheets
 
-**Purpose:** claim one of a limited number of slots — event volunteers, snacks, drivers, pit shifts.
+**Purpose:** claim one of a limited number of slots: event volunteers, snacks, drivers, pit shifts.
 
 - A sheet has slots, each with an optional time and a number of spots. Capacity is enforced by the database, so two
   people can't take the last spot at the same time.

@@ -83,7 +83,7 @@ export function Sidebar({ onNavigate, onSearch }: { onNavigate: () => void; onSe
             target="_blank"
             rel="noreferrer noopener"
             className="flex h-8 items-center gap-2.5 rounded-md px-2.5 text-[13px] text-fg/85 hover:bg-bg-subtle"
-            title="Discussion happens in your team's chat — TeamHub has no chat by design."
+            title="Discussion happens in your team's chat: TeamHub has no chat by design."
           >
             <MessagesSquare className="size-[17px] text-muted" />
             <span className="flex-1 truncate">{chat.label}</span>

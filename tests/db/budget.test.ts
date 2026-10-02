@@ -6,7 +6,7 @@ const ALL = Object.keys(JSON.parse(readFileSync('examples/demo.config.json', 'ut
 const LIMIT_MB = 25;
 
 /**
- * DB budget (spec §16.5): a "typical season" — 20 people, every tab, generous activity — stays ≤ 25 MB,
+ * DB budget (spec §16.5): a "typical season" (20 people, every tab, generous activity) stays ≤ 25 MB,
  * so a free Supabase project (500 MB) lasts for years.
  */
 describe('DB budget', () => {

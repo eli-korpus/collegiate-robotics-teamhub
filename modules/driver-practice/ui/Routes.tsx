@@ -91,7 +91,7 @@ export default function DriverPracticeRoutes() {
   const [kind, setKind] = useState('full');
   useCreateShortcut(() => setLogging(true), canLog);
   const list = (runs.data ?? []).filter((r) => (!scope || !r.team_id || r.team_id === scope) && (!kind || r.kind === kind));
-  const name = (id: string | null) => (id ? people.data?.get(id)?.name.split(' ')[0] ?? '?' : '—');
+  const name = (id: string | null) => (id ? people.data?.get(id)?.name.split(' ')[0] ?? '?' : '–');
   const pairs = useMemo(() => {
     const m = new Map<string, DrvRun[]>();
     for (const r of list) {
@@ -161,9 +161,9 @@ export default function DriverPracticeRoutes() {
               columns={[
                 { id: 'pair', header: 'Driver + operator', cell: (p) => <span className="font-medium">{p.label}</span> },
                 { id: 'n', header: 'Runs', align: 'right', sort: (p) => p.rs.length, cell: (p) => p.rs.length },
-                { id: 'avg', header: 'Avg score', align: 'right', sort: (p) => avg(p.rs.map((r) => r.score)) ?? -1, cell: (p) => avg(p.rs.map((r) => r.score))?.toFixed(1) ?? '—' },
-                { id: 'best', header: 'Best', align: 'right', sort: (p) => Math.max(-1, ...p.rs.map((r) => r.score ?? -1)), cell: (p) => Math.max(...p.rs.map((r) => r.score ?? -Infinity)).toString().replace('-Infinity', '—') },
-                { id: 'auto', header: 'Avg auto', align: 'right', cell: (p) => avg(p.rs.map((r) => r.auto_score))?.toFixed(1) ?? '—' },
+                { id: 'avg', header: 'Avg score', align: 'right', sort: (p) => avg(p.rs.map((r) => r.score)) ?? -1, cell: (p) => avg(p.rs.map((r) => r.score))?.toFixed(1) ?? '–' },
+                { id: 'best', header: 'Best', align: 'right', sort: (p) => Math.max(-1, ...p.rs.map((r) => r.score ?? -1)), cell: (p) => Math.max(...p.rs.map((r) => r.score ?? -Infinity)).toString().replace('-Infinity', '–') },
+                { id: 'auto', header: 'Avg auto', align: 'right', cell: (p) => avg(p.rs.map((r) => r.auto_score))?.toFixed(1) ?? '–' },
                 ...(fields.data ?? []).slice(0, 4).map((f) => ({ id: f.id, header: f.label, align: 'right' as const, cell: (p: (typeof pairs)[number]) => summarizeField(f, p.rs.map((r) => r.metrics?.[f.id] ?? null)) })),
               ]}
             />
@@ -177,7 +177,7 @@ export default function DriverPracticeRoutes() {
                       {name(r.driver)} + {name(r.operator)} · {KINDS.find((k) => k.v === r.kind)?.l ?? r.kind}
                       {r.notes && <span className="block truncate text-[12px] text-muted">{r.notes}</span>}
                     </span>
-                    <span className="tabular font-semibold">{r.score ?? '—'}</span>
+                    <span className="tabular font-semibold">{r.score ?? '–'}</span>
                     <Slot name="driver-practice.run.actions" props={{ run: r }} />
                     {(r.created_by === me.id || canWith(me, 'driver-practice.manage_fields', r.team_id)) && (
                       <IconButton label="Edit run" size="sm" onClick={() => setEditingRun(r)}>

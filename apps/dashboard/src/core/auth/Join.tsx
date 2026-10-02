@@ -25,7 +25,7 @@ export function Join() {
   if (session) return <Navigate to="/" replace />;
 
   return (
-    <AuthLayout title="Join the team" subtitle="Create your account — a captain or mentor will approve it." wide>
+    <AuthLayout title="Join the team" subtitle="Create your account. A captain or mentor will approve it." wide>
       <form
         className="space-y-4"
         onSubmit={async (e) => {

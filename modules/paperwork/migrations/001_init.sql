@@ -1,4 +1,4 @@
--- Paperwork Tracker (spec §13.6): status only — documents are never uploaded.
+-- Paperwork Tracker (spec §13.6): status only: documents are never uploaded.
 create table ppr_items (
   id uuid primary key default gen_random_uuid(),
   team_id uuid references teams (id) on delete cascade,

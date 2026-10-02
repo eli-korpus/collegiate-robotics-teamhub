@@ -369,9 +369,9 @@ function Modules() {
         columns={[
           { id: 'name', header: 'Tab', cell: (m) => <span className="font-medium">{m.name}</span> },
           { id: 'state', header: 'State', cell: (m) => (m.state === 'dormant' ? <Badge tone="warning">Dormant (hidden, data kept)</Badge> : <Badge tone="success">Active</Badge>) },
-          { id: 'ver', header: 'Version (code / DB)', cell: (m) => `${m.id === 'core' ? exp.core : exp.modules[m.id] ?? '—'} / ${schema.db?.get(m.id)?.version ?? '—'}` },
+          { id: 'ver', header: 'Version (code / DB)', cell: (m) => `${m.id === 'core' ? exp.core : exp.modules[m.id] ?? '–'} / ${schema.db?.get(m.id)?.version ?? '–'}` },
           { id: 'status', header: 'Status', cell: (m) => <StatusPill tone={tone(schema.status(m.id))} label={label(schema.status(m.id))} /> },
-          { id: 'size', header: 'Size', align: 'right', cell: (m) => (m.prefix ? formatBytes(sizeOf(m.prefix)) : '—') },
+          { id: 'size', header: 'Size', align: 'right', cell: (m) => (m.prefix ? formatBytes(sizeOf(m.prefix)) : '–') },
         ]}
       />
       {Object.keys(exp.integrations).length > 0 && (
@@ -492,7 +492,7 @@ export function ToolLinksAdmin() {
     <div className="space-y-4">
       <p className="text-[13px] text-muted">
         Tool links appear as quick-link chips in the tabs where they’re useful (e.g. Onshape in the Notebook, the manual in Rules). The <strong>Team chat</strong> link is where
-        discussion happens — TeamHub has no chat by design.
+        discussion happens: TeamHub has no chat by design.
       </p>
       <div className="grid gap-2 md:grid-cols-2">
         {pinned.map((l) => (
@@ -567,7 +567,7 @@ function KeepAlive() {
       </p>
       <p className="text-muted">
         Free Supabase projects pause after 7 days without activity. The <code>keepalive</code> GitHub Action in your fork pings the database every 3 days. GitHub turns off scheduled
-        workflows in repositories with no commits for 60 days — if pings stop, open your fork on GitHub &gt; <strong>Actions</strong> &gt; <strong>Keep TeamHub awake</strong> &gt;{' '}
+        workflows in repositories with no commits for 60 days. If pings stop, open your fork on GitHub &gt; <strong>Actions</strong> &gt; <strong>Keep TeamHub awake</strong> &gt;{' '}
         <strong>Enable workflow</strong>, or push any small change.
       </p>
       {projectRef() && (

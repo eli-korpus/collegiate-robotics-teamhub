@@ -129,7 +129,7 @@ function ProfileFieldsCard({ userId, details, name, memberships }: { userId: str
               <dt className="flex items-center gap-1 text-muted">
                 {f.label} {f.private && <Lock className="size-3 text-warning" aria-label="Private" />}
               </dt>
-              <dd>{(f.private ? priv.data?.[f.id] : details[f.id]) || <span className="text-faint">—</span>}</dd>
+              <dd>{(f.private ? priv.data?.[f.id] : details[f.id]) || <span className="text-faint">–</span>}</dd>
             </div>
           ))}
       </dl>

@@ -1,4 +1,4 @@
-# Upstream quality gates (spec §16). Team forks have team/teamhub.config.json and skip all of this —
+# Upstream quality gates (spec §16). Team forks have team/teamhub.config.json and skip all of this.
 # they only need the keep-alive (and, on GitHub Pages, the deploy) workflow the wizard installs.
 name: CI
 on:

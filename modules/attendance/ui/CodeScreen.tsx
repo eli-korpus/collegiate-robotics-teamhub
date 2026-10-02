@@ -52,7 +52,7 @@ export function CodeScreen() {
       <IconButton label="Close" className="absolute right-4 top-4" onClick={() => nav(`/attendance/session/${id}`)}>
         <X className="size-6" />
       </IconButton>
-      <p className="text-[18px] font-medium text-muted">Check in to practice — {runtime().config.program.name}</p>
+      <p className="text-[18px] font-medium text-muted">Check in to practice · {runtime().config.program.name}</p>
       {error ? (
         <p className="text-danger">{error}</p>
       ) : (

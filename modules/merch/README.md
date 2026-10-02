@@ -8,7 +8,7 @@
 - Members see only their own order; managers see all orders, a “what to order” tally per item and size, paid/delivered
   checkboxes and a CSV.
 - **Payments happen outside TeamHub** (stated in the UI). Members can't mark themselves paid, and can't change orders
-  after the drive closes — both enforced in the database.
+  after the drive closes: both enforced in the database.
 - New Season deletes orders older than one year (export first).
 
 **Not for:** collecting sizes for other reasons (People > Request info), payments.

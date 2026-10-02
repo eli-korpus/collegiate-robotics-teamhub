@@ -18,7 +18,7 @@ export function ToolLinks({ slots, className, label = 'Quick links' }: { slots: 
           href={l.url}
           target="_blank"
           rel="noreferrer noopener"
-          title={`${l.label} — ${hostOf(l.url)}`}
+          title={`${l.label} (${hostOf(l.url)})`}
           className="inline-flex h-7 items-center gap-1.5 rounded-full border border-border bg-surface px-2.5 text-[12px] font-medium text-fg shadow-sm hover:bg-bg-subtle"
         >
           <Favicon url={l.url} size={14} /> {l.label}
@@ -28,7 +28,7 @@ export function ToolLinks({ slots, className, label = 'Quick links' }: { slots: 
   );
 }
 
-/** "Questions? Ask in Team chat ↗" — the answer to "can we chat in TeamHub?" (spec §1.4). */
+/** "Questions? Ask in Team chat ↗": the answer to "can we chat in TeamHub?" (spec §1.4). */
 export function TeamChatLink({ prefix = 'Questions? Ask in', className }: { prefix?: string; className?: string }) {
   const links = useLinks();
   const chat = links.data?.find((l) => l.slot === 'team_chat');

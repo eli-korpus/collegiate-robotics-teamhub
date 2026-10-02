@@ -18,7 +18,7 @@ export default defineModule({
   category: 'team',
   icon: 'CalendarDays',
   summary: 'Practices, meetings, competitions and deadlines in one calendar.',
-  purpose: 'When things happen — practices, meetings, competitions, deadlines and socials.',
+  purpose: 'When things happen: practices, meetings, competitions, deadlines and socials.',
   notFor: [
     { text: 'RSVPs or finding a time that works', goTo: 'polls' },
     { text: 'Claiming limited slots (drivers, snacks)', goTo: 'signups' },

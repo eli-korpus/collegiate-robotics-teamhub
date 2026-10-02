@@ -1,7 +1,7 @@
 import { NavLink, useLocation, useNavigate } from 'react-router';
 import { Check, ChevronsUpDown, Home as HomeIcon, LogOut, Monitor, Moon, Search, Settings, Shield, Sun, User, Users, MessagesSquare } from 'lucide-react';
 import { Avatar, Kbd, Menu, SidebarItem, SidebarSection, TeamDot, cn, useMediaQuery } from '@teamhub/ui';
-import { isMultiTeam, runtime, setTeamScope, useCan, useLinks, useMe, usePeople, useSession, useTeamScope, type LoadedModule } from '@teamhub/sdk';
+import { canWith, isMultiTeam, runtime, setTeamScope, useCan, useLinks, useMe, usePeople, useSession, useTeamScope, type LoadedModule } from '@teamhub/sdk';
 import { nav } from '../../generated/nav';
 import { ProgramLogo, TeamLogo } from '../auth/AuthLayout';
 import { NotificationsButton } from './Notifications';
@@ -31,7 +31,7 @@ export function Sidebar({ onNavigate, onSearch }: { onNavigate: () => void; onSe
   const loc = useLocation();
   const { me } = useSession();
   const modules = runtime().modules;
-  const byId = new Map(modules.map((m) => [m.manifest.id, m]));
+  const byId = new Map(modules.filter((m) => !m.manifest.viewPerm || canWith(me, m.manifest.viewPerm)).map((m) => [m.manifest.id, m]));
   const wide = useMediaQuery('(min-width: 1024px)');
   const canApprove = useCan('people.approve_members');
   const links = useLinks();

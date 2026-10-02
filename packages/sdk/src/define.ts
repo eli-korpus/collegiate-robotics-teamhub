@@ -69,6 +69,8 @@ export interface ModuleManifest<S extends z.ZodType = z.ZodType> {
   entities: string[];
   buckets: BucketDef[];
   toolLinkSlots: string[];
+  /** Hide the whole tab (sidebar, ⌘K) from people without this permission in any team, e.g. Sponsors CRM. RLS still does the real protecting. */
+  viewPerm?: string;
   /** Widget ids (client file provides the components). Used for Home default ordering in the wizard. */
   widgets: { id: string; title: string; defaultFor: ProfileType[] }[];
   /** Ids of entities that accept comments (e.g. `task`); generator compiles teamhub_ref_visible() for them. */

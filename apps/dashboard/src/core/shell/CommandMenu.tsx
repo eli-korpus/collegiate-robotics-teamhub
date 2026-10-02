@@ -13,7 +13,7 @@ export function CommandMenu({ open, onOpenChange }: { open: boolean; onOpenChang
   const [results, setResults] = useState<{ module: string; items: SearchResult[] }[]>([]);
   const [loading, setLoading] = useState(false);
   const people = useActivePeople(null);
-  const modules = runtime().modules;
+  const modules = useMemo(() => runtime().modules.filter((m) => !m.manifest.viewPerm || canWith(me, m.manifest.viewPerm)), [me]);
 
   useEffect(() => {
     if (!open) setQ('');
@@ -54,13 +54,13 @@ export function CommandMenu({ open, onOpenChange }: { open: boolean; onOpenChang
     const go = (href: string) => () => nav(href);
     const gotoAll: { id: string; label: string; keywords?: string; hint?: string; icon: ReactNode; onSelect: () => void }[] = [
       { id: 'home', label: 'Home', icon: <Home />, onSelect: go('/') },
+      { id: 'people', label: 'People', icon: <Users />, onSelect: go('/people') },
+      { id: 'me', label: 'My profile', icon: <User />, onSelect: go('/me') },
+      ...(me?.isAdmin ? [{ id: 'admin', label: 'Admin', icon: <Shield />, onSelect: go('/admin') }] : []),
       ...modules.map((m) => {
         const I = m.client.icon;
         return { id: `m-${m.manifest.id}`, label: m.manifest.name, keywords: `${m.manifest.name} ${m.manifest.summary}`, hint: m.manifest.summary, icon: <I />, onSelect: go(`/${m.manifest.id}`) };
       }),
-      { id: 'people', label: 'People', icon: <Users />, onSelect: go('/people') },
-      { id: 'me', label: 'My profile', icon: <User />, onSelect: go('/me') },
-      ...(me?.isAdmin ? [{ id: 'admin', label: 'Admin', icon: <Shield />, onSelect: go('/admin') }] : []),
     ];
     const goto = gotoAll.filter((i) => !q || matches(i.keywords ?? String(i.label), q));
     const actions = allQuickActions()

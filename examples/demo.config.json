@@ -103,6 +103,42 @@
     "competition-day": {
       "state": "active",
       "settings": {}
+    },
+    "paperwork": {
+      "state": "active",
+      "settings": {}
+    },
+    "polls": {
+      "state": "active",
+      "settings": {}
+    },
+    "signups": {
+      "state": "active",
+      "settings": {}
+    },
+    "skills": {
+      "state": "active",
+      "settings": {}
+    },
+    "outreach": {
+      "state": "active",
+      "settings": {}
+    },
+    "sponsors": {
+      "state": "active",
+      "settings": {}
+    },
+    "media": {
+      "state": "active",
+      "settings": {}
+    },
+    "social": {
+      "state": "active",
+      "settings": {}
+    },
+    "merch": {
+      "state": "active",
+      "settings": {}
     }
   },
   "subteams": [

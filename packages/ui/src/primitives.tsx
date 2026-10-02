@@ -67,18 +67,20 @@ export const IconButton = forwardRef<HTMLButtonElement, ButtonProps & { label: s
   );
 });
 
+/** Inputs fill their container unless the caller sets a width (cn() doesn't merge conflicting classes). */
+const w = (c?: string) => (c && /(^|\s)(w-|max-w-|flex-1)/.test(c) ? '' : 'w-full');
 const field =
-  'w-full rounded-md border border-border bg-surface px-3 text-sm text-fg placeholder:text-faint shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft disabled:opacity-60';
+  'rounded-md border border-border bg-surface px-3 text-sm text-fg placeholder:text-faint shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft disabled:opacity-60';
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input({ className, ...rest }, ref) {
-  return <input ref={ref} className={cn(field, 'h-9', className)} {...rest} />;
+  return <input ref={ref} className={cn(field, w(className), 'h-9', className)} {...rest} />;
 });
 
 export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<HTMLTextAreaElement>>(function Textarea(
   { className, rows = 4, ...rest },
   ref,
 ) {
-  return <textarea ref={ref} rows={rows} className={cn(field, 'py-2 leading-relaxed', className)} {...rest} />;
+  return <textarea ref={ref} rows={rows} className={cn(field, w(className), 'py-2 leading-relaxed', className)} {...rest} />;
 });
 
 export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement>>(function Select(
@@ -86,7 +88,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
   ref,
 ) {
   return (
-    <select ref={ref} className={cn(field, 'h-9 pr-8 appearance-none bg-no-repeat', className)} style={{ backgroundImage: CHEVRON, backgroundPosition: 'right 0.6rem center', backgroundSize: '12px' }} {...rest}>
+    <select ref={ref} className={cn(field, w(className), 'h-9 pr-8 appearance-none bg-no-repeat', className)} style={{ backgroundImage: CHEVRON, backgroundPosition: 'right 0.6rem center', backgroundSize: '12px' }} {...rest}>
       {children}
     </select>
   );

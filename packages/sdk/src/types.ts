@@ -197,4 +197,4 @@ export interface SchemaExpectations {
 
 export type Children = { children?: ReactNode };
 
-export type ModuleMeta = Pick<ModuleManifest, 'id' | 'prefix' | 'name' | 'category' | 'icon' | 'summary' | 'purpose' | 'notFor' | 'toolLinkSlots'>;
+export type ModuleMeta = Pick<ModuleManifest, 'id' | 'prefix' | 'name' | 'category' | 'icon' | 'summary' | 'purpose' | 'notFor' | 'toolLinkSlots' | 'viewPerm'>;

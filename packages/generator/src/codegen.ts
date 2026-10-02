@@ -65,7 +65,7 @@ export function generateDashboardFiles(r: Resolved, outDir = 'apps/dashboard/src
   const meta = (m: (typeof active)[number]) => {
     const x = m.catalog.manifest;
     // Only what the dashboard uses at runtime (keeps the first page load small).
-    return { id: x.id, prefix: x.prefix, name: x.name, category: x.category, icon: x.icon, summary: x.summary, purpose: x.purpose, notFor: x.notFor, toolLinkSlots: x.toolLinkSlots };
+    return { id: x.id, prefix: x.prefix, name: x.name, category: x.category, icon: x.icon, summary: x.summary, purpose: x.purpose, notFor: x.notFor, toolLinkSlots: x.toolLinkSlots, ...(x.viewPerm ? { viewPerm: x.viewPerm } : {}) };
   };
   files.push({
     path: `${outDir}/modules.ts`,

@@ -1,6 +1,6 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { Hono } from 'hono';
+import { Hono, type MiddlewareHandler } from 'hono';
 import { z } from 'zod';
 import { parseConfig, type TeamhubConfig } from '@teamhub/config-schema';
 import {
@@ -24,6 +24,24 @@ import { checkSite, existingHostPaths, hostFiles, keepaliveFile, writeHostFiles 
 import { BACKUP_ROOT, exportData, importData } from './backup';
 import { applyConfig, computePlan, configureAuth, createAdmin, newSeason, readDbState, removeEverything } from './provision';
 
+/** Hostnames the wizard answers to. Anything else is a DNS-rebinding attempt (a website pointing its own domain at 127.0.0.1). */
+export const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
+export const isLocalHost = (host: string | undefined | null) => !!host && LOCAL_HOSTS.has(host.replace(/:\d+$/, '').toLowerCase());
+/** Header the wizard UI sends on every call. A cross-site page can't add it without a CORS preflight, which we never allow. */
+export const WIZARD_HEADER = 'x-teamhub-wizard';
+
+/**
+ * The wizard holds your Supabase access token and can change your database and push to GitHub, so only its own page
+ * may call it: the Host must be local, any Origin must be local, and every request must carry the wizard header.
+ */
+const localOnly: MiddlewareHandler = async (c, next) => {
+  const origin = c.req.header('origin');
+  if (!isLocalHost(c.req.header('host') ?? new URL(c.req.url).host)) return c.json({ error: 'Forbidden host' }, 403);
+  if (origin && !isLocalHost(new URL(origin).host)) return c.json({ error: 'Forbidden origin' }, 403);
+  if (c.req.header(WIZARD_HEADER) !== '1') return c.json({ error: 'Missing wizard header' }, 403);
+  await next();
+};
+
 const DRAFT = () => join(teamDir(), '.wizard-draft.json');
 
 export interface AppDeps {
@@ -33,6 +51,7 @@ export interface AppDeps {
 
 export function createApp(deps: AppDeps = {}) {
   const app = new Hono().basePath('/api');
+  app.use('*', localOnly);
   const catalogP = loadCatalog(deps.root);
   const mgmt = () => {
     const pat = getCreds().pat;

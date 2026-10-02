@@ -11,7 +11,7 @@ import { createServer as createVite } from 'vite';
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { normalize } from 'node:path';
 import { teamDir } from '@teamhub/generator';
-import { createApp } from './app';
+import { createApp, isLocalHost } from './app';
 
 const PORT = Number(process.env.TEAMHUB_WIZARD_PORT ?? 4747);
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -20,6 +20,11 @@ async function main() {
   const vite = await createVite({ root, configFile: join(root, 'vite.config.ts'), server: { middlewareMode: true }, appType: 'spa', logLevel: 'warn' });
   const api = getRequestListener(createApp().fetch);
   const server = createHttpServer((req, res) => {
+    // Refuse DNS-rebinding requests for every path (API, logos and the UI itself).
+    if (!isLocalHost(req.headers.host)) {
+      res.statusCode = 403;
+      return res.end('Forbidden host');
+    }
     if (req.url?.startsWith('/api/')) return api(req, res);
     if (req.url?.startsWith('/__team/')) {
       // Serve uploaded logos for previews (read-only, inside team/ only).

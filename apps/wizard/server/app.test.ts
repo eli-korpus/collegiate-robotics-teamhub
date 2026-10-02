@@ -45,7 +45,7 @@ async function fakeFetch(input: string | URL | Request, init?: RequestInit): Pro
 
 let app: Awaited<ReturnType<typeof import('./app').createApp>>;
 const call = async (method: string, path: string, body?: unknown) => {
-  const res = await app.request(`/api${path}`, { method, body: body === undefined ? undefined : JSON.stringify(body), headers: { 'content-type': 'application/json' } });
+  const res = await app.request(`/api${path}`, { method, body: body === undefined ? undefined : JSON.stringify(body), headers: { 'content-type': 'application/json', 'x-teamhub-wizard': '1' } });
   return { status: res.status, body: await res.json() };
 };
 
@@ -130,5 +130,20 @@ describe('wizard API', () => {
     const s = await call('GET', '/state');
     expect(s.body.mode).toBe('existing');
     expect(s.body.config.teams[0].id).toBe(TEAM_A);
+  });
+});
+
+describe('local-only guard', () => {
+  it('rejects requests without the wizard header (cross-site forms and fetches)', async () => {
+    const res = await app.request('/api/state', { method: 'GET' });
+    expect(res.status).toBe(403);
+    const post = await app.request('/api/danger/remove', { method: 'POST', body: '{"confirm":"x"}', headers: { 'content-type': 'text/plain' } });
+    expect(post.status).toBe(403);
+  });
+  it('rejects DNS-rebinding hosts and foreign origins', async () => {
+    const h = { 'x-teamhub-wizard': '1' };
+    expect((await app.request('http://evil.example:4747/api/state', { headers: { ...h, host: 'evil.example:4747' } })).status).toBe(403);
+    expect((await app.request('/api/state', { headers: { ...h, origin: 'https://evil.example' } })).status).toBe(403);
+    expect((await app.request('/api/state', { headers: { ...h, origin: 'http://localhost:4747' } })).status).toBe(200);
   });
 });

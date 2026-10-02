@@ -11,7 +11,8 @@ create policy sct_entries_read on sct_entries for select to authenticated using 
 create policy sct_entries_insert on sct_entries for insert to authenticated
   with check (teamhub_can('scouting.scout', null) and scout = (select auth.uid()));
 create policy sct_entries_update on sct_entries for update to authenticated
-  using (scout = (select auth.uid()) or teamhub_can('scouting.delete_entries', null)) with check (true);
+  using (scout = (select auth.uid()) or teamhub_can('scouting.delete_entries', null))
+  with check (scout = (select auth.uid()) or teamhub_can('scouting.delete_entries', null));
 create policy sct_entries_delete on sct_entries for delete to authenticated
   using (scout = (select auth.uid()) or teamhub_can('scouting.delete_entries', null));
 

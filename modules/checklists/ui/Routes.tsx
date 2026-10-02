@@ -36,6 +36,7 @@ import {
   useRows,
   useSupabase,
   useTeamScope,
+  isUrl,
 } from '@teamhub/sdk';
 
 type Kind = 'robot' | 'pit' | 'packing' | 'inspection' | 'judging' | 'portfolio' | 'other';
@@ -282,7 +283,7 @@ function ListPage() {
                   return (
                     <li key={i.id} className={cn('flex min-h-14 items-center gap-3 px-4 py-2', on && 'bg-success-soft/40')}>
                       <Checkbox size="lg" checked={on} disabled={!active || !canRun} onChange={(v) => toggle(i.id, v)} label={<span className={cn('text-[15px]', on && 'text-muted line-through')}>{i.text}</span>} />
-                      {i.link && (
+                      {isUrl(i.link) && (
                         <a href={i.link} target="_blank" rel="noreferrer" className="ml-auto text-accent" aria-label="Open link">
                           <ExternalLink className="size-4" />
                         </a>

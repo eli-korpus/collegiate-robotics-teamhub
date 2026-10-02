@@ -68,9 +68,10 @@ export function CheckInForm({ sessionId, initialCode = '', onDone }: { sessionId
   const submit = async (c: string) => {
     setBusy(true);
     setError(null);
-    const { error } = await sb.rpc('att_check_in', { p_session: sessionId, p_code: c });
+    const { data, error } = await sb.rpc('att_check_in', { p_session: sessionId, p_code: c });
     setBusy(false);
     if (error) return setError(friendlyError(error));
+    if (data === 'wrong_code') return setError('That code is wrong or has expired — use the one on the screen now.');
     setDone(true);
     qc.invalidateQueries({ queryKey: ['attendance'] });
     onDone?.();

@@ -37,12 +37,20 @@ describe('attendance RLS + check-in', () => {
     const code = r.code as string;
     const wrong = code === '0000' ? '1111' : '0000';
     await db.as(captainA, `delete from att_presence where user_id = $1`, [memberA]);
-    expect(await db.denied(memberA, `select att_check_in($1, $2)`, [session, wrong])).toBe(true);
+    expect((await db.as(memberA, `select att_check_in($1, $2) r`, [session, wrong]))[0].r).toBe('wrong_code');
+    expect(await db.as(memberA, 'select * from att_attempts')).toEqual([]); // not readable by clients
     expect(await db.denied(memberB, `select att_check_in($1, $2)`, [session, code])).toBe(true);
     await db.as(memberA, `select att_check_in($1, $2)`, [session, code]);
     const [p] = await db.admin('select check_in from att_presence where session_id = $1 and user_id = $2', [session, memberA]);
     expect(p.check_in).toBeTruthy();
     expect(await db.as(memberA, 'select * from att_codes')).toEqual([]);
+  });
+
+  it('locks self check-in after 5 wrong codes', async () => {
+    const [{ r }] = await db.as(captainA, `select att_rotate_code($1, 30) r`, [session]);
+    const wrong = r.code === '9999' ? '8888' : '9999';
+    for (let i = 0; i < 5; i++) await db.as(member2A, `select att_check_in($1, $2)`, [session, wrong]);
+    await expect(db.as(member2A, `select att_check_in($1, $2)`, [session, r.code])).rejects.toThrow(/Too many wrong codes/);
   });
 
   it('closing removes the code and blocks check-in; hours check-out', async () => {

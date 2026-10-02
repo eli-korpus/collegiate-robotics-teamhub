@@ -39,7 +39,8 @@ create policy core_profiles_update_self on profiles for update to authenticated
 create policy core_profiles_update_approver on profiles for update to authenticated
   using (teamhub_is_admin() or exists (
     select 1 from memberships m where m.user_id = profiles.id and teamhub_can('people.assign_positions', m.team_id)))
-  with check (true);
+  with check (teamhub_is_admin() or exists (
+    select 1 from memberships m where m.user_id = profiles.id and teamhub_can('people.assign_positions', m.team_id)));
 
 create policy core_private_read on profiles_private for select to authenticated using (
   user_id = (select auth.uid())
@@ -50,7 +51,8 @@ create policy core_private_insert on profiles_private for insert to authenticate
 create policy core_private_update on profiles_private for update to authenticated
   using (user_id = (select auth.uid()) or exists (
     select 1 from memberships m where m.user_id = profiles_private.user_id and teamhub_can('people.view_private', m.team_id)))
-  with check (true);
+  with check (user_id = (select auth.uid()) or exists (
+    select 1 from memberships m where m.user_id = profiles_private.user_id and teamhub_can('people.view_private', m.team_id)));
 
 -- Memberships: active users see active memberships; approvers see pending ones for their team.
 create policy core_memberships_read on memberships for select to authenticated using (
@@ -127,3 +129,9 @@ create policy core_avatars_delete on storage.objects for delete to authenticated
   using (bucket_id = 'avatars' and (split_part(name, '/', 1) = (select auth.uid())::text or teamhub_is_admin()));
 
 select teamhub_realtime_add('notifications');
+
+-- Defense in depth: TRUNCATE bypasses RLS, so client roles never get it (PostgREST doesn't expose it, but direct
+-- connections might). Re-applied every plan so new module tables are covered.
+revoke truncate, references, trigger on all tables in schema public from anon, authenticated;
+-- Internal helper that lists who holds a permission: only definer functions need it.
+revoke execute on function teamhub_users_with(text, uuid) from public, anon, authenticated;

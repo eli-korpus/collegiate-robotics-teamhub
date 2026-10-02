@@ -15,3 +15,9 @@ sql/
 test-results/
 playwright-report/
 .teamhub-ci/
+
+# Development-only material (not needed to use or contribute to TeamHub)
+TEAMHUB_FTC_SPEC.md
+scripts/prune-imports.mjs
+scripts/split-exports.mjs
+.claude/

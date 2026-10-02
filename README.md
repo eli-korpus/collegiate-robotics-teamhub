@@ -70,7 +70,6 @@ database after syncing your fork, back up and restore, or start a **new season**
 - [Configuration file reference](docs/configuration.md)
 - [Testing](docs/testing.md)
 - [Contributing and writing a tab](CONTRIBUTING.md)
-- [Full product specification](TEAMHUB_FTC_SPEC.md)
 
 ## Try it locally
 

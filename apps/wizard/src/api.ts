@@ -4,7 +4,7 @@ import type { NotForEntry, PermissionDefs } from '@teamhub/sdk/define';
 export async function api<T = any>(path: string, body?: unknown, method?: string): Promise<T> {
   const res = await fetch(`/api${path}`, {
     method: method ?? (body === undefined ? 'GET' : 'POST'),
-    headers: body === undefined ? undefined : { 'content-type': 'application/json' },
+    headers: body === undefined ? { 'x-teamhub-wizard': '1' } : { 'content-type': 'application/json', 'x-teamhub-wizard': '1' },
     body: body === undefined ? undefined : JSON.stringify(body),
   });
   const data = await res.json().catch(() => ({}));

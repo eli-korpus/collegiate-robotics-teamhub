@@ -1,6 +1,6 @@
 # Testing
 
-TeamHub promises that **any combination of tabs works**. The tests are built around that promise (spec §16).
+TeamHub promises that **any combination of tabs works**. The tests are built around that promise.
 
 | Command | What it checks | Time |
 |---|---|---|

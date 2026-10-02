@@ -62,8 +62,8 @@ The wizard explains every step ([walkthrough](docs/setup-wizard.md)). When it's 
 [Cloudflare](docs/hosting/cloudflare.md), [Vercel](docs/hosting/vercel.md), [Netlify](docs/hosting/netlify.md) or
 [GitHub Pages](docs/hosting/github-pages.md).
 
-Later, run `npm run setup` again to **edit** your dashboard (add tabs, rebrand, change permissions), **update** the
-database after syncing your fork, back up and restore, or start a **new season**.
+Later, run `npm run setup` again to **edit** your dashboard (add tabs, rebrand, change permissions), **update** to a
+new TeamHub version ([how updates work](docs/updating.md)), back up and restore, or start a **new season**.
 
 ## Customize it with AI
 
@@ -74,12 +74,14 @@ assistants (Claude Code, Cursor, GitHub Copilot, Codex and others read it automa
 ## Documentation
 
 - [Setup wizard walkthrough](docs/setup-wizard.md)
+- [Updating your dashboard](docs/updating.md)
 - [Hosting guides](docs/hosting/README.md)
 - [Tab library](docs/modules/README.md)
 - [Configuration file reference](docs/configuration.md)
 - [Testing](docs/testing.md)
 - [Guide for AI coding assistants](AGENTS.md)
 - [Contributing and writing a tab](CONTRIBUTING.md)
+- [Releasing (maintainers)](docs/releasing.md) and [changelog](CHANGELOG.md)
 
 ## Try it locally
 
@@ -97,7 +99,7 @@ mocked smoke tests: `npm run build:demo && npx playwright test`.
   can read and write what. Every tab ships with tests for those rules.
 - The wizard uses your Supabase personal access token only on your computer (in memory, or in
   `~/.teamhub/credentials.json` if you choose "remember"). It's never committed or sent anywhere except Supabase.
-- Found a security issue? Please open a private security advisory on GitHub instead of a public issue.
+- Found a security issue? Please report it privately; see [SECURITY.md](SECURITY.md).
 
 ## License
 

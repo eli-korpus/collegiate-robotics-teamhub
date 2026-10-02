@@ -20,7 +20,8 @@ import { allCorePermissions, modulePermissions } from '@teamhub/sdk/define';
 import { forgetCreds, getCreds, rememberedOnDisk, setCreds } from './credentials';
 import { Mgmt, MgmtError, projectRefOf, projectUrl, type FetchLike } from './mgmt';
 import { gitStatus, publish, sh } from './git';
-import { checkSite, existingHostPaths, hostFiles, keepaliveFile, writeHostFiles } from './hosting';
+import { checkForUpdate, installDependencies, mergeRelease, readState, revertUpdate, writeState } from './update';
+import { checkSite, existingHostPaths, hostFiles, keepaliveFile, updatesWorkflowFile, writeHostFiles } from './hosting';
 import { BACKUP_ROOT, exportData, importData } from './backup';
 import { applyConfig, computePlan, configureAuth, createAdmin, dataApiStatus, exposePublicSchema, newSeason, readDbState, removeEverything } from './provision';
 
@@ -47,6 +48,8 @@ const DRAFT = () => join(teamDir(), '.wizard-draft.json');
 export interface AppDeps {
   fetch?: FetchLike;
   root?: string;
+  /** Restarts the wizard process (after an update installs new code). Provided by main.ts. */
+  onRestart?: () => void;
 }
 
 export function createApp(deps: AppDeps = {}) {
@@ -323,7 +326,10 @@ export function createApp(deps: AppDeps = {}) {
     return c.json({ written: writeHostFiles(files), files });
   });
   app.post('/hosting/check', async (c) => c.json(await checkSite((await c.req.json<{ url: string }>()).url)));
-  app.post('/keepalive', async (c) => c.json({ written: writeHostFiles([keepaliveFile()]) }));
+  app.post('/keepalive', async (c) => {
+    const { updates = true } = await c.req.json<{ updates?: boolean }>().catch(() => ({ updates: true }));
+    return c.json({ written: writeHostFiles([keepaliveFile(), ...(updates ? [updatesWorkflowFile()] : [])]) });
+  });
 
   // ── Build & git ─────────────────────────────────────────────────────────
   app.post('/build', async (c) => {
@@ -333,6 +339,69 @@ export function createApp(deps: AppDeps = {}) {
     return c.json({ ok: res.ok, log: (res.stdout + res.stderr).split('\n').slice(-40).join('\n') });
   });
   app.get('/git', async (c) => c.json(await gitStatus()));
+
+  // ── Updates (docs/updating.md) ────────────────────────────────────────────
+  const pushCurrentBranch = async () => {
+    const push = await sh('git', ['push'], { timeout: 180_000 });
+    if (push.ok) return push;
+    const branch = String((await sh('git', ['rev-parse', '--abbrev-ref', 'HEAD'])).stdout).trim();
+    return sh('git', ['push', '-u', 'origin', branch], { timeout: 180_000 });
+  };
+  app.get('/update/check', async (c) => c.json(await checkForUpdate(REPO_ROOT)));
+  app.get('/update/state', async (c) => c.json(await readState(REPO_ROOT)));
+  /** Step 1: backup, merge the release, install. The wizard then restarts to run the new code (step 2). */
+  app.post('/update/start', async (c) => {
+    const { tag } = await c.req.json<{ tag: string }>();
+    if (!/^v\d+\.\d+\.\d+$/.test(tag ?? '')) throw new MgmtError('Unknown version', 400);
+    const config = readConfig();
+    if (!config) throw new MgmtError('Finish setup before updating.', 400);
+    const m = mgmt();
+    const ref = projectRef(config);
+    const keys = await m.apiKeys(ref);
+    const backup = await exportData(m, ref, keys.secret, await catalogP, config, { label: `before-update-to-${tag}` });
+    const merged = await mergeRelease(REPO_ROOT, tag, backup.path);
+    if (!merged.ok) return c.json({ ok: false, conflicts: merged.conflicts, message: merged.message, backup: backup.path }, 409);
+    const install = await installDependencies(REPO_ROOT);
+    if (!install.ok) {
+      return c.json({ ok: false, conflicts: [], message: `The new version was downloaded, but installing it failed. Run "npm install" in a terminal, then "npm run setup" > Update again.\n${String(install.stderr).slice(-1500)}`, backup: backup.path }, 500);
+    }
+    return c.json({ ok: true, restart: true, state: merged.state, backup: backup.path });
+  });
+  /** Step 2 (running the new code): update the database and server functions, test-build, then publish. */
+  app.post('/update/finish', async (c) => {
+    const state = await readState(REPO_ROOT);
+    if (!state || state.stage !== 'merged') throw new MgmtError('There is no update waiting to finish.', 400);
+    const config = readConfig();
+    if (!config) throw new MgmtError('No config found.', 400);
+    const m = mgmt();
+    const ref = projectRef(config);
+    const keys = await m.apiKeys(ref);
+    const catalog = await catalogP;
+    const { log } = await applyConfig(m, ref, keys, catalog, config);
+    await generate(config, catalog);
+    const build = await sh('npm', ['run', 'build'], { timeout: 600_000 });
+    if (!build.ok) {
+      log.push({ step: 'Test build failed: nothing was published, your live site is unchanged', ok: false, detail: String(build.stdout + build.stderr).split('\n').slice(-30).join('\n') });
+      return c.json({ ok: false, log });
+    }
+    log.push({ step: 'Test build passed', ok: true });
+    const push = await pushCurrentBranch();
+    log.push(push.ok ? { step: 'Published: your host is rebuilding the site', ok: true } : { step: 'Publish failed', ok: false, detail: String(push.stderr).trim() });
+    if (push.ok) await writeState(REPO_ROOT, { ...state, stage: 'done', at: new Date().toISOString() });
+    return c.json({ ok: push.ok, log, version: state.to });
+  });
+  /** Undo the last update's code and publish (the database stays: its changes are add-only and compatible). */
+  app.post('/update/rollback', async (c) => {
+    const r = await revertUpdate(REPO_ROOT);
+    if (!r.ok) return c.json(r, 400);
+    const push = await pushCurrentBranch();
+    return c.json({ ...r, ok: push.ok, message: push.ok ? `${r.message} Your host is rebuilding the site.` : `${r.message} But publishing failed: ${String(push.stderr).trim()}` });
+  });
+  app.post('/restart', (c) => {
+    if (!deps.onRestart) throw new MgmtError('Restart isn’t available here. Stop the wizard (Ctrl+C) and run "npm run setup" again.', 400);
+    setTimeout(deps.onRestart, 300);
+    return c.json({ ok: true });
+  });
   app.post('/git/publish', async (c) => {
     const { message } = await c.req.json<{ message?: string }>();
     const paths = ['team', ...existingHostPaths()].filter((p) => existsSync(join(REPO_ROOT, p)));

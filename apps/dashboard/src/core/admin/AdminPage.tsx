@@ -48,6 +48,7 @@ import {
   type LinkRow,
 } from '@teamhub/sdk';
 import { agentPrompt } from '@teamhub/sdk/agent-prompt';
+import { UpdateNotice } from './UpdateNotice';
 
 const SECTIONS = [
   { path: '', label: 'Storage & usage', icon: HardDrive },
@@ -78,6 +79,7 @@ export default function AdminPage() {
         </nav>
       </PageHeader>
       <div className="mx-auto max-w-5xl px-4 py-5 sm:px-6">
+        <UpdateNotice />
         <Routes>
           <Route index element={<Storage />} />
           <Route path="modules" element={<Modules />} />
@@ -630,8 +632,9 @@ function Help() {
       <Card className="space-y-2 p-4">
         <p className="font-semibold">Getting updates</p>
         <p className="text-muted">
-          On GitHub, open your fork and click <strong>Sync fork</strong>. If the new version needs database changes, admins see a banner here — run <code>npm run setup</code> &gt;{' '}
-          <strong>Update</strong>.
+          This site runs TeamHub {runtime().config.version}. When a new version is out, a notice appears at the top of this page. To update, run <code>npm run setup</code> on
+          your computer and choose <strong>Update</strong>: it backs up your data, updates your database, then your site, and you can undo it. Avoid GitHub’s “Sync fork”
+          button for updates.
         </p>
       </Card>
       <Card className="space-y-2 p-4">

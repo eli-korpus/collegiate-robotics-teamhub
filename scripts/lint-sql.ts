@@ -2,7 +2,8 @@
  * SQL linter for module and integration SQL (spec §16). Run by `npm run lint`.
  *  - every object a module/integration creates (table, function, trigger, policy, index, view, type, cron job) starts
  *    with its prefix, so dormant/delete can find it by prefix
- *  - migrations are expand-only (no DROP TABLE/COLUMN, RENAME, or column type changes)
+ *  - migrations are expand-only (no DROP TABLE/COLUMN, RENAME, or column type changes), except a migration that starts
+ *    with `-- teamhub:contract`, which only major releases may ship (docs/releasing.md)
  *  - modules never reference another module's tables; integrations only their two modules'
  *  - security definer functions pin search_path and never test current_user (it is the owner inside them)
  *  - {{settings.x}} placeholders exist in the module's settings schema and only appear in policies.sql / cron.sql
@@ -43,7 +44,9 @@ export function lintSql(catalog: Catalog): SqlProblem[] {
       if (!own.some((p) => name.startsWith(p))) problems.push({ where, message: `${kind} "${name}" must start with ${own.join(' or ')}` });
     }
     for (const m of clean.matchAll(CRON)) if (!own.some((p) => m[1].startsWith(p))) problems.push({ where, message: `cron job "${m[1]}" must start with ${own.join(' or ')}` });
-    if (opts.migration) {
+    // Major versions may remove things in a migration that starts with "-- teamhub:contract" (docs/releasing.md).
+    const contract = opts.migration && /^\s*-- teamhub:contract\b/.test(sql);
+    if (opts.migration && !contract) {
       if (/\bdrop\s+table\b/i.test(clean)) problems.push({ where, message: 'migrations are expand-only: no DROP TABLE (teardown is generated from the prefix)' });
       if (/\bdrop\s+column\b/i.test(clean)) problems.push({ where, message: 'migrations are expand-only: no DROP COLUMN' });
       if (/\brename\s+(?:column\s+)?\w+\s+to\b|\brename\s+to\b/i.test(clean)) problems.push({ where, message: 'migrations are expand-only: no RENAME' });

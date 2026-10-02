@@ -70,3 +70,23 @@ test('signed-out visitors see the login page @phone', async ({ page }) => {
   await page.getByRole('link', { name: 'Create an account' }).click();
   await expect(page.getByRole('heading', { name: 'Join the team' })).toBeVisible();
 });
+
+test.describe('update notice', () => {
+  test('admins see a newer TeamHub release in Admin and a dot on the sidebar', async ({ page }) => {
+    await mockSupabase(page, { latestRelease: { tag_name: 'v99.0.0', name: 'TeamHub v99.0.0 (security update)' } });
+    await page.goto('/admin');
+    await expect(page.getByText('Security update available: TeamHub 99.0.0')).toBeVisible();
+    await expect(page.getByText('major update')).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Admin', exact: true })).toHaveAttribute('title', 'TeamHub 99.0.0 is available');
+  });
+  test('members never contact GitHub', async ({ page }) => {
+    let calls = 0;
+    await mockSupabase(page, { admin: false, role: 'member', latestRelease: { tag_name: 'v99.0.0', name: 'x' } });
+    page.on('request', (r) => {
+      if (r.url().startsWith('https://api.github.com/')) calls++;
+    });
+    await page.goto('/');
+    await page.waitForTimeout(1500);
+    expect(calls).toBe(0);
+  });
+});

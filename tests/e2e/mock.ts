@@ -18,7 +18,7 @@ export function loadGenerated() {
   return { config, schema };
 }
 
-export async function mockSupabase(page: Page, opts: { tables?: Record<string, unknown[]>; rpc?: Record<string, unknown>; role?: 'mentor' | 'member'; admin?: boolean; realFtcScout?: boolean } = {}) {
+export async function mockSupabase(page: Page, opts: { tables?: Record<string, unknown[]>; rpc?: Record<string, unknown>; role?: 'mentor' | 'member'; admin?: boolean; realFtcScout?: boolean; latestRelease?: { tag_name: string; name: string } } = {}) {
   const { config, schema } = loadGenerated();
   const base = config.supabase.url as string;
   const ref = new URL(base).hostname.split('.')[0];
@@ -79,6 +79,10 @@ export async function mockSupabase(page: Page, opts: { tables?: Record<string, u
     }
     return route.fulfill({ json: {} });
   });
+  // TeamHub release check (admins only): never hit the real GitHub in tests.
+  await page.route('https://api.github.com/**', (r) =>
+    opts.latestRelease ? r.fulfill({ json: { ...opts.latestRelease, html_url: `https://github.com/elikorpus/teamhub-ftc/releases/tag/${opts.latestRelease.tag_name}` } }) : r.fulfill({ status: 404, json: {} }),
+  );
   // Avoid flaky third-party requests (favicons, FTCScout) in smoke tests.
   await page.route('https://www.google.com/s2/**', (r) => r.fulfill({ status: 404, body: '' }));
   if (!opts.realFtcScout) await page.route('https://api.ftcscout.org/**', (r) => r.fulfill({ json: { data: { teamByNumber: null, eventByCode: null, eventsSearch: [], __type: { possibleTypes: [] } } } }));

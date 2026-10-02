@@ -84,7 +84,7 @@ then enable it with the wizard. Details: `CONTRIBUTING.md`.
 (tabs must never import each other; `npm run lint` checks this).
 
 **Change Home, People or Admin:** `apps/dashboard/src/core/`. Keep these changes small: they're the files most likely to
-conflict when you sync your fork with new TeamHub releases.
+conflict when you update to new TeamHub releases.
 
 ## Rules that keep the dashboard safe and working
 
@@ -118,12 +118,23 @@ conflict when you sync your fork with new TeamHub releases.
 Before you push: `npm run typecheck && npm run lint && npm test` must pass. If you changed SQL, run
 `npm run setup` > Update so your live database matches.
 
+## Keep your changes update-friendly
+
+New TeamHub versions are merged into your fork by `npm run setup` > **Update**. Your changes are kept, but if an update
+changes the same lines you did, it stops and asks you to combine them. To keep updates painless:
+
+- Prefer **adding** (a new tab with `npm run new-module`, a new integration, a new file) over **editing** TeamHub's files.
+- Keep edits to shared files (`apps/dashboard/src/core/`, `packages/`, other teams' tabs) small and few.
+- Record every change in **`CUSTOMIZATIONS.md`** at the repository root (what, why, which files). The wizard shows it
+  before updating, and it tells an AI assistant what to keep when combining an update with your changes.
+- Never edit an existing migration file; add a new one.
+
 ## After changing code
 
 1. Run the checks above.
 2. If you added migrations or permissions: `npm run setup` > Update or Edit, so the database matches the code.
 3. Commit and push. The host rebuilds the site in a minute or two.
-4. Note your change somewhere (a commit message is fine) so you remember it when syncing future TeamHub updates.
+4. Add a line to `CUSTOMIZATIONS.md` so you (and the update wizard) remember it.
 
 ## Prompt for your AI assistant
 
@@ -147,6 +158,7 @@ How to work:
 - Do not add chat or private messages between users (youth protection).
 - Use Lucide icons only. No emojis in the interface.
 - When you're done, run npm run typecheck, npm run lint and npm test, and fix anything that fails.
+- Add a short note about the change to CUSTOMIZATIONS.md (create it if it doesn't exist), so future TeamHub updates go smoothly.
 - Tell me which files you changed, whether the database needs updating (npm run setup > Update), and how to undo the change.
 
 What we want to change: <describe the change here>

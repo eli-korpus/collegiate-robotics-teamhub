@@ -3,6 +3,7 @@ import { Check, ChevronsUpDown, ExternalLink, Home as HomeIcon, LogOut, Messages
 import { Avatar, Kbd, Menu, ModKey, SidebarItem, SidebarSection, TeamDot, cn, useMediaQuery } from '@teamhub/ui';
 import { canWith, isMultiTeam, runtime, setTeamScope, useCan, useLinks, useMe, usePeople, useSession, useTeamScope, type LoadedModule } from '@teamhub/sdk';
 import { nav } from '../../generated/nav';
+import { useAvailableUpdate } from './updates';
 import { ProgramLogo, TeamLogo } from '../auth/AuthLayout';
 import { NotificationsButton } from './Notifications';
 import { useTheme } from './theme';
@@ -33,6 +34,7 @@ export function Sidebar({ onNavigate, onSearch }: { onNavigate: () => void; onSe
   const modules = runtime().modules;
   const byId = new Map(modules.filter((m) => !m.manifest.viewPerm || canWith(me, m.manifest.viewPerm)).map((m) => [m.manifest.id, m]));
   const wide = useMediaQuery('(min-width: 1024px)');
+  const update = useAvailableUpdate();
   const canApprove = useCan('people.approve_members');
   const links = useLinks();
   const chat = links.data?.find((l) => l.slot === 'team_chat');
@@ -71,7 +73,7 @@ export function Sidebar({ onNavigate, onSearch }: { onNavigate: () => void; onSe
         ))}
         <SidebarSection title="Program" collapsible={false}>
           <SidebarItem as={NavLink} to="/people" icon={<Users />} label="People" count={pendingCount || undefined} active={loc.pathname.startsWith('/people')} onClick={onNavigate} />
-          {me?.isAdmin && <SidebarItem as={NavLink} to="/admin" icon={<Shield />} label="Admin" active={loc.pathname.startsWith('/admin')} onClick={onNavigate} />}
+          {me?.isAdmin && <SidebarItem as={NavLink} to="/admin" icon={<Shield />} label="Admin" dot={!!update} title={update ? `TeamHub ${update.version} is available` : undefined} active={loc.pathname.startsWith('/admin')} onClick={onNavigate} />}
         </SidebarSection>
       </div>
       <div className="space-y-1 border-t border-border p-2">

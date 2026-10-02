@@ -1,4 +1,4 @@
-import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 import { deriveAccent } from '@teamhub/ui/color';
 import { MODULE_CATEGORIES } from '@teamhub/config-schema';
@@ -112,6 +112,8 @@ export function generateDashboardFiles(r: Resolved, outDir = 'apps/dashboard/src
   });
 
   const runtime = {
+    // The TeamHub release this site was built from (root package.json), for the admin "update available" notice.
+    version: (JSON.parse(readFileSync(join(r.catalog.root, 'package.json'), 'utf8')) as { version: string }).version,
     program: c.program,
     teams: c.teams,
     theme: c.theme,

@@ -65,3 +65,4 @@ export function teamDir(root = REPO_ROOT): string {
 export function configPath(root = REPO_ROOT): string {
   return join(teamDir(root), 'teamhub.config.json');
 }
+export * from './release';

@@ -93,6 +93,11 @@ Settings are a zod object; the wizard renders the form from it (`.meta({ title, 
 Settings reach SQL only through `{{settings.x}}` in `policies.sql` / `cron.sql`, and the browser through
 `useModuleSettings('<id>')`.
 
+## Changelog and releases
+
+Add a line for every user-visible change under `## [Unreleased]` in `CHANGELOG.md`. Releases, versioning and the
+add-only database rule across versions are described in [docs/releasing.md](docs/releasing.md).
+
 ## Style
 
 - TypeScript strict, Prettier (`npm run format`), function components and hooks.

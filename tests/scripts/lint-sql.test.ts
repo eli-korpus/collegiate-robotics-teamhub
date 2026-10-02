@@ -33,4 +33,8 @@ describe('lint-sql', () => {
   it('ignores other prefixes inside strings and comments', () => {
     expect(lintSql(catalog(mod('a', 'aa_', "-- see bb_other\ncreate table aa_t (note text default 'bb_other');"), mod('b', 'bb_', 'create table bb_other (id int);')))).toEqual([]);
   });
+  it('allows removals only in a migration marked -- teamhub:contract (major releases)', () => {
+    expect(lintSql(catalog(mod('a', 'aa_', '-- teamhub:contract (2.0.0: replaced by aa_new)\nalter table aa_x drop column y;')))).toEqual([]);
+    expect(lintSql(catalog(mod('a', 'aa_', 'alter table aa_x drop column y; -- teamhub:contract')))).not.toEqual([]);
+  });
 });

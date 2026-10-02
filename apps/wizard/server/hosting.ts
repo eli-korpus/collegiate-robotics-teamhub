@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { REPO_ROOT } from '@teamhub/generator';
 import type { HostProvider } from '@teamhub/config-schema';
+import { TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
 
 export interface HostFile {
   path: string;
@@ -67,6 +68,14 @@ export function hostFiles(provider: HostProvider, programName: string, branch = 
   }
 }
 
+/** Weekly "is there a new TeamHub release?" check that opens an issue in the fork (docs/updating.md). */
+export function updatesWorkflowFile(): HostFile {
+  return {
+    path: '.github/workflows/teamhub-updates.yml',
+    content: readFileSync(join(REPO_ROOT, '.github/workflows/teamhub-updates.yml.template'), 'utf8').replace('__UPSTREAM__', TEAMHUB_UPSTREAM_REPO),
+  };
+}
+
 export function keepaliveFile(): HostFile {
   return { path: '.github/workflows/keepalive.yml', content: readFileSync(join(REPO_ROOT, '.github/workflows/keepalive.yml.template'), 'utf8') };
 }
@@ -80,7 +89,7 @@ export function writeHostFiles(files: HostFile[]): string[] {
   return files.map((f) => f.path);
 }
 
-export const HOST_OWNED_PATHS = ['wrangler.jsonc', 'vercel.json', 'netlify.toml', '.github/workflows/pages.yml', '.github/workflows/keepalive.yml'];
+export const HOST_OWNED_PATHS = ['wrangler.jsonc', 'vercel.json', 'netlify.toml', '.github/workflows/pages.yml', '.github/workflows/keepalive.yml', '.github/workflows/teamhub-updates.yml'];
 export const existingHostPaths = () => HOST_OWNED_PATHS.filter((p) => existsSync(join(REPO_ROOT, p)));
 
 /** Checks a deployed site responds and looks like TeamHub. */

@@ -27,6 +27,7 @@ How to work:
 - Do not add chat or private messages between users (youth protection).
 - Use Lucide icons only. No emojis in the interface.
 - When you're done, run npm run typecheck, npm run lint and npm test, and fix anything that fails.
+- Add a short note about the change to CUSTOMIZATIONS.md (create it if it doesn't exist), so future TeamHub updates go smoothly.
 - Tell me which files you changed, whether the database needs updating (npm run setup > Update), and how to undo the change.
 
 What we want to change: <describe the change here>`;

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Check, CheckCircle2, Copy, ExternalLink, GitBranch, PartyPopper, Printer, RefreshCw } from 'lucide-react';
 import type { HostProvider } from '@teamhub/config-schema';
-import { Banner, Button, Card, CopyBlock, Field, Input, QRCode, Spinner, cn, toast } from '@teamhub/ui';
+import { Banner, Button, Card, Checkbox, CopyBlock, Field, Input, QRCode, Spinner, cn, toast } from '@teamhub/ui';
 import { agentPrompt } from '@teamhub/sdk/agent-prompt';
 import { api, type GitState } from '../api';
 import { Section, StepShell, Why } from '../components';
@@ -97,7 +97,7 @@ export function Publish({ onNext, onBack }: StepProps) {
               Run <code>git config --global user.name "Your Name"</code> and <code>git config --global user.email you@example.com</code> in a terminal, then refresh.
             </Banner>
           )}
-          <Section title="What gets committed" description="Only TeamHub's team folder and host settings — so “Sync fork” on GitHub never conflicts and you always get new tabs and fixes.">
+          <Section title="What gets committed" description="Only TeamHub's team folder and host settings, so TeamHub updates never conflict with them and you always get new tabs and fixes.">
             <ul className="list-disc pl-5 text-[13px] text-muted">
               <li>team/teamhub.config.json (no secrets — the Supabase URL and publishable key are public by design)</li>
               <li>team/branding/ (logos)</li>
@@ -241,21 +241,30 @@ export function Host({ onNext, onBack }: StepProps) {
 export function KeepAlive({ onNext, onBack }: StepProps) {
   const { draft, setDraft } = useDraft();
   const [written, setWritten] = useState(false);
+  const [updates, setUpdates] = useState(true);
   return (
     <StepShell title="Keep your database awake" subtitle="Free Supabase projects pause after 7 days without activity — for example over a long break." onBack={onBack} onNext={onNext} nextLabel={draft.done.keepalive ? 'Continue' : 'Skip for now'}>
       <Section title="A tiny scheduled ping" description="We add a GitHub Action to your fork that pings your database every 3 days. It needs no secrets — it reads the public address from your config.">
         {!written ? (
-          <Button
-            variant="primary"
-            onClick={async () => {
-              await api('/keepalive', {});
-              setWritten(true);
-            }}
-          >
-            Add the keep-alive workflow
-          </Button>
+          <div className="space-y-3">
+            <Checkbox
+              checked={updates}
+              onChange={setUpdates}
+              label="Also check once a week for TeamHub updates"
+            />
+            <p className="-mt-2 pl-7 text-[12.5px] text-muted">Opens an issue in your fork (GitHub emails you) when a new version is out. It never changes your code.</p>
+            <Button
+              variant="primary"
+              onClick={async () => {
+                await api('/keepalive', { updates });
+                setWritten(true);
+              }}
+            >
+              Add the workflow{updates ? 's' : ''}
+            </Button>
+          </div>
         ) : (
-          <PublishButton message="Add TeamHub keep-alive workflow" label="Push it" onDone={() => setDraft((d) => ({ ...d, done: { ...d.done, keepalive: true } }))} />
+          <PublishButton message="Add TeamHub keep-alive and update-check workflows" label="Push it" onDone={() => setDraft((d) => ({ ...d, done: { ...d.done, keepalive: true } }))} />
         )}
         {draft.done.keepalive && (
           <p className="flex items-center gap-1.5 text-[13px] text-success">
@@ -327,7 +336,7 @@ export function Done() {
           <li>
             Run <code>npm run setup</code> again any time to add or remove tabs, rebrand, or change permissions (Edit mode).
           </li>
-          <li>When TeamHub releases updates: click “Sync fork” on GitHub, then run setup &gt; Update.</li>
+          <li>When TeamHub releases an update, admins see a notice in the dashboard. Run setup &gt; Update: it updates your database, then your site, and you can undo it.</li>
         </ul>
       </Section>
       <Button

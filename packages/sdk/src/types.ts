@@ -8,6 +8,8 @@ export type Sb = Pick<SupabaseClient<any, 'public', any>, 'from' | 'rpc' | 'auth
 
 /** The non-secret config baked into the build (generated/config.ts). */
 export interface RuntimeConfig {
+  /** TeamHub release this build came from, e.g. "1.1.0". */
+  version: string;
   program: TeamhubConfig['program'];
   teams: TeamConfig[];
   theme: TeamhubConfig['theme'];

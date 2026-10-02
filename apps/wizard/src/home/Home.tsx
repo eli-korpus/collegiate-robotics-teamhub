@@ -1,14 +1,28 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Archive, CalendarRange, DatabaseZap, Download, Mail, Pencil, ShieldAlert, Upload, KeyRound } from 'lucide-react';
 import { Banner, Button, Card, Checkbox, Dialog, Input, Switch, toast } from '@teamhub/ui';
 import { api, type Catalog, type ServerState } from '../api';
 import { ModuleIcon } from '../components';
-import { ApplyLog } from '../steps/connect';
+import { UpdateDialog } from './Update';
 
 /** Existing install: Edit, Update, Backup & Export, Import, New Season, Email, Danger zone (spec §5.1). */
 export function ExistingHome({ server, catalog, onEdit, refresh }: { server: ServerState; catalog: Catalog; onEdit: () => void; refresh: () => Promise<void> }) {
   const c = server.config!;
   const [dialog, setDialog] = useState<null | 'update' | 'backup' | 'import' | 'season' | 'email' | 'danger' | 'connect'>(null);
+  const [resume, setResume] = useState(false);
+  const [latest, setLatest] = useState<{ current: string; latest: string | null; available: boolean } | null>(null);
+  useEffect(() => {
+    // An update that was mid-way when the wizard restarted (or the page reloaded): finish it.
+    api<{ stage: string } | null>('/update/state')
+      .then((st) => {
+        if (st?.stage === 'merged') {
+          setResume(true);
+          setDialog('update');
+        }
+      })
+      .catch(() => {});
+    api<{ current: string; latest: string | null; available: boolean }>('/update/check').then(setLatest).catch(() => {});
+  }, []);
   const tabs = catalog.modules.filter((m) => m.id in c.modules);
   return (
     <div className="mx-auto max-w-3xl px-5 py-10">
@@ -40,7 +54,13 @@ export function ExistingHome({ server, catalog, onEdit, refresh }: { server: Ser
       )}
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         <Tile icon={<Pencil />} title="Edit" body="Add or remove tabs, rebrand, change positions or permissions." onClick={onEdit} primary />
-        <Tile icon={<DatabaseZap />} title="Update" body="After “Sync fork” on GitHub: apply new database changes." onClick={() => setDialog('update')} />
+        <Tile
+          icon={<DatabaseZap />}
+          title={latest?.available ? `Update to ${latest.latest}` : 'Update'}
+          body={latest ? (latest.available ? `A new TeamHub version is out (you have ${latest.current}).` : `You’re on the newest version (${latest.current}).`) : 'Get the newest TeamHub and update your database.'}
+          onClick={() => setDialog('update')}
+          primary={!!latest?.available}
+        />
         <Tile icon={<Download />} title="Backup & Export" body="Download all data and files as a zip." onClick={() => setDialog('backup')} />
         <Tile icon={<Upload />} title="Import" body="Restore a backup (e.g. into a new Supabase project)." onClick={() => setDialog('import')} />
         <Tile icon={<CalendarRange />} title="New Season" body="Set the new season label and roll over tabs." onClick={() => setDialog('season')} />
@@ -48,7 +68,7 @@ export function ExistingHome({ server, catalog, onEdit, refresh }: { server: Ser
         <Tile icon={<ShieldAlert />} title="Danger zone" body="Remove TeamHub from the database." onClick={() => setDialog('danger')} danger />
       </div>
       {dialog === 'connect' && <ConnectDialog onClose={() => setDialog(null)} refresh={refresh} />}
-      {dialog === 'update' && <UpdateDialog server={server} onClose={() => setDialog(null)} />}
+      {dialog === 'update' && <UpdateDialog server={server} resume={resume} onClose={() => (setDialog(null), setResume(false))} />}
       {dialog === 'backup' && <BackupDialog server={server} onClose={() => setDialog(null)} />}
       {dialog === 'import' && <ImportDialog onClose={() => setDialog(null)} />}
       {dialog === 'season' && <SeasonDialog server={server} catalog={catalog} onClose={() => setDialog(null)} refresh={refresh} />}
@@ -98,77 +118,6 @@ function ConnectDialog({ onClose, refresh }: { onClose: () => void; refresh: () 
         >
           Connect
         </Button>
-      </div>
-    </Dialog>
-  );
-}
-
-function UpdateDialog({ server, onClose }: { server: ServerState; onClose: () => void }) {
-  const [pull, setPull] = useState<{ ok: boolean; log: string } | null>(null);
-  const [plan, setPlan] = useState<{ summary: { migrations: { id: string; from: number; to: number }[] }; lines: string[] } | null>(null);
-  const [log, setLog] = useState<{ step: string; ok: boolean; detail?: string }[] | null>(null);
-  const [busy, setBusy] = useState(false);
-  return (
-    <Dialog open onOpenChange={(v) => !v && onClose()} title="Update" description="Get the newest TeamHub and update your database." size="lg">
-      <div className="space-y-4 text-[13.5px]">
-        <ol className="list-decimal space-y-1 pl-5">
-          <li>On GitHub, open your fork and click <strong>Sync fork &gt; Update branch</strong>.</li>
-          <li>
-            Pull it to this computer:{' '}
-            <Button
-              size="sm"
-              onClick={async () => {
-                setPull(await api('/git/pull', {}));
-              }}
-            >
-              git pull
-            </Button>
-          </li>
-          <li>If new code was pulled, stop the wizard (Ctrl+C), run <code>npm install</code> and <code>npm run setup</code> again, then come back here.</li>
-        </ol>
-        {pull && <pre className="max-h-32 overflow-auto rounded-md bg-bg-subtle p-2 text-[11.5px]">{pull.log}</pre>}
-        <Button
-          onClick={async () => {
-            try {
-              setPlan(await api('/plan', server.config));
-            } catch (e) {
-              toast.error((e as Error).message);
-            }
-          }}
-        >
-          Check for database updates
-        </Button>
-        {plan &&
-          (plan.summary.migrations.length ? (
-            <>
-              <ul className="list-disc pl-5">
-                {plan.summary.migrations.map((m) => (
-                  <li key={m.id}>
-                    {m.id}: version {m.from} to {m.to}
-                  </li>
-                ))}
-              </ul>
-              <Button
-                variant="primary"
-                loading={busy}
-                onClick={async () => {
-                  setBusy(true);
-                  try {
-                    setLog((await api<{ log: typeof log }>('/apply', { config: server.config })).log);
-                  } catch (e) {
-                    setLog([{ step: 'Update failed; nothing changed.', ok: false, detail: (e as Error).message }]);
-                  } finally {
-                    setBusy(false);
-                  }
-                }}
-              >
-                Apply updates
-              </Button>
-            </>
-          ) : (
-            <Banner tone="success">Your database is up to date.</Banner>
-          ))}
-        {log && <ApplyLog log={log} />}
       </div>
     </Dialog>
   );

@@ -27,7 +27,8 @@
     "ci:matrix": "tsx scripts/ci-matrix.ts",
     "new-module": "tsx scripts/new-module.ts",
     "format": "prettier --write .",
-    "docs:modules": "tsx scripts/docs-modules.ts"
+    "docs:modules": "tsx scripts/docs-modules.ts",
+    "release": "tsx scripts/release.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",

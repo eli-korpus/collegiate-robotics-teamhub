@@ -24,9 +24,10 @@ async function previousCatalog(): Promise<Catalog> {
 describe('upgrade', () => {
   it('previous release + data then current release keeps the data and reaches current versions', async () => {
     const db = await createTestDb();
-    const config = withModules(ALL);
     const prev = await previousCatalog();
-    await db.applyConfig(config, true, prev);
+    // Install the previous release with the tabs it had (newer releases may add tabs), then upgrade to every tab.
+    await db.applyConfig(withModules(ALL.filter((id) => prev.modules.has(id))), true, prev);
+    const config = withModules(ALL);
     const mentor = await db.user('Mentor', { [TEAM_A]: 'mentor' });
     await db.as(mentor, `insert into task_items (team_id, title, created_by) values ($1, 'Survives the upgrade', $2)`, [TEAM_A, mentor]);
     await db.as(mentor, `insert into sct_entries (event_code, team_number, data, scout) values ('USTEST1', 12345, '{"auto": 12}', $1)`, [mentor]);

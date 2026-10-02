@@ -1,0 +1,54 @@
+# Publishes a GitHub Release when a maintainer pushes a version tag (created by `npm run release`).
+# Team forks have team/teamhub.config.json and skip this.
+name: Release
+on:
+  push:
+    tags: ['v*.*.*']
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Only in the upstream repository
+        id: gate
+        run: echo "upstream=$([ -f team/teamhub.config.json ] && echo false || echo true)" >> "$GITHUB_OUTPUT"
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.upstream == 'true'
+        with:
+          node-version: 24
+          cache: npm
+      - if: steps.gate.outputs.upstream == 'true'
+        run: npm ci
+      - name: Version tag matches package.json
+        if: steps.gate.outputs.upstream == 'true'
+        run: test "v$(jq -r .version package.json)" = "$GITHUB_REF_NAME"
+      - name: Checks
+        if: steps.gate.outputs.upstream == 'true'
+        run: |
+          npx tsx packages/generator/src/cli.ts generate --config examples/demo.config.json
+          npm run typecheck
+          npm run lint
+          npm test
+      - name: Upgrade test from the previous release
+        if: steps.gate.outputs.upstream == 'true'
+        run: |
+          PREV=$(git tag --list 'v*.*.*' --sort=-v:refname | grep -vx "$GITHUB_REF_NAME" | head -1)
+          if [ -z "$PREV" ]; then echo "First release, no previous version to upgrade from."; exit 0; fi
+          echo "Upgrading from $PREV"
+          git worktree add ../prev "$PREV"
+          (cd ../prev && npm ci)
+          TEAMHUB_PREV_ROOT=../prev npx vitest run tests/db/upgrade.test.ts
+      - name: Publish the GitHub Release
+        if: steps.gate.outputs.upstream == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            --title "$(npx tsx scripts/release-notes.ts "$GITHUB_REF_NAME" --title)" \
+            --notes "$(npx tsx scripts/release-notes.ts "$GITHUB_REF_NAME")" \
+            --verify-tag

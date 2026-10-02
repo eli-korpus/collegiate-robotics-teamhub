@@ -46,15 +46,26 @@ Highlights:
 You need a computer with [Node.js](https://nodejs.org) 20.19+ and Git, a GitHub account and a free
 [Supabase](https://supabase.com) account. Setup takes about 30 minutes.
 
-```sh
-# 1. Fork this repository on GitHub, then clone your fork
-git clone https://github.com/<you>/teamhub-ftc.git
-cd teamhub-ftc
+1. **Make your own copy on GitHub (a "fork").** Sign in to GitHub, open
+   [github.com/elikorpus/teamhub-ftc](https://github.com/elikorpus/teamhub-ftc) and click **Fork** (top right), then
+   **Create fork**. Your copy lives at `https://github.com/YOUR-USERNAME/teamhub-ftc`, and it's where your team's
+   settings are saved and where your website is built from.
+2. **Download your copy to your computer** (replace `YOUR-USERNAME` with your GitHub username, the name shown in the
+   top-right menu on GitHub):
 
-# 2. Install and start the wizard (opens http://localhost:4747)
-npm install
-npm run setup
-```
+   ```sh
+   git clone https://github.com/YOUR-USERNAME/teamhub-ftc.git
+   cd teamhub-ftc
+   ```
+
+3. **Install and start the setup wizard** (it opens http://localhost:4747 in your browser):
+
+   ```sh
+   npm install
+   npm run setup
+   ```
+
+More detail, including GitHub Desktop and team accounts: [Get your own copy](docs/setup-wizard.md#before-you-start-get-your-own-copy).
 
 ![The setup wizard](docs/screenshots/wizard-tabs.png)
 

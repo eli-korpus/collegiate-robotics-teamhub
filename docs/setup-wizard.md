@@ -4,6 +4,43 @@ Run `npm run setup` in your copy of TeamHub and the wizard opens at `http://loca
 computer, saves your progress as you go (you can quit and come back), and shows a live preview of your dashboard on
 wide screens. Plan on about 30 minutes.
 
+## Before you start: get your own copy
+
+TeamHub runs from **your own copy** of the code on GitHub (a "fork"). Your team's settings are saved there, your
+website is built from it, and TeamHub updates are merged into it.
+
+1. Sign in to [GitHub](https://github.com) (create a free account if you need one).
+2. Open [github.com/elikorpus/teamhub-ftc](https://github.com/elikorpus/teamhub-ftc), click **Fork** (top right), then
+   **Create fork**. Leave the name as `teamhub-ftc`.
+3. Copy your fork's address. On your fork's page, click the green **Code** button and copy the HTTPS link. It looks
+   like `https://github.com/YOUR-USERNAME/teamhub-ftc.git`, where `YOUR-USERNAME` is your GitHub username.
+4. Download it to your computer, in a terminal:
+
+   ```sh
+   git clone https://github.com/YOUR-USERNAME/teamhub-ftc.git
+   cd teamhub-ftc
+   npm install
+   npm run setup
+   ```
+
+**What goes in place of `YOUR-USERNAME`:**
+
+| If you forked to… | Use | Example |
+|---|---|---|
+| Your personal GitHub account | your GitHub username | `https://github.com/sam-rivera/teamhub-ftc.git` |
+| A team or school organization | the organization's name | `https://github.com/example-robotics/teamhub-ftc.git` |
+| …and renamed the fork | the new name instead of `teamhub-ftc` | `https://github.com/example-robotics/team-dashboard.git` |
+
+The easiest way to get it exactly right is to copy the link from your fork's green **Code** button.
+
+**Prefer not to use a terminal for this?** In [GitHub Desktop](https://desktop.github.com), choose **File > Clone
+repository**, pick your fork from the list, then open a terminal in that folder (**Repository > Open in Terminal**)
+and run `npm install` and `npm run setup`.
+
+Clone **your fork**, not `elikorpus/teamhub-ftc` itself: the wizard needs to save your settings to a copy you own.
+If you cloned the original by mistake, fork it on GitHub and clone your fork instead. (If you have the GitHub
+command-line tool `gh` installed and signed in, the wizard's Publish step can create the fork for you.)
+
 ## 1. Welcome
 
 What you'll need: a GitHub account, a free Supabase account, and about 30 minutes. Everything runs on free plans.

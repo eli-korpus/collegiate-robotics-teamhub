@@ -281,7 +281,7 @@ export function Preview({
                   <p className="px-1.5 pt-1.5 text-[8.5px] font-semibold uppercase tracking-wider text-faint">{c}</p>
                   {list.slice(0, 6).map((t) => (
                     <div key={t.name} className="flex items-center gap-1.5 truncate px-1.5 py-0.5 text-fg/85">
-                      <ModuleIcon name={t.icon} className="size-3 text-muted" /> {t.name}
+                      <ModuleIcon name={t.icon} className="size-3 shrink-0 text-muted" /> {t.name}
                     </div>
                   ))}
                   {list.length > 6 && <p className="px-1.5 text-faint">+{list.length - 6} more</p>}

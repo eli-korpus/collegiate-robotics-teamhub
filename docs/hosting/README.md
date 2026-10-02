@@ -19,6 +19,8 @@ Every host uses the same build:
 | Node version | 20.19 or newer (22 or 24 recommended) |
 | Environment variables | none — the public Supabase URL and publishable key are in `team/teamhub.config.json` |
 
+![The wizard's Host it step](../screenshots/wizard-host.png)
+
 The wizard's **Host it** step writes the one config file your host needs (for example `wrangler.jsonc` or
 `netlify.toml`) into your fork and commits it.
 

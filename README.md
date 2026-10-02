@@ -56,7 +56,9 @@ npm install
 npm run setup
 ```
 
-The wizard explains every step. When it's done, connect your fork to a host:
+![The setup wizard](docs/screenshots/wizard-tabs.png)
+
+The wizard explains every step ([walkthrough](docs/setup-wizard.md)). When it's done, connect your fork to a host:
 [Cloudflare](docs/hosting/cloudflare.md), [Vercel](docs/hosting/vercel.md), [Netlify](docs/hosting/netlify.md) or
 [GitHub Pages](docs/hosting/github-pages.md).
 
@@ -65,6 +67,7 @@ database after syncing your fork, back up and restore, or start a **new season**
 
 ## Documentation
 
+- [Setup wizard walkthrough](docs/setup-wizard.md)
 - [Hosting guides](docs/hosting/README.md)
 - [Tab library](docs/modules/README.md)
 - [Configuration file reference](docs/configuration.md)

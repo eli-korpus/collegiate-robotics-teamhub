@@ -12,7 +12,7 @@ export default defineModule({
   prefix: 'ppr_',
   name: 'Paperwork Tracker',
   category: 'team',
-  icon: 'FileCheck2',
+  icon: 'FileCheck',
   summary: 'Track who has turned in consent forms, travel permission and other paperwork.',
   purpose: 'Track who has turned in required paperwork.',
   notFor: [

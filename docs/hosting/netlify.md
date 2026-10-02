@@ -26,5 +26,3 @@ The redirect makes refreshing `/calendar` work.
 ## Custom domain
 
 Site > **Domain management** > **Add a domain**. Then update the URL in the wizard.
-
-*Screenshots: TODO — console labels above are current as of October 2026 and may move.*

@@ -11,7 +11,7 @@ export default defineModule({
   prefix: 'code_',
   name: 'Code Hub',
   category: 'engineering',
-  icon: 'Code2',
+  icon: 'CodeXml',
   summary: "The software team's home: repo activity, OpModes and driver controls.",
   purpose: "The software team's home: repo activity, OpModes and controls.",
   notFor: [

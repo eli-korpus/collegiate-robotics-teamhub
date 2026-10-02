@@ -24,5 +24,3 @@ The rewrite makes refreshing `/calendar` work.
 ## Custom domain
 
 Project > **Settings** > **Domains** > **Add**. Then update the URL in the wizard.
-
-*Screenshots: TODO — console labels above are current as of October 2026 and may move.*

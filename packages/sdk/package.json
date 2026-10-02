@@ -6,7 +6,8 @@
   "exports": {
     ".": "./src/index.ts",
     "./define": "./src/define.ts",
-    "./ftcscout": "./src/ftcscout.ts"
+    "./ftcscout": "./src/ftcscout.ts",
+    "./agent-prompt": "./src/agent-prompt.ts"
   },
   "dependencies": {
     "@supabase/auth-js": "2.117.2",

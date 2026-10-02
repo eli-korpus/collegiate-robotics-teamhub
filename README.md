@@ -65,6 +65,12 @@ The wizard explains every step ([walkthrough](docs/setup-wizard.md)). When it's 
 Later, run `npm run setup` again to **edit** your dashboard (add tabs, rebrand, change permissions), **update** the
 database after syncing your fork, back up and restore, or start a **new season**.
 
+## Customize it with AI
+
+Want changes the wizard can't make? [`AGENTS.md`](AGENTS.md) explains the codebase and its safety rules to AI coding
+assistants (Claude Code, Cursor, GitHub Copilot, Codex and others read it automatically). Your dashboard's
+**Admin > AI assistant** page has a ready-to-paste prompt with your program's name and tabs filled in.
+
 ## Documentation
 
 - [Setup wizard walkthrough](docs/setup-wizard.md)
@@ -72,6 +78,7 @@ database after syncing your fork, back up and restore, or start a **new season**
 - [Tab library](docs/modules/README.md)
 - [Configuration file reference](docs/configuration.md)
 - [Testing](docs/testing.md)
+- [Guide for AI coding assistants](AGENTS.md)
 - [Contributing and writing a tab](CONTRIBUTING.md)
 
 ## Try it locally

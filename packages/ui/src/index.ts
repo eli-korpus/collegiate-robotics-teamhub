@@ -16,6 +16,7 @@ export * from './qr';
 export * from './hints';
 export * from './command';
 export * from './formbuilder';
+export * from './copy';
 export * from './markdown';
 export { Markdown } from './markdown-view';
 export { contrast, deriveAccent, readableOn, PRESET_ACCENTS, dominantColor } from './color';

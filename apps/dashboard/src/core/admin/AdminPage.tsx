@@ -1,13 +1,14 @@
 import { useMemo, useState } from 'react';
 import { NavLink, Route, Routes } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Activity, BookOpen, Boxes, CalendarRange, Database, ExternalLink, HardDrive, Link2, Pencil, Plus, Shield, Trash2 } from 'lucide-react';
+import { Activity, BookOpen, Bot, Boxes, CalendarRange, Database, ExternalLink, HardDrive, Link2, Pencil, Plus, Shield, Trash2 } from 'lucide-react';
 import {
   Badge,
   Banner,
   Button,
   CHART_COLORS,
   Card,
+  CopyBlock,
   CardHeader,
   DataTable,
   Dialog,
@@ -46,6 +47,7 @@ import {
   TeamBadge,
   type LinkRow,
 } from '@teamhub/sdk';
+import { agentPrompt } from '@teamhub/sdk/agent-prompt';
 
 const SECTIONS = [
   { path: '', label: 'Storage & usage', icon: HardDrive },
@@ -54,6 +56,7 @@ const SECTIONS = [
   { path: 'season', label: 'Season', icon: CalendarRange },
   { path: 'links', label: 'Tool links', icon: Link2 },
   { path: 'keepalive', label: 'Keep-alive', icon: Activity },
+  { path: 'ai', label: 'AI assistant', icon: Bot },
   { path: 'help', label: 'Help', icon: BookOpen },
 ];
 
@@ -82,6 +85,7 @@ export default function AdminPage() {
           <Route path="season" element={<Season />} />
           <Route path="links" element={<ToolLinksAdmin />} />
           <Route path="keepalive" element={<KeepAlive />} />
+          <Route path="ai" element={<AiAssistant />} />
           <Route path="help" element={<Help />} />
         </Routes>
       </div>
@@ -570,6 +574,39 @@ function KeepAlive() {
         </a>
       )}
     </Card>
+  );
+}
+
+/** A ready-made prompt for AI coding assistants, filled in with this program's name and tabs (see AGENTS.md). */
+function AiAssistant() {
+  const prompt = agentPrompt({ programName: runtime().config.program.name, tabs: runtime().modules.map((m) => m.manifest.name) });
+  return (
+    <div className="max-w-3xl space-y-4 text-[13.5px]">
+      <Card className="space-y-2 p-4">
+        <p className="font-semibold">Customize your dashboard with an AI assistant</p>
+        <p className="text-muted">
+          Want a change the setup wizard can't make, like new wording, a different layout or an extra field? An AI coding assistant can help. Open your copy of the TeamHub
+          repository in a tool like Claude Code, Cursor or GitHub Copilot, paste the prompt below, and describe the change on the last line.
+        </p>
+        <p className="text-muted">
+          The prompt points the assistant to <code>AGENTS.md</code>, a guide in your repository that explains how the code is organized and the rules that keep your
+          dashboard safe (like never putting passwords in the code).
+        </p>
+      </Card>
+      <CopyBlock text={prompt} label="Prompt" rows={16} />
+      <Card className="space-y-1.5 p-4">
+        <p className="font-semibold">Before you push the changes</p>
+        <ul className="list-disc space-y-1 pl-5 text-muted">
+          <li>Read what the assistant changed, and ask it to explain anything unclear.</li>
+          <li>
+            Make sure <code>npm run typecheck</code>, <code>npm run lint</code> and <code>npm test</code> pass.
+          </li>
+          <li>
+            If it changed the database, run <code>npm run setup</code> &gt; Update so your live database matches.
+          </li>
+        </ul>
+      </Card>
+    </div>
   );
 }
 

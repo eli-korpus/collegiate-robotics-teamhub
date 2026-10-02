@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Check, CheckCircle2, Copy, ExternalLink, GitBranch, PartyPopper, Printer, RefreshCw } from 'lucide-react';
 import type { HostProvider } from '@teamhub/config-schema';
-import { Banner, Button, Card, Field, Input, QRCode, Spinner, cn, toast } from '@teamhub/ui';
+import { Banner, Button, Card, CopyBlock, Field, Input, QRCode, Spinner, cn, toast } from '@teamhub/ui';
+import { agentPrompt } from '@teamhub/sdk/agent-prompt';
 import { api, type GitState } from '../api';
 import { Section, StepShell, Why } from '../components';
 import { useDraft } from '../draft';
@@ -271,7 +272,7 @@ export function KeepAlive({ onNext, onBack }: StepProps) {
 }
 
 export function Done() {
-  const { draft, reset } = useDraft();
+  const { draft, reset, catalog } = useDraft();
   const c = draft.config;
   const site = c.hosting.url;
   const join = site ? `${site}/join` : null;
@@ -310,6 +311,16 @@ export function Done() {
             </a>
           </div>
         )}
+      </Section>
+      <Section
+        title="Customize it with an AI assistant"
+        description="For changes the wizard can't make (wording, layouts, new fields), paste this into an AI coding assistant like Claude Code, Cursor or GitHub Copilot, opened in your copy of TeamHub. It points the assistant to AGENTS.md, a guide to the code and its safety rules. You can find this prompt later in your dashboard under Admin > AI assistant."
+      >
+        <CopyBlock
+          label="Prompt"
+          rows={12}
+          text={agentPrompt({ programName: c.program.name, tabs: catalog.modules.filter((m) => m.id in c.modules && c.modules[m.id].state === 'active').map((m) => m.name) })}
+        />
       </Section>
       <Section title="Later">
         <ul className="list-disc space-y-1 pl-5 text-[13px] text-muted">

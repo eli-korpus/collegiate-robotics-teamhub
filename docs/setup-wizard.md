@@ -71,8 +71,9 @@ end and the wizard points Supabase logins at it. Detailed guides: [hosting](host
 
 ## 14–15. Keep-alive and done
 
-The wizard adds a small GitHub workflow that keeps your free Supabase project from pausing, then gives you a join link
-and a printable "How to join" page with a QR code.
+The wizard adds a small GitHub workflow that keeps your free Supabase project from pausing, then gives you a join link,
+a printable "How to join" page with a QR code, and a ready-to-paste prompt for customizing the code with an AI
+assistant (see [AGENTS.md](../AGENTS.md)).
 
 ## Running it again later
 

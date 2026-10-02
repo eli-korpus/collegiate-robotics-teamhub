@@ -22,7 +22,8 @@ npm run build:demo && npx playwright test
 npm run ci:matrix -- --only core,all --count 2     # optional locally; CI runs the full matrix
 ```
 
-See [docs/testing.md](docs/testing.md) for what each check does.
+See [docs/testing.md](docs/testing.md) for what each check does. [AGENTS.md](AGENTS.md) is the short version of these
+rules for AI coding assistants; keep it in sync when conventions change.
 
 ## Repository map
 

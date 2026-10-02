@@ -16,10 +16,15 @@ create policy sct_entries_delete on sct_entries for delete to authenticated
   using (scout = (select auth.uid()) or teamhub_can('scouting.delete_entries', null));
 
 create policy sct_picklist_read on sct_picklist for select to authenticated using (teamhub_in_team(team_id));
-create policy sct_picklist_write on sct_picklist for all to authenticated
+create policy sct_picklist_insert on sct_picklist for insert to authenticated with check (teamhub_can('scouting.manage_picklist', team_id));
+create policy sct_picklist_update on sct_picklist for update to authenticated
   using (teamhub_can('scouting.manage_picklist', team_id)) with check (teamhub_can('scouting.manage_picklist', team_id));
+create policy sct_picklist_delete on sct_picklist for delete to authenticated using (teamhub_is_admin());
 
 alter table sct_events enable row level security;
 create policy sct_events_read on sct_events for select to authenticated using (teamhub_is_active());
-create policy sct_events_write on sct_events for all to authenticated
+create policy sct_events_insert on sct_events for insert to authenticated with check (teamhub_can('scouting.scout', null));
+create policy sct_events_update on sct_events for update to authenticated
   using (teamhub_can('scouting.scout', null)) with check (teamhub_can('scouting.scout', null));
+-- Past event data is kept; only admins delete it.
+create policy sct_events_delete on sct_events for delete to authenticated using (teamhub_is_admin());

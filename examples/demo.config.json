@@ -99,6 +99,10 @@
     "scouting": {
       "state": "active",
       "settings": {}
+    },
+    "competition-day": {
+      "state": "active",
+      "settings": {}
     }
   },
   "subteams": [

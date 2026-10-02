@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarDays, Plus, Search, Trophy } from 'lucide-react';
+import { CalendarDays, History, Plus, Search, Trash2, Trophy } from 'lucide-react';
 import { seasonYear } from '@teamhub/config-schema/util';
-import { Badge, Button, Dialog, Field, Input, Textarea, formatDate, toast } from '@teamhub/ui';
+import { Badge, Button, Dialog, Field, IconButton, Input, RelativeTime, Textarea, formatDate, toast, useConfirm } from '@teamhub/ui';
 import { friendlyError, getTeamEvents, runtime, searchEvents, useCan, useMe, useSeason, useSupabase } from '@teamhub/sdk';
 import { useManualEvents } from './event';
 
@@ -27,6 +27,12 @@ export function EventPicker({ value, name, onChange }: { value: string; name?: s
   });
   const results = useQuery({ queryKey: ['ftcscout', 'search', season, q], enabled: open && q.length >= 2, staleTime: 60 * 60_000, queryFn: () => searchEvents(season, q) });
   const manual = useManualEvents();
+  const confirm = useConfirm();
+  const past = useQuery({
+    queryKey: ['scouting', 'past-events'],
+    enabled: open,
+    queryFn: async () => ((await sb.rpc('sct_event_summary')).data ?? []) as { event_code: string; season: string; entries: number; pit: number; last_at: string; name: string | null }[],
+  });
   const pick = (code: string) => {
     onChange(code.toUpperCase());
     setOpen(false);
@@ -54,6 +60,40 @@ export function EventPicker({ value, name, onChange }: { value: string; name?: s
                     </li>
                   ))}
                 </ul>
+              </section>
+            )}
+            {(past.data?.length ?? 0) > 0 && (
+              <section>
+                <p className="mb-1 flex items-center gap-1 text-[12px] font-semibold uppercase tracking-wider text-faint">
+                  <History className="size-3.5" /> Past events with your scouting
+                </p>
+                <ul className="space-y-1">
+                  {past.data!.map((e) => (
+                    <li key={e.season + e.event_code} className="flex items-center gap-1">
+                      <button type="button" onClick={() => pick(e.event_code)} className="flex flex-1 items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13.5px] hover:bg-bg-subtle">
+                        <span className="flex-1 font-medium">{e.name ?? e.event_code}</span>
+                        <Badge>{e.entries} matches · {e.pit} pits</Badge>
+                        <span className="text-[12px] text-faint">{e.season} · <RelativeTime date={e.last_at} /></span>
+                      </button>
+                      {me.isAdmin && (
+                        <IconButton
+                          label={`Delete all scouting data for ${e.name ?? e.event_code}`}
+                          size="sm"
+                          onClick={async () => {
+                            if (!(await confirm({ title: `Delete all data for ${e.name ?? e.event_code}?`, body: `${e.entries + e.pit} scouting entries and the pick list are deleted for good. Export a backup first if you might need them.`, danger: true, confirmLabel: 'Delete event data', typeToConfirm: e.event_code }))) return;
+                            const { error } = await sb.rpc('sct_delete_event', { p_code: e.event_code, p_season: e.season });
+                            if (error) return toast.error(friendlyError(error));
+                            toast.success('Event data deleted');
+                            qc.invalidateQueries({ queryKey: ['scouting'] });
+                          }}
+                        >
+                          <Trash2 className="size-4" />
+                        </IconButton>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+                {!me.isAdmin && <p className="mt-1 px-2 text-[11.5px] text-faint">Past event data is kept. Only admins can delete it.</p>}
               </section>
             )}
             {(manual.data?.length ?? 0) > 0 && (

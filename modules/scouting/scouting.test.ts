@@ -17,3 +17,21 @@ describe('scouting', () => {
     expect(await db.as(null, 'select * from sct_entries')).toEqual([]);
   });
 });
+
+describe('past events are kept; only admins delete them', () => {
+  it('summarizes past events and lets only admins delete one', async () => {
+    const db = await createTestDb();
+    await db.applyConfig(withModules(['scouting']), true);
+    const admin = await db.user('Admin', { [TEAM_A]: 'mentor' }, { admin: true });
+    const captain = await db.user('Captain', { [TEAM_A]: 'captain' });
+    for (const code of ['OLD1', 'OLD1', 'NEW2']) await db.as(captain, `insert into sct_entries (event_code, team_number, scout) values ($1, 1234, $2)`, [code, captain]);
+    await db.as(captain, `insert into sct_events (code, name, teams) values ('OLD1', 'Scrimmage', '{1234}')`);
+    const sum = await db.as(captain, 'select event_code, entries, name from sct_event_summary() order by event_code');
+    expect(sum).toEqual([{ event_code: 'NEW2', entries: 1, name: null }, { event_code: 'OLD1', entries: 2, name: 'Scrimmage' }]);
+    expect(await db.denied(captain, `select sct_delete_event('OLD1', '2026–27')`)).toBe(true);
+    expect(await db.denied(captain, `delete from sct_events returning code`)).toBe(true);
+    expect((await db.as(admin, `select sct_delete_event('OLD1', '2026–27') n`))[0].n).toBe(2);
+    expect((await db.admin('select count(*)::int n from sct_entries'))[0].n).toBe(1);
+    expect(await db.admin('select * from sct_events')).toEqual([]);
+  });
+});

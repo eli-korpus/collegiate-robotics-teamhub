@@ -1,0 +1,33 @@
+name: We're using TeamHub
+description: Tell FTC Team 23208 your team uses TeamHub FTC, and get listed with the other teams using it.
+title: "Team using TeamHub"
+labels: [team-signup]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for using TeamHub FTC! Telling us helps FTC Team 23208 show how many teams it's helping.
+
+        **This form is public.** Share team information only, never students' names, emails or other personal details.
+        We look up your team number on FTCScout and add its official name and location to the
+        [list of teams using TeamHub](https://github.com/elikorpus/teamhub-ftc/blob/main/TEAMS.md).
+  - type: input
+    id: teams
+    attributes:
+      label: FTC team number(s)
+      description: Separate several teams with commas.
+      placeholder: "23208, 23209"
+    validations:
+      required: true
+  - type: textarea
+    id: note
+    attributes:
+      label: Anything you'd like to tell us? (optional)
+      description: Which tabs you use, what you like, what's missing. Public, so no personal details.
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Public listing
+      options:
+        - label: It's OK to list our team publicly as a TeamHub user.
+          required: true

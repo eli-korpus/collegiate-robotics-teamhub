@@ -64,6 +64,31 @@ Teams update their site and database at slightly different times, and can undo a
   now, without a recipe for exploiting it.
 - Publish the advisory after the release is out.
 
+## Usage history and team sign-ups
+
+Two workflows run only in the upstream repository (`elikorpus/teamhub-ftc`), never in team forks:
+
+- **Team sign-ups** (`.github/workflows/team-signups.yml`). Teams fill in the "We're using TeamHub" issue form (linked
+  from the README and the setup wizard's last screen). The workflow reads only the team numbers, looks them up on
+  FTCScout, adds the official name and location to `TEAMS.md` (data in `.github/data/teams.json`), thanks the team and
+  closes the issue. To remove a team, delete it from `.github/data/teams.json` and `TEAMS.md`. The form needs the
+  `team-signup` label to exist.
+- **Usage history** (`.github/workflows/traffic-history.yml`). Every day it saves stars, forks, page views, downloads
+  (git clones) and referring sites on the `traffic` branch. Open that branch on GitHub to read its `README.md`
+  summary. GitHub only keeps views and downloads for 14 days, so this is the only long-term record. Run it any time
+  from **Actions > Usage history > Run workflow**.
+
+  GitHub's built-in workflow token can't read views and downloads, so they need one secret. Without it, only stars and
+  forks are saved:
+
+  1. GitHub > your profile picture > **Settings > Developer settings > Personal access tokens > Fine-grained tokens >
+     Generate new token**.
+  2. Name it `TeamHub usage history`. Expiration: up to a year (set a reminder to renew it).
+  3. **Repository access:** Only select repositories > `teamhub-ftc`.
+  4. **Permissions > Repository permissions > Administration:** Read-only. Nothing else.
+  5. Generate, copy the token, then in the repository: **Settings > Secrets and variables > Actions > New repository
+     secret**, name `TRAFFIC_TOKEN`, paste, save.
+
 ## Checklist before tagging
 
 - [ ] CI is green on `main` (module matrix, smoke and accessibility tests).

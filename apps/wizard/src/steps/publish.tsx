@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Check, CheckCircle2, Copy, ExternalLink, GitBranch, PartyPopper, Printer, RefreshCw } from 'lucide-react';
+import { Check, CheckCircle2, Copy, ExternalLink, GitBranch, HeartHandshake, PartyPopper, Printer, RefreshCw } from 'lucide-react';
 import type { HostProvider } from '@teamhub/config-schema';
-import { TEAMHUB_CREDIT, isUpstreamRemote, suggestedRepoName } from '@teamhub/config-schema/util';
+import { TEAMHUB_CREDIT, TEAMHUB_UPSTREAM_REPO, isUpstreamRemote, suggestedRepoName } from '@teamhub/config-schema/util';
 import { Banner, Button, Card, Checkbox, CopyBlock, Field, Input, QRCode, Spinner, cn, toast } from '@teamhub/ui';
 import { agentPrompt } from '@teamhub/sdk/agent-prompt';
 import { api, type GitState } from '../api';
@@ -337,6 +337,24 @@ export function Done() {
           rows={12}
           text={agentPrompt({ programName: c.program.name, tabs: catalog.modules.filter((m) => m.id in c.modules && c.modules[m.id].state === 'active').map((m) => m.name) })}
         />
+      </Section>
+      <Section
+        title="Tell us you're using TeamHub (optional)"
+        description="Opens a short public form on GitHub with your team numbers filled in. Your team is added to the list of teams using TeamHub, which helps FTC Team 23208 show how many teams it's helping. It asks for team numbers only, never students' details."
+      >
+        <a
+          href={`https://github.com/${TEAMHUB_UPSTREAM_REPO}/issues/new?template=teamhub-team.yml&teams=${encodeURIComponent(
+            c.teams
+              .map((t) => t.number)
+              .filter(Boolean)
+              .join(', '),
+          )}`}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-accent hover:underline"
+        >
+          <HeartHandshake className="size-4" /> Add our team to the list <ExternalLink className="size-3.5" />
+        </a>
       </Section>
       <Section title="Later">
         <ul className="list-disc space-y-1 pl-5 text-[13px] text-muted">

@@ -1,0 +1,44 @@
+# Adds teams from "We're using TeamHub" issues to TEAMS.md. Only runs in the upstream TeamHub repository.
+name: Team sign-ups
+on:
+  issues:
+    types: [opened, edited]
+permissions:
+  contents: write
+  issues: write
+concurrency:
+  group: team-signups
+  cancel-in-progress: false
+
+jobs:
+  list:
+    if: github.repository == 'elikorpus/teamhub-ftc' && contains(github.event.issue.labels.*.name, 'team-signup')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Look up the teams and update TEAMS.md
+        id: list
+        env:
+          # Passed as data, never pasted into the script.
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: node scripts/github/team-signup.ts
+      - name: Save the list
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add TEAMS.md .github/data/teams.json
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -m "List teams from sign-up #${{ github.event.issue.number }}"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
+      - name: Thank the team
+        env:
+          GH_TOKEN: ${{ github.token }}
+          COMMENT: ${{ steps.list.outputs.comment }}
+          ISSUE: ${{ github.event.issue.number }}
+        run: |
+          gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body "$COMMENT"
+          if [ "${{ steps.list.outputs.listed }}" != "0" ]; then gh issue close "$ISSUE" --repo "$GITHUB_REPOSITORY" --reason completed; fi

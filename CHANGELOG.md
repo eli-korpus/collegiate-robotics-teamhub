@@ -15,6 +15,8 @@ How to update your dashboard: [docs/updating.md](docs/updating.md).
 
 ### Added
 
+- "We're using TeamHub" sign-up form (README and the setup wizard's last screen) and a public list of teams using
+  TeamHub (`TEAMS.md`), filled in automatically from FTCScout.
 - Credit: "made by FTC Team 23208" on the login page, an About card in Admin > Help, and the setup wizard's last screen.
 - Home greets people with more variety: greetings change with the time of day, the day of the week and the date
   ("Rise and build", "Happy Friday", "Working late"), and stay the same through each part of the day.

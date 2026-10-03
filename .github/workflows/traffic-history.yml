@@ -1,0 +1,41 @@
+# Saves the repository's stars, forks, views and downloads every day on the `traffic` branch (see its README.md),
+# because GitHub only keeps views and downloads for 14 days. Only runs in the upstream TeamHub repository.
+name: Usage history
+on:
+  schedule:
+    - cron: '23 6 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: traffic-history
+  cancel-in-progress: false
+
+jobs:
+  save:
+    if: github.repository == 'elikorpus/teamhub-ftc'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Open the traffic branch
+        run: |
+          if git fetch -q origin traffic; then git worktree add -q -B traffic history origin/traffic; else git worktree add -q --orphan -b traffic history; fi
+      - name: Get today's numbers
+        env:
+          GH_TOKEN: ${{ github.token }}
+          # A fine-grained token with "Administration: Read-only" on this repository. GitHub's built-in token can't
+          # read views and downloads. Without it, only stars and forks are saved.
+          TRAFFIC_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+        run: node scripts/github/traffic-history.ts history
+      - name: Save
+        working-directory: history
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then exit 0; fi
+          git commit -q -m "Usage history $(date -u +%F)"
+          git push -q origin traffic

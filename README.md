@@ -3,6 +3,8 @@
 An open-source, bring-your-own-services team dashboard for *FIRST* Tech Challenge teams.
 
 Created by [FTC Team 23208](https://ftcscout.org/teams/23208) (Eli Korpus) and shared free with every FTC team.
+Using it? [Add your team](https://github.com/elikorpus/teamhub-ftc/issues/new?template=teamhub-team.yml) to the
+[list of teams using TeamHub](TEAMS.md).
 
 TeamHub gives your program one place for practices, tasks, the engineering notebook, scouting, competition day,
 outreach hours and more, with only the tabs you choose. It runs on **your own** free Supabase project and **your

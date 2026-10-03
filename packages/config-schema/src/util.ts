@@ -30,6 +30,12 @@ export function positionIdFor(name: string): string {
 /** Where TeamHub updates come from: the upstream GitHub repository (owner/name). */
 export const TEAMHUB_UPSTREAM_REPO = 'elikorpus/teamhub-ftc';
 
+/** Who made TeamHub. Shown on the login page, in Admin > Help and in the setup wizard. Keep it (see LICENSE). */
+export const TEAMHUB_CREDIT = {
+  team: 'FTC Team 23208',
+  url: 'https://ftcscout.org/teams/23208',
+};
+
 /** "v1.2.3" or "1.2.3" → [1, 2, 3]. Pre-release suffixes are ignored. Null if it isn't a version. */
 export function parseVersion(v: string | null | undefined): [number, number, number] | null {
   const m = /^v?(\d+)\.(\d+)\.(\d+)/.exec((v ?? '').trim());

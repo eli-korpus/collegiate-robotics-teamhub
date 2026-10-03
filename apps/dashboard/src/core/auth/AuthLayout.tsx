@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { runtime } from '@teamhub/sdk';
 import { cn } from '@teamhub/ui';
-import { TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
+import { TEAMHUB_CREDIT, TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
 
 export function asset(path: string | null | undefined): string | null {
   if (!path) return null;
@@ -59,6 +59,10 @@ export function AuthLayout({ title, subtitle, children, wide }: { title: ReactNo
           Powered by{' '}
           <a href={`https://github.com/${TEAMHUB_UPSTREAM_REPO}`} className="hover:underline" target="_blank" rel="noreferrer">
             TeamHub FTC
+          </a>
+          , made by{' '}
+          <a href={TEAMHUB_CREDIT.url} className="hover:underline" target="_blank" rel="noreferrer">
+            {TEAMHUB_CREDIT.team}
           </a>
         </p>
       </div>

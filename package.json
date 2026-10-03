@@ -4,6 +4,7 @@
   "private": true,
   "description": "Open-source, bring-your-own-services team dashboard for FIRST Tech Challenge teams.",
   "license": "MIT",
+  "author": "FTC Team 23208",
   "type": "module",
   "engines": {
     "node": ">=20.19"

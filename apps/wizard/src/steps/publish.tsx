@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Check, CheckCircle2, Copy, ExternalLink, GitBranch, PartyPopper, Printer, RefreshCw } from 'lucide-react';
 import type { HostProvider } from '@teamhub/config-schema';
-import { isUpstreamRemote, suggestedRepoName } from '@teamhub/config-schema/util';
+import { TEAMHUB_CREDIT, isUpstreamRemote, suggestedRepoName } from '@teamhub/config-schema/util';
 import { Banner, Button, Card, Checkbox, CopyBlock, Field, Input, QRCode, Spinner, cn, toast } from '@teamhub/ui';
 import { agentPrompt } from '@teamhub/sdk/agent-prompt';
 import { api, type GitState } from '../api';
@@ -346,6 +346,13 @@ export function Done() {
           <li>When TeamHub releases an update, admins see a notice in the dashboard. Run setup &gt; Update: it updates your database, then your site, and you can undo it.</li>
         </ul>
       </Section>
+      <p className="text-[12.5px] text-muted">
+        TeamHub FTC is made by{' '}
+        <a href={TEAMHUB_CREDIT.url} target="_blank" rel="noreferrer" className="font-medium text-accent hover:underline">
+          {TEAMHUB_CREDIT.team}
+        </a>{' '}
+        and shared free with every FTC team. Good luck this season!
+      </p>
       <Button
         onClick={async () => {
           await api('/draft', undefined, 'DELETE');

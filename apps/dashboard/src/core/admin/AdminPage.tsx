@@ -48,6 +48,7 @@ import {
   type LinkRow,
 } from '@teamhub/sdk';
 import { agentPrompt } from '@teamhub/sdk/agent-prompt';
+import { TEAMHUB_CREDIT, TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
 import { UpdateNotice } from './UpdateNotice';
 
 const SECTIONS = [
@@ -653,6 +654,19 @@ function Help() {
         .
       </p>
       <TeamBadge teamId={null} />
+      <Card className="space-y-2 p-4">
+        <p className="font-semibold">About TeamHub</p>
+        <p className="text-muted">
+          TeamHub FTC is free, open-source software made by{' '}
+          <a href={TEAMHUB_CREDIT.url} className="font-medium text-accent hover:underline" target="_blank" rel="noreferrer">
+            {TEAMHUB_CREDIT.team}
+          </a>
+          . If it helps your team, tell other teams about it.
+        </p>
+        <a href={`https://github.com/${TEAMHUB_UPSTREAM_REPO}`} className="inline-flex items-center gap-1 font-medium text-accent hover:underline" target="_blank" rel="noreferrer">
+          TeamHub on GitHub <ExternalLink className="size-3.5" />
+        </a>
+      </Card>
     </div>
   );
 }

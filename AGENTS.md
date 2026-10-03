@@ -88,6 +88,8 @@ conflict when you update to new TeamHub releases.
 
 ## Rules that keep the dashboard safe and working
 
+- **Keep the credit.** TeamHub was made by FTC Team 23208. The MIT license requires keeping the copyright notice in
+  `LICENSE`; please also keep the "made by FTC Team 23208" line on the login page and the About card in Admin > Help.
 - **Security is in the database.** Row-level security decides who sees and changes what. Hiding a button is not
   security. Every table must have RLS policies and a test.
 - **Never commit secrets.** The Supabase URL and *publishable* key in the config are public on purpose. The service-role

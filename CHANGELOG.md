@@ -15,6 +15,7 @@ How to update your dashboard: [docs/updating.md](docs/updating.md).
 
 ### Added
 
+- Credit: "made by FTC Team 23208" on the login page, an About card in Admin > Help, and the setup wizard's last screen.
 - Home greets people with more variety: greetings change with the time of day, the day of the week and the date
   ("Rise and build", "Happy Friday", "Working late"), and stay the same through each part of the day.
   With the Events tab on, Home also counts down the week before a competition ("3 days to the qualifier",

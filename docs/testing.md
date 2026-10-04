@@ -7,12 +7,12 @@ TeamHub promises that **any combination of tabs works**. The tests are built aro
 | `npm run typecheck` | TypeScript across every package, module and integration | ~10 s |
 | `npm run lint` | ESLint (incl. the module-boundary rule: modules never import each other) + the SQL linter | ~15 s |
 | `npm test` | Vitest: config schema, generator snapshots, wizard server (mocked Management API), module logic, and **every module's RLS rules on real Postgres** (PGlite), plus the upgrade and DB-budget tests | ~1 min |
-| `npm run build:demo && npx playwright test` | Smoke + accessibility: every tab opens without console errors, Home, Ctrl+K or Cmd+K, axe in light/dark, desktop and phone | ~15 s |
+| `npm run build:demo && npm run e2e` | Smoke + accessibility: every tab opens without console errors, Home, Ctrl+K or Cmd+K, axe in light/dark, desktop and phone | ~15 s |
 | `npm run ci:matrix` | The module matrix (below) | ~4 min |
 
 ## Database tests (PGlite)
 
-`tests/db/harness.ts` runs real Postgres in-process with [PGlite](https://pglite.dev) and stubs just enough of
+`tools/tests/db/harness.ts` runs real Postgres in-process with [PGlite](https://pglite.dev) and stubs just enough of
 Supabase to apply the exact SQL plan the wizard would send:
 
 - roles `anon`, `authenticated`, `service_role` and Supabase's default grants
@@ -38,18 +38,18 @@ excluded from test plans) and edge functions. Those are exercised by the release
 
 ### Upgrade test
 
-`tests/db/upgrade.test.ts` applies the *previous* release's migrations, seeds data, then applies the current release
+`tools/tests/db/upgrade.test.ts` applies the *previous* release's migrations, seeds data, then applies the current release
 and checks the data survived (the expand-only rule). By default "previous" is simulated by dropping each module's newest
 migration. Against a real tag:
 
 ```sh
 git worktree add ../prev v1.0.0 && (cd ../prev && npm ci)
-TEAMHUB_PREV_ROOT=../prev npx vitest run tests/db/upgrade.test.ts
+TEAMHUB_PREV_ROOT=../prev npm test -- tools/tests/db/upgrade.test.ts
 ```
 
 ### DB budget test
 
-`tests/db/budget.test.ts` seeds a generous "typical season" (20 people and every tab: 100 practices, 300 tasks, 200
+`tools/tests/db/budget.test.ts` seeds a generous "typical season" (20 people and every tab: 100 practices, 300 tasks, 200
 notebook entries, 670 scouting entries, 3,000 notifications…) and asserts the database stays under **25 MB**
 (it measures about 5 MB), so a free 500 MB Supabase project lasts for years.
 
@@ -68,14 +68,14 @@ Playwright smoke test per config), `--no-typecheck`.
 
 ### Bundle budget
 
-`scripts/check-bundle.ts` enforces: initial JavaScript ≤ 180 KB gzip for core only, plus 1.5 KB per enabled tab
+`tools/scripts/check-bundle.ts` enforces: initial JavaScript ≤ 180 KB gzip for core only, plus 1.5 KB per enabled tab
 (each tab adds a tiny always-loaded client); every lazy chunk ≤ 60 KB gzip (except the 3D model viewer); and
 **disabled tabs contribute zero bytes**: each tab's client contains the marker `teamhub-module:<id>`, which must be
 absent from the build when the tab is off.
 
 ## SQL linter
 
-`scripts/lint-sql.ts` (part of `npm run lint`) enforces for every module and integration:
+`tools/scripts/lint-sql.ts` (part of `npm run lint`) enforces for every module and integration:
 
 - every table, function, trigger, policy, index, view and cron job starts with the unit's prefix
 - migrations are expand-only: no `DROP TABLE`, `DROP COLUMN`, `RENAME` or column type changes
@@ -85,11 +85,11 @@ absent from the build when the tab is off.
 
 ## Screenshots
 
-`tests/e2e/screens.spec.ts` captures light and dark screenshots for the docs:
+`tools/tests/e2e/screens.spec.ts` captures light and dark screenshots for the docs:
 
 ```sh
 npm run build:demo
-SCREENSHOTS=docs/screenshots SCREEN_PAGES=/,/calendar,/tasks npx playwright test tests/e2e/screens.spec.ts --project=desktop
+SCREENSHOTS=docs/screenshots SCREEN_PAGES=/,/calendar,/tasks npm run e2e -- tools/tests/e2e/screens.spec.ts --project=desktop
 ```
 
 `SCREEN_DATA` accepts JSON `{ "tables": { … }, "rpc": { … } }` to seed the mocked Supabase.

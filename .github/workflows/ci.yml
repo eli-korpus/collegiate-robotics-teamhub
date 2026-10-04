@@ -39,7 +39,7 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npx tsx packages/generator/src/cli.ts generate --config examples/demo.config.json
+      - run: npx tsx packages/generator/src/cli.ts generate --config tools/examples/demo.config.json
       - name: Typecheck
         run: npm run typecheck
       - name: Lint (ESLint boundaries + SQL identifiers)
@@ -49,10 +49,10 @@ jobs:
       - name: Build (all tabs)
         run: npm run build -w @teamhub/dashboard
       - name: Bundle budget
-        run: npx tsx scripts/check-bundle.ts --enabled "$(jq -r '.modules | keys | join(",")' examples/demo.config.json)"
+        run: npx tsx tools/scripts/check-bundle.ts --enabled "$(jq -r '.modules | keys | join(",")' tools/examples/demo.config.json)"
       - run: npx playwright install --with-deps chromium
       - name: Smoke + accessibility (every tab, light/dark, desktop/phone)
-        run: npx playwright test tests/e2e/smoke.spec.ts
+        run: npm run e2e -- tools/tests/e2e/smoke.spec.ts
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

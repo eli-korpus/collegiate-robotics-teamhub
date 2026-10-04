@@ -217,7 +217,7 @@ export function planSql(r: Resolved, db: DbState | null, opts: PlanOptions = {})
   const coreFrom = v.core?.version ?? 0;
   const coreMigs = r.catalog.core.migrations.slice(coreFrom);
   if (coreMigs.length) {
-    const sql = coreMigs.map((m) => `-- core/${m.name}\n${m.sql}`).join('\n\n');
+    const sql = coreMigs.map((m) => `-- database/migrations/${m.name}\n${m.sql}`).join('\n\n');
     countSql(sql);
     steps.push({ title: 'Core database', sql });
     summary.migrations.push({ id: 'core', from: coreFrom, to: r.catalog.core.version });
@@ -254,7 +254,7 @@ export function planSql(r: Resolved, db: DbState | null, opts: PlanOptions = {})
     const from = v[m.id]?.version ?? 0;
     const migs = m.catalog.migrations.slice(from);
     if (migs.length) {
-      const sql = migs.map((x) => `-- modules/${m.id}/${x.name}\n${x.sql}`).join('\n\n');
+      const sql = migs.map((x) => `-- tabs/${m.id}/${x.name}\n${x.sql}`).join('\n\n');
       countSql(sql);
       steps.push({ title: `Tab: ${m.catalog.manifest.name}`, sql });
       summary.migrations.push({ id: m.id, from, to: m.catalog.version });
@@ -269,7 +269,7 @@ export function planSql(r: Resolved, db: DbState | null, opts: PlanOptions = {})
     const from = v[id]?.version ?? 0;
     const migs = ix.migrations.slice(from);
     if (migs.length) {
-      const sql = migs.map((x) => `-- integrations/${id}/${x.name}\n${x.sql}`).join('\n\n');
+      const sql = migs.map((x) => `-- tabs/integrations/${id}/${x.name}\n${x.sql}`).join('\n\n');
       countSql(sql);
       steps.push({ title: `Integration: ${id}`, sql });
       summary.migrations.push({ id, from, to: ix.version });

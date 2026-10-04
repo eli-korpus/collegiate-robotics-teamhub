@@ -5,7 +5,7 @@ The wizard writes `vercel.json` into your fork:
 ```json
 {
   "buildCommand": "npm run build",
-  "outputDirectory": "apps/dashboard/dist",
+  "outputDirectory": "dashboard/dist",
   "framework": null,
   "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
 }

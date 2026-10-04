@@ -36,6 +36,17 @@ export interface Catalog {
 
 export const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 
+/** Where things live in the repository (paths relative to its root). */
+export const LAYOUT = {
+  dashboard: 'dashboard',
+  wizard: 'setup-wizard',
+  tabs: 'tabs',
+  integrations: 'tabs/integrations',
+  database: 'database',
+  functions: 'database/functions',
+  changelog: 'docs/CHANGELOG.md',
+} as const;
+
 const readIf = (p: string) => (existsSync(p) ? readFileSync(p, 'utf8') : null);
 
 function readMigrations(dir: string): SqlFile[] {
@@ -61,7 +72,7 @@ export function loadCatalog(root = REPO_ROOT): Promise<Catalog> {
 }
 
 async function doLoad(root: string): Promise<Catalog> {
-  const coreDir = join(root, 'core');
+  const coreDir = join(root, LAYOUT.database);
   const coreMigrations = readMigrations(coreDir);
   const core = {
     migrations: coreMigrations,
@@ -71,14 +82,14 @@ async function doLoad(root: string): Promise<Catalog> {
   };
 
   const modules = new Map<string, CatalogModule>();
-  const mroot = join(root, 'modules');
+  const mroot = join(root, LAYOUT.tabs);
   for (const id of existsSync(mroot) ? readdirSync(mroot).sort() : []) {
     const dir = join(mroot, id);
     const manifestPath = join(dir, 'module.ts');
     if (!existsSync(manifestPath)) continue;
     const mod = await import(pathToFileURL(manifestPath).href);
     const manifest: ModuleManifest = mod.default;
-    if (manifest.id !== id) throw new Error(`modules/${id}/module.ts declares id "${manifest.id}"`);
+    if (manifest.id !== id) throw new Error(`tabs/${id}/module.ts declares id "${manifest.id}"`);
     const migrations = readMigrations(dir);
     modules.set(id, {
       manifest,
@@ -92,14 +103,14 @@ async function doLoad(root: string): Promise<Catalog> {
   }
 
   const integrations = new Map<string, CatalogIntegration>();
-  const iroot = join(root, 'integrations');
+  const iroot = join(root, LAYOUT.integrations);
   for (const id of existsSync(iroot) ? readdirSync(iroot).sort() : []) {
     const dir = join(iroot, id);
     const manifestPath = join(dir, 'integration.ts');
     if (!existsSync(manifestPath)) continue;
     const mod = await import(pathToFileURL(manifestPath).href);
     const manifest: IntegrationManifest = mod.default;
-    if (manifest.id !== id) throw new Error(`integrations/${id}/integration.ts declares id "${manifest.id}"`);
+    if (manifest.id !== id) throw new Error(`tabs/integrations/${id}/integration.ts declares id "${manifest.id}"`);
     const migrations = readMigrations(dir);
     integrations.set(id, {
       manifest,

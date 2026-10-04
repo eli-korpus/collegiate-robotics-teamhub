@@ -10,7 +10,7 @@ body:
 
         **This form is public.** Share team information only, never students' names, emails or other personal details.
         We look up your team number on FTCScout and add its official name and location to the
-        [list of teams using TeamHub](https://github.com/elikorpus/teamhub-ftc/blob/main/TEAMS.md).
+        [list of teams using TeamHub](https://github.com/elikorpus/teamhub-ftc/blob/main/docs/TEAMS.md).
   - type: input
     id: teams
     attributes:

@@ -12,9 +12,9 @@ Vercel, Netlify or GitHub Pages) from the fork. Users are mostly high-school stu
 
 There are two programs in this repository:
 
-- **The dashboard** (`apps/dashboard`): the website the team uses. It's built from `team/teamhub.config.json` and only
+- **The dashboard** (`dashboard/`): the website the team uses. It's built from `team/teamhub.config.json` and only
   contains the tabs the team chose.
-- **The setup wizard** (`npm run setup`, `apps/wizard`): a local web app that writes the config, sets up and updates the
+- **The setup wizard** (`npm run setup`, `setup-wizard/`): a local web app that writes the config, sets up and updates the
   Supabase database, and handles hosting. It's the safe way to change most settings.
 
 ## Before you change code: can the wizard do it?
@@ -25,6 +25,7 @@ Run `npm run setup` and choose **Edit** for any of these. Don't hand-edit code f
 - program name, teams, colors, logos, light/dark default
 - subteams, positions, profile fields, permissions (who can do what)
 - tool links (also editable in the dashboard: Admin > Tool links)
+- who can join (email domains; also editable in the dashboard: Admin > Who can join)
 
 Day-to-day data (people, teams people are on, events, tasks…) is edited in the dashboard itself.
 
@@ -34,18 +35,19 @@ Day-to-day data (people, teams people are on, events, tasks…) is edited in the
 |---|---|
 | `team/teamhub.config.json` | This team's settings. Written by the wizard. Format: `docs/configuration.md`. |
 | `team/branding/` | Logos. |
-| `apps/dashboard/src/core/` | Home, People, Admin, sign-in and the app shell. |
-| `apps/dashboard/src/generated/` | **Generated. Never edit.** Rebuilt from the config by `npm run generate`. |
-| `modules/<id>/` | One folder per tab (`modules/tasks`, `modules/scouting`, …). |
-| `integrations/<a>+<b>/` | Small features that exist only when both tabs are enabled (e.g. tasks on the calendar). |
+| `dashboard/src/core/` | Home, People, Admin, sign-in and the app shell. |
+| `dashboard/src/generated/` | **Generated. Never edit.** Rebuilt from the config by `npm run generate`. |
+| `tabs/<id>/` | One folder per tab (`tabs/tasks`, `tabs/scouting`, …). |
+| `tabs/integrations/<a>+<b>/` | Small features that exist only when both tabs are enabled (e.g. tasks on the calendar). |
 | `packages/ui/` | Design system: buttons, inputs, dialogs, lists, calendar, charts. Icons come from Lucide. |
 | `packages/sdk/` | Helpers tabs use: data hooks, permissions, team scope, uploads, FTCScout client. |
 | `packages/generator/` | Turns the config into generated code and the database plan. |
-| `core/migrations/`, `core/policies.sql` | Core database tables and security rules. |
-| `supabase/functions/` | Server functions (password reset links, deleting users, storage cleanup, calendar feed). |
-| `docs/` | Hosting guides, configuration reference, tab list, testing. |
+| `database/migrations/`, `database/policies.sql` | Core database tables and security rules. |
+| `database/functions/` | Server functions (password reset links, deleting users, storage cleanup, calendar feed). |
+| `docs/` | Hosting guides, configuration reference, tab list, testing, changelog. |
+| `tools/` | Tests, scripts and example configs for developing TeamHub itself. |
 
-### Inside a tab (`modules/<id>/`)
+### Inside a tab (`tabs/<id>/`)
 
 | File | Purpose |
 |---|---|
@@ -60,30 +62,30 @@ Day-to-day data (people, teams people are on, events, tasks…) is edited in the
 
 ## How to make common changes
 
-**Change wording, layout or behavior of a tab:** edit files in `modules/<id>/ui/`. Use components from `@teamhub/ui` and
+**Change wording, layout or behavior of a tab:** edit files in `tabs/<id>/ui/`. Use components from `@teamhub/ui` and
 hooks from `@teamhub/sdk` (`useRows`, `useSupabase`, `useCan`, `useMe`, `useTeamScope`, `TeamScopePicker`,
 `ScopeVisibility`, `friendlyError`) so it matches the rest of the app.
 
 **Add a column or table to a tab:**
 
-1. Add a **new** file `modules/<id>/migrations/NNN_short_name.sql` with the next number. Only add things: new tables,
+1. Add a **new** file `tabs/<id>/migrations/NNN_short_name.sql` with the next number. Only add things: new tables,
    nullable columns, new functions. Never drop or rename (older copies of the site must keep working).
 2. Name every new table, function, policy, index and trigger with the tab's prefix (see `prefix` in `module.ts`).
-3. Add row-level security in `modules/<id>/policies.sql`. Use `teamhub_in_team(team_id)` for "can see" and
+3. Add row-level security in `tabs/<id>/policies.sql`. Use `teamhub_in_team(team_id)` for "can see" and
    `teamhub_can('<tab>.<action>', team_id)` for "can do". Never use `using (true)` for writes.
-4. Add a test to `modules/<id>/<id>.test.ts` for who can and can't read and write.
+4. Add a test to `tabs/<id>/<id>.test.ts` for who can and can't read and write.
 5. Apply it to the real database: `npm run setup` > **Update** (or **Edit** > Apply).
 
 **Add a permission:** add it to `definePermissions` in the tab's `module.ts`, use it in `policies.sql` and with
 `useCan` in the UI, then run `npm run setup` > Edit to choose who gets it.
 
 **Add a brand-new tab:** `npm run new-module -- <id> --prefix <abc_> --name "Tab name" --category team|engineering|competition|outreach`,
-then enable it with the wizard. Details: `CONTRIBUTING.md`.
+then enable it with the wizard. Details: `.github/CONTRIBUTING.md`.
 
-**Connect two tabs:** create an integration in `integrations/<a>+<b>/` instead of importing one tab from another
+**Connect two tabs:** create an integration in `tabs/integrations/<a>+<b>/` instead of importing one tab from another
 (tabs must never import each other; `npm run lint` checks this).
 
-**Change Home, People or Admin:** `apps/dashboard/src/core/`. Keep these changes small: they're the files most likely to
+**Change Home, People or Admin:** `dashboard/src/core/`. Keep these changes small: they're the files most likely to
 conflict when you update to new TeamHub releases.
 
 ## Rules that keep the dashboard safe and working
@@ -99,7 +101,7 @@ conflict when you update to new TeamHub releases.
 - **Free-tier budget.** Prefer links over files. Uploads go through `<Upload>` (compressed in the browser). Don't store
   big files in the database.
 - **Expand-only database changes.** Add, never drop or rename. Never edit a migration that has already been applied.
-- **Don't edit generated files** (`apps/dashboard/src/generated/`). Change the config or the generator instead.
+- **Don't edit generated files** (`dashboard/src/generated/`). Change the config or the generator instead.
 - **Keep tabs independent.** A tab you didn't choose adds zero code to the site. Don't import between tabs.
 - **Icons come from Lucide** (`lucide-react`). No emojis or hand-drawn icons.
 - **Plain, friendly wording** for high-school students. Say who will see what people type.
@@ -115,7 +117,7 @@ conflict when you update to new TeamHub releases.
 | `npm run typecheck` | TypeScript check. |
 | `npm run lint` | Code and SQL rules (tab boundaries, table prefixes, add-only migrations). |
 | `npm test` | Unit tests and database permission tests (in-process Postgres). |
-| `npm run build:demo && npx playwright test` | Build and open every tab in a browser, with accessibility checks. |
+| `npm run build:demo && npm run e2e` | Build and open every tab in a browser, with accessibility checks. |
 
 Before you push: `npm run typecheck && npm run lint && npm test` must pass. If you changed SQL, run
 `npm run setup` > Update so your live database matches.
@@ -126,7 +128,7 @@ New TeamHub versions are merged into your fork by `npm run setup` > **Update**. 
 changes the same lines you did, it stops and asks you to combine them. To keep updates painless:
 
 - Prefer **adding** (a new tab with `npm run new-module`, a new integration, a new file) over **editing** TeamHub's files.
-- Keep edits to shared files (`apps/dashboard/src/core/`, `packages/`, other teams' tabs) small and few.
+- Keep edits to shared files (`dashboard/src/core/`, `packages/`, other teams' tabs) small and few.
 - Record every change in **`CUSTOMIZATIONS.md`** at the repository root (what, why, which files). The wizard shows it
   before updating, and it tells an AI assistant what to keep when combining an update with your changes.
 - Never edit an existing migration file; add a new one.
@@ -154,7 +156,7 @@ Before changing anything:
 How to work:
 - Explain your plan in plain language and wait for my OK before making big changes.
 - Make the smallest change that does what we asked. If the setup wizard (npm run setup) can already do it, tell me that instead of editing code.
-- Never edit files in apps/dashboard/src/generated/. They are rebuilt from our config.
+- Never edit files in dashboard/src/generated/. They are rebuilt from our config.
 - Database changes go in a new numbered migration file. Never edit or delete an existing migration. Every table needs row-level security policies.
 - Never put secrets (the Supabase service-role key, access tokens, passwords) in the repository.
 - Do not add chat or private messages between users (youth protection).

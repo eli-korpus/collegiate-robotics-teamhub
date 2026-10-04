@@ -16,7 +16,7 @@ into every dashboard (admins see "This site runs 1.2.0").
 
 ## Every change: update the changelog
 
-Add a line under `## [Unreleased]` in `CHANGELOG.md` in the same pull request, in the right section: **Added**,
+Add a line under `## [Unreleased]` in `docs/CHANGELOG.md` in the same pull request, in the right section: **Added**,
 **Changed**, **Fixed**, **Removed** or **Security**. Write it for team admins, not developers ("Polls can be edited
 until someone answers", not "add poll_edit_guard trigger").
 
@@ -58,7 +58,7 @@ Teams update their site and database at slightly different times, and can undo a
 
 ## Security fixes
 
-- Report vulnerabilities privately (see `SECURITY.md`). Fix in a private
+- Report vulnerabilities privately (see `.github/SECURITY.md`). Fix in a private
   [security advisory](https://docs.github.com/en/code-security/security-advisories) fork if it's serious.
 - Release as a patch with a `### Security` section in the changelog. Describe the impact and that teams should update
   now, without a recipe for exploiting it.
@@ -70,8 +70,8 @@ Two workflows run only in the upstream repository (`elikorpus/teamhub-ftc`), nev
 
 - **Team sign-ups** (`.github/workflows/team-signups.yml`). Teams fill in the "We're using TeamHub" issue form (linked
   from the README and the setup wizard's last screen). The workflow reads only the team numbers, looks them up on
-  FTCScout, adds the official name and location to `TEAMS.md` (data in `.github/data/teams.json`), thanks the team and
-  closes the issue. To remove a team, delete it from `.github/data/teams.json` and `TEAMS.md`. The form needs the
+  FTCScout, adds the official name and location to `docs/TEAMS.md` (data in `.github/data/teams.json`), thanks the team and
+  closes the issue. To remove a team, delete it from `.github/data/teams.json` and `docs/TEAMS.md`. The form needs the
   `team-signup` label to exist.
 - **Usage history** (`.github/workflows/traffic-history.yml`). Every day it saves stars, forks, page views, downloads
   (git clones) and referring sites on the `traffic` branch. Open that branch on GitHub to read its `README.md`
@@ -92,7 +92,7 @@ Two workflows run only in the upstream repository (`elikorpus/teamhub-ftc`), nev
 ## Checklist before tagging
 
 - [ ] CI is green on `main` (module matrix, smoke and accessibility tests).
-- [ ] `CHANGELOG.md` Unreleased section describes every user-visible change.
+- [ ] `docs/CHANGELOG.md` Unreleased section describes every user-visible change.
 - [ ] New migrations are add-only (or a major release with contract migrations and an upgrade guide).
 - [ ] `AGENTS.md` and docs still match how things work.
 - [ ] For big changes: the release QA checklist in `docs/testing.md` against a real Supabase project.

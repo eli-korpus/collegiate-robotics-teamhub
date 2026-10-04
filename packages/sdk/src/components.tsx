@@ -73,7 +73,7 @@ export function AdminOnly({ children, fallback = null }: { children: ReactNode; 
 }
 
 // ── Slots (integration extension points) ──────────────────────────────────
-/** Renders components registered by modules/integrations for a named slot. Nothing renders when none exist (P2). */
+/** Renders components registered by tabs/integrations for a named slot. Nothing renders when none exist (P2). */
 export function Slot<P extends object>({ name, props, wrap }: { name: string; props: P; wrap?: (children: ReactNode) => ReactNode }) {
   const comps = slotComponents(name);
   if (!comps.length) return null;

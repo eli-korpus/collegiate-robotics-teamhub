@@ -10,7 +10,7 @@ undo an update.
 - **On GitHub (optional):** if you turned on "Check once a week for TeamHub updates" in the setup wizard, your fork
   gets an issue titled "TeamHub X is available", and GitHub emails you about it.
 - **Release notes:** every version is listed on the
-  [TeamHub releases page](https://github.com/elikorpus/teamhub-ftc/releases) and in `CHANGELOG.md`.
+  [TeamHub releases page](https://github.com/elikorpus/teamhub-ftc/releases) and in `docs/CHANGELOG.md`.
 
 Version numbers tell you how big an update is: **1.0.x** is fixes, **1.x.0** is new features, and **2.0.0** is a
 major update with an upgrade guide.

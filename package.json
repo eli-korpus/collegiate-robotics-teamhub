@@ -10,26 +10,27 @@
     "node": ">=20.19"
   },
   "workspaces": [
-    "apps/*",
+    "dashboard",
+    "setup-wizard",
     "packages/*"
   ],
   "scripts": {
-    "setup": "tsx apps/wizard/server/main.ts",
+    "setup": "tsx setup-wizard/server/main.ts",
     "generate": "tsx packages/generator/src/cli.ts generate",
     "build": "npm run generate && npm run build -w @teamhub/dashboard",
     "dev": "npm run generate && npm run dev -w @teamhub/dashboard",
-    "dev:demo": "tsx packages/generator/src/cli.ts generate --config examples/demo.config.json && npm run dev -w @teamhub/dashboard",
-    "build:demo": "tsx packages/generator/src/cli.ts generate --config examples/demo.config.json && npm run build -w @teamhub/dashboard",
+    "dev:demo": "tsx packages/generator/src/cli.ts generate --config tools/examples/demo.config.json && npm run dev -w @teamhub/dashboard",
+    "build:demo": "tsx packages/generator/src/cli.ts generate --config tools/examples/demo.config.json && npm run build -w @teamhub/dashboard",
     "typecheck": "tsc -p tsconfig.json",
-    "lint": "eslint . && tsx scripts/lint-sql.ts",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "e2e": "playwright test",
-    "ci:matrix": "tsx scripts/ci-matrix.ts",
-    "new-module": "tsx scripts/new-module.ts",
-    "format": "prettier --write .",
-    "docs:modules": "tsx scripts/docs-modules.ts",
-    "release": "tsx scripts/release.ts"
+    "lint": "eslint . && tsx tools/scripts/lint-sql.ts",
+    "test": "vitest run --config tools/vitest.config.ts",
+    "test:watch": "vitest --config tools/vitest.config.ts",
+    "e2e": "playwright test --config tools/playwright.config.ts",
+    "ci:matrix": "tsx tools/scripts/ci-matrix.ts",
+    "new-module": "tsx tools/scripts/new-module.ts",
+    "format": "prettier --write . --ignore-path .gitignore --ignore-path tools/.prettierignore",
+    "docs:modules": "tsx tools/scripts/docs-modules.ts",
+    "release": "tsx tools/scripts/release.ts"
   },
   "devDependencies": {
     "@axe-core/playwright": "4.13.0",
@@ -47,5 +48,10 @@
     "typescript": "6.0.3",
     "typescript-eslint": "8.71.0",
     "vitest": "5.0.3"
+  },
+  "prettier": {
+    "singleQuote": true,
+    "printWidth": 110,
+    "trailingComma": "all"
   }
 }

@@ -2,7 +2,7 @@
 
 GitHub Pages needs a small workflow to build the site. The wizard writes `.github/workflows/pages.yml` into your fork;
 it runs `npm run build`, copies `index.html` to `404.html` (so refreshing `/calendar` works) and publishes
-`apps/dashboard/dist`.
+`dashboard/dist`.
 
 ## Steps
 

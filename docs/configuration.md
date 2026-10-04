@@ -20,7 +20,7 @@ The file is validated by `packages/config-schema` (zod) every time the app is ge
 | `teams` | array (≥ 1) | Each team: `id` (UUID, never change it), `number` (FTC team number or null), `name`, `shortCode` (1–4 chars, e.g. `A`), `color` (hex), `logo`, `logoDark`, `school`, `city`. |
 | `theme` | object | `accent` (hex), `secondary` (hex or null), `corners` (`soft`/`sharp`), `defaultMode` (`light`/`dark`/`system`). Accents are automatically adjusted to meet WCAG AA contrast; the generator prints a note when it does. |
 | `season` | string | Initial season label like `2026–27`. The live value is in the database and changes with the wizard's **New Season** tool. |
-| `modules` | object | Tabs, keyed by id: `{ "state": "active" \| "dormant", "settings": { … } }`. Missing = not installed. See [modules/README.md](modules/README.md). |
+| `modules` | object | Tabs, keyed by id: `{ "state": "active" \| "dormant", "settings": { … } }`. Missing = not installed. See [tabs/README.md](tabs/README.md). |
 | `subteams` | array | `{ id, name }`: one list used by People, Tasks, Notebook and Skills. |
 | `positions` | array | `{ id: "pos_…", name, teamId (null = program-wide), grantsPermissions }`. |
 | `profileFields` | array | Extra profile fields: `{ id, label, type: "text" \| "select", options, private }`. Private fields are visible only to the person and mentors. A field with id `shirt_size` is used by Merch & Orders. |
@@ -52,5 +52,5 @@ The file is validated by `packages/config-schema` (zod) every time the app is ge
 
 ## Example
 
-[`examples/demo.config.json`](../examples/demo.config.json) enables every tab for two teams.
-[`examples/core-only.config.json`](../examples/core-only.config.json) is the smallest valid config.
+[`tools/examples/demo.config.json`](../tools/examples/demo.config.json) enables every tab for two teams.
+[`tools/examples/core-only.config.json`](../tools/examples/core-only.config.json) is the smallest valid config.

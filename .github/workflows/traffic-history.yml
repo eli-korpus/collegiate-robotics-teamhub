@@ -29,7 +29,7 @@ jobs:
           # A fine-grained token with "Administration: Read-only" on this repository. GitHub's built-in token can't
           # read views and downloads. Without it, only stars and forks are saved.
           TRAFFIC_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
-        run: node scripts/github/traffic-history.ts history
+        run: node tools/scripts/github/traffic-history.ts history
       - name: Save
         working-directory: history
         run: |

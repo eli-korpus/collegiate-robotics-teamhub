@@ -83,7 +83,7 @@ export interface ModuleManifest<S extends z.ZodType = z.ZodType> {
   seasonRollover?: { describe: string; sql: string };
   /** Module whose presence this module reads in UI only (never required). */
   docs?: string;
-  /** Edge functions (folders in supabase/functions) deployed only when this module is enabled. */
+  /** Edge functions (folders in database/functions) deployed only when this module is enabled. */
   functions?: string[];
 }
 

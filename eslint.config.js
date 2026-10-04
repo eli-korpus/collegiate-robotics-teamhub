@@ -6,14 +6,14 @@ import reactHooks from 'eslint-plugin-react-hooks';
 /** Modules may import only from @teamhub/sdk, @teamhub/ui, npm packages and their own folder (spec §4.2). */
 const moduleBoundary = {
   patterns: [
-    { group: ['**/modules/*', '../../*/**', '@modules/*'], message: 'Modules must not import from other modules (spec P2). Use registries or an integration unit.' },
-    { group: ['**/integrations/*'], message: 'Modules must not import integrations.' },
-    { group: ['**/apps/*'], message: 'Modules must not import from apps.' },
+    { group: ['**/tabs/*', '../../*/**'], message: 'Tabs must not import from other tabs (spec P2). Use registries or an integration unit.' },
+    { group: ['**/integrations/*'], message: 'Tabs must not import integrations.' },
+    { group: ['**/dashboard/*', '**/setup-wizard/*'], message: 'Tabs must not import from the dashboard or the wizard.' },
   ],
 };
 
 export default tseslint.config(
-  { ignores: ['**/dist/**', '**/node_modules/**', 'apps/dashboard/src/generated/**', 'supabase/functions/**', 'test-results/**', 'playwright-report/**'] },
+  { ignores: ['**/dist/**', '**/node_modules/**', 'dashboard/src/generated/**', 'database/functions/**', 'test-results/**', 'playwright-report/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
@@ -25,12 +25,12 @@ export default tseslint.config(
       'no-empty': ['error', { allowEmptyCatch: true }],
     },
   },
-  { files: ['scripts/**', '**/*.mjs'], languageOptions: { globals: { process: 'readonly', console: 'readonly', URL: 'readonly' } } },
-  { files: ['modules/**/*.{ts,tsx}'], ignores: ['**/*.test.ts'], rules: { 'no-restricted-imports': ['error', moduleBoundary] } },
+  { files: ['tools/scripts/**', '**/*.mjs'], languageOptions: { globals: { process: 'readonly', console: 'readonly', URL: 'readonly' } } },
+  { files: ['tabs/**/*.{ts,tsx}'], ignores: ['**/*.test.ts', 'tabs/integrations/**'], rules: { 'no-restricted-imports': ['error', moduleBoundary] } },
   {
-    files: ['integrations/**/*.{ts,tsx}'],
+    files: ['tabs/integrations/**/*.{ts,tsx}'],
     rules: {
-      'no-restricted-imports': ['error', { patterns: [{ group: ['**/modules/*', '**/apps/*'], message: 'Integrations talk to modules only through tables and registries.' }] }],
+      'no-restricted-imports': ['error', { patterns: [{ group: ['**/tabs/*', '../../*/**', '**/dashboard/*', '**/setup-wizard/*'], message: 'Integrations talk to tabs only through tables and registries.' }] }],
     },
   },
 );

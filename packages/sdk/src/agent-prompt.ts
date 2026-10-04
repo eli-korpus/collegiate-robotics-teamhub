@@ -1,7 +1,7 @@
 /**
  * The prompt teams paste into an AI coding assistant (Claude Code, Cursor, Copilot, ChatGPT…) to customize their fork.
  * One source of truth: shown on the wizard's last step and in Admin > AI assistant, and (with placeholders) in AGENTS.md.
- * tests/scripts/agents.test.ts checks AGENTS.md still contains the generic version.
+ * tools/tests/scripts/agents.test.ts checks AGENTS.md still contains the generic version.
  */
 export interface AgentPromptInput {
   programName: string;
@@ -21,7 +21,7 @@ Before changing anything:
 How to work:
 - Explain your plan in plain language and wait for my OK before making big changes.
 - Make the smallest change that does what we asked. If the setup wizard (npm run setup) can already do it, tell me that instead of editing code.
-- Never edit files in apps/dashboard/src/generated/. They are rebuilt from our config.
+- Never edit files in dashboard/src/generated/. They are rebuilt from our config.
 - Database changes go in a new numbered migration file. Never edit or delete an existing migration. Every table needs row-level security policies.
 - Never put secrets (the Supabase service-role key, access tokens, passwords) in the repository.
 - Do not add chat or private messages between users (youth protection).

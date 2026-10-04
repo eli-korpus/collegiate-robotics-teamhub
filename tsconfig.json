@@ -20,17 +20,13 @@
   },
   "include": [
     "packages/*/src",
-    "apps/dashboard/src",
-    "apps/dashboard/vite.config.ts",
-    "apps/wizard/src",
-    "apps/wizard/server",
-    "apps/wizard/vite.config.ts",
-    "modules",
-    "integrations",
-    "scripts",
-    "tests",
-    "vitest.config.ts",
-    "playwright.config.ts"
+    "dashboard/src",
+    "dashboard/vite.config.ts",
+    "setup-wizard/src",
+    "setup-wizard/server",
+    "setup-wizard/vite.config.ts",
+    "tabs",
+    "tools"
   ],
-  "exclude": ["node_modules", "**/dist", "supabase/functions"]
+  "exclude": ["node_modules", "**/dist", "database/functions"]
 }

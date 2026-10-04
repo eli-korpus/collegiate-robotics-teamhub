@@ -3,6 +3,7 @@ import { join, relative } from 'node:path';
 import { deriveAccent } from '@teamhub/ui/color';
 import { MODULE_CATEGORIES } from '@teamhub/config-schema';
 import type { Resolved } from './resolve';
+import { LAYOUT } from './catalog';
 
 const json = (v: unknown) => JSON.stringify(v, null, 2);
 const ident = (id: string) => id.replace(/[^a-zA-Z0-9]/g, '_');
@@ -48,7 +49,7 @@ ${block(dark, sec?.d ?? null, 'dark')}
   return { css, adjusted };
 }
 
-export function generateDashboardFiles(r: Resolved, outDir = 'apps/dashboard/src/generated'): GeneratedFile[] {
+export function generateDashboardFiles(r: Resolved, outDir = 'dashboard/src/generated'): GeneratedFile[] {
   const root = r.catalog.root;
   const abs = join(root, outDir);
   const rel = (p: string) => {
@@ -165,10 +166,10 @@ export function writeFiles(root: string, files: GeneratedFile[], cleanDir?: stri
   }
 }
 
-/** Copies team/branding → apps/dashboard/public/branding. */
+/** Copies team/branding → dashboard/public/branding. */
 export function copyBranding(root: string): number {
   const from = join(process.env.TEAMHUB_TEAM_DIR ?? join(root, 'team'), 'branding');
-  const to = join(root, 'apps', 'dashboard', 'public', 'branding');
+  const to = join(root, LAYOUT.dashboard, 'public', 'branding');
   rmSync(to, { recursive: true, force: true });
   if (!existsSync(from)) return 0;
   mkdirSync(to, { recursive: true });

@@ -4,7 +4,7 @@ An open-source, bring-your-own-services team dashboard for *FIRST* Tech Challeng
 
 Created by [FTC Team 23208](https://ftcscout.org/teams/23208) and shared free with every FTC team.
 Using it? [Add your team](https://github.com/elikorpus/teamhub-ftc/issues/new?template=teamhub-team.yml) to the
-[list of teams using TeamHub](TEAMS.md).
+[list of teams using TeamHub](docs/TEAMS.md).
 
 TeamHub gives your program one place for practices, tasks, the engineering notebook, scouting, competition day,
 outreach hours and more, with only the tabs you choose. It runs on **your own** free Supabase project and **your
@@ -23,7 +23,7 @@ own** free static host, so there are no accounts with us, no fees and no data le
 
 ## What's inside
 
-28 optional tabs in four groups ([full list](docs/modules/README.md)):
+28 optional tabs in four groups ([full list](docs/tabs/README.md)):
 
 | Team | Engineering | Competition | Outreach & Business |
 |---|---|---|---|
@@ -96,22 +96,22 @@ assistants (Claude Code, Cursor, GitHub Copilot, Codex and others read it automa
 - [Setup wizard walkthrough](docs/setup-wizard.md)
 - [Updating your dashboard](docs/updating.md)
 - [Hosting guides](docs/hosting/README.md)
-- [Tab library](docs/modules/README.md)
+- [Tab library](docs/tabs/README.md)
 - [Configuration file reference](docs/configuration.md)
 - [Testing](docs/testing.md)
 - [Guide for AI coding assistants](AGENTS.md)
-- [Contributing and writing a tab](CONTRIBUTING.md)
-- [Releasing (maintainers)](docs/releasing.md) and [changelog](CHANGELOG.md)
+- [Contributing and writing a tab](.github/CONTRIBUTING.md)
+- [Releasing (maintainers)](docs/releasing.md) and [changelog](docs/CHANGELOG.md)
 
 ## Try it locally
 
 ```sh
 npm install
-npm run dev:demo     # dashboard with every tab, using examples/demo.config.json
+npm run dev:demo     # dashboard with every tab, using tools/examples/demo.config.json
 ```
 
-`dev:demo` needs a Supabase project to sign in. Point `examples/demo.config.json` at a throwaway project, or run the
-mocked smoke tests: `npm run build:demo && npx playwright test`.
+`dev:demo` needs a Supabase project to sign in. Point `tools/examples/demo.config.json` at a throwaway project, or run the
+mocked smoke tests: `npm run build:demo && npm run e2e`.
 
 ## Security
 
@@ -119,7 +119,7 @@ mocked smoke tests: `npm run build:demo && npx playwright test`.
   can read and write what. Every tab ships with tests for those rules.
 - The wizard uses your Supabase personal access token only on your computer (in memory, or in
   `~/.teamhub/credentials.json` if you choose "remember"). It's never committed or sent anywhere except Supabase.
-- Found a security issue? Please report it privately; see [SECURITY.md](SECURITY.md).
+- Found a security issue? Please report it privately; see [SECURITY.md](.github/SECURITY.md).
 
 ## License
 

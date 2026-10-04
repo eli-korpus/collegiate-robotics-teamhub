@@ -15,7 +15,7 @@ Every host uses the same build:
 | Setting | Value |
 |---|---|
 | Build command | `npm run build` |
-| Output directory | `apps/dashboard/dist` |
+| Output directory | `dashboard/dist` |
 | Node version | 20.19 or newer (22 or 24 recommended) |
 | Environment variables | none: the public Supabase URL and publishable key are in `team/teamhub.config.json` |
 
@@ -48,5 +48,5 @@ All four hosts support a custom domain (e.g. `hub.exampleRobotics.org`) from the
 
 ## Manual fallback
 
-Run `npm run build` on your computer and upload `apps/dashboard/dist` by drag-and-drop to Cloudflare or Netlify. This
+Run `npm run build` on your computer and upload `dashboard/dist` by drag-and-drop to Cloudflare or Netlify. This
 works, but you'll have to repeat it after every change. Prefer a Git-connected deploy.

@@ -30,7 +30,7 @@ jobs:
       - name: Checks
         if: steps.gate.outputs.upstream == 'true'
         run: |
-          npx tsx packages/generator/src/cli.ts generate --config examples/demo.config.json
+          npx tsx packages/generator/src/cli.ts generate --config tools/examples/demo.config.json
           npm run typecheck
           npm run lint
           npm test
@@ -42,13 +42,13 @@ jobs:
           echo "Upgrading from $PREV"
           git worktree add ../prev "$PREV"
           (cd ../prev && npm ci)
-          TEAMHUB_PREV_ROOT=../prev npx vitest run tests/db/upgrade.test.ts
+          TEAMHUB_PREV_ROOT=../prev npm test -- tools/tests/db/upgrade.test.ts
       - name: Publish the GitHub Release
         if: steps.gate.outputs.upstream == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh release create "$GITHUB_REF_NAME" \
-            --title "$(npx tsx scripts/release-notes.ts "$GITHUB_REF_NAME" --title)" \
-            --notes "$(npx tsx scripts/release-notes.ts "$GITHUB_REF_NAME")" \
+            --title "$(npx tsx tools/scripts/release-notes.ts "$GITHUB_REF_NAME" --title)" \
+            --notes "$(npx tsx tools/scripts/release-notes.ts "$GITHUB_REF_NAME")" \
             --verify-tag

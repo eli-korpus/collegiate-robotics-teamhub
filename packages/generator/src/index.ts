@@ -41,13 +41,13 @@ export interface GenerateResult {
   brandingFiles: number;
 }
 
-/** `teamhub generate`: config → apps/dashboard/src/generated + branding (spec §3.3). */
+/** `teamhub generate`: config → dashboard/src/generated + branding (spec §3.3). */
 export async function generate(config: TeamhubConfig, catalog?: Catalog, root = REPO_ROOT): Promise<GenerateResult> {
   const cat = catalog ?? (await loadCatalog(root));
   const r = resolveConfig(config, cat);
   if (r.errors.length) throw new ConfigError(`Config problems:\n${r.errors.map((e) => `  • ${e}`).join('\n')}`);
   const files = generateDashboardFiles(r);
-  writeFiles(root, files, 'apps/dashboard/src/generated');
+  writeFiles(root, files, 'dashboard/src/generated');
   const brandingFiles = copyBranding(root);
   return {
     modules: r.modules.filter((m) => m.state === 'active').map((m) => m.id),

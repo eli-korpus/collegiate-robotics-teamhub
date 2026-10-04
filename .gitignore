@@ -4,13 +4,13 @@ dist/
 .env
 .env.*
 !.env.example
-apps/dashboard/src/generated/
+dashboard/src/generated/
 team/.wizard-draft.json
 *.log
 .vscode/
 .idea/
-apps/dashboard/public/branding/
-apps/dashboard/public/404.html
+dashboard/public/branding/
+dashboard/public/404.html
 sql/
 test-results/
 playwright-report/
@@ -18,6 +18,6 @@ playwright-report/
 
 # Development-only material (not needed to use or contribute to TeamHub)
 TEAMHUB_FTC_SPEC.md
-scripts/prune-imports.mjs
-scripts/split-exports.mjs
+tools/scripts/prune-imports.mjs
+tools/scripts/split-exports.mjs
 .claude/

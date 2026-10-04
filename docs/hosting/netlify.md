@@ -5,7 +5,7 @@ The wizard writes `netlify.toml` into your fork:
 ```toml
 [build]
   command = "npm run build"
-  publish = "apps/dashboard/dist"
+  publish = "dashboard/dist"
 
 [[redirects]]
   from = "/*"

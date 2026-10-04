@@ -8,7 +8,7 @@ Cloudflare serves the dashboard as **static assets on Workers** (free plan, no b
   "name": "example-robotics-teamhub",
   "compatibility_date": "2026-09-01",
   "assets": {
-    "directory": "./apps/dashboard/dist",
+    "directory": "./dashboard/dist",
     "not_found_handling": "single-page-application"
   }
 }
@@ -29,7 +29,7 @@ Cloudflare serves the dashboard as **static assets on Workers** (free plan, no b
 6. Copy the URL ending in `.workers.dev` and paste it into the wizard's **Host it** step.
 
 > Cloudflare Pages (the older product) also works: framework preset **None**, build command `npm run build`, build
-> output directory `apps/dashboard/dist`. Pages serves single-page apps correctly as long as there's no `404.html`.
+> output directory `dashboard/dist`. Pages serves single-page apps correctly as long as there's no `404.html`.
 
 ## Custom domain
 

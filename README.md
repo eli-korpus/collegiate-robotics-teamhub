@@ -2,7 +2,7 @@
 
 An open-source, bring-your-own-services team dashboard for *FIRST* Tech Challenge teams.
 
-Created by [FTC Team 23208](https://ftcscout.org/teams/23208) (Eli Korpus) and shared free with every FTC team.
+Created by [FTC Team 23208](https://ftcscout.org/teams/23208) and shared free with every FTC team.
 Using it? [Add your team](https://github.com/elikorpus/teamhub-ftc/issues/new?template=teamhub-team.yml) to the
 [list of teams using TeamHub](TEAMS.md).
 

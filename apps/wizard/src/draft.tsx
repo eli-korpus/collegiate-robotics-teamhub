@@ -30,6 +30,7 @@ export function newConfig(): TeamhubConfig {
     home: { defaults: { member: [], captain: [], mentor: [] } },
     nav: { order: [] },
     toolLinks: [],
+    join: { allowedEmailDomains: [] },
     hosting: { provider: null, url: null, basePath: '/' },
     supabase: { url: null, anonKey: null, projectRef: null },
     features: { email: false },

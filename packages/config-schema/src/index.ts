@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 /** The three base profile types (spec §7.2). Admin is a flag, not a type. */
-import { PROFILE_TYPES } from './util';
+import { EMAIL_DOMAIN_RE, PROFILE_TYPES } from './util';
 export * from './util';
 export const ProfileTypeSchema = z.enum(PROFILE_TYPES);
 
@@ -124,6 +124,13 @@ export const ConfigSchema = z.object({
     .default({ defaults: { member: [], captain: [], mentor: [] } }),
   nav: z.object({ order: z.array(z.string()).default([]) }).default({ order: [] }),
   toolLinks: z.array(ToolLinkSchema).default([]),
+  /**
+   * Optional sign-up rule: only emails from these domains (or their subdomains) can create an account. The live value
+   * is in teamhub_settings, editable in Admin > Who can join; the wizard writes it when you change it here.
+   */
+  join: z
+    .object({ allowedEmailDomains: z.array(z.string().regex(EMAIL_DOMAIN_RE, 'Use a domain like collegiateschool.org')).max(20).default([]) })
+    .default({ allowedEmailDomains: [] }),
   hosting: z
     .object({
       provider: z.enum(HOSTS).nullable().default(null),

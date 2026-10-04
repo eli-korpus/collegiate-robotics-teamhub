@@ -36,6 +36,18 @@ export interface ApplyOptions {
   skipFunctions?: boolean;
 }
 
+/**
+ * SQL that sets the live email-domain rule (Admin > Who can join), or null when the wizard shouldn't touch it.
+ * The database remembers the list the wizard last wrote, so the wizard only writes when its own list changed: a change
+ * an admin made in the dashboard isn't undone by an unrelated wizard edit.
+ */
+export function joinRulesSql(config: TeamhubConfig, lastWritten: string | null): string | null {
+  const next = JSON.stringify([...config.join.allowedEmailDomains].sort());
+  if (lastWritten === next) return null;
+  return `update teamhub_settings set allowed_email_domains = array[${config.join.allowedEmailDomains.map(lit).join(', ')}]::text[] where id = 1;
+insert into teamhub_private.config (key, value) values ('wizard_join_domains', ${lit(next)}) on conflict (key) do update set value = excluded.value;`;
+}
+
 export async function applyConfig(
   m: Mgmt,
   ref: string,
@@ -95,6 +107,14 @@ export async function applyConfig(
     } catch (e) {
       log.push({ step: 'Set function secrets', ok: false, detail: (e as Error).message });
     }
+  }
+
+  const [lastJoin] = await m.query<{ value: string | null }>(ref, `select value from teamhub_private.config where key = 'wizard_join_domains'`);
+  const joinSql = joinRulesSql(config, lastJoin?.value ?? null);
+  if (joinSql) {
+    await m.query(ref, joinSql);
+    const d = config.join.allowedEmailDomains;
+    log.push({ step: 'Sign-up rule saved', ok: true, detail: d.length ? `only ${d.map((x) => '@' + x).join(', ')} emails` : 'anyone with the join link' });
   }
 
   await configureAuth(m, ref, config, opts.siteUrl ?? config.hosting.url);
@@ -170,6 +190,12 @@ export async function createAdmin(
   input: { email: string; password: string; name: string; types: Record<string, 'member' | 'captain' | 'mentor'> },
 ) {
   const sb = createClient(projectUrl(ref), secretKey, { auth: { persistSession: false, autoRefreshToken: false } });
+  // The admin can always sign in, even if their email isn't on an allowed domain (Admin > Who can join lists it).
+  await m.query(
+    ref,
+    `insert into teamhub_allowed_emails (email, note) select e, 'Admin account from setup' from (values (${lit(input.email.trim().toLowerCase())})) v(e)
+     where not teamhub_email_allowed(e) on conflict (email) do nothing`,
+  );
   const { data, error } = await sb.auth.admin.createUser({
     email: input.email,
     password: input.password,

@@ -77,6 +77,7 @@ export function useSettingsRow() {
       return data as {
         season_label: string;
         last_keepalive: string | null;
+        allowed_email_domains?: string[];
         storage_limits: { db_mb: number; files_mb: number };
         storage_history: { month: string; db: number; files: number }[];
         extra_profile_fields: { id: string; label: string; type: 'text' | 'select'; options?: string[] }[];

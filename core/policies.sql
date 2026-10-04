@@ -21,6 +21,9 @@ create policy core_settings_read on teamhub_settings for select to authenticated
 create policy core_settings_update on teamhub_settings for update to authenticated
   using (teamhub_is_admin()) with check (teamhub_is_admin());
 -- teamhub_storage_trash: no client policies (definer functions only).
+alter table teamhub_allowed_emails enable row level security;
+create policy core_allowed_emails_admin on teamhub_allowed_emails for all to authenticated
+  using (teamhub_is_admin()) with check (teamhub_is_admin());
 
 -- Teams: names/colors are needed by pending users too.
 create policy core_teams_read on teams for select to authenticated using (true);
@@ -140,9 +143,12 @@ grant usage, select on all sequences in schema public to authenticated, service_
 grant execute on all functions in schema public to authenticated, service_role;
 -- Signed-out visitors only need the keep-alive ping (tables are never readable without signing in).
 grant execute on function teamhub_ping() to anon;
+-- The sign-up page shows which email domains are accepted.
+grant execute on function teamhub_join_rules() to anon;
 -- Internal helpers stay locked (re-applied because the grant above covers every function).
 revoke execute on function teamhub_drop_policies(text), teamhub_make_dormant(text), teamhub_drop_prefix(text),
-  teamhub_trash(text, text[]), teamhub_notify(uuid[], text, text), teamhub_realtime_add(text)
+  teamhub_trash(text, text[]), teamhub_notify(uuid[], text, text), teamhub_realtime_add(text),
+  teamhub_email_allowed(text)
   from public, anon, authenticated;
 
 -- Defense in depth: TRUNCATE bypasses RLS, so client roles never get it (PostgREST doesn't expose it, but direct

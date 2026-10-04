@@ -15,6 +15,9 @@ How to update your dashboard: [docs/updating.md](docs/updating.md).
 
 ### Added
 
+- **Who can join:** optionally limit sign-ups to email addresses at your school's or organization's domains (setup wizard >
+  People, or Admin > Who can join), and allow specific addresses such as a mentor's personal email. Enforced by the
+  database. Run `npm run setup` > Update to add it to an existing dashboard.
 - "We're using TeamHub" sign-up form (README and the setup wizard's last screen) and a public list of teams using
   TeamHub (`TEAMS.md`), filled in automatically from FTCScout.
 - Credit: "made by FTC Team 23208" on the login page, an About card in Admin > Help, and the setup wizard's last screen.

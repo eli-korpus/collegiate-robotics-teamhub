@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Link, Navigate } from 'react-router';
+import { useQuery } from '@tanstack/react-query';
+import { emailDomainAllowed } from '@teamhub/config-schema/util';
 import { Check } from 'lucide-react';
 import { Banner, Button, Field, Input, Segmented, Textarea, VisibilityNote, cn } from '@teamhub/ui';
 import { friendlyError, isMultiTeam, runtime, useSession, useSupabase } from '@teamhub/sdk';
@@ -21,6 +23,17 @@ export function Join() {
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Optional rule from Admin > Who can join. The database enforces it; this is only for clear messages.
+  const rules = useQuery({
+    queryKey: ['core', 'join-rules'],
+    queryFn: async () => {
+      const { data, error } = await sb.rpc('teamhub_join_rules');
+      if (error) throw error;
+      return data as { allowed_email_domains: string[] };
+    },
+  });
+  const domains = rules.data?.allowed_email_domains ?? [];
+  const domainList = domains.map((d) => `@${d}`).join(' or ');
 
   if (session) return <Navigate to="/" replace />;
 
@@ -40,7 +53,14 @@ export function Join() {
             options: { data: { name: name.trim(), teams: picked, requested_type: type, note: note.trim() || null } },
           });
           setBusy(false);
-          if (error) setError(/registered/i.test(error.message) ? 'That email already has an account. Try signing in.' : friendlyError(error));
+          if (!error) return;
+          if (/registered/i.test(error.message)) return setError('That email already has an account. Try signing in.');
+          if (/TEAMHUB_EMAIL_NOT_ALLOWED/.test(error.message) || (!emailDomainAllowed(email, domains) && /saving new user/i.test(error.message))) {
+            return setError(
+              `This program only accepts sign-ups with ${domainList || 'certain'} email addresses. If you're a mentor or parent without one, ask an admin to allow your email (Admin > Who can join).`,
+            );
+          }
+          setError(friendlyError(error));
         }}
       >
         {error && <Banner tone="danger">{error}</Banner>}
@@ -48,7 +68,9 @@ export function Join() {
           {(id) => <Input id={id} required maxLength={80} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />}
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Email">{(id) => <Input id={id} type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />}</Field>
+          <Field label="Email" hint={domains.length ? `Use your ${domainList} email` : undefined}>
+            {(id) => <Input id={id} type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />}
+          </Field>
           <Field label="Password" hint="At least 8 characters">
             {(id) => <Input id={id} type="password" required minLength={8} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />}
           </Field>

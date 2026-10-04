@@ -92,3 +92,20 @@ test.describe('update notice', () => {
     expect(calls).toBe(0);
   });
 });
+
+test.describe('who can join', () => {
+  test('the sign-up page says which email to use', async ({ page }) => {
+    await page.route('**/rest/v1/rpc/teamhub_join_rules', (route) => route.fulfill({ json: { allowed_email_domains: ['collegiateschool.org'] } }));
+    await page.goto('/join');
+    await expect(page.getByText('Use your @collegiateschool.org email')).toBeVisible();
+  });
+
+  test('admins can manage the allowed domains and addresses', async ({ page }) => {
+    const errors = watchErrors(page);
+    await mockSupabase(page, { tables: { teamhub_allowed_emails: [{ email: 'coach@gmail.com', note: 'Mentor' }] } });
+    await page.goto('/admin/join');
+    await expect(page.getByText('Anyone with your join link can sign up right now.')).toBeVisible();
+    await expect(page.getByText('coach@gmail.com')).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+});

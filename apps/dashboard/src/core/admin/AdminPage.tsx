@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { NavLink, Route, Routes } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Activity, BookOpen, Bot, Boxes, CalendarRange, Database, ExternalLink, HardDrive, Link2, Pencil, Plus, Shield, Trash2 } from 'lucide-react';
+import { Activity, BookOpen, Bot, Boxes, CalendarRange, Database, ExternalLink, HardDrive, Link2, MailCheck, Pencil, Plus, Shield, Trash2 } from 'lucide-react';
 import {
   Badge,
   Banner,
@@ -50,11 +50,13 @@ import {
 import { agentPrompt } from '@teamhub/sdk/agent-prompt';
 import { TEAMHUB_CREDIT, TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
 import { UpdateNotice } from './UpdateNotice';
+import { WhoCanJoin } from './WhoCanJoin';
 
 const SECTIONS = [
   { path: '', label: 'Storage & usage', icon: HardDrive },
   { path: 'modules', label: 'Tabs & database', icon: Boxes },
   { path: 'admins', label: 'Admins', icon: Shield },
+  { path: 'join', label: 'Who can join', icon: MailCheck },
   { path: 'season', label: 'Season', icon: CalendarRange },
   { path: 'links', label: 'Tool links', icon: Link2 },
   { path: 'keepalive', label: 'Keep-alive', icon: Activity },
@@ -85,6 +87,7 @@ export default function AdminPage() {
           <Route index element={<Storage />} />
           <Route path="modules" element={<Modules />} />
           <Route path="admins" element={<Admins />} />
+          <Route path="join" element={<WhoCanJoin />} />
           <Route path="season" element={<Season />} />
           <Route path="links" element={<ToolLinksAdmin />} />
           <Route path="keepalive" element={<KeepAlive />} />

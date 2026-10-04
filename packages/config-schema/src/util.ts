@@ -26,6 +26,23 @@ export function positionIdFor(name: string): string {
   return `pos_${slugify(name) || 'position'}`;
 }
 
+// ── Who can join ────────────────────────────────────────────────────────────
+/** A lowercase email domain like "collegiateschool.org" (same rule as the database). */
+export const EMAIL_DOMAIN_RE = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/;
+
+/** "@CollegiateSchool.org", "name@collegiateschool.org" or " collegiateschool.org " → "collegiateschool.org" (null if invalid). */
+export function normalizeEmailDomain(input: string): string | null {
+  const d = input.trim().toLowerCase().split('@').pop()!.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '');
+  return EMAIL_DOMAIN_RE.test(d) ? d : null;
+}
+
+/** Same check the database makes (subdomains count). An empty list allows every email. */
+export function emailDomainAllowed(email: string, domains: string[]): boolean {
+  if (!domains.length) return true;
+  const dom = email.trim().toLowerCase().split('@')[1] ?? '';
+  return domains.some((d) => dom === d || dom.endsWith(`.${d}`));
+}
+
 // ── Versions & updates ──────────────────────────────────────────────────────
 /** Where TeamHub updates come from: the upstream GitHub repository (owner/name). */
 export const TEAMHUB_UPSTREAM_REPO = 'elikorpus/teamhub-ftc';

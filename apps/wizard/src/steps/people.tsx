@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Lock, Plus, Trash2 } from 'lucide-react';
-import { positionIdFor, slugify, type PermissionGrant, type ProfileType } from '@teamhub/config-schema';
+import { normalizeEmailDomain, positionIdFor, slugify, type PermissionGrant, type ProfileType } from '@teamhub/config-schema';
 import type { PermissionDefs } from '@teamhub/sdk/define';
 import { Badge, Button, Checkbox, IconButton, Input, Segmented, Select, Spinner, Switch } from '@teamhub/ui';
 import { api } from '../api';
@@ -15,6 +15,9 @@ export function People({ onNext, onBack }: StepProps) {
   const c = draft.config;
   const [newSub, setNewSub] = useState('');
   const [newPos, setNewPos] = useState('');
+  const [newDomain, setNewDomain] = useState('');
+  const [domainError, setDomainError] = useState<string | null>(null);
+  const domains = c.join?.allowedEmailDomains ?? [];
   const suggestions = useMemo(() => {
     const s = new Set<string>(GENERIC_POSITIONS);
     for (const m of catalog.modules) if (m.id in c.modules) m.suggestedPositions.forEach((p) => s.add(p));
@@ -56,6 +59,54 @@ export function People({ onNext, onBack }: StepProps) {
         </form>
       </Section>
 
+      <Section
+        title="Who can join (optional)"
+        description="Only allow sign-ups from email addresses at certain domains, like your school's. Leave empty to let anyone with the join link sign up (a captain or mentor still approves every request)."
+      >
+        {domains.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {domains.map((d, i) => (
+              <span key={d} className="inline-flex items-center gap-1 rounded-full border border-border bg-bg-subtle py-0.5 pl-3 pr-1 text-[13px]">
+                @{d}
+                <IconButton label={`Remove ${d}`} size="sm" className="size-6" onClick={() => update((x) => void x.join.allowedEmailDomains.splice(i, 1))}>
+                  <Trash2 className="size-3.5" />
+                </IconButton>
+              </span>
+            ))}
+          </div>
+        )}
+        <form
+          className="flex gap-2"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!newDomain.trim()) return;
+            const d = normalizeEmailDomain(newDomain);
+            if (!d) return setDomainError('That doesn’t look like an email domain. Type the part after the @, like collegiateschool.org.');
+            setDomainError(null);
+            update((x) => {
+              x.join ??= { allowedEmailDomains: [] };
+              if (!x.join.allowedEmailDomains.includes(d)) x.join.allowedEmailDomains.push(d);
+            });
+            setNewDomain('');
+          }}
+        >
+          <Input value={newDomain} onChange={(e) => setNewDomain(e.target.value)} placeholder="Add a domain (e.g. collegiateschool.org)" aria-label="Email domain" />
+          <Button type="submit" icon={<Plus className="size-4" />}>
+            Add
+          </Button>
+        </form>
+        {domainError && <p className="text-[12.5px] text-danger">{domainError}</p>}
+        {domains.length > 0 && (
+          <p className="text-[12.5px] text-muted">
+            Subdomains count too (students.{domains[0]} is allowed). Mentors or parents without a school email? After setup, an admin can allow their exact address in the dashboard
+            under Admin &gt; Who can join. Your admin account is always allowed.
+          </p>
+        )}
+        <Why title="How it works">
+          The database checks every new account, so this can't be skipped. People who already have an account aren't affected. Admins can change this list any time in the
+          dashboard (Admin &gt; Who can join).
+        </Why>
+      </Section>
       <Section title="Positions" description="Named responsibilities like “3D Print Farm Manager”. Tabs use them for permissions and routing (e.g. print jobs go to whoever holds that position).">
         {c.positions.length > 0 && (
           <ul className="divide-y divide-border rounded-md border border-border">

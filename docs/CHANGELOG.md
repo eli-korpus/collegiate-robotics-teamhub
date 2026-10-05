@@ -13,6 +13,11 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Fixed
+
+- Setup wizard > Tab options: clicking an option's description could remove its tags one by one (for example
+  the Social Media platforms) or toggle a To Manufacture position.
+
 ## [1.0.0] - 2026-10-05
 
 ### Added

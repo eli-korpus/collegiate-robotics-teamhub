@@ -106,17 +106,19 @@ export function SchemaForm({
         const label = s.title ?? k;
         const type = Array.isArray(s.type) ? s.type[0] : s.type;
         if (type === 'boolean') return <Switch key={k} checked={!!v} onChange={(x) => set(k, x)} label={label} description={s.description} />;
+        // A <div>, not a <label>: clicking a label "clicks" the first button inside it, which in tag lists is a
+        // remove button (clicking the description deleted tags). Controls get their names from aria-label instead.
         const field = (control: ReactNode, descriptionFirst = false) => (
-          <label key={k} className="block space-y-1.5">
-            <span className="block text-[13px] font-medium">{label}</span>
-            {descriptionFirst && s.description && <span className="block text-[12.5px] text-muted">{s.description}</span>}
+          <div key={k} role="group" aria-label={label} className="space-y-1.5">
+            <p className="text-[13px] font-medium">{label}</p>
+            {descriptionFirst && s.description && <p className="text-[12.5px] text-muted">{s.description}</p>}
             {control}
-            {!descriptionFirst && s.description && <span className="block text-[12.5px] text-muted">{s.description}</span>}
-          </label>
+            {!descriptionFirst && s.description && <p className="text-[12.5px] text-muted">{s.description}</p>}
+          </div>
         );
         if (s.enum)
           return field(
-            <Select value={String(v ?? '')} onChange={(e) => set(k, e.target.value)}>
+            <Select aria-label={label} value={String(v ?? '')} onChange={(e) => set(k, e.target.value)}>
               {s.enum.map((o) => (
                 <option key={String(o)} value={String(o)}>
                   {optionLabel(o)}
@@ -125,13 +127,13 @@ export function SchemaForm({
             </Select>,
           );
         if (type === 'number' || type === 'integer')
-          return field(<Input type="number" min={s.minimum} max={s.maximum} value={v == null ? '' : String(v)} onChange={(e) => set(k, e.target.value === '' ? undefined : Number(e.target.value))} className="max-w-40" />);
+          return field(<Input aria-label={label} type="number" min={s.minimum} max={s.maximum} value={v == null ? '' : String(v)} onChange={(e) => set(k, e.target.value === '' ? undefined : Number(e.target.value))} className="max-w-40" />);
         if (type === 'array' && s.items?.type === 'string')
           return field(
             <TagListInput label={label} value={Array.isArray(v) ? (v as string[]) : []} onChange={(x) => set(k, x)} maxLength={s.items?.maxLength ?? 60} />,
           );
         if (type === 'array' && s.items?.properties) return field(<ObjectList schema={s.items} value={Array.isArray(v) ? (v as Record<string, unknown>[]) : []} onChange={(x) => set(k, x)} positions={positions} />, true);
-        return field(<Input value={String(v ?? '')} onChange={(e) => set(k, e.target.value)} />);
+        return field(<Input aria-label={label} value={String(v ?? '')} onChange={(e) => set(k, e.target.value)} />);
       })}
     </div>
   );

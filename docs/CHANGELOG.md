@@ -13,27 +13,6 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
-### Added
-
-- Tool links like the code repository, portfolio or CAD can be one for the whole program or one per team (programs
-  with several teams). Everyone sees their own team's link; Admin > Tool links shows which team each link is for.
-
-### Changed
-
-- Required fields are checked everywhere (setup wizard steps and every Save button in the dashboard): an empty one
-  turns red with "Please fill this in." instead of failing silently. Optional fields all show the same "Optional" tag.
-- Setup wizard: "How many FTC teams?" moved to the Teams step, and switching to one team asks before removing the
-  others. Per-team options only appear when a program really has several teams.
-
-### Fixed
-
-- Setup wizard > Publish: after a failed upload, pressing the button again said "Pushed to GitHub" without uploading
-  anything. It now uploads whatever is waiting, only reports success when GitHub accepts it, and explains failures in
-  plain language with a fix: use your private no-reply email (GitHub's email privacy block), get newer changes
-  first, or which account to sign in with.
-- Setup wizard > Tab options: clicking an option's description could remove its tags one by one (for example
-  the Social Media platforms) or toggle a To Manufacture position.
-
 ## [1.0.0] - 2026-10-05
 
 ### Added
@@ -75,3 +54,8 @@ How to update your dashboard: [docs/updating.md](updating.md).
 - Social Media Planner works with a single platform (like Instagram) without asking where each post goes.
 - Setup wizard: season picker, a light/dark preview that switches the whole preview, clearly optional tool links,
   position pickers for To Manufacture methods, and options that only show when they apply.
+- Tool links (code repository, portfolio, CAD…) can be one for the whole program or one per team.
+- Required fields are checked in every setup step and Save button ("Please fill this in."), and optional fields all
+  show the same "Optional" tag.
+- Setup wizard: Publish explains upload problems in plain language with one-click fixes (private no-reply email,
+  getting newer changes first) and only reports success when GitHub accepted the upload.

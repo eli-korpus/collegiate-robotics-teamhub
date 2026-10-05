@@ -1,0 +1,43 @@
+# Checks once a week for a new TeamHub release and opens an issue in your fork when one is out (GitHub emails the
+# repository owner about new issues). Installed by the TeamHub setup wizard. It never changes your code: to update,
+# run `npm run setup` on your computer and choose Update, which updates your database before your site.
+name: Check for TeamHub updates
+on:
+  schedule:
+    - cron: '23 14 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+  issues: write
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: package.json
+          sparse-checkout-cone-mode: false
+      - name: Compare with the latest release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          UPSTREAM: elikorpus/teamhub-ftc
+        run: |
+          current=$(jq -r .version package.json)
+          release=$(gh api "repos/$UPSTREAM/releases/latest" 2>/dev/null || echo '{}')
+          latest=$(echo "$release" | jq -r '.tag_name // empty' | sed 's/^v//')
+          if [ -z "$latest" ]; then echo "No releases yet."; exit 0; fi
+          newest=$(printf '%s\n%s\n' "$current" "$latest" | sort -V | tail -1)
+          if [ "$latest" = "$current" ] || [ "$newest" != "$latest" ]; then echo "Up to date ($current)."; exit 0; fi
+          name=$(echo "$release" | jq -r '.name // empty')
+          url=$(echo "$release" | jq -r '.html_url')
+          title="TeamHub $latest is available"
+          case "$name" in *[Ss]ecurity*) title="Security update: TeamHub $latest is available" ;; esac
+          if gh issue list --state open --search "\"TeamHub $latest is available\" in:title" --json number --jq 'length' | grep -qv '^0$'; then
+            echo "Issue already open."; exit 0
+          fi
+          body=$(printf '%s\n\n%s\n\n%s\n\n%s\n' \
+            "Your dashboard runs TeamHub **$current**. Version **$latest** is out: [what's new]($url)." \
+            "**How to update:** on your computer, open your TeamHub folder, run \`npm run setup\` and choose **Update**. It backs up your data, updates your database, then publishes your site, and you can undo it." \
+            "Please don't use GitHub's \"Sync fork\" button for TeamHub updates: its \"Discard commits\" option deletes your team's settings, and it updates your site before your database." \
+            "This issue was opened by the \"Check for TeamHub updates\" workflow. Close it once you've updated.")
+          gh issue create --title "$title" --body "$body"

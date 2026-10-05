@@ -381,8 +381,8 @@
     ]
   },
   "hosting": {
-    "provider": null,
-    "url": null,
+    "provider": "cloudflare",
+    "url": "https://collegiate-robotics-teamhub.ekorpus.workers.dev",
     "basePath": "/"
   },
   "supabase": {

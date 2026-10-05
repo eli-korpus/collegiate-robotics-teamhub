@@ -54,8 +54,8 @@ export function Program({ onNext, onBack }: StepProps) {
   const c = draft.config;
   const [busy, setBusy] = useState(false);
   return (
-    <StepShell title="Your program" subtitle="A program is your whole club: one school or organization. It can have one FTC team or several." onBack={onBack} onNext={onNext} nextDisabled={!c.program.name.trim()}>
-      <Field label="Program name" hint='e.g. "Example Robotics": shown at the top of the dashboard and on the login page.'>
+    <StepShell title="Your program" subtitle="A program is your whole club: one school or organization. It can have one FTC team or several." onBack={onBack} onNext={onNext}>
+      <Field label="Program name" required hint='e.g. "Example Robotics": shown at the top of the dashboard and on the login page.'>
         {(id) => <Input id={id} autoFocus value={c.program.name} maxLength={80} onChange={(e) => update((x) => void (x.program.name = e.target.value))} />}
       </Field>
       <Field label="Program logo" optional hint="Square works best. If you skip this, your first team's logo is used.">
@@ -158,7 +158,7 @@ export function Teams({ onNext, onBack }: StepProps) {
   };
 
   return (
-    <StepShell title={c.program.multiTeam ? 'Your teams' : 'Your team'} subtitle="Enter the FTC team number and we’ll look up the details on FTCScout." onBack={onBack} onNext={onNext} nextDisabled={!valid}>
+    <StepShell title={c.program.multiTeam ? 'Your teams' : 'Your team'} subtitle="Enter the FTC team number and we’ll look up the details on FTCScout." onBack={onBack} onNext={() => valid && onNext()}>
       <div className="space-y-1.5">
         <p className="text-[13px] font-medium">How many FTC teams does your program have?</p>
         <Segmented
@@ -200,7 +200,7 @@ export function Teams({ onNext, onBack }: StepProps) {
                 />
               )}
             </Field>
-            <Field label="Team name">{(id) => <Input id={id} value={t.name} maxLength={80} onChange={(e) => update((x) => void (x.teams[i].name = e.target.value))} />}</Field>
+            <Field label="Team name" required>{(id) => <Input id={id} value={t.name} maxLength={80} onChange={(e) => update((x) => void (x.teams[i].name = e.target.value))} />}</Field>
           </div>
           {looking === i && <p className="text-[12.5px] text-muted">Looking up on FTCScout…</p>}
           {t.number && found[t.number] && (
@@ -209,7 +209,18 @@ export function Teams({ onNext, onBack }: StepProps) {
             </p>
           )}
           <div className="grid gap-3 sm:grid-cols-[140px_1fr]">
-            <Field label="Short code" hint="1–4 letters, e.g. A">
+            <Field
+              label="Short code"
+              required
+              hint="1–4 letters, e.g. A"
+              error={
+                t.shortCode && !/^[A-Za-z0-9]{1,4}$/.test(t.shortCode)
+                  ? 'Use 1–4 letters or numbers.'
+                  : t.shortCode && c.teams.some((o, j) => j !== i && o.shortCode.toUpperCase() === t.shortCode.toUpperCase())
+                    ? 'Another team already uses this code.'
+                    : undefined
+              }
+            >
               {(id) => <Input id={id} value={t.shortCode} maxLength={4} onChange={(e) => update((x) => void (x.teams[i].shortCode = e.target.value.toUpperCase()))} />}
             </Field>
             <Field label="Team color" hint="Shown as a dot on this team's items.">

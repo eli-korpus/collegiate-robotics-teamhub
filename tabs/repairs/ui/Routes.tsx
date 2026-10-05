@@ -178,7 +178,7 @@ function IssueDialog({ issue, onClose, draftTitle = '' }: { issue?: Issue; onClo
       <div className="space-y-4">
         {!issue && <ModulePurpose moduleId="repairs" compact />}
         <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="repairs.report" label="Robot of" />
-        <Field label="What broke?">{(id) => <Input id={id} autoFocus maxLength={160} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="Intake belt snapped" />}</Field>
+        <Field label="What broke?" required>{(id) => <Input id={id} autoFocus maxLength={160} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="Intake belt snapped" />}</Field>
         <div className="grid gap-3 sm:grid-cols-3">
           <Field label="Subsystem" optional>
             {(id) => (
@@ -201,7 +201,7 @@ function IssueDialog({ issue, onClose, draftTitle = '' }: { issue?: Issue; onClo
               </Select>
             )}
           </Field>
-          <Field label="When">{(id) => <Input id={id} type="datetime-local" value={v.happened_at} onChange={(e) => setV({ ...v, happened_at: e.target.value })} />}</Field>
+          <Field label="When" required>{(id) => <Input id={id} type="datetime-local" value={v.happened_at} onChange={(e) => setV({ ...v, happened_at: e.target.value })} />}</Field>
         </div>
         <Field label="At" optional hint='e.g. "Qual 14, League Meet 2" or "Practice"'>{(id) => <Input id={id} maxLength={80} value={v.event_label} onChange={(e) => setV({ ...v, event_label: e.target.value })} />}</Field>
         <Field label="Why it happened" optional>{(id) => <Textarea id={id} rows={2} maxLength={3000} value={v.cause} onChange={(e) => setV({ ...v, cause: e.target.value })} />}</Field>

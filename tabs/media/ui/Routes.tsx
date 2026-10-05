@@ -16,6 +16,7 @@ import {
   toast,
   useConfirm,
   type ProcessedFile,
+  validateRequired,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -350,6 +351,7 @@ function AlbumEditor({ album, onClose }: { album: Album | null; onClose: (id?: s
   const scope = useTeamScope();
   const [v, setV] = useState({ title: album?.title ?? '', date: album?.date ?? toDateInput(new Date()), external_url: album?.external_url ?? '', team_id: album ? album.team_id : scope });
   const save = async () => {
+    if (!validateRequired()) return;
     if (!v.title.trim()) return toast.error('Name the album');
     if (v.external_url && !/^https?:\/\//i.test(v.external_url)) return toast.error('Album link must start with https://');
     const body = { title: v.title.trim(), date: v.date, external_url: v.external_url.trim() || null, team_id: v.team_id };
@@ -361,8 +363,8 @@ function AlbumEditor({ album, onClose }: { album: Album | null; onClose: (id?: s
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()} title={album ? 'Edit album' : 'New album'} size="md" footer={<Button variant="primary" onClick={save}>{album ? 'Save' : 'Create album'}</Button>}>
       <div className="space-y-4">
-        <Field label="Album">{(id) => <Input id={id} autoFocus maxLength={120} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="League meet 2" />}</Field>
-        <Field label="Date">{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
+        <Field label="Album" required>{(id) => <Input id={id} autoFocus maxLength={120} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="League meet 2" />}</Field>
+        <Field label="Date" required>{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
         <Field label="Link to the full album" optional hint="Google Photos or Drive: great for lots of photos or videos">
           {(id) => <Input id={id} type="url" value={v.external_url} onChange={(e) => setV({ ...v, external_url: e.target.value })} placeholder="https://photos.app.goo.gl/…" />}
         </Field>

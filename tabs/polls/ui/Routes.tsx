@@ -27,6 +27,7 @@ import {
   toast,
   useConfirm,
   TagListInput,
+  validateRequired,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -173,6 +174,7 @@ function CreatePoll({ eventRef, onClose }: { eventRef: string | null; onClose: (
   const [teamId, setTeamId] = useState<string | null>(scope);
   const personal = PERSONAL.test(question);
   const save = async () => {
+    if (!validateRequired()) return;
     if (!question.trim()) return toast.error('Write the question');
     const opts = kind === 'choice' ? options.map((o) => o.trim()).filter(Boolean) : kind === 'availability' ? { dates: [...dates].sort(), slots } : [];
     if (kind === 'choice' && (opts as string[]).length < 2) return toast.error('Add at least two options');
@@ -230,7 +232,7 @@ function CreatePoll({ eventRef, onClose }: { eventRef: string | null; onClose: (
               About: <EntityLink refStr={eventRef} />
             </p>
           )}
-          <Field label="Question">{(id) => <Input id={id} autoFocus maxLength={300} value={question} onChange={(e) => setQuestion(e.target.value)} placeholder={kind === 'availability' ? 'When can everyone come to the build session?' : 'What should we…'} />}</Field>
+          <Field label="Question" required>{(id) => <Input id={id} autoFocus maxLength={300} value={question} onChange={(e) => setQuestion(e.target.value)} placeholder={kind === 'availability' ? 'When can everyone come to the build session?' : 'What should we…'} />}</Field>
           {personal && (
             <Banner tone="warning" title="This looks like personal info">
               Collect it with <strong>People &gt; Request info</strong> instead: answers save privately to each profile and you'll see who's missing.{' '}
@@ -309,6 +311,7 @@ function PollDialog({ poll: p, myVote, onClose }: { poll: Poll; myVote: VoteRow 
   const vis = pollVisibility(p);
   const refresh = () => qc.invalidateQueries({ queryKey: ['polls'] });
   const submit = async () => {
+    if (!validateRequired()) return;
     const value = p.kind === 'choice' ? sel : p.kind === 'availability' ? bits : text.trim();
     if (p.kind === 'choice' && !sel.length) return toast.error('Pick an option');
     const { error } = await sb.from('poll_votes').upsert({ poll_id: p.id, user_id: me.id, value: JSON.stringify(value) === '""' ? '' : value, voted_at: new Date().toISOString() });
@@ -482,6 +485,7 @@ function EditPoll({ poll: p, onClose }: { poll: Poll; onClose: () => void }) {
   const [options, setOptions] = useState<string[]>(Array.isArray(p.options) ? p.options : []);
   const [closes, setCloses] = useState(p.closes_at ? toDateTimeInput(new Date(p.closes_at)) : '');
   const save = async () => {
+    if (!validateRequired()) return;
     const clean = options.map((o) => o.trim()).filter(Boolean);
     if (!question.trim()) return toast.error('Write the question');
     if (p.kind === 'choice' && clean.length < 2) return toast.error('Keep at least two options');
@@ -497,7 +501,7 @@ function EditPoll({ poll: p, onClose }: { poll: Poll; onClose: () => void }) {
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()} title="Edit poll" description="You can change the question and choices until someone answers." footer={<Button variant="primary" onClick={save}>Save</Button>}>
       <div className="space-y-3">
-        <Field label="Question">{(id) => <Input id={id} maxLength={300} value={question} onChange={(e) => setQuestion(e.target.value)} />}</Field>
+        <Field label="Question" required>{(id) => <Input id={id} maxLength={300} value={question} onChange={(e) => setQuestion(e.target.value)} />}</Field>
         {p.kind === 'choice' && (
           <div className="space-y-2">
             {options.map((o, i) => (

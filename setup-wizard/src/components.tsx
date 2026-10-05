@@ -1,6 +1,6 @@
-import { useState, type ReactNode } from 'react';
+import { useRef, useState, type ReactNode } from 'react';
 import { icons, ChevronDown, ChevronRight, HelpCircle, ArrowLeft, ArrowRight, Box } from 'lucide-react';
-import { Button, Input, Select, Switch, TagListInput, deriveAccent, dominantColor, readableOn } from '@teamhub/ui';
+import { Button, Field, Input, Select, Switch, TagListInput, deriveAccent, dominantColor, readableOn, validateRequired } from '@teamhub/ui';
 import type { JsonSchema } from './api';
 
 export function ModuleIcon({ name, className }: { name: string; className?: string }) {
@@ -46,11 +46,14 @@ export function StepShell({
   hideNext?: boolean;
   footerExtra?: ReactNode;
 }) {
+  const body = useRef<HTMLDivElement>(null);
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-8 sm:px-8">
       <h1 className="text-[24px] font-semibold tracking-tight">{title}</h1>
       {subtitle && <p className="mt-1.5 text-[14px] leading-relaxed text-muted">{subtitle}</p>}
-      <div className="mt-6 space-y-5">{children}</div>
+      <div ref={body} className="mt-6 space-y-5">
+        {children}
+      </div>
       <div className="mt-10 flex items-center gap-3 border-t border-border pt-5">
         {onBack && (
           <Button variant="ghost" icon={<ArrowLeft className="size-4" />} onClick={onBack}>
@@ -60,7 +63,7 @@ export function StepShell({
         <span className="flex-1" />
         {footerExtra}
         {!hideNext && onNext && (
-          <Button variant="primary" size="lg" onClick={onNext} disabled={nextDisabled} loading={nextLoading}>
+          <Button variant="primary" size="lg" onClick={() => validateRequired(body.current) && onNext()} disabled={nextDisabled} loading={nextLoading}>
             {nextLabel} <ArrowRight className="size-4" />
           </Button>
         )}
@@ -133,7 +136,12 @@ export function SchemaForm({
             <TagListInput label={label} value={Array.isArray(v) ? (v as string[]) : []} onChange={(x) => set(k, x)} maxLength={s.items?.maxLength ?? 60} />,
           );
         if (type === 'array' && s.items?.properties) return field(<ObjectList schema={s.items} value={Array.isArray(v) ? (v as Record<string, unknown>[]) : []} onChange={(x) => set(k, x)} positions={positions} />, true);
-        return field(<Input aria-label={label} value={String(v ?? '')} onChange={(e) => set(k, e.target.value)} />);
+        // Text settings (like the Tasks column names) can't be left empty.
+        return (
+          <Field key={k} label={label} required hint={s.description}>
+            {(id) => <Input id={id} value={String(v ?? '')} onChange={(e) => set(k, e.target.value)} />}
+          </Field>
+        );
       })}
     </div>
   );

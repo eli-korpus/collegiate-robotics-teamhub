@@ -145,8 +145,8 @@ export function StartDialog({ onClose, initial }: { onClose: () => void; initial
       }
     >
       <div className="space-y-3">
-        <Field label="Name">{(id) => <Input id={id} value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} />}</Field>
-        <Field label="Date">{(id) => <Input id={id} type="date" value={date} onChange={(e) => setDate(e.target.value)} />}</Field>
+        <Field label="Name" required>{(id) => <Input id={id} value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} />}</Field>
+        <Field label="Date" required>{(id) => <Input id={id} type="date" value={date} onChange={(e) => setDate(e.target.value)} />}</Field>
         <TeamScopePicker value={teamId} onChange={setTeamId} perm="attendance.take" label="Who's expected" />
       </div>
     </Dialog>

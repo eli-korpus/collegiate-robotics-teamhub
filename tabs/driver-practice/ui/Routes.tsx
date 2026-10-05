@@ -259,7 +259,7 @@ function LogDialog({ fields, onClose, run }: { fields: FieldDef[]; onClose: () =
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Driver">{() => <PersonPicker value={v.driver} onChange={(driver) => setV({ ...v, driver })} />}</Field>
           <Field label="Operator" optional>{() => <PersonPicker value={v.operator} onChange={(operator) => setV({ ...v, operator })} />}</Field>
-          <Field label="Date">{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
+          <Field label="Date" required>{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
           <Field label="Run type">
             {(id) => (
               <Select id={id} value={v.kind} onChange={(e) => setV({ ...v, kind: e.target.value })}>

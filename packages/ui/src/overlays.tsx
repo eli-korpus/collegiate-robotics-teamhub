@@ -2,7 +2,7 @@ import { createContext, useCallback, useContext, useEffect, useState, useSyncExt
 import { Dialog as RDialog, DropdownMenu as RMenu } from 'radix-ui';
 import { X, CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
 import { cn } from './cn';
-import { Button, IconButton, Input } from './primitives';
+import { Button, IconButton, Input, validateRequired } from './primitives';
 
 // ── Dialog ─────────────────────────────────────────────────────────────────
 export function Dialog({
@@ -53,7 +53,22 @@ export function Dialog({
             </RDialog.Close>
           </div>
           <div className="min-h-0 flex-1 overflow-y-auto px-5 py-3">{children}</div>
-          {footer && <div className="flex flex-wrap items-center justify-end gap-2 border-t border-border px-5 py-3">{footer}</div>}
+          {footer && (
+            <div
+              className="flex flex-wrap items-center justify-end gap-2 border-t border-border px-5 py-3"
+              // The main (primary) button saves: check required fields first, so every dialog gets the same checks.
+              onClickCapture={(e) => {
+                const btn = (e.target as HTMLElement).closest('button[data-variant="primary"]');
+                const dialog = (e.currentTarget as HTMLElement).closest('[role="dialog"]');
+                if (btn && dialog && !validateRequired(dialog)) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }
+              }}
+            >
+              {footer}
+            </div>
+          )}
         </RDialog.Content>
       </RDialog.Portal>
     </RDialog.Root>

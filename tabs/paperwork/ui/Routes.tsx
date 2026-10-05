@@ -193,7 +193,7 @@ function ItemDialog({ item, onClose }: { item: Item | null; onClose: () => void 
       }
     >
       <div className="space-y-3">
-        <Field label="Name">{(id) => <Input id={id} autoFocus maxLength={120} value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} placeholder="FIRST Consent & Release" />}</Field>
+        <Field label="Name" required>{(id) => <Input id={id} autoFocus maxLength={120} value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} placeholder="FIRST Consent & Release" />}</Field>
         <Field label="Where to get it" optional hint="Link to the form (e.g. the FIRST dashboard or school website)">{(id) => <Input id={id} type="url" value={v.url} onChange={(e) => setV({ ...v, url: e.target.value })} />}</Field>
         <div className="grid gap-3 sm:grid-cols-2">
           <Field label="Due" optional>{(id) => <Input id={id} type="date" value={v.due} onChange={(e) => setV({ ...v, due: e.target.value })} />}</Field>

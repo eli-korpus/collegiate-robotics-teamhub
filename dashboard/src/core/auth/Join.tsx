@@ -64,14 +64,14 @@ export function Join() {
         }}
       >
         {error && <Banner tone="danger">{error}</Banner>}
-        <Field label="Your name" hint="First and last name, as your team knows you.">
+        <Field label="Your name" required hint="First and last name, as your team knows you.">
           {(id) => <Input id={id} required maxLength={80} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />}
         </Field>
         <div className="grid gap-4 sm:grid-cols-2">
-          <Field label="Email" hint={domains.length ? `Use your ${domainList} email` : undefined}>
+          <Field label="Email" required hint={domains.length ? `Use your ${domainList} email` : undefined}>
             {(id) => <Input id={id} type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />}
           </Field>
-          <Field label="Password" hint="At least 8 characters">
+          <Field label="Password" required hint="At least 8 characters">
             {(id) => <Input id={id} type="password" required minLength={8} autoComplete="new-password" value={password} onChange={(e) => setPassword(e.target.value)} />}
           </Field>
         </div>

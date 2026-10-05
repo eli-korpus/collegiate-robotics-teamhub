@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useParams } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, CheckCheck, LogOut, Pencil, QrCode, Square, Trash2 } from 'lucide-react';
-import { Avatar, Banner, Button, Checkbox, Dialog, EmptyState, Field, Input, SearchInput, Spinner, StatusPill, VisibilityNote, cn, formatDate, formatTime, matches, toDateInput, toast, useConfirm } from '@teamhub/ui';
+import { Avatar, Banner, Button, Checkbox, Dialog, EmptyState, Field, Input, SearchInput, Spinner, StatusPill, VisibilityNote, cn, formatDate, formatTime, matches, toDateInput, toast, useConfirm, validateRequired } from '@teamhub/ui';
 import { canWith, friendlyError, TeamBadge, useActivePeople, useMe, useRealtime, useSupabase } from '@teamhub/sdk';
 import { roster, sessionTitle, useAttSettings, type Presence, type Session } from '../data';
 import { CheckInForm } from './CheckIn';
@@ -194,6 +194,7 @@ function EditSession({ session: s, onClose }: { session: Session; onClose: () =>
   const sb = useSupabase();
   const [v, setV] = useState({ title: s.title ?? '', date: s.date, start: timeOf(s.starts_at), end: timeOf(s.ends_at) });
   const save = async () => {
+    if (!validateRequired()) return;
     if (v.start && v.end && v.end <= v.start) return toast.error('The end time must be after the start time');
     const { error } = await sb.from('att_sessions').update({ title: v.title.trim() || null, date: v.date, starts_at: at(v.date, v.start), ends_at: at(v.date, v.end) }).eq('id', s.id);
     if (error) return toast.error(friendlyError(error));
@@ -204,7 +205,7 @@ function EditSession({ session: s, onClose }: { session: Session; onClose: () =>
     <Dialog open onOpenChange={(o) => !o && onClose()} title="Edit practice session" footer={<Button variant="primary" onClick={save}>Save</Button>}>
       <div className="space-y-3">
         <Field label="Name" optional>{(id) => <Input id={id} maxLength={120} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="Practice" />}</Field>
-        <Field label="Date">{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
+        <Field label="Date" required>{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
         <div className="grid grid-cols-2 gap-3">
           <Field label="Start" optional>{(id) => <Input id={id} type="time" value={v.start} onChange={(e) => setV({ ...v, start: e.target.value })} />}</Field>
           <Field label="End" optional>{(id) => <Input id={id} type="time" value={v.end} onChange={(e) => setV({ ...v, end: e.target.value })} />}</Field>

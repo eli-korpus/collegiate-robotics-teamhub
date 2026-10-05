@@ -399,7 +399,7 @@ function ListEditor({ list, onClose, onDelete }: { list?: List; onClose: () => v
           </div>
         )}
         <div className="grid gap-3 sm:grid-cols-[1fr_220px]">
-          <Field label="Name">{(id) => <Input id={id} value={name} maxLength={80} onChange={(e) => setName(e.target.value)} />}</Field>
+          <Field label="Name" required>{(id) => <Input id={id} value={name} maxLength={80} onChange={(e) => setName(e.target.value)} />}</Field>
           <Field label="Kind">
             {(id) => (
               <Select id={id} value={kind} onChange={(e) => setKind(e.target.value as Kind)}>

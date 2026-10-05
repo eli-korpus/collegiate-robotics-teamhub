@@ -45,10 +45,10 @@ export function ResetPassword() {
           }}
         >
           {error && <Banner tone="danger">{error}</Banner>}
-          <Field label="New password" hint="At least 8 characters">
+          <Field label="New password" required hint="At least 8 characters">
             {(id) => <Input id={id} type="password" autoComplete="new-password" required value={pw} onChange={(e) => setPw(e.target.value)} />}
           </Field>
-          <Field label="Repeat password">{(id) => <Input id={id} type="password" autoComplete="new-password" required value={pw2} onChange={(e) => setPw2(e.target.value)} />}</Field>
+          <Field label="Repeat password" required>{(id) => <Input id={id} type="password" autoComplete="new-password" required value={pw2} onChange={(e) => setPw2(e.target.value)} />}</Field>
           <Button type="submit" variant="primary" size="lg" className="w-full" loading={busy} disabled={!session}>
             Save password
           </Button>

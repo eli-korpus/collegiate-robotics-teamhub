@@ -21,6 +21,7 @@ import {
   toCsv,
   toast,
   useConfirm,
+  validateRequired,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -208,6 +209,7 @@ function SponsorDialog({ sponsor, canManage, onClose }: { sponsor: Sponsor | nul
     team_id: sponsor ? sponsor.team_id : scope,
   });
   const save = async () => {
+    if (!validateRequired()) return;
     if (!v.name.trim()) return toast.error('Name the sponsor');
     if (v.website && !/^https?:\/\//i.test(v.website)) return toast.error('Website must start with https://');
     const t = (x: string) => x.trim() || null;
@@ -251,7 +253,7 @@ function SponsorDialog({ sponsor, canManage, onClose }: { sponsor: Sponsor | nul
     >
       <fieldset disabled={!editable} className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Sponsor">{(id) => <Input id={id} autoFocus={!sponsor} maxLength={120} value={v.name} onChange={set('name')} />}</Field>
+          <Field label="Sponsor" required>{(id) => <Input id={id} autoFocus={!sponsor} maxLength={120} value={v.name} onChange={set('name')} />}</Field>
           <Field label="Status">
             {(id) => (
               <Select id={id} value={v.status} onChange={set('status')}>

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ExternalLink, MessagesSquare } from 'lucide-react';
-import { Button, Favicon, Input, Select, cn, hostOf } from '@teamhub/ui';
+import { Button, Favicon, Input, Select, cn, hostOf, OptionalTag } from '@teamhub/ui';
 import { useSlotLinks, useToolLink, type LinkRow } from './hooks';
 import { TeamScopePicker } from './teams';
 
@@ -91,7 +91,7 @@ export function LinkEditor({
       </div>
       <label className="block space-y-1.5">
         <span className="block text-[13px] font-medium">
-          Description <span className="font-normal text-faint">(optional)</span>
+          Description <OptionalTag />
         </span>
         <Input maxLength={300} value={v.description} onChange={(e) => setV({ ...v, description: e.target.value })} />
       </label>

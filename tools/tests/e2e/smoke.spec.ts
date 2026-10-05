@@ -109,3 +109,23 @@ test.describe('who can join', () => {
     expect(errors).toEqual([]);
   });
 });
+
+test.describe('required fields', () => {
+  test('saving with an empty required field shows a message instead of saving', async ({ page }) => {
+    const errors = watchErrors(page);
+    let inserts = 0;
+    await mockSupabase(page);
+    await page.route('**/rest/v1/task_items*', (route) => (route.request().method() === 'POST' ? (inserts++, route.fulfill({ status: 201, json: [] })) : route.fallback()));
+    await page.goto('/tasks?new=1');
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByText('Details')).toBeVisible();
+    await expect(dialog.getByText('Optional').first()).toBeVisible();
+    await dialog.getByRole('button', { name: 'Create task' }).click();
+    await expect(dialog.getByText('Please fill this in.')).toBeVisible();
+    await expect(dialog.getByLabel('Title')).toBeFocused();
+    expect(inserts).toBe(0);
+    await dialog.getByLabel('Title').fill('Wire the intake');
+    await expect(dialog.getByText('Please fill this in.')).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+});

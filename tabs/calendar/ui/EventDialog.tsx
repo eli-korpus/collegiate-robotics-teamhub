@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Checkbox, Dialog, Field, Input, Select, Switch, Textarea, toast, toDateInput } from '@teamhub/ui';
+import { Button, Checkbox, Dialog, Field, Input, Select, Switch, Textarea, toast, toDateInput, validateRequired } from '@teamhub/ui';
 import { friendlyError, ModulePurpose, ScopeVisibility, TeamScopePicker, useMe, useSupabase, useTeamScope } from '@teamhub/sdk';
 import { KINDS, type Kind } from '../kinds';
 import { WEEKDAYS, formatRule, parseRule, type Weekday } from '../rrule';
@@ -42,6 +42,8 @@ export function EventDialog({ open, onClose, event, draft, onSaved }: { open: bo
   const [busy, setBusy] = useState(false);
 
   const save = async () => {
+
+    if (!validateRequired()) return;
     if (!title.trim()) return toast.error('Give the event a title');
     const starts_at = allDay ? dateToAllDay(date) : new Date(`${date}T${from}`).toISOString();
     let ends_at: string | null;
@@ -101,7 +103,7 @@ export function EventDialog({ open, onClose, event, draft, onSaved }: { open: bo
         {!event && <ModulePurpose moduleId="calendar" compact />}
         <TeamScopePicker value={teamId} onChange={setTeamId} perm="calendar.create" />
         <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
-          <Field label="Title">{(id) => <Input id={id} autoFocus value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Build practice" />}</Field>
+          <Field label="Title" required>{(id) => <Input id={id} autoFocus value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Build practice" />}</Field>
           <Field label="Kind">
             {(id) => (
               <Select id={id} value={kind} onChange={(e) => setKind(e.target.value as Kind)}>
@@ -116,15 +118,15 @@ export function EventDialog({ open, onClose, event, draft, onSaved }: { open: bo
         </div>
         <Switch checked={allDay} onChange={setAllDay} label="All day" />
         <div className="grid gap-3 sm:grid-cols-3">
-          <Field label={allDay ? 'Start date' : 'Date'}>{(id) => <Input id={id} type="date" required value={date} onChange={(e) => setDate(e.target.value)} />}</Field>
+          <Field label={allDay ? 'Start date' : 'Date'} required>{(id) => <Input id={id} type="date" required value={date} onChange={(e) => setDate(e.target.value)} />}</Field>
           {allDay ? (
             <Field label="End date" optional>
               {(id) => <Input id={id} type="date" min={date} value={endDate} onChange={(e) => setEndDate(e.target.value)} />}
             </Field>
           ) : (
             <>
-              <Field label="From">{(id) => <Input id={id} type="time" value={from} onChange={(e) => setFrom(e.target.value)} />}</Field>
-              <Field label="To">{(id) => <Input id={id} type="time" value={to} onChange={(e) => setTo(e.target.value)} />}</Field>
+              <Field label="From" required>{(id) => <Input id={id} type="time" value={from} onChange={(e) => setFrom(e.target.value)} />}</Field>
+              <Field label="To" required>{(id) => <Input id={id} type="time" value={to} onChange={(e) => setTo(e.target.value)} />}</Field>
             </>
           )}
         </div>

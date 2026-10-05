@@ -183,7 +183,7 @@ function ItemDialog({ kind, onClose }: { kind: 'question' | 'reminder'; onClose:
     >
       <div className="space-y-3">
         <ModulePurpose moduleId="rules" compact />
-        <Field label={kind === 'question' ? 'Question' : 'Rule to remember'}>{(id) => <Input id={id} autoFocus maxLength={200} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />}</Field>
+        <Field label={kind === 'question' ? 'Question' : 'Rule to remember'} required>{(id) => <Input id={id} autoFocus maxLength={200} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />}</Field>
         <Field label="Rule number" optional hint="e.g. G12, R304">{(id) => <Input id={id} maxLength={40} value={v.rule_ref} onChange={(e) => setV({ ...v, rule_ref: e.target.value })} />}</Field>
         <Field label="Details" optional>{(id) => <Textarea id={id} rows={3} maxLength={4000} value={v.body} onChange={(e) => setV({ ...v, body: e.target.value })} />}</Field>
         <Field label="Source link" optional>{(id) => <Input id={id} type="url" value={v.source_url} onChange={(e) => setV({ ...v, source_url: e.target.value })} />}</Field>

@@ -223,7 +223,7 @@ function OpModeDialog({ op, onClose }: { op: OpMode | null; onClose: () => void 
     >
       <div className="space-y-4">
         <div className="grid gap-3 sm:grid-cols-3">
-          <Field label="Name" className="sm:col-span-3">{(id) => <Input id={id} autoFocus value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} placeholder="MainTeleOp" />}</Field>
+          <Field label="Name" required className="sm:col-span-3">{(id) => <Input id={id} autoFocus value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} placeholder="MainTeleOp" />}</Field>
           <Field label="Type">
             {(id) => (
               <Select id={id} value={v.kind} onChange={(e) => setV({ ...v, kind: e.target.value as 'auto' })}>

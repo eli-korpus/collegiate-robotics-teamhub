@@ -28,6 +28,7 @@ import {
   formatBytes,
   toast,
   useConfirm,
+  validateRequired,
 } from '@teamhub/ui';
 import {
   AdminOnly,
@@ -268,8 +269,8 @@ function Storage() {
         }
       >
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Database (MB)">{(id) => <Input id={id} type="number" min={100} value={limits.db_mb} onChange={(e) => setLimits({ ...limits, db_mb: Number(e.target.value) })} />}</Field>
-          <Field label="File storage (MB)">{(id) => <Input id={id} type="number" min={100} value={limits.files_mb} onChange={(e) => setLimits({ ...limits, files_mb: Number(e.target.value) })} />}</Field>
+          <Field label="Database (MB)" required>{(id) => <Input id={id} type="number" min={100} value={limits.db_mb} onChange={(e) => setLimits({ ...limits, db_mb: Number(e.target.value) })} />}</Field>
+          <Field label="File storage (MB)" required>{(id) => <Input id={id} type="number" min={100} value={limits.files_mb} onChange={(e) => setLimits({ ...limits, files_mb: Number(e.target.value) })} />}</Field>
         </div>
       </Dialog>
     </div>
@@ -466,6 +467,7 @@ function Season() {
         className="flex gap-2"
         onSubmit={async (e) => {
           e.preventDefault();
+          if (!validateRequired(e.currentTarget)) return;
           if (!label || !/^\d{4}[–-]\d{2}$/.test(label)) return toast.error('Use the format 2026–27');
           const { error } = await sb.from('teamhub_settings').update({ season_label: label.replace('-', '–') }).eq('id', 1);
           if (error) return toast.error(friendlyError(error));

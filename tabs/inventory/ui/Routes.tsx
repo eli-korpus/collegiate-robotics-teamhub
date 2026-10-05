@@ -267,7 +267,7 @@ function PartDialog({ part, categories, perTeam, onClose }: { part: Part | null;
       }
     >
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Name" className="sm:col-span-2">{(id) => <Input id={id} autoFocus maxLength={160} value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} />}</Field>
+        <Field label="Name" required className="sm:col-span-2">{(id) => <Input id={id} autoFocus maxLength={160} value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} />}</Field>
         <Field label="SKU / part number" optional>{(id) => <Input id={id} value={v.sku} onChange={(e) => setV({ ...v, sku: e.target.value })} />}</Field>
         <Field label="Vendor" optional>{(id) => <Input id={id} value={v.vendor} onChange={(e) => setV({ ...v, vendor: e.target.value })} placeholder="goBILDA, REV…" />}</Field>
         <Field label="Product link" optional className="sm:col-span-2">{(id) => <Input id={id} type="url" value={v.url} onChange={(e) => setV({ ...v, url: e.target.value })} />}</Field>
@@ -284,7 +284,7 @@ function PartDialog({ part, categories, perTeam, onClose }: { part: Part | null;
             </>
           )}
         </Field>
-        <Field label="Quantity">{(id) => <Input id={id} type="number" min={0} value={v.qty} onChange={(e) => setV({ ...v, qty: Math.max(0, Number(e.target.value) || 0) })} />}</Field>
+        <Field label="Quantity" required>{(id) => <Input id={id} type="number" min={0} value={v.qty} onChange={(e) => setV({ ...v, qty: Math.max(0, Number(e.target.value) || 0) })} />}</Field>
         <Field label="Low at" optional hint="Flag as low when this many or fewer are left">{(id) => <Input id={id} type="number" min={0} value={v.low_at} onChange={(e) => setV({ ...v, low_at: e.target.value })} />}</Field>
         <Field label="Notes" optional className="sm:col-span-2">{(id) => <Textarea id={id} rows={2} maxLength={500} value={v.notes} onChange={(e) => setV({ ...v, notes: e.target.value })} />}</Field>
         {perTeam && (

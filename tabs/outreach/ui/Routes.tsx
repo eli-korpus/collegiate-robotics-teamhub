@@ -25,6 +25,7 @@ import {
   toDateInput,
   toast,
   useConfirm,
+  validateRequired,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -204,6 +205,7 @@ function EventDialog({ event: e, hours, onEdit, onClose }: { event: OutEvent; ho
   const canLog = canWith(me, 'outreach.log_hours', e.team_id);
   const refresh = () => qc.invalidateQueries({ queryKey: ['outreach'] });
   const log = async () => {
+    if (!validateRequired()) return;
     const n = Number(h);
     if (!(n > 0 && n <= 24)) return toast.error('Enter hours between 0.5 and 24');
     const { error } = await sb.from('out_hours').upsert({ event_id: e.id, user_id: me.id, hours: Math.round(n * 10) / 10 });
@@ -272,7 +274,7 @@ function EventDialog({ event: e, hours, onEdit, onClose }: { event: OutEvent; ho
         <Slot name="outreach.event.actions" props={{ event: e }} wrap={(c) => <div className="flex flex-wrap gap-2">{c}</div>} />
         {canLog && (
           <div className="flex flex-wrap items-end gap-2 rounded-lg border border-border bg-bg-subtle/50 p-3">
-            <Field label="Your hours">{(id) => <Input id={id} type="number" step={0.5} min={0.5} max={24} className="w-28" value={h} onChange={(ev) => setH(ev.target.value)} />}</Field>
+            <Field label="Your hours" required>{(id) => <Input id={id} type="number" step={0.5} min={0.5} max={24} className="w-28" value={h} onChange={(ev) => setH(ev.target.value)} />}</Field>
             <Button variant="primary" onClick={log}>
               {mine ? 'Update' : 'Log hours'}
             </Button>
@@ -333,6 +335,7 @@ function EventEditor({ event, draftTitle, onClose }: { event: OutEvent | null; d
     team_id: event ? event.team_id : scope,
   });
   const save = async () => {
+    if (!validateRequired()) return;
     if (!v.title.trim()) return toast.error('Give the event a title');
     const body = { title: v.title.trim(), date: v.date, kind: v.kind, location: v.location.trim() || null, people_reached: v.people_reached ? Math.max(0, Math.round(Number(v.people_reached))) : null, description: v.description.trim() || null, team_id: v.team_id };
     const { error } = event ? await sb.from('out_events').update(body).eq('id', event.id) : await sb.from('out_events').insert({ ...body, created_by: me.id });
@@ -343,9 +346,9 @@ function EventEditor({ event, draftTitle, onClose }: { event: OutEvent | null; d
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()} title={event ? 'Edit outreach event' : 'Add outreach event'} size="md" footer={<Button variant="primary" onClick={save}>Save</Button>}>
       <div className="space-y-4">
-        <Field label="What">{(id) => <Input id={id} autoFocus maxLength={120} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="Library robot demo" />}</Field>
+        <Field label="What" required>{(id) => <Input id={id} autoFocus maxLength={120} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="Library robot demo" />}</Field>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Date">{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
+          <Field label="Date" required>{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
           <Field label="Kind">
             {(id) => (
               <Select id={id} value={v.kind} onChange={(e) => setV({ ...v, kind: e.target.value })}>

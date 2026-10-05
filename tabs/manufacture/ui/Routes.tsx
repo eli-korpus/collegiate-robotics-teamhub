@@ -29,6 +29,7 @@ import {
   toast,
   useConfirm,
   type ProcessedFile,
+  validateRequired,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -213,6 +214,7 @@ function SubmitDialog({ onClose, draftTitle }: { onClose: () => void; draftTitle
   const method = settings.methods.find((m) => m.id === v.method);
   const holders = usePositionHolders(method?.positions ?? []);
   const submit = async () => {
+    if (!validateRequired()) return;
     if (!v.title.trim()) return toast.error('Name the part');
     if (!files.length && !v.onshape_url) return toast.error('Attach a file or paste an Onshape link');
     setBusy(true);
@@ -267,7 +269,7 @@ function SubmitDialog({ onClose, draftTitle }: { onClose: () => void; draftTitle
         <ModulePurpose moduleId="manufacture" compact />
         <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="manufacture.submit" />
         <div className="grid gap-3 sm:grid-cols-[1fr_200px]">
-          <Field label="Part name">{(id) => <Input id={id} autoFocus maxLength={140} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />}</Field>
+          <Field label="Part name" required>{(id) => <Input id={id} autoFocus maxLength={140} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />}</Field>
           <Field label="Method">
             {(id) => (
               <Select id={id} value={v.method} onChange={(e) => setV({ ...v, method: e.target.value })}>
@@ -292,7 +294,7 @@ function SubmitDialog({ onClose, draftTitle }: { onClose: () => void; draftTitle
           </p>
         )}
         <div className="grid gap-3 sm:grid-cols-4">
-          <Field label="Quantity">{(id) => <Input id={id} type="number" min={1} max={999} value={v.qty} onChange={(e) => setV({ ...v, qty: Number(e.target.value) || 1 })} />}</Field>
+          <Field label="Quantity" required>{(id) => <Input id={id} type="number" min={1} max={999} value={v.qty} onChange={(e) => setV({ ...v, qty: Number(e.target.value) || 1 })} />}</Field>
           <Field label="Material" optional>{(id) => <Input id={id} placeholder="PLA, PETG…" value={v.material} onChange={(e) => setV({ ...v, material: e.target.value })} />}</Field>
           <Field label="Color" optional>{(id) => <Input id={id} value={v.color} onChange={(e) => setV({ ...v, color: e.target.value })} />}</Field>
           <Field label="Needed by" optional>{(id) => <Input id={id} type="date" value={v.needed_by} onChange={(e) => setV({ ...v, needed_by: e.target.value })} />}</Field>

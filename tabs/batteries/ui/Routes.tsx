@@ -18,6 +18,7 @@ import {
   Textarea,
   toast,
   useConfirm,
+  validateRequired,
 } from '@teamhub/ui';
 import { canWith, friendlyError, ModuleHeader, ModulePurpose, TeamBadge, TeamScopePicker, useCan, useMe, useSupabase, useTeamScope } from '@teamhub/sdk';
 import { batteryStatus, STATE_LABEL, useBatLogs, useBatSettings, useBatteries, type Battery, type BatLog } from './data';
@@ -185,6 +186,7 @@ function BatteryDialog({ battery, onClose }: { battery: Battery | null; onClose:
   const scope = useTeamScope();
   const [v, setV] = useState({ label: battery?.label ?? '', type: battery?.type ?? '', purchased: battery?.purchased ?? '', notes: battery?.notes ?? '', retired: battery?.retired ?? false, team_id: battery ? battery.team_id : scope });
   const save = async () => {
+    if (!validateRequired()) return;
     if (!v.label.trim()) return toast.error('Give it a label, e.g. “B3”');
     const row = { ...v, label: v.label.trim(), type: v.type || null, purchased: v.purchased || null, notes: v.notes || null };
     const res = battery ? await sb.from('bat_batteries').update(row).eq('id', battery.id) : await sb.from('bat_batteries').insert(row);
@@ -226,7 +228,7 @@ function BatteryDialog({ battery, onClose }: { battery: Battery | null; onClose:
     >
       <div className="space-y-3">
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Label">{(id) => <Input id={id} autoFocus maxLength={40} value={v.label} onChange={(e) => setV({ ...v, label: e.target.value })} placeholder="B3" />}</Field>
+          <Field label="Label" required>{(id) => <Input id={id} autoFocus maxLength={40} value={v.label} onChange={(e) => setV({ ...v, label: e.target.value })} placeholder="B3" />}</Field>
           <Field label="Type" optional>{(id) => <Input id={id} maxLength={60} value={v.type} onChange={(e) => setV({ ...v, type: e.target.value })} placeholder="12V NiMH 3000mAh" />}</Field>
         </div>
         <Field label="Purchased" optional>{(id) => <Input id={id} type="date" value={v.purchased} onChange={(e) => setV({ ...v, purchased: e.target.value })} />}</Field>

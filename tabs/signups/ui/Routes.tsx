@@ -19,6 +19,7 @@ import {
   toDateTimeInput,
   toast,
   useConfirm,
+  validateRequired,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -278,6 +279,7 @@ function SheetEditor({ sheet, slots = [], eventRef, title, onClose }: { sheet: S
   );
   const [busy, setBusy] = useState(false);
   const save = async () => {
+    if (!validateRequired()) return;
     const clean = rows.filter((r) => r.label.trim());
     if (!v.title.trim()) return toast.error('Give the sheet a title');
     if (!clean.length) return toast.error('Add at least one slot');
@@ -311,7 +313,7 @@ function SheetEditor({ sheet, slots = [], eventRef, title, onClose }: { sheet: S
     <Dialog open onOpenChange={(o) => !o && onClose()} title={sheet ? 'Edit sign-up sheet' : 'New sign-up sheet'} size="lg" footer={<Button variant="primary" onClick={save} loading={busy}>{sheet ? 'Save' : 'Create sheet'}</Button>}>
       <div className="space-y-4">
         {!sheet && <ModulePurpose moduleId="signups" compact />}
-        <Field label="Title">{(id) => <Input id={id} autoFocus maxLength={120} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="Snacks for the qualifier" />}</Field>
+        <Field label="Title" required>{(id) => <Input id={id} autoFocus maxLength={120} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="Snacks for the qualifier" />}</Field>
         <Field label="Details" optional>{(id) => <Textarea id={id} rows={2} maxLength={2000} value={v.description} onChange={(e) => setV({ ...v, description: e.target.value })} />}</Field>
         {v.event_ref && (
           <p className="flex items-center gap-2 text-[13px] text-muted">

@@ -1,4 +1,4 @@
-import { forwardRef, useId, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
+import { forwardRef, useEffect, useId, useRef, useState, type ButtonHTMLAttributes, type InputHTMLAttributes, type ReactNode, type SelectHTMLAttributes, type TextareaHTMLAttributes } from 'react';
 import { Check, Command, Info, AlertTriangle, XCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { cn } from './cn';
 
@@ -33,6 +33,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
     <button
       ref={ref}
       type={type}
+      data-variant={variant}
       disabled={disabled || loading}
       className={cn(
         'inline-flex items-center justify-center rounded-md font-medium whitespace-nowrap transition-colors duration-150 disabled:opacity-50 select-none',
@@ -70,7 +71,7 @@ export const IconButton = forwardRef<HTMLButtonElement, ButtonProps & { label: s
 /** Inputs fill their container unless the caller sets a width (cn() doesn't merge conflicting classes). */
 const w = (c?: string) => (c && /(^|\s)(w-|max-w-|flex-1)/.test(c) ? '' : 'w-full');
 const field =
-  'rounded-md border border-border bg-surface px-3 text-sm text-fg placeholder:text-faint shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft disabled:opacity-60';
+  'rounded-md border border-border bg-surface px-3 text-sm text-fg placeholder:text-faint shadow-sm transition-colors focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent-soft disabled:opacity-60 aria-[invalid=true]:border-danger';
 
 export const Input = forwardRef<HTMLInputElement, InputHTMLAttributes<HTMLInputElement>>(function Input({ className, ...rest }, ref) {
   return <input ref={ref} className={cn(field, w(className), 'h-9', className)} {...rest} />;
@@ -113,6 +114,7 @@ export function Field({
   className,
   id,
   optional,
+  required,
 }: {
   label?: ReactNode;
   hint?: ReactNode;
@@ -120,22 +122,84 @@ export function Field({
   children: ReactNode | ((id: string) => ReactNode);
   className?: string;
   id?: string;
+  /** Shows an "Optional" tag next to the label. */
   optional?: boolean;
+  /** Checked by validateRequired() (Save buttons, the wizard's Continue): empty = red box and "Please fill this in." */
+  required?: boolean;
 }) {
   const auto = useId();
   const fid = id ?? auto;
+  const ref = useRef<HTMLDivElement>(null);
+  const [missing, setMissing] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !required) return;
+    const update = (empty: boolean) => {
+      setMissing(empty);
+      const c = controlOf(el);
+      if (empty) c?.setAttribute('aria-invalid', 'true');
+      else c?.removeAttribute('aria-invalid');
+    };
+    const check = (e: Event) => {
+      const empty = isEmptyField(el);
+      update(empty);
+      if (empty) (e as CustomEvent<{ missing: HTMLElement[] }>).detail.missing.push(el);
+    };
+    const clear = () => !isEmptyField(el) && update(false);
+    el.addEventListener('th:check', check);
+    el.addEventListener('input', clear);
+    el.addEventListener('change', clear);
+    return () => {
+      el.removeEventListener('th:check', check);
+      el.removeEventListener('input', clear);
+      el.removeEventListener('change', clear);
+    };
+  }, [required]);
+  const message = error ?? (missing ? 'Please fill this in.' : null);
   return (
-    <div className={cn('space-y-1.5', className)}>
+    <div ref={ref} data-th-required={required || undefined} className={cn('space-y-1.5', className)}>
       {label && (
         <Label htmlFor={fid}>
           {label}
-          {optional && <span className="ml-1 font-normal text-faint">(optional)</span>}
+          {optional && <OptionalTag />}
         </Label>
       )}
       {typeof children === 'function' ? children(fid) : children}
-      {error ? <p className="text-[12.5px] text-danger">{error}</p> : hint ? <p className="text-[12.5px] text-muted">{hint}</p> : null}
+      {message ? (
+        <p className="text-[12.5px] text-danger" role="alert">
+          {message}
+        </p>
+      ) : hint ? (
+        <p className="text-[12.5px] text-muted">{hint}</p>
+      ) : null}
     </div>
   );
+}
+
+/** The one way to mark a field as optional. */
+export function OptionalTag() {
+  return <span className="ml-1.5 text-[11.5px] font-normal text-faint">Optional</span>;
+}
+
+const controlOf = (el: Element) => el.querySelector<HTMLElement>('input:not([type=hidden]):not([type=checkbox]):not([type=radio]), textarea, select');
+const isEmptyField = (el: Element) => {
+  const c = controlOf(el) as HTMLInputElement | null;
+  return !!c && !c.disabled && !String(c.value ?? '').trim();
+};
+
+/**
+ * Checks every `<Field required>` in the open dialog (or `root`, or the page): marks empty ones, focuses the first.
+ * Call it first in Save handlers: `if (!validateRequired()) return;`
+ */
+export function validateRequired(root?: ParentNode | null): boolean {
+  const dialogs = document.querySelectorAll('[role="dialog"], [role="alertdialog"]');
+  const scope: ParentNode = root ?? dialogs[dialogs.length - 1] ?? document;
+  const missing: HTMLElement[] = [];
+  scope.querySelectorAll('[data-th-required]').forEach((el) => el.dispatchEvent(new CustomEvent('th:check', { detail: { missing } })));
+  if (!missing.length) return true;
+  missing[0].scrollIntoView?.({ block: 'center', behavior: 'smooth' });
+  controlOf(missing[0])?.focus({ preventScroll: true });
+  return false;
 }
 
 /** Native checkbox, styled (no Radix: keeps the core bundle small). Supports an indeterminate state. */

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Download, Trash2, UserPlus } from 'lucide-react';
-import { Avatar, Button, Card, CardHeader, Field, Input, PageHeader, Select, Textarea, VisibilityNote, downloadText, toast, useConfirm } from '@teamhub/ui';
+import { Avatar, Button, Card, CardHeader, Field, Input, PageHeader, Select, Textarea, VisibilityNote, downloadText, toast, useConfirm, validateRequired } from '@teamhub/ui';
 import { friendlyError, isMultiTeam, runtime, useMe, usePeople, useSupabase, Upload, uploadFile } from '@teamhub/sdk';
 import { ProfileFieldInput, saveProfileFields, useMyPrivate, useProfileFields } from '../home/coreWidgets';
 
@@ -36,7 +36,7 @@ export default function MyProfile() {
           <div className="flex flex-wrap items-start gap-5 px-4 pb-4">
             <Avatar name={name} src={people.data?.get(me.id)?.avatarUrl} size={72} />
             <div className="min-w-60 flex-1 space-y-3">
-              <Field label="Display name">{(id) => <Input id={id} value={name} maxLength={80} onChange={(e) => setName(e.target.value)} />}</Field>
+              <Field label="Display name" required>{(id) => <Input id={id} value={name} maxLength={80} onChange={(e) => setName(e.target.value)} />}</Field>
               <Upload
                 kind="avatar"
                 label="Drop a photo or"
@@ -119,6 +119,7 @@ export default function MyProfile() {
               className="space-y-2.5 px-4 pb-4"
               onSubmit={async (e) => {
                 e.preventDefault();
+                if (!validateRequired(e.currentTarget)) return;
                 const { error } = await sb.from('memberships').insert({ user_id: me.id, team_id: joinTeam, type: joinType, requested_type: joinType, status: 'pending', note: joinNote || null });
                 if (error) return toast.error(friendlyError(error));
                 toast.success('Request sent');

@@ -233,7 +233,6 @@ export function useSlotLinks(slots: string[], teamId?: string | null): LinkRow[]
   const scope = useTeamScope();
   const team = teamId === undefined ? scope : teamId;
   const key = slots.join(',');
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   return useMemo(() => resolveSlotLinks(links.data ?? [], slots, team), [links.data, key, team]);
 }
 

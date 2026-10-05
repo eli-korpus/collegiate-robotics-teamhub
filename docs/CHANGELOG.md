@@ -20,6 +20,8 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ### Changed
 
+- Required fields are checked everywhere (setup wizard steps and every Save button in the dashboard): an empty one
+  turns red with "Please fill this in." instead of failing silently. Optional fields all show the same "Optional" tag.
 - Setup wizard: "How many FTC teams?" moved to the Teams step, and switching to one team asks before removing the
   others. Per-team options only appear when a program really has several teams.
 

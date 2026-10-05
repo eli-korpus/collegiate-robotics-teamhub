@@ -21,6 +21,8 @@ import {
   toCsv,
   toast,
   useConfirm,
+  validateRequired,
+  OptionalTag,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -314,6 +316,7 @@ function SkillEditor({ skill, all, onClose }: { skill: Skill | null; all: Skill[
     requires: skill?.requires ?? [],
   });
   const save = async () => {
+    if (!validateRequired()) return;
     if (!v.name.trim()) return toast.error('Name the skill');
     if (v.url && !/^https?:\/\//i.test(v.url)) return toast.error('Training link must start with https://');
     const body = { name: v.name.trim(), category: v.category.trim() || null, description: v.description.trim() || null, url: v.url.trim() || null, subteam_id: v.subteam_id || null, team_id: v.team_id, requires: v.requires };
@@ -354,7 +357,7 @@ function SkillEditor({ skill, all, onClose }: { skill: Skill | null; all: Skill[
     >
       <div className="space-y-4">
         {!skill && <Banner tone="info">Skills are proven abilities (“Drill press safety”), not job titles: those are Positions in People.</Banner>}
-        <Field label="Skill">{(id) => <Input id={id} autoFocus maxLength={80} value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} placeholder="Drill press safety" />}</Field>
+        <Field label="Skill" required>{(id) => <Input id={id} autoFocus maxLength={80} value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} placeholder="Drill press safety" />}</Field>
         <Field label="Category" optional>
           {(id) => (
             <>
@@ -379,7 +382,7 @@ function SkillEditor({ skill, all, onClose }: { skill: Skill | null; all: Skill[
         <Field label="Training link" optional>{(id) => <Input id={id} type="url" value={v.url} onChange={(e) => setV({ ...v, url: e.target.value })} placeholder="https://…" />}</Field>
         {all.filter((s) => s.id !== skill?.id).length > 0 && (
           <fieldset className="space-y-1">
-            <legend className="mb-1 text-[13px] font-medium">Learn these first (optional)</legend>
+            <legend className="mb-1 text-[13px] font-medium">Learn these first <OptionalTag /></legend>
             {all
               .filter((s) => s.id !== skill?.id)
               .map((s) => (

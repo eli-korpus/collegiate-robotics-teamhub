@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Award, Link2, Pause, Pencil, Play, Plus, Shuffle, Trash2, X } from 'lucide-react';
-import { Badge, Button, Card, CardHeader, Dialog, EmptyState, Field, IconButton, Input, Markdown, ProgressRing, Segmented, Spinner, Textarea, toast } from '@teamhub/ui';
+import { Badge, Button, Card, CardHeader, Dialog, EmptyState, Field, IconButton, Input, Markdown, ProgressRing, Segmented, Spinner, Textarea, toast, validateRequired } from '@teamhub/ui';
 import { EntityLink, friendlyError, ModuleHeader, ModulePurpose, Person, PersonPicker, Slot, useCan, useRows, useSeason, useSupabase, useTeamScope } from '@teamhub/sdk';
 
 interface Question {
@@ -178,7 +178,7 @@ function Practice() {
         }
       >
         <div className="space-y-3">
-          <Field label="Question">{(id) => <Input id={id} autoFocus maxLength={300} value={v.question} onChange={(e) => setV({ ...v, question: e.target.value })} placeholder="What was your biggest design challenge?" />}</Field>
+          <Field label="Question" required>{(id) => <Input id={id} autoFocus maxLength={300} value={v.question} onChange={(e) => setV({ ...v, question: e.target.value })} placeholder="What was your biggest design challenge?" />}</Field>
           <Field label="Talking points" optional>{(id) => <Textarea id={id} rows={3} maxLength={2000} value={v.notes} onChange={(e) => setV({ ...v, notes: e.target.value })} />}</Field>
           <Field label="Who usually answers" optional>{() => <PersonPicker value={v.owner} onChange={(owner) => setV({ ...v, owner })} />}</Field>
         </div>
@@ -303,6 +303,7 @@ function Evidence() {
           className="flex flex-wrap gap-2"
           onSubmit={async (e) => {
             e.preventDefault();
+            if (!validateRequired(e.currentTarget)) return;
             if (!newC.award.trim() || !newC.criterion.trim()) return;
             const { error } = await sb.from('jdg_criteria').insert({ award: newC.award.trim(), criterion: newC.criterion.trim(), team_id: scope, sort: list.length });
             if (error) return toast.error(friendlyError(error));

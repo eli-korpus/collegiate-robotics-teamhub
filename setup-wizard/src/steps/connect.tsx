@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle2, ExternalLink, KeyRound, XCircle } from 'lucide-react';
 import type { TeamhubConfig } from '@teamhub/config-schema';
-import { Banner, Button, Checkbox, Field, Input, Segmented, Select, Spinner, toast } from '@teamhub/ui';
+import { Banner, Button, Checkbox, Field, Input, Segmented, Select, Spinner, toast, validateRequired } from '@teamhub/ui';
 import { TOOL_SLOT_LABELS } from '@teamhub/sdk';
 import { api } from '../api';
 import { Section, StepShell, Why } from '../components';
@@ -440,10 +440,10 @@ export function AdminAccount({ onNext, onBack }: StepProps) {
         ) : undefined
       }
     >
-      <Field label="Your name">{(id) => <Input id={id} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />}</Field>
+      <Field label="Your name" required>{(id) => <Input id={id} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />}</Field>
       <div className="grid gap-3 sm:grid-cols-2">
-        <Field label="Email">{(id) => <Input id={id} type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />}</Field>
-        <Field label="Password" hint="At least 8 characters">
+        <Field label="Email" required error={email && !/\S+@\S+\.\S+/.test(email) ? 'That doesn’t look like an email address.' : undefined}>{(id) => <Input id={id} type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />}</Field>
+        <Field label="Password" required hint="At least 8 characters" error={password && password.length < 8 ? 'Use at least 8 characters.' : undefined}>
           {(id) => <Input id={id} type="password" value={password} onChange={(e) => setPassword(e.target.value)} autoComplete="new-password" />}
         </Field>
       </div>
@@ -462,8 +462,8 @@ export function AdminAccount({ onNext, onBack }: StepProps) {
       <Button
         variant="primary"
         loading={busy}
-        disabled={!name.trim() || !/\S+@\S+/.test(email) || password.length < 8}
         onClick={async () => {
+          if (!validateRequired() || !/\S+@\S+\.\S+/.test(email) || password.length < 8) return;
           setBusy(true);
           try {
             await api('/admin', { name: name.trim(), email: email.trim(), password, types });

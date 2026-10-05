@@ -25,6 +25,8 @@ import {
   useConfirm,
   daysBetween,
   type ProcessedFile,
+  validateRequired,
+  OptionalTag,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -274,6 +276,8 @@ function Composer({ post, onClose }: { post: Post | null; onClose: () => void })
   const preview = useMemo(() => (image ? URL.createObjectURL(image.blob) : null), [image]);
 
   const save = async () => {
+
+    if (!validateRequired()) return;
     if (!title.trim()) return toast.error('Add a title');
     setBusy(true);
     try {
@@ -312,13 +316,13 @@ function Composer({ post, onClose }: { post: Post | null; onClose: () => void })
       <div className="space-y-4">
         {!post && <ModulePurpose moduleId="announcements" compact />}
         <TeamScopePicker value={teamId} onChange={setTeamId} perm="announcements.post" label="Send to" />
-        <Field label="Title">{(id) => <Input id={id} autoFocus maxLength={140} value={title} onChange={(e) => setTitle(e.target.value)} />}</Field>
-        <Field label="Message" hint="Formatting: **bold**, *italic*, - lists, [links](https://…)">
+        <Field label="Title" required>{(id) => <Input id={id} autoFocus maxLength={140} value={title} onChange={(e) => setTitle(e.target.value)} />}</Field>
+        <Field label="Message" required hint="Formatting: **bold**, *italic*, - lists, [links](https://…)">
           {(id) => <Textarea id={id} rows={7} maxLength={8000} value={body} onChange={(e) => setBody(e.target.value)} />}
         </Field>
         <div className="space-y-2">
           <p className="flex items-center gap-1.5 text-[13px] font-medium">
-            <ImageIcon className="size-4" /> Image <span className="font-normal text-faint">(optional)</span>
+            <ImageIcon className="size-4" /> Image <OptionalTag />
           </p>
           {preview || (post?.image_path && !removeImage) ? (
             <div className="flex items-center gap-3">

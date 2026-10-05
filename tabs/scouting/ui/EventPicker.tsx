@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarDays, History, Plus, Search, Trash2, Trophy } from 'lucide-react';
 import { seasonYear } from '@teamhub/config-schema/util';
-import { Badge, Button, Dialog, Field, IconButton, Input, RelativeTime, Textarea, formatDate, toast, useConfirm } from '@teamhub/ui';
+import { Badge, Button, Dialog, Field, IconButton, Input, RelativeTime, Textarea, formatDate, toast, useConfirm, validateRequired } from '@teamhub/ui';
 import { friendlyError, getTeamEvents, runtime, searchEvents, useCan, useMe, useSeason, useSupabase } from '@teamhub/sdk';
 import { useManualEvents } from './event';
 
@@ -142,6 +142,7 @@ export function EventPicker({ value, name, onChange }: { value: string; name?: s
             className="space-y-3"
             onSubmit={async (e) => {
               e.preventDefault();
+              if (!validateRequired(e.currentTarget)) return;
               const teams = [...new Set(m.teams.split(/[^0-9]+/).filter(Boolean).map(Number).filter((n) => n > 0))];
               const code = (m.code || m.name).toUpperCase().replace(/[^A-Z0-9]+/g, '').slice(0, 20);
               if (!m.name.trim() || code.length < 2) return toast.error('Give the event a name');
@@ -152,12 +153,12 @@ export function EventPicker({ value, name, onChange }: { value: string; name?: s
               pick(code);
             }}
           >
-            <Field label="Event name">{(id) => <Input id={id} autoFocus value={m.name} onChange={(e) => setM({ ...m, name: e.target.value })} placeholder="Fall scrimmage at Lincoln HS" />}</Field>
+            <Field label="Event name" required>{(id) => <Input id={id} autoFocus value={m.name} onChange={(e) => setM({ ...m, name: e.target.value })} placeholder="Fall scrimmage at Lincoln HS" />}</Field>
             <div className="grid gap-3 sm:grid-cols-2">
               <Field label="Short code" optional hint="Letters and digits">{(id) => <Input id={id} value={m.code} onChange={(e) => setM({ ...m, code: e.target.value })} />}</Field>
               <Field label="Date" optional>{(id) => <Input id={id} type="date" value={m.date} onChange={(e) => setM({ ...m, date: e.target.value })} />}</Field>
             </div>
-            <Field label="Team numbers" hint="Paste them separated by spaces, commas or new lines. Names and season stats load from FTCScout.">
+            <Field label="Team numbers" required hint="Paste them separated by spaces, commas or new lines. Names and season stats load from FTCScout.">
               {(id) => <Textarea id={id} rows={4} value={m.teams} onChange={(e) => setM({ ...m, teams: e.target.value })} placeholder="12345 23456 34567 …" />}
             </Field>
             <div className="flex gap-2">

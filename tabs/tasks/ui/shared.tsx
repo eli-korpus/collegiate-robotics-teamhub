@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Flag, Trash2 } from 'lucide-react';
-import { AvatarStack, Badge, Button, Checkbox, Dialog, DueDate, Field, Input, Select, Sheet, Textarea, toast, useConfirm, Markdown, RelativeTime } from '@teamhub/ui';
+import { AvatarStack, Badge, Button, Checkbox, Dialog, DueDate, Field, Input, Select, Sheet, Textarea, toast, useConfirm, Markdown, RelativeTime, validateRequired } from '@teamhub/ui';
 import {
   canWith,
   CommentThread,
@@ -120,6 +120,7 @@ export function TaskDialog({ task, onClose, draft }: { task?: Task | null; onClo
   const [busy, setBusy] = useState(false);
   const canAssign = canWith(me, 'tasks.assign', v.team_id);
   const save = async () => {
+    if (!validateRequired()) return;
     if (!v.title.trim()) return toast.error('Give the task a title');
     setBusy(true);
     const row = { ...v, title: v.title.trim(), description: v.description.trim() || null, due: v.due || null, subteam_id: v.subteam_id || null, position_id: v.position_id || null };
@@ -148,12 +149,12 @@ export function TaskDialog({ task, onClose, draft }: { task?: Task | null; onClo
       <div className="space-y-4">
         {!task && <ModulePurpose moduleId="tasks" compact />}
         <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="tasks.create" />
-        <Field label="Title">{(id) => <Input id={id} autoFocus maxLength={200} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />}</Field>
+        <Field label="Title" required>{(id) => <Input id={id} autoFocus maxLength={200} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />}</Field>
         <Field label="Details" optional>
           {(id) => <Textarea id={id} rows={4} maxLength={5000} value={v.description} onChange={(e) => setV({ ...v, description: e.target.value })} />}
         </Field>
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Assigned to">
+          <Field label="Assigned to" optional>
             {() =>
               canAssign ? (
                 <PersonPicker multiple max={5} value={v.assignee} onChange={(assignee) => setV({ ...v, assignee })} teamId={v.team_id} placeholder="Nobody yet" />

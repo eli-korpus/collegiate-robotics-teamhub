@@ -32,8 +32,8 @@ export function Login() {
         }}
       >
         {error && <Banner tone="danger">{error}</Banner>}
-        <Field label="Email">{(id) => <Input id={id} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />}</Field>
-        <Field label="Password">
+        <Field label="Email" required>{(id) => <Input id={id} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />}</Field>
+        <Field label="Password" required>
           {(id) => <Input id={id} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />}
         </Field>
         <Button type="submit" variant="primary" className="w-full" size="lg" loading={busy}>

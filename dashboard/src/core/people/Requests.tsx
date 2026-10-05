@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Check, UserPlus, X } from 'lucide-react';
-import { Avatar, Button, Checkbox, Dialog, EmptyState, RelativeTime, Segmented, TYPE_LABEL, toast, useConfirm, VisibilityNote } from '@teamhub/ui';
+import { Avatar, Button, Checkbox, Dialog, EmptyState, RelativeTime, Segmented, TYPE_LABEL, toast, useConfirm, VisibilityNote, OptionalTag } from '@teamhub/ui';
 import { canWith, friendlyError, runtime, useMe, usePeople, usePositions, useSupabase, TeamBadge, type Membership, type PersonInfo } from '@teamhub/sdk';
 import { ProfileFieldInput, useProfileFields } from '../home/coreWidgets';
 
@@ -120,7 +120,7 @@ function ApproveDialog({ p, m, onClose }: { p: PersonInfo; m: Membership; onClos
         </div>
         {assignable.length > 0 && (
           <div className="space-y-1.5">
-            <p className="text-[13px] font-medium">Positions (optional)</p>
+            <p className="text-[13px] font-medium">Positions <OptionalTag /></p>
             <div className="grid gap-1.5 sm:grid-cols-2">
               {assignable.map((x) => (
                 <Checkbox key={x.id} checked={pos.includes(x.id)} onChange={(v) => setPos(v ? [...pos, x.id] : pos.filter((y) => y !== x.id))} label={x.name} />
@@ -130,7 +130,7 @@ function ApproveDialog({ p, m, onClose }: { p: PersonInfo; m: Membership; onClos
         )}
         {fields.length > 0 && (
           <div className="space-y-2">
-            <p className="text-[13px] font-medium">Profile details (optional)</p>
+            <p className="text-[13px] font-medium">Profile details <OptionalTag /></p>
             {fields.map((f) => (
               <label key={f.id} className="grid grid-cols-[120px_1fr] items-center gap-2 text-[13px]">
                 <span className="text-muted">{f.label}</span>

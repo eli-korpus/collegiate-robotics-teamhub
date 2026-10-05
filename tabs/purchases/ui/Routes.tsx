@@ -196,10 +196,10 @@ function RequestDialog({ onClose, draft, existing }: { onClose: () => void; draf
       <div className="space-y-4">
         {!existing && <ModulePurpose moduleId="purchases" compact />}
         <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="purchases.request" label="For" />
-        <Field label="Item">{(id) => <Input id={id} autoFocus maxLength={200} value={v.item} onChange={(e) => setV({ ...v, item: e.target.value })} placeholder="e.g. goBILDA 5203 motor 312 RPM" />}</Field>
+        <Field label="Item" required>{(id) => <Input id={id} autoFocus maxLength={200} value={v.item} onChange={(e) => setV({ ...v, item: e.target.value })} placeholder="e.g. goBILDA 5203 motor 312 RPM" />}</Field>
         <Field label="Link" optional>{(id) => <Input id={id} type="url" placeholder="https://" value={v.url} onChange={(e) => setV({ ...v, url: e.target.value })} />}</Field>
         <div className="grid gap-3 sm:grid-cols-3">
-          <Field label="Quantity">{(id) => <Input id={id} type="number" min={1} value={v.qty} onChange={(e) => setV({ ...v, qty: Number(e.target.value) || 1 })} />}</Field>
+          <Field label="Quantity" required>{(id) => <Input id={id} type="number" min={1} value={v.qty} onChange={(e) => setV({ ...v, qty: Number(e.target.value) || 1 })} />}</Field>
           <Field label="Est. price each" optional>{(id) => <Input id={id} type="number" min={0} step="0.01" value={v.est_price} onChange={(e) => setV({ ...v, est_price: e.target.value })} />}</Field>
           <Field label="How soon">
             {(id) => (

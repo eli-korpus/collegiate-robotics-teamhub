@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, X } from 'lucide-react';
-import { Badge, Button, Dialog, Field, IconButton, Input, Segmented, Select, Textarea, submitOnBlur, toDateInput, toast, type ProcessedFile } from '@teamhub/ui';
+import { Badge, Button, Dialog, Field, IconButton, Input, Segmented, Select, Textarea, submitOnBlur, toDateInput, toast, type ProcessedFile, validateRequired } from '@teamhub/ui';
 import {
   EntityLink,
   friendlyError,
@@ -54,6 +54,8 @@ export function EntryEditor({ entry, draft, onClose, imageCount = 0 }: { entry?:
   const max = (settings.maxPhotos ?? 6) - imageCount;
 
   const save = async () => {
+
+    if (!validateRequired()) return;
     if (!v.title.trim()) return toast.error('Give the entry a title');
     if (v.onshape_url && !/^https?:\/\//.test(v.onshape_url)) return toast.error('The Onshape link must start with https://');
     setBusy(true);
@@ -113,8 +115,8 @@ export function EntryEditor({ entry, draft, onClose, imageCount = 0 }: { entry?:
           ]}
         />
         <div className="grid gap-3 sm:grid-cols-[1fr_160px]">
-          <Field label="Title">{(id) => <Input id={id} autoFocus maxLength={160} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />}</Field>
-          <Field label="Date">{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
+          <Field label="Title" required>{(id) => <Input id={id} autoFocus maxLength={160} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />}</Field>
+          <Field label="Date" required>{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
         </div>
         <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="notebook.write" label="Team" />
         <div className="grid gap-3 sm:grid-cols-2">
@@ -130,20 +132,20 @@ export function EntryEditor({ entry, draft, onClose, imageCount = 0 }: { entry?:
               </Select>
             )}
           </Field>
-          <Field label="Authors">{() => <PersonPicker multiple max={8} value={v.authors} onChange={(authors) => setV({ ...v, authors })} />}</Field>
+          <Field label="Authors" optional>{() => <PersonPicker multiple max={8} value={v.authors} onChange={(authors) => setV({ ...v, authors })} />}</Field>
         </div>
         {kind === 'iteration' && (
           <div className="grid gap-3 sm:grid-cols-[140px_1fr]">
-            <Field label="Version">{(id) => <Input id={id} placeholder="v2" maxLength={20} value={v.version_label} onChange={(e) => setV({ ...v, version_label: e.target.value })} />}</Field>
+            <Field label="Version" optional>{(id) => <Input id={id} placeholder="v2" maxLength={20} value={v.version_label} onChange={(e) => setV({ ...v, version_label: e.target.value })} />}</Field>
             <Field label="Onshape link" optional>{(id) => <Input id={id} type="url" placeholder="https://cad.onshape.com/…" value={v.onshape_url} onChange={(e) => setV({ ...v, onshape_url: e.target.value })} />}</Field>
           </div>
         )}
-        <Field label={kind === 'iteration' ? 'What changed' : 'What we did & learned'} hint="Formatting: **bold**, - lists, ### headings, [links](https://…)">
+        <Field label={kind === 'iteration' ? 'What changed' : 'What we did & learned'} required hint="Formatting: **bold**, - lists, ### headings, [links](https://…)">
           {(id) => <Textarea id={id} rows={8} maxLength={20000} value={v.body} onChange={(e) => setV({ ...v, body: e.target.value })} />}
         </Field>
         {kind === 'iteration' && (
           <>
-            <Field label="Why we changed it" hint="Judges look for the reasoning behind each design decision.">
+            <Field label="Why we changed it" optional hint="Judges look for the reasoning behind each design decision.">
               {(id) => <Textarea id={id} rows={3} maxLength={4000} value={v.why} onChange={(e) => setV({ ...v, why: e.target.value })} />}
             </Field>
             <MatrixEditor value={matrix} onChange={setMatrix} />

@@ -24,6 +24,7 @@ import {
   toDateTimeInput,
   toast,
   useConfirm,
+  validateRequired,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -156,6 +157,7 @@ function MyOrder({ drive: d, order }: { drive: Drive; order: Order | null }) {
   };
   const needsSize = !!field && !field.private && !profileSize && d.items.some((i) => i.sizes.length);
   const save = async () => {
+    if (!validateRequired()) return;
     if (needsSize && askSize) {
       const { error } = await sb.from('profiles').update({ details: { ...(me.profile.details ?? {}), [field!.id]: askSize } }).eq('id', me.id);
       if (error) return toast.error(friendlyError(error));
@@ -351,6 +353,7 @@ function DriveEditor({ drive, onClose }: { drive: Drive | null; onClose: () => v
     drive?.items.map((i) => ({ id: i.id, name: i.name, price: i.price ?? '', sizes: i.sizes })) ?? [{ id: crypto.randomUUID().slice(0, 8), name: 'Team T-shirt', price: '', sizes: defaultSizes }],
   );
   const save = async () => {
+    if (!validateRequired()) return;
     if (!v.title.trim()) return toast.error('Name the order drive');
     const clean = items.filter((i) => i.name.trim()).map((i) => ({ id: i.id, name: i.name.trim(), price: i.price.trim() || null, sizes: i.sizes }));
     if (!clean.length) return toast.error('Add at least one item');
@@ -390,7 +393,7 @@ function DriveEditor({ drive, onClose }: { drive: Drive | null; onClose: () => v
       }
     >
       <div className="space-y-4">
-        <Field label="Title">{(id) => <Input id={id} autoFocus maxLength={120} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="2026–27 team shirts" />}</Field>
+        <Field label="Title" required>{(id) => <Input id={id} autoFocus maxLength={120} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="2026–27 team shirts" />}</Field>
         <Field label="Details" optional hint="How to pay, pickup, etc.">{(id) => <Textarea id={id} rows={2} maxLength={2000} value={v.description} onChange={(e) => setV({ ...v, description: e.target.value })} />}</Field>
         <div className="space-y-2">
           <p className="text-[13px] font-medium">Items</p>

@@ -29,6 +29,8 @@ How to update your dashboard: [docs/updating.md](updating.md).
   name instead of typing ids.
 - Selected options in switches (like Whole program / Each team has its own) are easier to see.
 - Examples use made-up names and numbers.
+- Setup wizard > Tool links: clearly optional, one row per link with a short description, the button text only
+  appears once a link is added, and links without https:// get it added automatically.
 
 ### Fixed
 

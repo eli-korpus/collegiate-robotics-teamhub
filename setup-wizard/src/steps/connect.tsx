@@ -20,7 +20,9 @@ const PREFILL: Record<string, { label: string; url: string }> = {
   gm0: { label: 'Game Manual 0', url: 'https://gm0.org' },
   ftc_docs: { label: 'FTC Docs', url: 'https://ftc-docs.firstinspires.org' },
 };
-const ORDER = ['team_chat', 'portfolio', 'code_repo', 'cad', 'drive', 'website', 'social', 'manual', 'qa_forum', 'ftcscout', 'gm0', 'ftc_docs'];
+const ORDER = ['team_chat', 'portfolio', 'code_repo', 'cad', 'drive', 'website', 'social', 'manual', 'qa_forum'];
+/** Filled in automatically; shown separately so it's clear nothing needs doing. */
+const PREFILLED = ['ftcscout', 'gm0', 'ftc_docs'];
 
 export function ToolLinksStep({ onNext, onBack }: StepProps) {
   const { draft, update } = useDraft();
@@ -45,23 +47,54 @@ export function ToolLinksStep({ onNext, onBack }: StepProps) {
       if (i >= 0) x.toolLinks[i] = l;
       else x.toolLinks.push(l);
     });
-  const invalid = c.toolLinks.some((l) => !/^https?:\/\/\S+$/.test(l.url));
+  // FTCScout is only filled in when a team number was entered; otherwise it belongs with the team's own links.
+  const [prefilled] = useState(() => PREFILLED.filter((s) => s !== 'ftcscout' || !!c.teams[0]?.number || c.toolLinks.some((l) => l.slot === s)));
+  const valid = (url: string) => /^https?:\/\/\S+$/.test(url);
+  const invalid = c.toolLinks.some((l) => !valid(l.url));
+  const row = (slot: string) => {
+    const l = get(slot);
+    // Still typing "https://"? Not an error yet.
+    const bad = !!l && !valid(l.url) && !['https://', 'http://'].some((p) => p.startsWith(l.url));
+    return (
+      <li key={slot} className="space-y-2 px-4 py-3">
+        <div className="flex flex-wrap items-baseline gap-x-2">
+          <span className="text-[13.5px] font-medium">{TOOL_SLOT_LABELS[slot]}</span>
+          <span className="text-[11.5px] text-faint">Optional</span>
+        </div>
+        {HINTS[slot] && <p className="-mt-1 text-[12px] text-muted">{HINTS[slot]}</p>}
+        <Input type="url" placeholder="Paste a link (https://…)" value={l?.url ?? ''} onChange={(e) => set(slot, e.target.value)}
+          onBlur={(e) => {
+            const u = e.target.value.trim();
+            if (u && !/^https?:\/\//i.test(u) && /^[\w-]+(\.[\w-]+)+/.test(u)) set(slot, `https://${u}`);
+          }}
+          aria-label={`${TOOL_SLOT_LABELS[slot]} link`}
+          aria-invalid={bad || undefined}
+        />
+        {bad && <p className="text-[12px] text-danger">Links start with https://</p>}
+        {l && !bad && (
+          <label className="flex items-center gap-2 text-[12.5px] text-muted">
+            <span className="shrink-0">Button text</span>
+            <Input className="h-8 max-w-64" value={l.label} placeholder={TOOL_SLOT_LABELS[slot]} onChange={(e) => set(slot, l.url, e.target.value)} aria-label={`${TOOL_SLOT_LABELS[slot]} button text`} />
+          </label>
+        )}
+      </li>
+    );
+  };
   return (
-    <StepShell title="Your team's tools" subtitle="Links to the tools you already use. They appear as quick-link chips in the tabs where they're useful. All optional, all editable later in the dashboard." onBack={onBack} onNext={onNext} nextDisabled={invalid}>
-      {ORDER.map((slot) => {
-        const l = get(slot);
-        return (
-          <div key={slot} className="grid items-start gap-2 sm:grid-cols-[180px_1fr_160px]">
-            <div className="pt-2 text-[13.5px] font-medium">{TOOL_SLOT_LABELS[slot]}</div>
-            <div>
-              <Input type="url" placeholder="https://" value={l?.url ?? ''} onChange={(e) => set(slot, e.target.value)} aria-label={`${TOOL_SLOT_LABELS[slot]} URL`} />
-              {HINTS[slot] && <p className="mt-1 text-[12px] text-muted">{HINTS[slot]}</p>}
-            </div>
-            <Input placeholder="Label" value={l?.label ?? ''} disabled={!l} onChange={(e) => l && set(slot, l.url, e.target.value)} aria-label={`${TOOL_SLOT_LABELS[slot]} label`} />
-          </div>
-        );
-      })}
-      {invalid && <p className="text-[12.5px] text-danger">Links must start with https://</p>}
+    <StepShell
+      title="Your team's tools"
+      subtitle="Links to the tools your team already uses. They show up as quick-link buttons in the tabs where they help, like your team chat next to announcements."
+      onBack={onBack}
+      onNext={onNext}
+      nextDisabled={invalid}
+    >
+      <Banner tone="info">Everything on this page is optional. Skip anything you don't use and press Continue. You can add or change links any time in the dashboard (Admin &gt; Tool links).</Banner>
+      <Section title="Your team's links">
+        <ul className="-mx-4 divide-y divide-border">{[...ORDER, ...PREFILLED.filter((s) => !prefilled.includes(s))].map(row)}</ul>
+      </Section>
+      <Section title="Already filled in for you" description="Handy FTC links. Keep them, change them, or clear a box to remove one.">
+        <ul className="-mx-4 divide-y divide-border">{prefilled.map(row)}</ul>
+      </Section>
     </StepShell>
   );
 }

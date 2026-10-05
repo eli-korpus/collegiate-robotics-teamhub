@@ -211,9 +211,35 @@ export function useLinks() {
   });
 }
 
-export function useToolLink(slot: string): LinkRow | null {
+/**
+ * Which tool links to show for these slots. Viewing one team: that team's own link, else the program-wide one.
+ * Viewing all teams: the program-wide link, else every team's own link (labelled with the team's short code).
+ */
+export function resolveSlotLinks(links: LinkRow[], slots: string[], scope: string | null): LinkRow[] {
+  const out: LinkRow[] = [];
+  for (const slot of slots) {
+    const all = links.filter((l) => l.slot === slot);
+    const own = scope ? all.find((l) => l.team_id === scope) : undefined;
+    const program = all.find((l) => !l.team_id);
+    if (own ?? program) out.push((own ?? program)!);
+    else if (!scope) out.push(...all.map((l) => (all.length > 1 ? { ...l, label: `${l.label} (${teamById(l.team_id)?.shortCode ?? 'team'})` } : l)));
+  }
+  return out;
+}
+
+/** Tool links for these slots, for the team being viewed (see resolveSlotLinks). */
+export function useSlotLinks(slots: string[], teamId?: string | null): LinkRow[] {
   const links = useLinks();
-  return links.data?.find((l) => l.slot === slot) ?? null;
+  const scope = useTeamScope();
+  const team = teamId === undefined ? scope : teamId;
+  const key = slots.join(',');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return useMemo(() => resolveSlotLinks(links.data ?? [], slots, team), [links.data, key, team]);
+}
+
+/** The one tool link for a slot (e.g. team chat), for the team being viewed or the given team. */
+export function useToolLink(slot: string, teamId?: string | null): LinkRow | null {
+  return useSlotLinks([slot], teamId)[0] ?? null;
 }
 
 // ── Errors & mutations ────────────────────────────────────────────────────

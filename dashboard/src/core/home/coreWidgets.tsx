@@ -8,7 +8,8 @@ import {
   isMultiTeam,
   runtime,
   useCan,
-  useLinks,
+  TOOL_SLOT_LABELS,
+  useSlotLinks,
   useMe,
   usePeople,
   useSettingsRow,
@@ -200,8 +201,7 @@ function TeamInfo() {
 
 // ── Quick links ────────────────────────────────────────────────────────────
 function QuickLinks() {
-  const links = useLinks();
-  const pinned = (links.data ?? []).filter((l) => l.slot).slice(0, 10);
+  const pinned = useSlotLinks(Object.keys(TOOL_SLOT_LABELS)).slice(0, 10);
   const canEdit = useCan('core.edit_links');
   return (
     <Card>

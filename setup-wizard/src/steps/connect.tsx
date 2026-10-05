@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle2, ExternalLink, KeyRound, XCircle } from 'lucide-react';
 import type { TeamhubConfig } from '@teamhub/config-schema';
-import { Banner, Button, Checkbox, Field, Input, Select, Spinner, toast } from '@teamhub/ui';
+import { Banner, Button, Checkbox, Field, Input, Segmented, Select, Spinner, toast } from '@teamhub/ui';
 import { TOOL_SLOT_LABELS } from '@teamhub/sdk';
 import { api } from '../api';
 import { Section, StepShell, Why } from '../components';
-import { useDraft } from '../draft';
+import { hasSeveralTeams, useDraft } from '../draft';
 import type { StepProps } from './basics';
 
 const HINTS: Record<string, string> = {
@@ -24,72 +24,138 @@ const ORDER = ['team_chat', 'portfolio', 'code_repo', 'cad', 'drive', 'website',
 /** Filled in automatically; shown separately so it's clear nothing needs doing. */
 const PREFILLED = ['ftcscout', 'gm0', 'ftc_docs'];
 
+/** Links a team could have its own copy of (programs with several teams). */
+const TEAMABLE = new Set(['team_chat', 'portfolio', 'code_repo', 'cad', 'drive', 'website', 'social', 'ftcscout']);
+
 export function ToolLinksStep({ onNext, onBack }: StepProps) {
   const { draft, update } = useDraft();
   const c = draft.config;
+  const multi = hasSeveralTeams(c);
   useEffect(() => {
     update((x) => {
-      for (const [slot, v] of Object.entries(PREFILL)) if (!x.toolLinks.some((l) => l.slot === slot)) x.toolLinks.push({ slot, ...v, section: null, description: null });
-      const n = x.teams[0]?.number;
-      if (n && !x.toolLinks.some((l) => l.slot === 'ftcscout')) x.toolLinks.push({ slot: 'ftcscout', label: 'FTCScout', url: `https://ftcscout.org/teams/${n}`, section: null, description: null });
+      for (const [slot, v] of Object.entries(PREFILL)) if (!x.toolLinks.some((l) => l.slot === slot)) x.toolLinks.push({ slot, teamId: null, ...v, section: null, description: null });
+      if (!x.toolLinks.some((l) => l.slot === 'ftcscout')) {
+        const numbered = x.teams.filter((t) => t.number);
+        const each = hasSeveralTeams(x) && numbered.length > 1;
+        for (const t of each ? numbered : numbered.slice(0, 1))
+          x.toolLinks.push({ slot: 'ftcscout', teamId: each ? t.id : null, label: 'FTCScout', url: `https://ftcscout.org/teams/${t.number}`, section: null, description: null });
+      }
     });
-     
   }, []);
-  const get = (slot: string) => c.toolLinks.find((l) => l.slot === slot);
-  const set = (slot: string, url: string, label?: string) =>
+  const get = (slot: string, teamId: string | null) => c.toolLinks.find((l) => l.slot === slot && (l.teamId ?? null) === teamId);
+  const set = (slot: string, teamId: string | null, url: string, label?: string) =>
     update((x) => {
-      const i = x.toolLinks.findIndex((l) => l.slot === slot);
+      const i = x.toolLinks.findIndex((l) => l.slot === slot && (l.teamId ?? null) === teamId);
       if (!url.trim()) {
         if (i >= 0) x.toolLinks.splice(i, 1);
         return;
       }
-      const l = { slot, url: url.trim(), label: label ?? x.toolLinks[i]?.label ?? TOOL_SLOT_LABELS[slot], section: null, description: null };
+      const l = { slot, teamId, url: url.trim(), label: label ?? x.toolLinks[i]?.label ?? TOOL_SLOT_LABELS[slot], section: null, description: null };
       if (i >= 0) x.toolLinks[i] = l;
       else x.toolLinks.push(l);
     });
+  const perTeam = (slot: string) => multi && c.toolLinks.some((l) => l.slot === slot && l.teamId);
+  const [eachTeam, setEachTeam] = useState<Record<string, boolean>>({});
+  const isEach = (slot: string) => eachTeam[slot] ?? perTeam(slot);
+  const setMode = (slot: string, each: boolean) => {
+    setEachTeam({ ...eachTeam, [slot]: each });
+    update((x) => {
+      const mine = x.toolLinks.filter((l) => l.slot === slot);
+      x.toolLinks = x.toolLinks.filter((l) => l.slot !== slot);
+      if (each) {
+        // The FTCScout page is naturally per team; other links start empty for each team.
+        if (slot === 'ftcscout') for (const t of x.teams.filter((t) => t.number)) x.toolLinks.push({ slot, teamId: t.id, label: 'FTCScout', url: `https://ftcscout.org/teams/${t.number}`, section: null, description: null });
+      } else if (mine[0]) x.toolLinks.push({ ...mine[0], teamId: null });
+    });
+  };
   // FTCScout is only filled in when a team number was entered; otherwise it belongs with the team's own links.
-  const [prefilled] = useState(() => PREFILLED.filter((s) => s !== 'ftcscout' || !!c.teams[0]?.number || c.toolLinks.some((l) => l.slot === s)));
+  const [prefilled] = useState(() => PREFILLED.filter((s) => s !== 'ftcscout' || c.teams.some((t) => t.number) || c.toolLinks.some((l) => l.slot === s)));
   const valid = (url: string) => /^https?:\/\/\S+$/.test(url);
   const invalid = c.toolLinks.some((l) => !valid(l.url));
-  const row = (slot: string) => {
-    const l = get(slot);
+
+  const linkInput = (slot: string, teamId: string | null, name: string) => {
+    const l = get(slot, teamId);
     // Still typing "https://"? Not an error yet.
     const bad = !!l && !valid(l.url) && !['https://', 'http://'].some((p) => p.startsWith(l.url));
     return (
-      <li key={slot} className="space-y-2 px-4 py-3">
-        <div className="flex flex-wrap items-baseline gap-x-2">
-          <span className="text-[13.5px] font-medium">{TOOL_SLOT_LABELS[slot]}</span>
-          <span className="text-[11.5px] text-faint">Optional</span>
-        </div>
-        {HINTS[slot] && <p className="-mt-1 text-[12px] text-muted">{HINTS[slot]}</p>}
-        <Input type="url" placeholder="Paste a link (https://…)" value={l?.url ?? ''} onChange={(e) => set(slot, e.target.value)}
+      <div className="space-y-2">
+        <Input
+          type="url"
+          placeholder="Paste a link (https://…)"
+          value={l?.url ?? ''}
+          onChange={(e) => set(slot, teamId, e.target.value)}
           onBlur={(e) => {
             const u = e.target.value.trim();
-            if (u && !/^https?:\/\//i.test(u) && /^[\w-]+(\.[\w-]+)+/.test(u)) set(slot, `https://${u}`);
+            if (u && !/^https?:\/\//i.test(u) && /^[\w-]+(\.[\w-]+)+/.test(u)) set(slot, teamId, `https://${u}`);
           }}
-          aria-label={`${TOOL_SLOT_LABELS[slot]} link`}
+          aria-label={`${name} link`}
           aria-invalid={bad || undefined}
         />
         {bad && <p className="text-[12px] text-danger">Links start with https://</p>}
         {l && !bad && (
           <label className="flex items-center gap-2 text-[12.5px] text-muted">
             <span className="shrink-0">Button text</span>
-            <Input className="h-8 max-w-64" value={l.label} placeholder={TOOL_SLOT_LABELS[slot]} onChange={(e) => set(slot, l.url, e.target.value)} aria-label={`${TOOL_SLOT_LABELS[slot]} button text`} />
+            <Input className="h-8 max-w-64" value={l.label} placeholder={TOOL_SLOT_LABELS[slot]} onChange={(e) => set(slot, teamId, l.url, e.target.value)} aria-label={`${name} button text`} />
           </label>
+        )}
+      </div>
+    );
+  };
+
+  const row = (slot: string) => {
+    const name = TOOL_SLOT_LABELS[slot];
+    const canSplit = multi && TEAMABLE.has(slot);
+    const each = canSplit && isEach(slot);
+    return (
+      <li key={slot} className="space-y-2 px-4 py-3">
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
+          <span className="text-[13.5px] font-medium">{name}</span>
+          <span className="text-[11.5px] text-faint">Optional</span>
+          {canSplit && (
+            <Segmented
+              size="sm"
+              className="ml-auto"
+              value={each ? 'team' : 'program'}
+              onChange={(v) => setMode(slot, v === 'team')}
+              options={[
+                { value: 'program', label: 'One for the program' },
+                { value: 'team', label: 'One per team' },
+              ]}
+            />
+          )}
+        </div>
+        {HINTS[slot] && <p className="-mt-1 text-[12px] text-muted">{HINTS[slot]}</p>}
+        {each ? (
+          <ul className="space-y-3 border-l-2 border-border pl-3">
+            {c.teams.map((t) => (
+              <li key={t.id} className="space-y-1.5">
+                <p className="flex items-center gap-1.5 text-[12.5px] font-medium">
+                  <span className="size-2 rounded-full" style={{ background: t.color }} />
+                  {t.name || `Team ${t.shortCode}`}
+                </p>
+                {linkInput(slot, t.id, `${name} for ${t.name || t.shortCode}`)}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          linkInput(slot, null, name)
         )}
       </li>
     );
   };
   return (
     <StepShell
-      title="Your team's tools"
-      subtitle="Links to the tools your team already uses. They show up as quick-link buttons in the tabs where they help, like your team chat next to announcements."
+      title={multi ? "Your teams' tools" : "Your team's tools"}
+      subtitle="Links to the tools you already use. They show up as quick-link buttons in the tabs where they help, like your team chat next to announcements."
       onBack={onBack}
       onNext={onNext}
       nextDisabled={invalid}
     >
-      <Banner tone="info">Everything on this page is optional. Skip anything you don't use and press Continue. You can add or change links any time in the dashboard (Admin &gt; Tool links).</Banner>
-      <Section title="Your team's links">
+      <Banner tone="info">
+        Everything on this page is optional. Skip anything you don't use and press Continue. You can add or change links any time in the dashboard (Admin &gt; Tool links).
+        {multi && ' Links like the code repository can be one for the whole program or one per team: people then see their own team’s link.'}
+      </Banner>
+      <Section title={multi ? 'Your links' : "Your team's links"}>
         <ul className="-mx-4 divide-y divide-border">{[...ORDER, ...PREFILLED.filter((s) => !prefilled.includes(s))].map(row)}</ul>
       </Section>
       <Section title="Already filled in for you" description="Handy FTC links. Keep them, change them, or clear a box to remove one.">

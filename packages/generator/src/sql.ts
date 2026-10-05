@@ -191,10 +191,11 @@ export function configSyncSql(r: Resolved): string {
   lines.push(`insert into teamhub_settings (id, season_label) values (1, ${lit(c.season)}) on conflict (id) do nothing;`);
   if (c.toolLinks.length) {
     const vals = c.toolLinks
-      .map((l, i) => `(${lit(l.label)}, ${lit(l.url)}, ${lit(l.description)}, ${lit(l.slot)}, ${lit(l.section)}, ${i})`)
+      // A team's own link only when that team exists (and the program really has several teams).
+      .map((l, i) => `(${lit(l.label)}, ${lit(l.url)}, ${lit(l.description)}, ${lit(l.slot)}, ${lit(l.section)}, ${i}, ${l.teamId && c.program.multiTeam && c.teams.some((t) => t.id === l.teamId) ? lit(l.teamId) + '::uuid' : 'null::uuid'})`)
       .join(',\n  ');
     lines.push(
-      `-- Seed tool links once; afterwards they are edited in-app.\ninsert into links (label, url, description, slot, section, sort)\nselect * from (values\n  ${vals}\n) v(label, url, description, slot, section, sort)\nwhere not exists (select 1 from links);`,
+      `-- Seed tool links once; afterwards they are edited in-app.\ninsert into links (label, url, description, slot, section, sort, team_id)\nselect * from (values\n  ${vals}\n) v(label, url, description, slot, section, sort, team_id)\nwhere not exists (select 1 from links);`,
     );
   }
   return lines.join('\n\n');

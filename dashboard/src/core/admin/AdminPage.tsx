@@ -32,6 +32,7 @@ import {
 import {
   AdminOnly,
   friendlyError,
+  isMultiTeam,
   LinkEditor,
   NoAccess,
   PersonPicker,
@@ -490,7 +491,8 @@ export function ToolLinksAdmin() {
   const confirm = useConfirm();
   const [editing, setEditing] = useState<Partial<LinkRow> | null>(null);
   const pinned = (links.data ?? []).filter((l) => l.slot);
-  const free = Object.keys(TOOL_SLOT_LABELS).filter((s) => !pinned.some((l) => l.slot === s));
+  // Multi-team programs can add a separate link per team, so every kind of link stays available.
+  const free = Object.keys(TOOL_SLOT_LABELS).filter((s) => isMultiTeam() || !pinned.some((l) => l.slot === s));
   const refresh = () => qc.invalidateQueries({ queryKey: ['core', 'links'] });
   return (
     <div className="space-y-4">
@@ -505,7 +507,12 @@ export function ToolLinksAdmin() {
             label={l.label}
             url={l.url}
             description={l.description}
-            badge={<Badge>{TOOL_SLOT_LABELS[l.slot!] ?? l.slot}</Badge>}
+            badge={
+              <>
+                <Badge>{TOOL_SLOT_LABELS[l.slot!] ?? l.slot}</Badge>
+                {isMultiTeam() && (l.team_id ? <TeamBadge teamId={l.team_id} /> : <Badge>Whole program</Badge>)}
+              </>
+            }
             actions={
               <>
                 <IconButton label="Edit link" size="sm" onClick={() => setEditing(l)}>

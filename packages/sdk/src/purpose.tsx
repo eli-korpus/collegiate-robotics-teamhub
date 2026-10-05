@@ -3,7 +3,7 @@ import { NewMenu, PurposeHint } from '@teamhub/ui';
 import type { NotForEntry } from './define';
 import { allQuickActions, getModule } from './runtime';
 import { canWith, useSession } from './session';
-import { useLinks } from './hooks';
+import { resolveSlotLinks, useLinks, useTeamScope } from './hooks';
 
 const CORE_PAGES: Record<string, { label: string; href: string }> = {
   'request-info': { label: 'Request info', href: '/people?tab=request-info' },
@@ -13,10 +13,11 @@ const CORE_PAGES: Record<string, { label: string; href: string }> = {
 /** Resolves a manifest `notFor` target to a link, or null when that tab/tool isn't available. */
 export function useNotForLinks(entries: NotForEntry[]) {
   const links = useLinks();
+  const scope = useTeamScope();
   return entries.map((n) => {
     if (n.goTo.startsWith('link:')) {
       const slot = n.goTo.slice(5);
-      const l = links.data?.find((x) => x.slot === slot);
+      const l = resolveSlotLinks(links.data ?? [], [slot], scope)[0];
       return { text: n.text, href: l?.url ?? null, label: l?.label ?? undefined, external: true };
     }
     if (n.goTo.startsWith('core:')) {

@@ -1,14 +1,13 @@
 import { useState } from 'react';
 import { ExternalLink, MessagesSquare } from 'lucide-react';
 import { Button, Favicon, Input, Select, cn, hostOf } from '@teamhub/ui';
-import { useLinks, type LinkRow } from './hooks';
+import { useSlotLinks, useToolLink, type LinkRow } from './hooks';
 import { TeamScopePicker } from './teams';
 
 // ── Tool links (spec §10.6) ────────────────────────────────────────────────
 /** Small favicon chips of the team's tool links for the given slots ("Quick links" in a tab header). */
 export function ToolLinks({ slots, className, label = 'Quick links' }: { slots: string[]; className?: string; label?: string }) {
-  const links = useLinks();
-  const shown = (links.data ?? []).filter((l) => l.slot && slots.includes(l.slot)).sort((a, b) => slots.indexOf(a.slot!) - slots.indexOf(b.slot!));
+  const shown = useSlotLinks(slots);
   if (!shown.length) return null;
   return (
     <div className={cn('flex flex-wrap items-center gap-1.5', className)} aria-label={label}>
@@ -30,8 +29,7 @@ export function ToolLinks({ slots, className, label = 'Quick links' }: { slots: 
 
 /** "Questions? Ask in Team chat ↗": the answer to "can we chat in TeamHub?" (spec §1.4). */
 export function TeamChatLink({ prefix = 'Questions? Ask in', className }: { prefix?: string; className?: string }) {
-  const links = useLinks();
-  const chat = links.data?.find((l) => l.slot === 'team_chat');
+  const chat = useToolLink('team_chat');
   if (!chat) return null;
   return (
     <p className={cn('flex items-center gap-1.5 text-[12.5px] text-muted', className)}>

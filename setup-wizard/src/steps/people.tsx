@@ -5,7 +5,7 @@ import type { PermissionDefs } from '@teamhub/sdk/define';
 import { Badge, Button, Checkbox, IconButton, Input, PendingAddHint, RemovableTag, Segmented, Spinner, submitOnBlur } from '@teamhub/ui';
 import { api } from '../api';
 import { Section, StepShell, Why } from '../components';
-import { SUGGESTED_FIELDS, useDraft } from '../draft';
+import { SUGGESTED_FIELDS, hasSeveralTeams, useDraft } from '../draft';
 import type { StepProps } from './basics';
 
 const GENERIC_POSITIONS = ['Lead Programmer', 'Drive Coach', 'Driver 1', 'Driver 2', 'Safety Captain'];
@@ -105,7 +105,7 @@ export function People({ onNext, onBack }: StepProps) {
             {c.positions.map((p, i) => (
               <li key={p.id} className="flex flex-wrap items-center gap-2 px-3 py-2">
                 <span className="min-w-32 flex-1 text-[13.5px] font-medium">{p.name}</span>
-                {c.program.multiTeam && (
+                {hasSeveralTeams(c) && (
                   <div className="flex flex-col items-end gap-0.5">
                     <Segmented
                       size="sm"

@@ -13,6 +13,16 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Added
+
+- Tool links like the code repository, portfolio or CAD can be one for the whole program or one per team (programs
+  with several teams). Everyone sees their own team's link; Admin > Tool links shows which team each link is for.
+
+### Changed
+
+- Setup wizard: "How many FTC teams?" moved to the Teams step, and switching to one team asks before removing the
+  others. Per-team options only appear when a program really has several teams.
+
 ### Fixed
 
 - Setup wizard > Tab options: clicking an option's description could remove its tags one by one (for example

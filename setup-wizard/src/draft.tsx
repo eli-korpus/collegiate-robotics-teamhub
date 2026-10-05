@@ -10,6 +10,27 @@ export const SUGGESTED_FIELDS = [
   { id: 'emergency_contact', label: 'Emergency contact', type: 'text' as const, options: [], private: true },
 ];
 
+/** Per-team options only make sense with several teams: "several teams" chosen and at least two added. */
+export const hasSeveralTeams = (c: TeamhubConfig) => c.program.multiTeam && c.teams.length > 1;
+
+/** After teams are removed: drop links and settings that point at a team that no longer exists. */
+export function dropMissingTeamRefs(x: TeamhubConfig) {
+  const ids = new Set(x.teams.map((t) => t.id));
+  x.toolLinks = x.toolLinks.filter((l) => !l.teamId || ids.has(l.teamId));
+  for (const p of x.positions) if (p.teamId && !ids.has(p.teamId)) p.teamId = null;
+  if (x.teams.length < 2) {
+    // One team: a "separate link per team" is just the link.
+    const seen = new Set<string>();
+    x.toolLinks = x.toolLinks.filter((l) => {
+      if (!l.slot || !l.teamId) return true;
+      if (seen.has(l.slot) || x.toolLinks.some((o) => o.slot === l.slot && !o.teamId)) return false;
+      seen.add(l.slot);
+      return true;
+    });
+    for (const l of x.toolLinks) l.teamId = null;
+  }
+}
+
 export function newConfig(): TeamhubConfig {
   return {
     configVersion: 1,

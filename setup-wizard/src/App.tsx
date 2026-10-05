@@ -2,7 +2,7 @@ import { useEffect, useState, type ComponentType } from 'react';
 import { Check, Moon, RotateCcw, Sun } from 'lucide-react';
 import { Banner, Button, ErrorState, IconButton, Spinner, cn, useConfirm } from '@teamhub/ui';
 import { api, type Catalog, type Draft, type ServerState } from './api';
-import { DraftProvider, newDraft, useDraft } from './draft';
+import { DraftProvider, hasSeveralTeams, newDraft, useDraft } from './draft';
 import { Preview } from './components';
 import { Look, Program, Teams, Welcome, logoUrl, type StepProps } from './steps/basics';
 import { ChooseTabs, TabOptions, recomputeHomeDefaults } from './steps/tabs';
@@ -194,7 +194,7 @@ function Layout() {
             accent={c.theme.accent}
             corners={c.theme.corners}
             dark={dark}
-            teams={c.program.multiTeam ? c.teams.map((t) => ({ name: t.name || t.shortCode, color: t.color })) : []}
+            teams={hasSeveralTeams(c) ? c.teams.map((t) => ({ name: t.name || t.shortCode, color: t.color })) : []}
             tabs={catalog.modules.filter((m) => m.id in c.modules).map((m) => ({ name: m.name, icon: m.icon, category: m.category }))}
           />
         </aside>

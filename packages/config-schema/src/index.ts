@@ -86,6 +86,8 @@ export type ToolLinkSlot = (typeof TOOL_LINK_SLOTS)[number];
 
 export const ToolLinkSchema = z.object({
   slot: z.string().nullable().default(null),
+  /** A team's own link (programs with several teams); null = the whole program. */
+  teamId: uuid.nullable().default(null),
   label: z.string().min(1).max(60),
   url: z.string().url(),
   section: z.string().nullable().default(null),

@@ -1,7 +1,7 @@
 import { ExternalLink } from 'lucide-react';
 import { type ReactNode } from 'react';
 import { FileDrop, type FileKind, type ProcessedFile } from '@teamhub/ui';
-import { useLinks, useStorageFull } from './hooks';
+import { useStorageFull, useToolLink } from './hooks';
 
 // ── Uploads ────────────────────────────────────────────────────────────────
 /** FileDrop wired to storage limits and the team's Drive tool link (spec §11.2). */
@@ -23,8 +23,7 @@ export function Upload({
   label?: ReactNode;
 }) {
   const full = useStorageFull();
-  const links = useLinks();
-  const drive = links.data?.find((l) => l.slot === 'drive');
+  const drive = useToolLink('drive');
   return (
     <FileDrop
       kind={kind}

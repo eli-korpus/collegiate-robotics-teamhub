@@ -1,7 +1,7 @@
 import { NavLink, useLocation, useNavigate } from 'react-router';
 import { Check, ChevronsUpDown, ExternalLink, Home as HomeIcon, LogOut, MessagesSquare, Monitor, Moon, Search, Settings, Shield, Sun, User, Users } from 'lucide-react';
 import { Avatar, Kbd, Menu, ModKey, SidebarItem, SidebarSection, TeamDot, cn, useMediaQuery } from '@teamhub/ui';
-import { canWith, isMultiTeam, runtime, setTeamScope, useCan, useLinks, useMe, usePeople, useSession, useTeamScope, type LoadedModule } from '@teamhub/sdk';
+import { canWith, isMultiTeam, runtime, setTeamScope, useCan, useToolLink, useMe, usePeople, useSession, useTeamScope, type LoadedModule } from '@teamhub/sdk';
 import { nav } from '../../generated/nav';
 import { useAvailableUpdate } from './updates';
 import { ProgramLogo, TeamLogo } from '../auth/AuthLayout';
@@ -36,8 +36,7 @@ export function Sidebar({ onNavigate, onSearch }: { onNavigate: () => void; onSe
   const wide = useMediaQuery('(min-width: 1024px)');
   const update = useAvailableUpdate();
   const canApprove = useCan('people.approve_members');
-  const links = useLinks();
-  const chat = links.data?.find((l) => l.slot === 'team_chat');
+  const chat = useToolLink('team_chat');
   const people = usePeople();
   const pendingCount = canApprove ? [...(people.data?.values() ?? [])].filter((p) => p.status === 'pending' || p.memberships.some((m) => m.status === 'pending')).length : 0;
 

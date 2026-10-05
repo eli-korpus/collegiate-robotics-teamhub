@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { CheckCircle2, Clock, GitBranch, Database, Plus, Trash2, Upload, Wallet } from 'lucide-react';
-import { Banner, Button, Card, Field, IconButton, Input, PRESET_ACCENTS, Segmented, Select, Spinner, cn, deriveAccent, toast } from '@teamhub/ui';
+import { Banner, Button, Card, Field, IconButton, Input, PRESET_ACCENTS, Segmented, Select, Spinner, cn, deriveAccent, toast, useConfirm } from '@teamhub/ui';
 import { defaultSeasonLabel, seasonYear } from '@teamhub/config-schema/util';
 import { getTeam } from '@teamhub/sdk/ftcscout';
 import { api } from '../api';
 import { processLogo, Section, StepShell, Why } from '../components';
-import { useDraft } from '../draft';
+import { dropMissingTeamRefs, useDraft } from '../draft';
 
 export interface StepProps {
   onNext: () => void;
@@ -58,23 +58,6 @@ export function Program({ onNext, onBack }: StepProps) {
       <Field label="Program name" hint='e.g. "Example Robotics": shown at the top of the dashboard and on the login page.'>
         {(id) => <Input id={id} autoFocus value={c.program.name} maxLength={80} onChange={(e) => update((x) => void (x.program.name = e.target.value))} />}
       </Field>
-      <div className="space-y-1.5">
-        <p className="text-[13px] font-medium">How many FTC teams?</p>
-        <Segmented
-          value={c.program.multiTeam ? 'multi' : 'single'}
-          onChange={(v) =>
-            update((x) => {
-              x.program.multiTeam = v === 'multi';
-              if (!x.program.multiTeam) x.teams = x.teams.slice(0, 1);
-            })
-          }
-          options={[
-            { value: 'single', label: 'One team' },
-            { value: 'multi', label: 'Several teams' },
-          ]}
-        />
-        <p className="text-[12.5px] text-muted">With several teams, items can belong to one team or the whole program, and people can switch views.</p>
-      </div>
       <Field label="Program logo" optional hint="Square works best. If you skip this, your first team's logo is used.">
         {() => (
           <LogoPicker
@@ -148,6 +131,7 @@ function LogoPicker({ value, onPick, onClear, busy }: { value: string | null; on
 
 export function Teams({ onNext, onBack }: StepProps) {
   const { draft, update } = useDraft();
+  const confirm = useConfirm();
   const c = draft.config;
   const [looking, setLooking] = useState<number | null>(null);
   const [found, setFound] = useState<Record<number, string>>({});
@@ -175,6 +159,33 @@ export function Teams({ onNext, onBack }: StepProps) {
 
   return (
     <StepShell title={c.program.multiTeam ? 'Your teams' : 'Your team'} subtitle="Enter the FTC team number and we’ll look up the details on FTCScout." onBack={onBack} onNext={onNext} nextDisabled={!valid}>
+      <div className="space-y-1.5">
+        <p className="text-[13px] font-medium">How many FTC teams does your program have?</p>
+        <Segmented
+          value={c.program.multiTeam ? 'multi' : 'single'}
+          onChange={async (v) => {
+            if (v === 'single' && c.teams.length > 1) {
+              const keep = c.teams[0].name || 'the first team';
+              const ok = await confirm({ title: 'Switch to one team?', body: `Only ${keep} is kept. The other ${c.teams.length - 1} team${c.teams.length > 2 ? 's are' : ' is'} removed, along with any links set up for them.`, confirmLabel: 'Keep one team', danger: true });
+              if (!ok) return;
+            }
+            update((x) => {
+              x.program.multiTeam = v === 'multi';
+              if (!x.program.multiTeam) x.teams = x.teams.slice(0, 1);
+              dropMissingTeamRefs(x);
+            });
+          }}
+          options={[
+            { value: 'single', label: 'One team' },
+            { value: 'multi', label: 'Several teams' },
+          ]}
+        />
+        <p className="text-[12.5px] text-muted">
+          {c.program.multiTeam
+            ? 'Add each team below. Items can then belong to one team or the whole program, and people can switch between teams.'
+            : 'Running several FTC teams in one club? Choose Several teams to add them.'}
+        </p>
+      </div>
       {c.teams.map((t, i) => (
         <Section key={t.id} title={c.program.multiTeam ? `Team ${i + 1}` : 'Team details'}>
           <div className="grid gap-3 sm:grid-cols-[140px_1fr]">
@@ -237,7 +248,15 @@ export function Teams({ onNext, onBack }: StepProps) {
           </Field>
           {c.teams.length > 1 && (
             <div className="flex justify-end">
-              <IconButton label="Remove team" onClick={() => update((x) => void x.teams.splice(i, 1))}>
+              <IconButton
+                label="Remove team"
+                onClick={() =>
+                  update((x) => {
+                    x.teams.splice(i, 1);
+                    dropMissingTeamRefs(x);
+                  })
+                }
+              >
                 <Trash2 className="size-4" />
               </IconButton>
             </div>

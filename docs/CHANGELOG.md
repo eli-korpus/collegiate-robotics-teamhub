@@ -55,6 +55,8 @@ How to update your dashboard: [docs/updating.md](updating.md).
 - Setup wizard: season picker, a light/dark preview that switches the whole preview, clearly optional tool links,
   position pickers for To Manufacture methods, and options that only show when they apply.
 - Tool links (code repository, portfolio, CAD…) can be one for the whole program or one per team.
+- Tool links are kept private: the setup wizard saves them only in the team's database, never in the settings file
+  that is public on GitHub.
 - Required fields are checked in every setup step and Save button ("Please fill this in."), and optional fields all
   show the same "Optional" tag.
 - Setup wizard: Publish explains upload problems in plain language with one-click fixes (private no-reply email,

@@ -97,7 +97,8 @@ describe('wizard API', () => {
   });
 
   it('applies a fresh install: schema, functions, secrets, auth config, config file', async () => {
-    const r = await call('POST', '/apply', { config: config() });
+    const chat = { slot: 'team_chat', label: 'Team chat', url: 'https://chat.example.org/private-invite' };
+    const r = await call('POST', '/apply', { config: { ...config(), toolLinks: [chat] } });
     expect(r.status).toBe(200);
     expect(r.body.log.every((l: { ok: boolean }) => l.ok)).toBe(true);
     expect((await db.admin('select id from teamhub_modules order by id')).map((x) => x.id)).toEqual(['attendance', 'attendance+calendar', 'calendar', 'core']);
@@ -106,6 +107,10 @@ describe('wizard API', () => {
     expect(auth?.body).toMatchObject({ mailer_autoconfirm: true, disable_signup: false });
     const saved = JSON.parse(readFileSync(join(tmp, 'team', 'teamhub.config.json'), 'utf8'));
     expect(saved.modules.attendance.settings.trackHours).toBe(true);
+    // Tool links can be private: they go into the database, never into the (public) config file.
+    expect(await db.admin('select url from links')).toEqual([{ url: chat.url }]);
+    expect(saved.toolLinks).toBeUndefined();
+    expect(readFileSync(join(tmp, 'team', 'teamhub.config.json'), 'utf8')).not.toContain('private-invite');
     const [secret] = await db.admin(`select value from teamhub_private.config where key = 'cleanup_secret'`);
     expect(secret.value).toHaveLength(48);
   });

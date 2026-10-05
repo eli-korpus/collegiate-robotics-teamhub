@@ -152,7 +152,7 @@ export function ToolLinksStep({ onNext, onBack }: StepProps) {
       nextDisabled={invalid}
     >
       <Banner tone="info">
-        Everything on this page is optional. Skip anything you don't use and press Continue. You can add or change links any time in the dashboard (Admin &gt; Tool links).
+        Everything on this page is optional. Skip anything you don't use and press Continue. These links are saved only in your team's private database, never in your public GitHub copy, and you can change them any time in the dashboard (Admin &gt; Tool links).
         {multi && ' Links like the code repository can be one for the whole program or one per team: people then see their own team’s link.'}
       </Banner>
       <Section title={multi ? 'Your links' : "Your team's links"}>

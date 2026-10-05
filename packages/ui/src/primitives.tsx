@@ -88,7 +88,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSel
   ref,
 ) {
   return (
-    <select ref={ref} className={cn(field, w(className), 'h-9 pr-8 appearance-none bg-no-repeat', className)} style={{ backgroundImage: CHEVRON, backgroundPosition: 'right 0.6rem center', backgroundSize: '14px' }} {...rest}>
+    <select ref={ref} className={cn(field, w(className), 'h-9 pr-8 appearance-none bg-no-repeat', className)} style={{ backgroundImage: CHEVRON, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 0.6rem center', backgroundSize: '14px' }} {...rest}>
       {children}
     </select>
   );

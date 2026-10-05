@@ -11,7 +11,7 @@ export const permissions = definePermissions('attendance', {
 export const settings = z.object({
   trackHours: z.boolean().default(false).meta({ title: 'Track hours (check-in and check-out)', description: 'Off = just present/absent. On = also record arrival and leaving times to total hours.' }),
   selfCheckIn: z.boolean().default(true).meta({ title: 'Self check-in with a rotating code', description: 'Members type a 4-digit code (or scan a QR) shown on a screen at practice.' }),
-  codeRotateSeconds: z.number().int().min(10).max(300).default(30).meta({ title: 'Code changes every (seconds)' }),
+  codeRotateSeconds: z.number().int().min(10).max(300).default(30).meta({ title: 'Code changes every (seconds)', showIf: 'selfCheckIn' }),
   includeMentors: z.boolean().default(false).meta({ title: 'Track mentors too', description: 'Off = rosters list members and captains only.' }),
 });
 

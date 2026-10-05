@@ -89,6 +89,9 @@ export function SchemaForm({ schema, value, onChange }: { schema: JsonSchema; va
   return (
     <div className="space-y-4">
       {Object.entries(props).map(([k, s]) => {
+        // `.meta({ showIf: 'otherSetting' })` hides an option while that on/off setting is off.
+        const showIf = (s as { showIf?: string }).showIf;
+        if (showIf && !(value[showIf] ?? props[showIf]?.default)) return null;
         const v = value[k] ?? s.default;
         const label = s.title ?? k;
         const type = Array.isArray(s.type) ? s.type[0] : s.type;
@@ -105,7 +108,7 @@ export function SchemaForm({ schema, value, onChange }: { schema: JsonSchema; va
             <Select value={String(v ?? '')} onChange={(e) => set(k, e.target.value)}>
               {s.enum.map((o) => (
                 <option key={String(o)} value={String(o)}>
-                  {String(o)}
+                  {optionLabel(o)}
                 </option>
               ))}
             </Select>,
@@ -320,4 +323,10 @@ export function Preview({
       <p className="mt-1.5 text-center text-[11px] text-faint">Live preview · text on accent {readableOn(a.accent) === '#FFFFFF' ? 'white' : 'dark'}</p>
     </div>
   );
+}
+
+/** "week-list" → "Week list" for tab option menus. */
+function optionLabel(o: unknown): string {
+  const s = String(o).replace(/[-_]+/g, ' ');
+  return s.charAt(0).toUpperCase() + s.slice(1);
 }

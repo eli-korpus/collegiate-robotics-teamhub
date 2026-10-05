@@ -20,6 +20,8 @@ How to update your dashboard: [docs/updating.md](updating.md).
 - Setup wizard: the preview's light/dark switch now changes the whole preview, not just the text.
 - Setup wizard: the season is now picked from a list (last, this or next season) instead of typed, with a clearer
   explanation that seasons are named by their years, not the game's name.
+- Dropdown menus showed a repeating row of arrows; their options now read normally ("Month", not "month").
+- Setup wizard > Tab options: Attendance's "Code changes every (seconds)" only shows while self check-in is on.
 
 ## [1.0.0] - 2026-10-04
 

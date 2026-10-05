@@ -26,6 +26,7 @@ import {
   toDateTimeInput,
   toast,
   useConfirm,
+  TagListInput,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -167,14 +168,15 @@ function CreatePoll({ eventRef, onClose }: { eventRef: string | null; onClose: (
   const [options, setOptions] = useState(['', '']);
   const [multi, setMulti] = useState(false);
   const [dates, setDates] = useState<string[]>([0, 1, 2, 3, 4].map((d) => toDateInput(addDays(new Date(), d + 1))));
-  const [slots, setSlots] = useState('3–5 PM, 5–7 PM');
+  const [slots, setSlots] = useState(['3–5 PM', '5–7 PM']);
   const [closes, setCloses] = useState(toDateTimeInput(addDays(new Date(), 3)));
   const [teamId, setTeamId] = useState<string | null>(scope);
   const personal = PERSONAL.test(question);
   const save = async () => {
     if (!question.trim()) return toast.error('Write the question');
-    const opts = kind === 'choice' ? options.map((o) => o.trim()).filter(Boolean) : kind === 'availability' ? { dates: [...dates].sort(), slots: slots.split(',').map((s) => s.trim()).filter(Boolean) } : [];
+    const opts = kind === 'choice' ? options.map((o) => o.trim()).filter(Boolean) : kind === 'availability' ? { dates: [...dates].sort(), slots } : [];
     if (kind === 'choice' && (opts as string[]).length < 2) return toast.error('Add at least two options');
+    if (kind === 'availability' && (!slots.length || !dates.length)) return toast.error('Add at least one day and one time slot');
     const { error } = await sb.from('poll_polls').insert({ team_id: teamId, kind, question: question.trim(), options: opts, multi: kind === 'choice' && multi, visibility, closes_at: closes ? new Date(closes).toISOString() : null, ref: eventRef, created_by: me.id });
     if (error) return toast.error(friendlyError(error));
     qc.invalidateQueries({ queryKey: ['polls'] });
@@ -273,7 +275,10 @@ function CreatePoll({ eventRef, onClose }: { eventRef: string | null; onClose: (
                   Add day
                 </Button>
               </div>
-              <Field label="Time slots" hint="Separate with commas">{(id) => <Input id={id} value={slots} onChange={(e) => setSlots(e.target.value)} />}</Field>
+              <div className="space-y-1.5">
+                <p className="text-[13px] font-medium">Time slots</p>
+                <TagListInput label="Time slot" placeholder="Add a time slot, like 3–5 PM" maxLength={30} max={12} value={slots} onChange={setSlots} />
+              </div>
             </div>
           )}
           <Field label="Closes" optional>{(id) => <Input id={id} type="datetime-local" value={closes} onChange={(e) => setCloses(e.target.value)} />}</Field>

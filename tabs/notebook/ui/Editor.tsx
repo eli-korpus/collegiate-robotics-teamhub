@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2, X } from 'lucide-react';
-import { Badge, Button, Dialog, Field, IconButton, Input, Segmented, Select, Textarea, toDateInput, toast, type ProcessedFile } from '@teamhub/ui';
+import { Badge, Button, Dialog, Field, IconButton, Input, Segmented, Select, Textarea, submitOnBlur, toDateInput, toast, type ProcessedFile } from '@teamhub/ui';
 import {
   EntityLink,
   friendlyError,
@@ -168,7 +168,7 @@ export function EntryEditor({ entry, draft, onClose, imageCount = 0 }: { entry?:
                 setNewTag('');
               }}
             >
-              <Input value={newTag} onChange={(e) => setNewTag(e.target.value)} placeholder="+ tag" className="h-7 w-24 text-[12px]" aria-label="New tag" />
+              <Input value={newTag} onChange={(e) => setNewTag(e.target.value)} onBlur={submitOnBlur} placeholder="Add tag" className="h-7 w-28 text-[12px]" aria-label="New tag" />
             </form>
           </div>
         </div>

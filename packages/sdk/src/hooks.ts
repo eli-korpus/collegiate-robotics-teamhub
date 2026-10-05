@@ -144,6 +144,7 @@ export function usePeople() {
           memberships: ((m.data ?? []) as Membership[]).filter((y) => y.user_id === x.id),
           positionIds: holders.map((y) => y.position_id),
           positions: holders.map((y) => names.get(y.position_id) ?? y.position_id),
+          positionTeams: Object.fromEntries(holders.map((y) => [y.position_id, y.team_id])),
         });
       }
       return out;

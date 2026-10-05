@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 import { ArrowDown, ArrowUp, Check, Files, Link2 } from 'lucide-react';
 import { Badge, Banner, Button, Dialog, IconButton, Markdown, Segmented, cn } from '@teamhub/ui';
+import { positionIdFor } from '@teamhub/config-schema';
 import type { CatalogModule } from '../api';
-import { ModuleIcon, SchemaForm, Section, StepShell, Why } from '../components';
+import { ModuleIcon, SchemaForm, Section, StepShell, Why, type PositionChoice } from '../components';
 import { useDraft } from '../draft';
 import type { StepProps } from './basics';
 
@@ -172,6 +173,13 @@ export function recomputeHomeDefaults(c: { modules: Record<string, unknown>; hom
 export function TabOptions({ onNext, onBack }: StepProps) {
   const { draft, update, catalog } = useDraft();
   const chosen = catalog.modules.filter((m) => m.id in draft.config.modules);
+  // Positions tab options can route to: the ones already added, plus ones your tabs suggest (offered in People & positions).
+  const positionChoices: PositionChoice[] = [
+    ...draft.config.positions.map((p) => ({ id: p.id, name: p.name, created: true })),
+    ...[...new Set(chosen.flatMap((m) => m.suggestedPositions))]
+      .filter((name) => !draft.config.positions.some((p) => p.id === positionIdFor(name)))
+      .map((name) => ({ id: positionIdFor(name), name, created: false })),
+  ];
   const withOptions = chosen.filter((m) => Object.keys(m.settingsSchema.properties ?? {}).length);
   const [homeType, setHomeType] = useState<'member' | 'captain' | 'mentor'>('member');
   const titles = useMemo(() => {
@@ -196,6 +204,7 @@ export function TabOptions({ onNext, onBack }: StepProps) {
             schema={m.settingsSchema}
             value={{ ...m.settingsDefaults, ...((draft.config.modules[m.id]?.settings as Record<string, unknown>) ?? {}) }}
             onChange={(v) => update((c) => void (c.modules[m.id] = { ...c.modules[m.id], settings: v }))}
+            positions={positionChoices}
           />
         </Section>
       ))}

@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2 } from 'lucide-react';
 import { normalizeEmailDomain } from '@teamhub/config-schema/util';
-import { Banner, Button, Card, IconButton, Input, Spinner, toast } from '@teamhub/ui';
+import { Banner, Button, Card, IconButton, Input, PendingAddHint, RemovableTag, Spinner, submitOnBlur, toast } from '@teamhub/ui';
 import { friendlyError, useSettingsRow, useSupabase } from '@teamhub/sdk';
 
 interface AllowedEmail {
@@ -48,12 +48,7 @@ export function WhoCanJoin() {
         ) : (
           <div className="flex flex-wrap gap-2">
             {domains.map((d) => (
-              <span key={d} className="inline-flex items-center gap-1 rounded-full border border-border bg-bg-subtle py-0.5 pl-3 pr-1 text-[13px]">
-                @{d}
-                <IconButton label={`Remove ${d}`} size="sm" className="size-6" onClick={() => saveDomains(domains.filter((x) => x !== d))}>
-                  <Trash2 className="size-3.5" />
-                </IconButton>
-              </span>
+              <RemovableTag key={d} label={`@${d}`} removeLabel={`Remove ${d}`} onRemove={() => saveDomains(domains.filter((x) => x !== d))} />
             ))}
           </div>
         )}
@@ -62,16 +57,17 @@ export function WhoCanJoin() {
           onSubmit={async (e) => {
             e.preventDefault();
             const d = normalizeEmailDomain(domain);
-            if (!d) return toast.error('Type the part after the @, like collegiateschool.org');
+            if (!d) return toast.error('Type the part after the @, like yourschool.org');
             if (!domains.includes(d)) await saveDomains([...domains, d]);
             setDomain('');
           }}
         >
-          <Input value={domain} onChange={(e) => setDomain(e.target.value)} placeholder="collegiateschool.org" aria-label="Email domain" />
+          <Input value={domain} onChange={(e) => setDomain(e.target.value)} onBlur={submitOnBlur} placeholder="yourschool.org" aria-label="Email domain" />
           <Button type="submit" icon={<Plus className="size-4" />}>
             Add domain
           </Button>
         </form>
+        <PendingAddHint text={domain} />
         <p className="text-[12.5px] text-muted">
           Subdomains count too: allowing school.org also allows students.school.org. This only affects new sign-ups. People who already have an account keep it.
         </p>
@@ -125,6 +121,7 @@ export function WhoCanJoin() {
             Allow
           </Button>
         </form>
+        <PendingAddHint text={email} />
       </Card>
     </div>
   );

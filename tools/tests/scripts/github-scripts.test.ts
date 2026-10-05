@@ -2,12 +2,12 @@ import { describe, expect, it } from 'vitest';
 import { cleanText, mergeTeams, parseTeamNumbers, renderTeamsPage, type ListedTeam } from '../../scripts/github/team-signup';
 import { mergeTraffic, renderSummary } from '../../scripts/github/traffic-history';
 
-const form = (teams: string) => `### FTC team number(s)\n\n${teams}\n\n### Anything you'd like to tell us? (optional)\n\n23209 is our sister team\n`;
+const form = (teams: string) => `### FTC team number(s)\n\n${teams}\n\n### Anything you'd like to tell us? (optional)\n\n67890 is our sister team\n`;
 
 describe('team sign-ups', () => {
   it('reads only the team number answer', () => {
-    expect(parseTeamNumbers(form('23208, 23209'))).toEqual([23208, 23209]);
-    expect(parseTeamNumbers(form('Team #23208 and 23208'))).toEqual([23208]);
+    expect(parseTeamNumbers(form('12345, 67890'))).toEqual([12345, 67890]);
+    expect(parseTeamNumbers(form('Team #12345 and 12345'))).toEqual([12345]);
     expect(parseTeamNumbers('no form here 12345')).toEqual([]);
   });
 

@@ -61,6 +61,8 @@ export interface PositionRow {
   team_id: string | null;
   grants_permissions: boolean;
   source: 'config' | 'app';
+  /** Each team has its own holder(s) (position_holders.team_id says which). Missing on databases not yet updated. */
+  per_team?: boolean;
 }
 
 export interface Me {
@@ -84,6 +86,8 @@ export interface PersonInfo {
   memberships: Membership[];
   positionIds: string[];
   positions: string[];
+  /** For each position held: the team it's held for (null = whole program). */
+  positionTeams: Record<string, string | null>;
 }
 
 // ── Module client contributions (registries, spec §4.5) ────────────────────

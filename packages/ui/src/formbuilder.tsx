@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from 'react';
 import { ArrowDown, ArrowUp, Minus, Plus, Trash2, Pause, Play, RotateCcw, Star } from 'lucide-react';
 import { cn } from './cn';
 import { Button, Checkbox, IconButton, Input, Select, Textarea } from './primitives';
+import { TagListInput } from './taglist';
 
 export const FIELD_TYPES = {
   counter: 'Counter (+/−)',
@@ -92,14 +93,7 @@ export function FieldEditor({
             </div>
           </div>
           {(f.type === 'select' || f.type === 'multiselect') && (
-            <Input
-              className="mt-2"
-              value={(f.options ?? []).join(', ')}
-              placeholder="Options, separated by commas"
-              aria-label="Options"
-              onChange={(e) => update(i, { options: e.target.value.split(',').map((s) => s.trimStart()) })}
-              onBlur={(e) => update(i, { options: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })}
-            />
+            <TagListInput className="mt-2" label="Choice" placeholder="Add a choice people can pick" value={f.options ?? []} onChange={(options) => update(i, { options })} />
           )}
           {(f.type === 'number' || f.type === 'counter') && (
             <div className="mt-2 flex gap-2">

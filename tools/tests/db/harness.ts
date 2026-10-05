@@ -148,7 +148,7 @@ export function testConfig(overrides: Partial<TeamhubConfigInput> = {}): Teamhub
   const parsed = parseConfig({
     program: { name: 'Test Robotics', multiTeam: true },
     teams: [
-      { id: TEAM_A, number: 23209, name: 'Alpha', shortCode: 'A', color: '#3B82F6' },
+      { id: TEAM_A, number: 12345, name: 'Alpha', shortCode: 'A', color: '#3B82F6' },
       { id: TEAM_B, number: 99999, name: 'Beta', shortCode: 'B', color: '#10B981' },
     ],
     season: '2026–27',

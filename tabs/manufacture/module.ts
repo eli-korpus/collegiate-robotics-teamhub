@@ -7,9 +7,10 @@ export const permissions = definePermissions('manufacture', {
 });
 
 const Method = z.object({
-  id: z.string().regex(/^[a-z0-9_]+$/).meta({ title: 'id' }),
-  name: z.string().meta({ title: 'Name' }),
-  positions: z.array(z.string()).default([]).meta({ title: 'Position ids (e.g. pos_3d_print_farm_manager)' }),
+  // Internal id, made from the name by the setup wizard (kept stable once saved).
+  id: z.string().regex(/^[a-z0-9_]+$/).meta({ title: 'id', autoFrom: 'name' }),
+  name: z.string().meta({ title: 'Method' }),
+  positions: z.array(z.string()).default([]).meta({ title: 'Handled by', widget: 'positions' }),
 });
 
 export const settings = z.object({
@@ -23,7 +24,7 @@ export const settings = z.object({
       { id: 'outsourced', name: 'Outsourced', positions: [] },
       { id: 'machine_shop', name: 'Machine shop', positions: [] },
     ])
-    .meta({ title: 'Manufacturing methods', description: 'Each method is handled by whoever holds its positions (mentors if nobody does).' }),
+    .meta({ title: 'Manufacturing methods', description: 'The ways your team makes parts. A request for a method goes to whoever holds the positions you pick for it. If you pick none, or nobody holds them, mentors get it.' }),
   autoDeleteDays: z.number().int().min(1).max(365).default(14).meta({ title: 'Delete model files this many days after a job is done', description: 'Unless the job is marked “keep files”.' }),
   maxFileMB: z.number().min(1).max(25).default(25).meta({ title: 'Max file size (MB, after compression)' }),
 });

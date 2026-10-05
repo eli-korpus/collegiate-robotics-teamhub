@@ -81,15 +81,17 @@ create policy core_positions_delete on positions for delete to authenticated
   using (source = 'app' and teamhub_can('people.assign_positions', team_id));
 
 create policy core_holders_read on position_holders for select to authenticated using (teamhub_is_active());
+-- Per-team positions are checked for the holder's team; other positions for the position's team.
 create policy core_holders_insert on position_holders for insert to authenticated with check (
   exists (select 1 from positions p where p.id = position_id and (
-    teamhub_can('people.assign_positions', p.team_id)
-    or (not p.grants_permissions and teamhub_can('people.assign_badges', p.team_id))))
+    teamhub_can('people.assign_positions', case when p.per_team then position_holders.team_id else p.team_id end)
+    or (not p.grants_permissions and teamhub_can('people.assign_badges', case when p.per_team then position_holders.team_id else p.team_id end))))
+  and (position_holders.team_id is not null or not exists (select 1 from positions p where p.id = position_id and p.per_team))
 );
 create policy core_holders_delete on position_holders for delete to authenticated using (
   exists (select 1 from positions p where p.id = position_id and (
-    teamhub_can('people.assign_positions', p.team_id)
-    or (not p.grants_permissions and teamhub_can('people.assign_badges', p.team_id))))
+    teamhub_can('people.assign_positions', case when p.per_team then position_holders.team_id else p.team_id end)
+    or (not p.grants_permissions and teamhub_can('people.assign_badges', case when p.per_team then position_holders.team_id else p.team_id end))))
 );
 
 create policy core_subteams_read on subteams for select to authenticated using (teamhub_is_active());

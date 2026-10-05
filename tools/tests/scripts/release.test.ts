@@ -70,7 +70,7 @@ describe('changelog', () => {
 describe('fork names', () => {
   it('suggests "<team or organization>-teamhub" and accepts any valid name', () => {
     expect(suggestedRepoName('Example Robotics')).toBe('example-robotics-teamhub');
-    expect(suggestedRepoName('Gear Grinders #23209!')).toBe('gear-grinders-23209-teamhub');
+    expect(suggestedRepoName('Gear Grinders #12345!')).toBe('gear-grinders-12345-teamhub');
     expect(suggestedRepoName('')).toBe('my-team-teamhub');
     expect(isValidRepoName('example-robotics-teamhub')).toBe(true);
     expect(isValidRepoName('has space')).toBe(false);

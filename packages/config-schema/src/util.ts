@@ -27,10 +27,10 @@ export function positionIdFor(name: string): string {
 }
 
 // ── Who can join ────────────────────────────────────────────────────────────
-/** A lowercase email domain like "collegiateschool.org" (same rule as the database). */
+/** A lowercase email domain like "example.edu" (same rule as the database). */
 export const EMAIL_DOMAIN_RE = /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/;
 
-/** "@CollegiateSchool.org", "name@collegiateschool.org" or " collegiateschool.org " → "collegiateschool.org" (null if invalid). */
+/** "@YourSchool.org", "name@yourschool.org" or " yourschool.org " → "example.edu" (null if invalid). */
 export function normalizeEmailDomain(input: string): string | null {
   const d = input.trim().toLowerCase().split('@').pop()!.replace(/^https?:\/\//, '').replace(/^www\./, '').replace(/\/.*$/, '');
   return EMAIL_DOMAIN_RE.test(d) ? d : null;

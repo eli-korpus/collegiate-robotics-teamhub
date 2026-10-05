@@ -20,6 +20,7 @@ import {
   downloadText,
   formatDate,
   toCsv,
+  TagListInput,
   toDateTimeInput,
   toast,
   useConfirm,
@@ -338,7 +339,7 @@ function DriveEditor({ drive, onClose }: { drive: Drive | null; onClose: () => v
   const confirm = useConfirm();
   const scope = useTeamScope();
   const field = sizeField();
-  const defaultSizes = field?.type === 'select' && field.options.length ? field.options.join(', ') : 'YS, YM, YL, S, M, L, XL, 2XL';
+  const defaultSizes = field?.type === 'select' && field.options.length ? field.options : ['YS', 'YM', 'YL', 'S', 'M', 'L', 'XL', '2XL'];
   const [v, setV] = useState({
     title: drive?.title ?? '',
     description: drive?.description ?? '',
@@ -346,12 +347,12 @@ function DriveEditor({ drive, onClose }: { drive: Drive | null; onClose: () => v
     status: drive?.status ?? 'open',
     team_id: drive ? drive.team_id : scope,
   });
-  const [items, setItems] = useState<{ id: string; name: string; price: string; sizes: string }[]>(
-    drive?.items.map((i) => ({ id: i.id, name: i.name, price: i.price ?? '', sizes: i.sizes.join(', ') })) ?? [{ id: crypto.randomUUID().slice(0, 8), name: 'Team T-shirt', price: '', sizes: defaultSizes }],
+  const [items, setItems] = useState<{ id: string; name: string; price: string; sizes: string[] }[]>(
+    drive?.items.map((i) => ({ id: i.id, name: i.name, price: i.price ?? '', sizes: i.sizes })) ?? [{ id: crypto.randomUUID().slice(0, 8), name: 'Team T-shirt', price: '', sizes: defaultSizes }],
   );
   const save = async () => {
     if (!v.title.trim()) return toast.error('Name the order drive');
-    const clean = items.filter((i) => i.name.trim()).map((i) => ({ id: i.id, name: i.name.trim(), price: i.price.trim() || null, sizes: i.sizes.split(',').map((s) => s.trim()).filter(Boolean) }));
+    const clean = items.filter((i) => i.name.trim()).map((i) => ({ id: i.id, name: i.name.trim(), price: i.price.trim() || null, sizes: i.sizes }));
     if (!clean.length) return toast.error('Add at least one item');
     const body = { title: v.title.trim(), description: v.description.trim() || null, closes_at: v.closes_at ? new Date(v.closes_at).toISOString() : null, status: v.status, team_id: v.team_id, items: clean };
     const { error } = drive ? await sb.from('mer_drives').update(body).eq('id', drive.id) : await sb.from('mer_drives').insert({ ...body, created_by: me.id });
@@ -394,13 +395,15 @@ function DriveEditor({ drive, onClose }: { drive: Drive | null; onClose: () => v
         <div className="space-y-2">
           <p className="text-[13px] font-medium">Items</p>
           {items.map((i, n) => (
-            <div key={i.id} className="grid gap-2 sm:grid-cols-[1fr_6rem_1.4fr_auto]">
-              <Input aria-label="Item" placeholder="Hoodie" value={i.name} onChange={(e) => setItems(items.map((x, j) => (j === n ? { ...x, name: e.target.value } : x)))} />
-              <Input aria-label="Price" placeholder="$25" value={i.price} onChange={(e) => setItems(items.map((x, j) => (j === n ? { ...x, price: e.target.value } : x)))} />
-              <Input aria-label="Sizes" placeholder="Sizes, comma separated (blank = one size)" value={i.sizes} onChange={(e) => setItems(items.map((x, j) => (j === n ? { ...x, sizes: e.target.value } : x)))} />
-              <IconButton label="Remove item" onClick={() => setItems(items.filter((_, j) => j !== n))} disabled={items.length === 1}>
-                <X className="size-4" />
-              </IconButton>
+            <div key={i.id} className="space-y-2 rounded-md border border-border p-2.5">
+              <div className="grid grid-cols-[1fr_6rem_auto] gap-2">
+                <Input aria-label="Item" placeholder="Hoodie" value={i.name} onChange={(e) => setItems(items.map((x, j) => (j === n ? { ...x, name: e.target.value } : x)))} />
+                <Input aria-label="Price" placeholder="$25" value={i.price} onChange={(e) => setItems(items.map((x, j) => (j === n ? { ...x, price: e.target.value } : x)))} />
+                <IconButton label="Remove item" onClick={() => setItems(items.filter((_, j) => j !== n))} disabled={items.length === 1}>
+                  <X className="size-4" />
+                </IconButton>
+              </div>
+              <TagListInput label="Size" placeholder="Add a size (none = one size)" maxLength={20} value={i.sizes} onChange={(sizes) => setItems(items.map((x, j) => (j === n ? { ...x, sizes } : x)))} />
             </div>
           ))}
           <Button size="sm" icon={<Plus className="size-4" />} onClick={() => setItems([...items, { id: crypto.randomUUID().slice(0, 8), name: '', price: '', sizes: defaultSizes }])}>

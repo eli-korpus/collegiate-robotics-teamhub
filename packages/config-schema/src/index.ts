@@ -28,7 +28,10 @@ export type TeamConfig = z.infer<typeof TeamSchema>;
 export const PositionSchema = z.object({
   id: z.string().regex(/^pos_[a-z0-9_]+$/, 'Position ids look like pos_lead_programmer'),
   name: z.string().min(1).max(60),
+  /** Older configs could tie a position to one team; the wizard now offers whole program or each team instead. */
   teamId: uuid.nullable().default(null),
+  /** Each team has its own holder(s), who only act for their team. False: one position for the whole program. */
+  perTeam: z.boolean().default(false),
   grantsPermissions: z.boolean().default(false),
 });
 export type PositionConfig = z.infer<typeof PositionSchema>;
@@ -129,7 +132,7 @@ export const ConfigSchema = z.object({
    * is in teamhub_settings, editable in Admin > Who can join; the wizard writes it when you change it here.
    */
   join: z
-    .object({ allowedEmailDomains: z.array(z.string().regex(EMAIL_DOMAIN_RE, 'Use a domain like collegiateschool.org')).max(20).default([]) })
+    .object({ allowedEmailDomains: z.array(z.string().regex(EMAIL_DOMAIN_RE, 'Use a domain like yourschool.org')).max(20).default([]) })
     .default({ allowedEmailDomains: [] }),
   hosting: z
     .object({

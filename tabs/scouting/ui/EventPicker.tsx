@@ -158,7 +158,7 @@ export function EventPicker({ value, name, onChange }: { value: string; name?: s
               <Field label="Date" optional>{(id) => <Input id={id} type="date" value={m.date} onChange={(e) => setM({ ...m, date: e.target.value })} />}</Field>
             </div>
             <Field label="Team numbers" hint="Paste them separated by spaces, commas or new lines. Names and season stats load from FTCScout.">
-              {(id) => <Textarea id={id} rows={4} value={m.teams} onChange={(e) => setM({ ...m, teams: e.target.value })} placeholder="23209 22359 18898 …" />}
+              {(id) => <Textarea id={id} rows={4} value={m.teams} onChange={(e) => setM({ ...m, teams: e.target.value })} placeholder="12345 23456 34567 …" />}
             </Field>
             <div className="flex gap-2">
               <Button type="submit" variant="primary">

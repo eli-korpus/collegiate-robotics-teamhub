@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { BadgeCheck, Lock, Pencil, Plus, Trash2, X } from 'lucide-react';
-import { Avatar, Banner, Button, Card, Dialog, EmptyState, IconButton, Input, Tooltip, toast, useConfirm } from '@teamhub/ui';
-import { canWith, friendlyError, isMultiTeam, runtime, useMe, usePeople, usePositions, useSupabase, PersonPicker, TeamBadge, TeamScopePicker } from '@teamhub/sdk';
+import { Avatar, Banner, Button, Card, Dialog, EmptyState, IconButton, Input, Select, Tooltip, toast, useConfirm } from '@teamhub/ui';
+import { canWith, friendlyError, isMultiTeam, runtime, useMe, usePeople, usePositions, useSupabase, useTeams, PersonPicker, TeamBadge, TeamScopePicker } from '@teamhub/sdk';
 
 /** Positions = responsibilities ("Drive Coach"); Skills are proven abilities (spec §7.3, §13.9). */
 export function Positions() {
@@ -11,18 +11,21 @@ export function Positions() {
   const qc = useQueryClient();
   const confirm = useConfirm();
   const positions = usePositions();
+  const teams = useTeams();
   const people = usePeople();
   const [adding, setAdding] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
   const [newTeam, setNewTeam] = useState<string | null>(null);
   const [pick, setPick] = useState<string[]>([]);
+  const [assignTeam, setAssignTeam] = useState<string | null>(null);
   const [renaming, setRenaming] = useState<{ id: string; name: string } | null>(null);
   const canCreate = canWith(me, 'people.assign_positions');
   const holders = (id: string) => [...(people.data?.values() ?? [])].filter((p) => p.positionIds.includes(id) && p.status === 'active');
   const refresh = () => qc.invalidateQueries({ queryKey: ['core'] });
 
   const skillsEnabled = runtime().modules.some((m) => m.manifest.id === 'skills');
+  const addingPerTeam = !!positions.data?.find((x) => x.id === adding)?.per_team && isMultiTeam();
 
   return (
     <div className="mx-auto max-w-4xl space-y-4 px-4 py-4 sm:px-6">
@@ -43,6 +46,7 @@ export function Positions() {
         <div className="grid gap-3 md:grid-cols-2">
           {positions.data.map((pos) => {
             const hs = holders(pos.id);
+            const perTeam = !!pos.per_team && isMultiTeam();
             const canAssign = canWith(me, 'people.assign_positions', pos.team_id) || (!pos.grants_permissions && canWith(me, 'people.assign_badges', pos.team_id));
             return (
               <Card key={pos.id} className="p-3.5">
@@ -58,12 +62,7 @@ export function Positions() {
                     </p>
                     <p className="text-[12px] text-muted">
                       {pos.grants_permissions ? 'Carries permissions' : 'Badge only'}
-                      {isMultiTeam() && (
-                        <>
-                          {' · '}
-                          <TeamBadge teamId={pos.team_id} />
-                        </>
-                      )}
+                      {isMultiTeam() && (perTeam ? ' · Each team has its own' : <>{' · '}<TeamBadge teamId={pos.team_id} /></>)}
                     </p>
                   </div>
                   {pos.source === 'app' && canWith(me, 'people.assign_positions', pos.team_id) && (
@@ -92,6 +91,7 @@ export function Positions() {
                     <li key={h.id} className="flex items-center gap-2 text-[13px]">
                       <Avatar name={h.name} src={h.avatarUrl} size={22} />
                       <span className="flex-1 truncate">{h.name}</span>
+                      {perTeam && <TeamBadge teamId={h.positionTeams[pos.id] ?? null} />}
                       {canAssign && (
                         <IconButton
                           label={`Remove ${h.name}`}
@@ -117,6 +117,7 @@ export function Positions() {
                     icon={<Plus className="size-4" />}
                     onClick={() => {
                       setPick([]);
+                      setAssignTeam(null);
                       setAdding(pos.id);
                     }}
                   >
@@ -136,9 +137,11 @@ export function Positions() {
         footer={
           <Button
             variant="primary"
-            disabled={!pick.length}
+            disabled={!pick.length || (addingPerTeam && !assignTeam)}
             onClick={async () => {
-              const { error } = await sb.rpc('people_assign_positions', { p_user: pick[0], p_positions: [adding] });
+              const { error } = addingPerTeam
+                ? await sb.rpc('people_assign_positions_in_team', { p_user: pick[0], p_positions: [adding], p_team: assignTeam })
+                : await sb.rpc('people_assign_positions', { p_user: pick[0], p_positions: [adding] });
               if (error) return toast.error(friendlyError(error));
               setAdding(null);
               refresh();
@@ -148,7 +151,22 @@ export function Positions() {
           </Button>
         }
       >
-        <PersonPicker value={pick} onChange={setPick} teamId={positions.data?.find((x) => x.id === adding)?.team_id ?? null} />
+        <div className="space-y-3">
+          {addingPerTeam && (
+            <label className="block space-y-1.5">
+              <span className="block text-[13px] font-medium">For which team</span>
+              <Select value={assignTeam ?? ''} onChange={(e) => setAssignTeam(e.target.value || null)}>
+                <option value="">Pick a team</option>
+                {teams.map((t) => (
+                  <option key={t.id} value={t.id}>
+                    {t.name}
+                  </option>
+                ))}
+              </Select>
+            </label>
+          )}
+          <PersonPicker value={pick} onChange={setPick} teamId={addingPerTeam ? assignTeam : (positions.data?.find((x) => x.id === adding)?.team_id ?? null)} />
+        </div>
       </Dialog>
 
       <Dialog

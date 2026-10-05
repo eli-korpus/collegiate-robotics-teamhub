@@ -42,6 +42,7 @@ export interface JsonSchema {
   default?: unknown;
   minimum?: number;
   maximum?: number;
+  maxLength?: number;
   required?: string[];
 }
 

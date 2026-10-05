@@ -10,8 +10,8 @@ const config = (domains: string[]) => {
 
 describe('who can join', () => {
   it('cleans up what people type', () => {
-    expect(normalizeEmailDomain(' @CollegiateSchool.org ')).toBe('collegiateschool.org');
-    expect(normalizeEmailDomain('jane@collegiateschool.org')).toBe('collegiateschool.org');
+    expect(normalizeEmailDomain(' @Example.edu ')).toBe('example.edu');
+    expect(normalizeEmailDomain('jane@example.edu')).toBe('example.edu');
     expect(normalizeEmailDomain('https://www.school.org/')).toBe('school.org');
     expect(normalizeEmailDomain('not a domain')).toBeNull();
     expect(normalizeEmailDomain('localhost')).toBeNull();

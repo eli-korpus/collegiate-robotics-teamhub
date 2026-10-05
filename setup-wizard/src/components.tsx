@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { icons, ChevronDown, ChevronRight, HelpCircle, ArrowLeft, ArrowRight, Box } from 'lucide-react';
-import { Button, Input, Select, Switch, Textarea, deriveAccent, dominantColor, readableOn } from '@teamhub/ui';
+import { Button, Input, Select, Switch, TagListInput, deriveAccent, dominantColor, readableOn } from '@teamhub/ui';
 import type { JsonSchema } from './api';
 
 export function ModuleIcon({ name, className }: { name: string; className?: string }) {
@@ -82,7 +82,17 @@ export function Section({ title, children, description }: { title: string; descr
 }
 
 /** Renders a module's settings form from its zod → JSON schema (spec §5.2 step 6). */
-export function SchemaForm({ schema, value, onChange }: { schema: JsonSchema; value: Record<string, unknown>; onChange: (v: Record<string, unknown>) => void }) {
+export function SchemaForm({
+  schema,
+  value,
+  onChange,
+  positions = [],
+}: {
+  schema: JsonSchema;
+  value: Record<string, unknown>;
+  onChange: (v: Record<string, unknown>) => void;
+  positions?: PositionChoice[];
+}) {
   const props = schema.properties ?? {};
   if (!Object.keys(props).length) return <p className="text-[13px] text-faint">No options for this tab.</p>;
   const set = (k: string, v: unknown) => onChange({ ...value, [k]: v });
@@ -96,11 +106,12 @@ export function SchemaForm({ schema, value, onChange }: { schema: JsonSchema; va
         const label = s.title ?? k;
         const type = Array.isArray(s.type) ? s.type[0] : s.type;
         if (type === 'boolean') return <Switch key={k} checked={!!v} onChange={(x) => set(k, x)} label={label} description={s.description} />;
-        const field = (control: ReactNode) => (
+        const field = (control: ReactNode, descriptionFirst = false) => (
           <label key={k} className="block space-y-1.5">
             <span className="block text-[13px] font-medium">{label}</span>
+            {descriptionFirst && s.description && <span className="block text-[12.5px] text-muted">{s.description}</span>}
             {control}
-            {s.description && <span className="block text-[12.5px] text-muted">{s.description}</span>}
+            {!descriptionFirst && s.description && <span className="block text-[12.5px] text-muted">{s.description}</span>}
           </label>
         );
         if (s.enum)
@@ -117,48 +128,136 @@ export function SchemaForm({ schema, value, onChange }: { schema: JsonSchema; va
           return field(<Input type="number" min={s.minimum} max={s.maximum} value={v == null ? '' : String(v)} onChange={(e) => set(k, e.target.value === '' ? undefined : Number(e.target.value))} className="max-w-40" />);
         if (type === 'array' && s.items?.type === 'string')
           return field(
-            <Textarea
-              rows={2}
-              value={(Array.isArray(v) ? v : []).join(', ')}
-              onChange={(e) => set(k, e.target.value.split(',').map((x) => x.trimStart()))}
-              onBlur={(e) => set(k, e.target.value.split(',').map((x) => x.trim()).filter(Boolean))}
-              placeholder="Separate items with commas"
-            />,
+            <TagListInput label={label} value={Array.isArray(v) ? (v as string[]) : []} onChange={(x) => set(k, x)} maxLength={s.items?.maxLength ?? 60} />,
           );
-        if (type === 'array' && s.items?.properties) return field(<ObjectList schema={s.items} value={Array.isArray(v) ? (v as Record<string, unknown>[]) : []} onChange={(x) => set(k, x)} />);
+        if (type === 'array' && s.items?.properties) return field(<ObjectList schema={s.items} value={Array.isArray(v) ? (v as Record<string, unknown>[]) : []} onChange={(x) => set(k, x)} positions={positions} />, true);
         return field(<Input value={String(v ?? '')} onChange={(e) => set(k, e.target.value)} />);
       })}
     </div>
   );
 }
 
-function ObjectList({ schema, value, onChange }: { schema: JsonSchema; value: Record<string, unknown>[]; onChange: (v: Record<string, unknown>[]) => void }) {
-  const cols = Object.entries(schema.properties ?? {});
+/** A position that tab options can route to (from People & positions). */
+export interface PositionChoice {
+  id: string;
+  name: string;
+  /** False for positions a tab suggests that haven't been added in People & positions yet. */
+  created: boolean;
+}
+
+/** "pos_3d_print_farm_manager" → "3D Print Farm Manager" (for positions not created yet). */
+function positionName(id: string): string {
+  return id
+    .replace(/^pos_/, '')
+    .split('_')
+    .map((w) => (/^\d+[a-z]$/.test(w) ? w.toUpperCase() : w.charAt(0).toUpperCase() + w.slice(1)))
+    .join(' ');
+}
+
+const slugId = (name: string) => name.toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '') || 'item';
+
+/**
+ * A list of items with column headers. Schema meta it understands:
+ * - `autoFrom: 'name'` on a field: hidden, filled in from that field (internal ids).
+ * - `widget: 'positions'` on a string array: pick positions by name instead of typing ids.
+ */
+function ObjectList({ schema, value, onChange, positions }: { schema: JsonSchema; value: Record<string, unknown>[]; onChange: (v: Record<string, unknown>[]) => void; positions: PositionChoice[] }) {
+  type Meta = JsonSchema & { autoFrom?: string; widget?: string };
+  const all = Object.entries(schema.properties ?? {}) as [string, Meta][];
+  const autos = all.filter(([, s]) => s.autoFrom);
+  const cols = all.filter(([, s]) => !s.autoFrom);
+  const kind = (s: Meta) => (Array.isArray(s.type) ? s.type[0] : s.type);
+  // Rows added in this session: only their ids follow the name. Saved items keep their id forever, because data
+  // (like existing jobs) refers to it.
+  const [fresh, setFresh] = useState<Set<number>>(new Set());
+  const setRow = (i: number, patch: Record<string, unknown>) =>
+    onChange(
+      value.map((r, j) => {
+        if (j !== i) return r;
+        const next = { ...r, ...patch };
+        for (const [k, s] of autos) {
+          const src = s.autoFrom!;
+          if (src in patch && fresh.has(i)) {
+            let id = slugId(String(next[src] ?? ''));
+            for (let n = 2; value.some((o, oi) => oi !== i && o[k] === id); n++) id = `${slugId(String(next[src] ?? ''))}_${n}`;
+            next[k] = id;
+          }
+        }
+        return next;
+      }),
+    );
+  const grid = { gridTemplateColumns: `${cols.map(([, s]) => (s.widget === 'positions' ? 'minmax(0,2fr)' : 'minmax(0,1fr)')).join(' ')} auto` };
   return (
     <div className="space-y-2">
+      {value.length > 0 && (
+        <div className="grid gap-2 px-2 text-[12px] font-medium text-muted" style={grid}>
+          {cols.map(([k, s]) => (
+            <span key={k}>{s.title ?? k}</span>
+          ))}
+          <span className="w-16" />
+        </div>
+      )}
       {value.map((row, i) => (
-        <div key={i} className="flex flex-wrap items-center gap-2 rounded-md border border-border p-2">
+        <div key={i} className="grid items-start gap-2 rounded-md border border-border p-2" style={grid}>
           {cols.map(([k, s]) => {
-            const t = Array.isArray(s.type) ? s.type[0] : s.type;
-            if (t === 'boolean') return <Switch key={k} checked={!!row[k]} onChange={(x) => onChange(value.map((r, j) => (j === i ? { ...r, [k]: x } : r)))} label={s.title ?? k} />;
+            const t = kind(s);
+            if (t === 'boolean') return <Switch key={k} checked={!!row[k]} onChange={(x) => setRow(i, { [k]: x })} label={s.title ?? k} />;
+            if (t === 'array' && s.widget === 'positions') {
+              const picked = (row[k] as string[]) ?? [];
+              const used = value.flatMap((r) => (r[k] as string[]) ?? []);
+              const choices = [...positions, ...[...new Set(used)].filter((id) => !positions.some((p) => p.id === id)).map((id) => ({ id, name: positionName(id), created: false }))];
+              return (
+                <div key={k} className="flex flex-wrap gap-1.5" role="group" aria-label={`${s.title ?? k}: ${String(row.name ?? '')}`}>
+                  {choices.length === 0 && <span className="py-1.5 text-[12.5px] text-faint">No positions yet: add them in People &amp; positions.</span>}
+                  {choices.map((p) => {
+                    const on = picked.includes(p.id);
+                    const missing = !p.created;
+                    return (
+                      <button
+                        key={p.id}
+                        type="button"
+                        aria-pressed={on}
+                        title={missing ? 'Not created yet: it’s suggested in People & positions' : undefined}
+                        onClick={() => setRow(i, { [k]: on ? picked.filter((x) => x !== p.id) : [...picked, p.id] })}
+                        className={`rounded-full border px-2.5 py-1 text-[12.5px] transition-colors ${on ? 'border-accent bg-accent-soft font-medium' : 'border-border text-muted hover:bg-bg-subtle'}`}
+                      >
+                        {p.name}
+                        {missing && on ? ' *' : ''}
+                      </button>
+                    );
+                  })}
+                </div>
+              );
+            }
             if (t === 'array')
               return (
-                <Input
-                  key={k}
-                  className="min-w-40 flex-1"
-                  placeholder={s.title ?? k}
-                  value={((row[k] as string[]) ?? []).join(', ')}
-                  onChange={(e) => onChange(value.map((r, j) => (j === i ? { ...r, [k]: e.target.value.split(',').map((x) => x.trim()).filter(Boolean) } : r)))}
-                />
+                <TagListInput key={k} label={s.title ?? k} value={(row[k] as string[]) ?? []} onChange={(x) => setRow(i, { [k]: x })} />
               );
-            return <Input key={k} className="min-w-32 flex-1" placeholder={s.title ?? k} value={String(row[k] ?? '')} onChange={(e) => onChange(value.map((r, j) => (j === i ? { ...r, [k]: e.target.value } : r)))} />;
+            return <Input key={k} aria-label={s.title ?? k} value={String(row[k] ?? '')} onChange={(e) => setRow(i, { [k]: e.target.value })} />;
           })}
-          <Button size="sm" variant="ghost" onClick={() => onChange(value.filter((_, j) => j !== i))}>
+          <Button
+            size="sm"
+            variant="ghost"
+            className="w-16"
+            onClick={() => {
+              onChange(value.filter((_, j) => j !== i));
+              setFresh(new Set([...fresh].filter((x) => x !== i).map((x) => (x > i ? x - 1 : x))));
+            }}
+          >
             Remove
           </Button>
         </div>
       ))}
-      <Button size="sm" onClick={() => onChange([...value, Object.fromEntries(cols.map(([k, s]) => [k, (Array.isArray(s.type) ? s.type[0] : s.type) === 'array' ? [] : (Array.isArray(s.type) ? s.type[0] : s.type) === 'boolean' ? false : '']))])}>
+      {value.some((r) => cols.some(([k, s]) => s.widget === 'positions' && ((r[k] as string[]) ?? []).some((id) => !positions.some((p) => p.id === id && p.created)))) && (
+        <p className="text-[12px] text-muted">* Not created yet. You’ll be offered these positions in the People &amp; positions step.</p>
+      )}
+      <Button
+        size="sm"
+        onClick={() => {
+          setFresh(new Set([...fresh, value.length]));
+          onChange([...value, Object.fromEntries(all.map(([k, s]) => [k, kind(s) === 'array' ? [] : kind(s) === 'boolean' ? false : '']))]);
+        }}
+      >
         Add
       </Button>
     </div>

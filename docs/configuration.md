@@ -28,7 +28,7 @@ The file is validated by `packages/config-schema` (zod) every time the app is ge
 | `home` | object | `defaults.member/captain/mentor`: ordered widget ids for each profile type's Home page. People can still reorder or hide their own. |
 | `nav` | object | `order`: optional explicit sidebar order of tab ids. |
 | `toolLinks` | array | Links seeded into the in-app link list on first setup: `{ slot, label, url, section, description }`. Slots like `team_chat`, `drive`, `cad`, `code_repo` let tabs show the right shortcut ("Discuss in Discord"). Edited in the app afterwards. |
-| `join.allowedEmailDomains` | string[] | Optional. Only emails at these domains (or their subdomains) can sign up, e.g. `["collegiateschool.org"]`. Empty lets anyone with the join link sign up. Enforced by the database. Admins can change it, and allow specific addresses, in Admin > Who can join; the wizard only writes it when you change it in the wizard. |
+| `join.allowedEmailDomains` | string[] | Optional. Only emails at these domains (or their subdomains) can sign up, e.g. `["example.edu"]`. Empty lets anyone with the join link sign up. Enforced by the database. Admins can change it, and allow specific addresses, in Admin > Who can join; the wizard only writes it when you change it in the wizard. |
 | `hosting` | object | `provider` (`cloudflare`/`vercel`/`netlify`/`github-pages`), `url`, `basePath` (`/` unless GitHub project pages). |
 | `supabase` | object | `url`, `anonKey` (the publishable key), `projectRef`. |
 | `features` | object | `email`: turn on only after configuring custom SMTP in Supabase (enables email confirmation and self-serve password reset). |

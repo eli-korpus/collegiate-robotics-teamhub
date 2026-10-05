@@ -13,10 +13,28 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Added
+
+- Positions can be **Whole program** (one person covers every team) or **Each team has its own** (every team can have
+  its own holder, who only acts for that team). Replaces picking one exact team, which blocked using the same position
+  name on several teams. Run `npm run setup` > Update to add it to your database.
+- Social Media Planner: list just one platform (like Instagram) and posts go there automatically, without asking.
+
+### Changed
+
+- Lists you type (social platforms, inventory categories, notebook tags, merch sizes, poll time slots, form answer
+  choices) use tags with an Add button instead of one comma-separated box. Pasting a comma-separated list still works.
+- Anything typed in a "type, then Add" box is added when you click away, with a reminder while it is waiting.
+- To Manufacture methods have column headers and an explanation, and you pick who handles each method by position
+  name instead of typing ids.
+- Selected options in switches (like Whole program / Each team has its own) are easier to see.
+- Examples use made-up names and numbers.
+
 ### Fixed
 
 - Missing styles: since v1.0.0 parts of the dashboard and the setup wizard lost their styling, and the setup wizard's
-  tab **Details** windows opened off-screen, so the buttons seemed to do nothing.
+  tab **Details** windows and **Start over** confirmation opened off-screen, so the buttons seemed to do nothing.
+  Checkboxes also showed stray check marks and dropdowns a row of arrows.
 - Setup wizard: the preview's light/dark switch now changes the whole preview, not just the text.
 - Setup wizard: the season is now picked from a list (last, this or next season) instead of typed, with a clearer
   explanation that seasons are named by their years, not the game's name.

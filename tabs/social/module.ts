@@ -22,7 +22,10 @@ export default defineModule({
   footprint: 'Tiny (links only, no media)',
   stores: 'Post ideas, captions, links to media and their status.',
   settings: z.object({
-    platforms: z.array(z.string().min(1).max(30)).default(['Instagram', 'TikTok', 'YouTube', 'Facebook', 'LinkedIn']).meta({ title: 'Platforms' }),
+    platforms: z.array(z.string().min(1).max(30)).default(['Instagram', 'TikTok', 'YouTube', 'Facebook', 'LinkedIn']).meta({
+      title: 'Platforms',
+      description: 'Where your team posts. Only post on Instagram? List just Instagram: posts then go there automatically and nobody is asked where.',
+    }),
   }),
   permissions,
   suggestedPositions: ['Media Lead'],

@@ -54,7 +54,7 @@ You need a computer with [Node.js](https://nodejs.org) 20.19+ and Git, a GitHub 
    [github.com/elikorpus/teamhub-ftc](https://github.com/elikorpus/teamhub-ftc) and click **Fork** (top right).
    - **Owner:** your team's or school's GitHub organization if you have one, otherwise your own account.
    - **Repository name:** we suggest your team or organization name followed by `-teamhub`, for example
-     `example-robotics-teamhub` or `team-23209-teamhub`. It keeps your copy easy to recognize.
+     `example-robotics-teamhub` or `team-12345-teamhub`. It keeps your copy easy to recognize.
 
    Then click **Create fork**. Your copy lives at `https://github.com/OWNER/REPOSITORY-NAME`.
 2. **Download your copy to your computer** (use your fork's owner and name; the green **Code** button on your fork's

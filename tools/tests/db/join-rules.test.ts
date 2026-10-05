@@ -24,26 +24,26 @@ describe('who can join', () => {
   });
 
   it('only accepts allowed domains (and their subdomains) once a rule is set', async () => {
-    await setRules(['collegiateschool.org', 'example.edu']);
-    expect(await db.signUp('Student@CollegiateSchool.org', { teams: [TEAM_A] })).toBeTruthy();
-    expect(await db.signUp('kid@students.collegiateschool.org')).toBeTruthy();
-    expect(await db.signUp('teacher@example.edu')).toBeTruthy();
+    await setRules(['example.edu', 'example.org']);
+    expect(await db.signUp('Student@Example.edu', { teams: [TEAM_A] })).toBeTruthy();
+    expect(await db.signUp('kid@students.example.edu')).toBeTruthy();
+    expect(await db.signUp('teacher@example.org')).toBeTruthy();
     await expect(db.signUp('someone@gmail.com', { teams: [TEAM_A] })).rejects.toThrow(/TEAMHUB_EMAIL_NOT_ALLOWED/);
-    await expect(db.signUp('trick@notcollegiateschool.org')).rejects.toThrow(/TEAMHUB_EMAIL_NOT_ALLOWED/);
-    await expect(db.signUp('trick@collegiateschool.org.evil.com')).rejects.toThrow(/TEAMHUB_EMAIL_NOT_ALLOWED/);
+    await expect(db.signUp('trick@notexample.edu')).rejects.toThrow(/TEAMHUB_EMAIL_NOT_ALLOWED/);
+    await expect(db.signUp('trick@example.edu.evil.com')).rejects.toThrow(/TEAMHUB_EMAIL_NOT_ALLOWED/);
     // A blocked sign-up leaves nothing behind.
     expect(await db.admin(`select 1 from auth.users where email = 'someone@gmail.com'`)).toHaveLength(0);
   });
 
   it('accepts specific addresses an admin allowed, whatever their domain', async () => {
-    await setRules(['collegiateschool.org'], ['coach.smith@gmail.com']);
+    await setRules(['example.edu'], ['coach.smith@gmail.com']);
     expect(await db.signUp('Coach.Smith@gmail.com')).toBeTruthy();
     await expect(db.signUp('coach.jones@gmail.com')).rejects.toThrow(/TEAMHUB_EMAIL_NOT_ALLOWED/);
   });
 
   it('shows signed-out visitors the domains, but never the allowed addresses', async () => {
     const [r] = await db.as(null, 'select teamhub_join_rules() r');
-    expect(r.r).toEqual({ allowed_email_domains: ['collegiateschool.org'] });
+    expect(r.r).toEqual({ allowed_email_domains: ['example.edu'] });
     await expect(db.as(null, `select teamhub_email_allowed('coach.smith@gmail.com')`)).rejects.toThrow();
     await expect(db.as(mentor, `select teamhub_email_allowed('coach.smith@gmail.com')`)).rejects.toThrow();
     expect(await db.denied(null, 'select * from teamhub_allowed_emails')).toBe(true);

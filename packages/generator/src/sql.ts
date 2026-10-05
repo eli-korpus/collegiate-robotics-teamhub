@@ -178,11 +178,11 @@ export function configSyncSql(r: Resolved): string {
   lines.push(`delete from subteams where id not in (${c.subteams.map((s) => lit(s.id)).join(', ') || "''"});`);
   if (c.positions.length) {
     lines.push(
-      `insert into positions (id, name, team_id, grants_permissions, source) values\n  ${c.positions
-        .map((p) => `(${lit(p.id)}, ${lit(p.name)}, ${p.teamId ? lit(p.teamId) + '::uuid' : 'null'}, ${p.grantsPermissions}, 'config')`)
+      `insert into positions (id, name, team_id, grants_permissions, source, per_team) values\n  ${c.positions
+        .map((p) => `(${lit(p.id)}, ${lit(p.name)}, ${p.teamId && !p.perTeam ? lit(p.teamId) + '::uuid' : 'null'}, ${p.grantsPermissions}, 'config', ${!!p.perTeam})`)
         .join(
           ',\n  ',
-        )}\non conflict (id) do update set name = excluded.name, team_id = excluded.team_id,\n  grants_permissions = excluded.grants_permissions, source = 'config';`,
+        )}\non conflict (id) do update set name = excluded.name, team_id = excluded.team_id,\n  grants_permissions = excluded.grants_permissions, source = 'config', per_team = excluded.per_team;`,
     );
   }
   lines.push(

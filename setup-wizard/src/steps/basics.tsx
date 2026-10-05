@@ -55,7 +55,7 @@ export function Program({ onNext, onBack }: StepProps) {
   const [busy, setBusy] = useState(false);
   return (
     <StepShell title="Your program" subtitle="A program is your whole club: one school or organization. It can have one FTC team or several." onBack={onBack} onNext={onNext} nextDisabled={!c.program.name.trim()}>
-      <Field label="Program name" hint='e.g. "Collegiate Robotics": shown at the top of the dashboard and on the login page.'>
+      <Field label="Program name" hint='e.g. "Example Robotics": shown at the top of the dashboard and on the login page.'>
         {(id) => <Input id={id} autoFocus value={c.program.name} maxLength={80} onChange={(e) => update((x) => void (x.program.name = e.target.value))} />}
       </Field>
       <div className="space-y-1.5">

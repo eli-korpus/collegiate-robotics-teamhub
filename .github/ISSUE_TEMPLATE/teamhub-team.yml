@@ -16,7 +16,7 @@ body:
     attributes:
       label: FTC team number(s)
       description: Separate several teams with commas.
-      placeholder: "23208, 23209"
+      placeholder: "12345, 67890"
     validations:
       required: true
   - type: textarea

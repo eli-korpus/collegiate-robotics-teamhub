@@ -345,7 +345,7 @@ export function Segmented<T extends string>({
   size?: 'sm' | 'md';
 }) {
   return (
-    <div role="radiogroup" className={cn('inline-flex rounded-md bg-bg-subtle p-0.5', className)}>
+    <div role="radiogroup" className={cn('inline-flex rounded-md border border-border bg-bg-subtle p-0.5', className)}>
       {options.map((o) => (
         <button
           key={o.value}
@@ -354,9 +354,9 @@ export function Segmented<T extends string>({
           aria-checked={value === o.value}
           onClick={() => onChange(o.value)}
           className={cn(
-            'inline-flex items-center gap-1.5 rounded-[calc(var(--th-radius-md)-2px)] font-medium text-muted transition-colors',
+            'inline-flex items-center gap-1.5 rounded-[calc(var(--th-radius-md)-2px)] font-medium text-muted transition-colors hover:text-fg',
             size === 'sm' ? 'h-7 px-2 text-[12.5px]' : 'h-8 px-3 text-[13px]',
-            value === o.value && 'bg-surface text-fg shadow-sm',
+            value === o.value && 'bg-accent-soft text-fg shadow-sm ring-1 ring-accent/60',
           )}
         >
           {o.icon}

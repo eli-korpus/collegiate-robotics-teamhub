@@ -55,6 +55,7 @@ export default function SocialRoutes() {
   const sb = useSupabase();
   const qc = useQueryClient();
   const canDraft = useCan('social.draft');
+  const onePlatform = useModuleSettings<{ platforms: string[] }>('social').platforms.length === 1;
   const [view, setView] = useLocalStorage<'board' | 'calendar'>('teamhub-social-view', 'board');
   const [calView, setCalView] = useState<CalendarView>('month');
   const [cursor, setCursor] = useState(new Date());
@@ -89,7 +90,8 @@ export default function SocialRoutes() {
               <KanbanCard onClick={() => setSelected(p.id)} accent={PLATFORM_COLORS[p.platforms[0]]}>
                 <p className="line-clamp-2 text-[13px] font-medium">{firstLine(p.caption)}</p>
                 <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[11.5px] text-muted">
-                  {p.platforms.map((x) => (
+                  {!onePlatform &&
+                    p.platforms.map((x) => (
                     <span key={x} className="rounded bg-bg-subtle px-1.5">
                       {x}
                     </span>
@@ -127,13 +129,15 @@ function PostDialog({ post, draft, onClose }: { post: Post | null; draft: string
   const confirm = useConfirm();
   const scope = useTeamScope();
   const { platforms } = useModuleSettings<{ platforms: string[] }>('social');
+  // One platform: every post goes there, so don't ask (posts saved earlier keep what they had).
+  const only = platforms.length === 1 ? platforms[0] : null;
   const social = useToolLink('social');
   const team = post ? post.team_id : scope;
   const approver = canWith(me, 'social.approve', team);
   const marker = canWith(me, 'social.mark_posted', team);
   const canEdit = !post || canWith(me, 'social.draft', team) || approver;
   const [v, setV] = useState({
-    platforms: post?.platforms ?? [],
+    platforms: post?.platforms ?? (only ? [only] : []),
     caption: post?.caption ?? '',
     media_ref: post?.media_ref ?? draft ?? '',
     scheduled_for: post?.scheduled_for ? toDateTimeInput(new Date(post.scheduled_for)) : '',
@@ -144,7 +148,7 @@ function PostDialog({ post, draft, onClose }: { post: Post | null; draft: string
     if (!v.caption.trim() && (status ?? post?.status ?? 'idea') !== 'idea') return toast.error('Write the caption first');
     if (v.posted_url && !/^https?:\/\//i.test(v.posted_url)) return toast.error('Post link must start with https://');
     const body = {
-      platforms: v.platforms,
+      platforms: only && !v.platforms.length ? [only] : v.platforms,
       caption: v.caption,
       media_ref: v.media_ref.trim() || null,
       scheduled_for: v.scheduled_for ? new Date(v.scheduled_for).toISOString() : null,
@@ -209,6 +213,7 @@ function PostDialog({ post, draft, onClose }: { post: Post | null; draft: string
           <span className="text-[12px] text-faint">TeamHub never posts for you: copy the caption and post it yourself.</span>
         </div>
         {approvedEdit && <Banner tone="warning">Changing the caption sends this post back for approval.</Banner>}
+        {!(only && v.platforms.every((x) => x === only)) && (
         <fieldset>
           <legend className="mb-1.5 text-[13px] font-medium">Where</legend>
           <div className="flex flex-wrap gap-1.5">
@@ -228,6 +233,7 @@ function PostDialog({ post, draft, onClose }: { post: Post | null; draft: string
             })}
           </div>
         </fieldset>
+        )}
         <Field label="Caption" hint={`${v.caption.length} characters`}>
           {(id) => (
             <div className="relative">

@@ -95,9 +95,9 @@ test.describe('update notice', () => {
 
 test.describe('who can join', () => {
   test('the sign-up page says which email to use', async ({ page }) => {
-    await page.route('**/rest/v1/rpc/teamhub_join_rules', (route) => route.fulfill({ json: { allowed_email_domains: ['collegiateschool.org'] } }));
+    await page.route('**/rest/v1/rpc/teamhub_join_rules', (route) => route.fulfill({ json: { allowed_email_domains: ['example.edu'] } }));
     await page.goto('/join');
-    await expect(page.getByText('Use your @collegiateschool.org email')).toBeVisible();
+    await expect(page.getByText('Use your @example.edu email')).toBeVisible();
   });
 
   test('admins can manage the allowed domains and addresses', async ({ page }) => {

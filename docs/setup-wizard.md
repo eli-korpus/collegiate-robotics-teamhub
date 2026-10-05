@@ -35,7 +35,7 @@ among your repositories, tells people what it is at a glance, and gives a tidy a
 | Your program | Suggested repository name |
 |---|---|
 | A school club with several teams, "Example Robotics" | `example-robotics-teamhub` |
-| A single team, #23209 "Gear Grinders" | `gear-grinders-teamhub` or `team-23209-teamhub` |
+| A single team, #12345 "Gear Grinders" | `gear-grinders-teamhub` or `team-12345-teamhub` |
 | An organization's account, "Example High School" | `example-hs-robotics-teamhub` |
 
 **What goes in the clone address:** `OWNER` is the account you forked to (your GitHub username, or your

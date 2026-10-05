@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Lock, Plus, Trash2 } from 'lucide-react';
 import { normalizeEmailDomain, positionIdFor, slugify, type PermissionGrant, type ProfileType } from '@teamhub/config-schema';
 import type { PermissionDefs } from '@teamhub/sdk/define';
-import { Badge, Button, Checkbox, IconButton, Input, Segmented, Select, Spinner, Switch } from '@teamhub/ui';
+import { Badge, Button, Checkbox, IconButton, Input, PendingAddHint, RemovableTag, Segmented, Spinner, submitOnBlur } from '@teamhub/ui';
 import { api } from '../api';
 import { Section, StepShell, Why } from '../components';
 import { SUGGESTED_FIELDS, useDraft } from '../draft';
@@ -26,7 +26,7 @@ export function People({ onNext, onBack }: StepProps) {
   const addPosition = (name: string) =>
     update((x) => {
       const id = positionIdFor(name);
-      if (!x.positions.some((p) => p.id === id)) x.positions.push({ id, name, teamId: null, grantsPermissions: true });
+      if (!x.positions.some((p) => p.id === id)) x.positions.push({ id, name, teamId: null, perTeam: false, grantsPermissions: true });
     });
 
   return (
@@ -34,12 +34,7 @@ export function People({ onNext, onBack }: StepProps) {
       <Section title="Subteams" description="One list used by People, Tasks, Notebook and Skills.">
         <div className="flex flex-wrap gap-2">
           {c.subteams.map((s, i) => (
-            <span key={s.id} className="inline-flex items-center gap-1 rounded-full border border-border bg-bg-subtle py-0.5 pl-3 pr-1 text-[13px]">
-              {s.name}
-              <IconButton label={`Remove ${s.name}`} size="sm" className="size-6" onClick={() => update((x) => void x.subteams.splice(i, 1))}>
-                <Trash2 className="size-3.5" />
-              </IconButton>
-            </span>
+            <RemovableTag key={s.id} label={s.name} onRemove={() => update((x) => void x.subteams.splice(i, 1))} />
           ))}
         </div>
         <form
@@ -52,11 +47,12 @@ export function People({ onNext, onBack }: StepProps) {
             setNewSub('');
           }}
         >
-          <Input value={newSub} onChange={(e) => setNewSub(e.target.value)} placeholder="Add a subteam (e.g. Strategy)" />
+          <Input value={newSub} onChange={(e) => setNewSub(e.target.value)} onBlur={submitOnBlur} placeholder="Add a subteam (e.g. Strategy)" aria-label="New subteam" />
           <Button type="submit" icon={<Plus className="size-4" />}>
             Add
           </Button>
         </form>
+        <PendingAddHint text={newSub} />
       </Section>
 
       <Section
@@ -66,12 +62,7 @@ export function People({ onNext, onBack }: StepProps) {
         {domains.length > 0 && (
           <div className="flex flex-wrap gap-2">
             {domains.map((d, i) => (
-              <span key={d} className="inline-flex items-center gap-1 rounded-full border border-border bg-bg-subtle py-0.5 pl-3 pr-1 text-[13px]">
-                @{d}
-                <IconButton label={`Remove ${d}`} size="sm" className="size-6" onClick={() => update((x) => void x.join.allowedEmailDomains.splice(i, 1))}>
-                  <Trash2 className="size-3.5" />
-                </IconButton>
-              </span>
+              <RemovableTag key={d} label={`@${d}`} removeLabel={`Remove ${d}`} onRemove={() => update((x) => void x.join.allowedEmailDomains.splice(i, 1))} />
             ))}
           </div>
         )}
@@ -81,7 +72,7 @@ export function People({ onNext, onBack }: StepProps) {
             e.preventDefault();
             if (!newDomain.trim()) return;
             const d = normalizeEmailDomain(newDomain);
-            if (!d) return setDomainError('That doesn’t look like an email domain. Type the part after the @, like collegiateschool.org.');
+            if (!d) return setDomainError('That doesn’t look like an email domain. Type the part after the @, like yourschool.org.');
             setDomainError(null);
             update((x) => {
               x.join ??= { allowedEmailDomains: [] };
@@ -90,11 +81,12 @@ export function People({ onNext, onBack }: StepProps) {
             setNewDomain('');
           }}
         >
-          <Input value={newDomain} onChange={(e) => setNewDomain(e.target.value)} placeholder="Add a domain (e.g. collegiateschool.org)" aria-label="Email domain" />
+          <Input value={newDomain} onChange={(e) => setNewDomain(e.target.value)} onBlur={submitOnBlur} placeholder="Add a domain (e.g. yourschool.org)" aria-label="Email domain" />
           <Button type="submit" icon={<Plus className="size-4" />}>
             Add
           </Button>
         </form>
+        {!domainError && <PendingAddHint text={newDomain} />}
         {domainError && <p className="text-[12.5px] text-danger">{domainError}</p>}
         {domains.length > 0 && (
           <p className="text-[12.5px] text-muted">
@@ -107,21 +99,30 @@ export function People({ onNext, onBack }: StepProps) {
           dashboard (Admin &gt; Who can join).
         </Why>
       </Section>
-      <Section title="Positions" description="Named responsibilities like “3D Print Farm Manager”. Tabs use them for permissions and routing (e.g. print jobs go to whoever holds that position).">
+      <Section title="Positions" description="Named responsibilities like “3D Print Farm Manager”. Tabs use them for permissions and routing (e.g. print jobs go to whoever holds that position). With several teams, pick “Whole program” for one person covering every team, or “Each team has its own” so every team can have its own holder.">
         {c.positions.length > 0 && (
           <ul className="divide-y divide-border rounded-md border border-border">
             {c.positions.map((p, i) => (
               <li key={p.id} className="flex flex-wrap items-center gap-2 px-3 py-2">
                 <span className="min-w-32 flex-1 text-[13.5px] font-medium">{p.name}</span>
                 {c.program.multiTeam && (
-                  <Select value={p.teamId ?? ''} onChange={(e) => update((x) => void (x.positions[i].teamId = e.target.value || null))} className="w-40" aria-label="Applies to">
-                    <option value="">Whole program</option>
-                    {c.teams.map((t) => (
-                      <option key={t.id} value={t.id}>
-                        {t.name || `Team ${t.shortCode}`}
-                      </option>
-                    ))}
-                  </Select>
+                  <div className="flex flex-col items-end gap-0.5">
+                    <Segmented
+                      size="sm"
+                      value={p.perTeam ? 'team' : 'program'}
+                      onChange={(v) =>
+                        update((x) => {
+                          x.positions[i].perTeam = v === 'team';
+                          x.positions[i].teamId = null;
+                        })
+                      }
+                      options={[
+                        { value: 'program', label: 'Whole program' },
+                        { value: 'team', label: 'Each team has its own' },
+                      ]}
+                    />
+                    {p.teamId && !p.perTeam && <span className="text-[11.5px] text-muted">Now: only {c.teams.find((t) => t.id === p.teamId)?.name ?? 'one team'}. Pick an option to change it.</span>}
+                  </div>
                 )}
                 <IconButton label={`Remove ${p.name}`} size="sm" onClick={() => update((x) => void x.positions.splice(i, 1))}>
                   <Trash2 className="size-4" />
@@ -148,11 +149,12 @@ export function People({ onNext, onBack }: StepProps) {
             setNewPos('');
           }}
         >
-          <Input value={newPos} onChange={(e) => setNewPos(e.target.value)} placeholder="Add a position" />
+          <Input value={newPos} onChange={(e) => setNewPos(e.target.value)} onBlur={submitOnBlur} placeholder="Add a position" aria-label="New position" />
           <Button type="submit" icon={<Plus className="size-4" />}>
             Add
           </Button>
         </form>
+        <PendingAddHint text={newPos} />
         <p className="text-[12.5px] text-muted">Mentors can also create badge-only positions later in the dashboard. Proven abilities (“Certified driver”) belong in Skills & Training.</p>
       </Section>
 
@@ -289,7 +291,6 @@ export function Permissions({ onNext, onBack }: StepProps) {
         <p>Your choices are compiled into the database’s access rules, so they can’t be bypassed: the dashboard only hides buttons you can’t use. Changing them later is just an Edit in this wizard.</p>
         <p>Approvals are tiered: captains and mentors approve members; only mentors and admins approve captains and mentors.</p>
       </Why>
-      <Switch checked={c.features.email} onChange={() => {}} disabled label="Email confirmation" description="Off: no email provider needed. A captain or mentor approves every signup. Turn on later from the wizard home after adding SMTP in Supabase." />
     </StepShell>
   );
 }

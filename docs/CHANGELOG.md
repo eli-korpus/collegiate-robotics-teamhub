@@ -13,12 +13,6 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
-### Security
-
-- Defense in depth: signed-out visitors can no longer use any database table or function except the keep-alive ping
-  and the sign-up page's email rule. Row-level security already hid every row from them, so no data was exposed.
-  Run `npm run setup` > Update to apply it.
-
 ## [1.0.0] - 2026-10-04
 
 ### Added
@@ -52,3 +46,5 @@ How to update your dashboard: [docs/updating.md](updating.md).
 - Release tooling for maintainers: `npm run release`, a release workflow that runs an upgrade test against the
   previous version and publishes the GitHub Release, and `.github/SECURITY.md`.
 - Guides: `docs/updating.md` (including rolling back on each host) and `docs/releasing.md`.
+- Signed-out visitors can only reach the keep-alive ping and the sign-up page's email rule: every table and every
+  other database function is closed to them, on top of row-level security.

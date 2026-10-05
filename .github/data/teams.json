@@ -1,1 +1,16 @@
-[]
+[
+  {
+    "number": 23208,
+    "name": "Collegiate Dutchmen Blue",
+    "location": "New York, NY, USA",
+    "joined": "2026-10-05",
+    "issue": 1
+  },
+  {
+    "number": 23209,
+    "name": "Collegiate Dutchmen B",
+    "location": "New York, NY, USA",
+    "joined": "2026-10-05",
+    "issue": 1
+  }
+]

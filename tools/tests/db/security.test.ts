@@ -1,5 +1,6 @@
 import { beforeAll, describe, expect, it } from 'vitest';
 import { createTestDb, TEAM_A, TEAM_B, withModules, type TestDb } from './harness';
+import { readFileSync } from 'node:fs';
 
 /** Regression tests for the v1 security review: privilege escalation, data exposure and integrity holes. */
 describe('security review', () => {
@@ -121,4 +122,27 @@ describe('editing other people’s profiles', () => {
     expect(await db.denied(other, `update profiles set display_name = 'Hacked' where id = $1 returning id`, [student])).toBe(true);
     expect(await db.denied(other, `insert into profiles_private (user_id, data) values ($1, '{}')`, [mentor])).toBe(true);
   });
+});
+
+describe('signed-out visitors', () => {
+  it('can only call the keep-alive ping and the sign-up email rule, and touch no table', async () => {
+    const db = await createTestDb();
+    const all = Object.keys(JSON.parse(readFileSync('tools/examples/demo.config.json', 'utf8')).modules);
+    await db.applyConfig(withModules(all), true);
+    const fns = await db.admin<{ name: string }>(
+      `select p.proname as name from pg_proc p join pg_namespace n on n.oid = p.pronamespace
+       where n.nspname = 'public' and has_function_privilege('anon', p.oid, 'execute') order by 1`,
+    );
+    expect(fns.map((f) => f.name)).toEqual(['teamhub_join_rules', 'teamhub_ping']);
+    const tables = await db.admin(
+      `select c.relname from pg_class c join pg_namespace n on n.oid = c.relnamespace
+       where n.nspname = 'public' and c.relkind in ('r', 'v')
+         and (has_table_privilege('anon', c.oid, 'select') or has_table_privilege('anon', c.oid, 'insert')
+           or has_table_privilege('anon', c.oid, 'update') or has_table_privilege('anon', c.oid, 'delete'))`,
+    );
+    expect(tables).toEqual([]);
+    // Signed-in people still use the app's functions.
+    const [r] = await db.as(await db.user('Member', { [TEAM_A]: 'member' }), `select teamhub_can('tasks.assign', $1) ok`, [TEAM_A]);
+    expect(typeof r.ok).toBe('boolean');
+  }, 300_000);
 });

@@ -141,10 +141,8 @@ grant select, insert, update, delete on all tables in schema public to authentic
 grant all on all tables in schema public to service_role;
 grant usage, select on all sequences in schema public to authenticated, service_role;
 grant execute on all functions in schema public to authenticated, service_role;
--- Signed-out visitors only need the keep-alive ping (tables are never readable without signing in).
-grant execute on function teamhub_ping() to anon;
--- The sign-up page shows which email domains are accepted.
-grant execute on function teamhub_join_rules() to anon;
+-- Signed-out visitors get only the keep-alive ping and the sign-up page's email rule: see ANON_LOCKDOWN, which runs
+-- after every tab's rules.
 -- Internal helpers stay locked (re-applied because the grant above covers every function).
 revoke execute on function teamhub_drop_policies(text), teamhub_make_dormant(text), teamhub_drop_prefix(text),
   teamhub_trash(text, text[]), teamhub_notify(uuid[], text, text), teamhub_realtime_add(text),

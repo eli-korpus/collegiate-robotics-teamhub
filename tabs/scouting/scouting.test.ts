@@ -14,7 +14,7 @@ describe('scouting', () => {
     await db.as(member, `insert into sct_entries (template_id, event_code, team_number, scout) values ($1, 'EV1', 1234, $2)`, [id, member]);
     expect(await db.denied(member, `insert into sct_picklist (event_code, team_id) values ('EV1', $1)`, [TEAM_A])).toBe(true);
     await db.as(lead, `insert into sct_picklist (event_code, team_id, ranking) values ('EV1', $1, '[{"team":1234}]')`, [TEAM_A]);
-    expect(await db.as(null, 'select * from sct_entries')).toEqual([]);
+    expect(await db.denied(null, 'select * from sct_entries')).toBe(true);
   });
 });
 

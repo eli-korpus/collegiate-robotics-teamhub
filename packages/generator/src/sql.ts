@@ -149,6 +149,17 @@ export const AVATAR_BUCKET: BucketDef = {
   deleteAnyPerm: 'core.avatar',
 };
 
+/**
+ * Last step of every plan, so it covers everything any tab created: signed-out visitors can't touch a single table and
+ * can only call the keep-alive ping and the sign-up page's email rule. Row-level security already hides every row from
+ * them; this is a second layer. (Signed-in users keep their explicit grants from database/policies.sql, and triggers
+ * don't need call permission.)
+ */
+export const ANON_LOCKDOWN = `-- Signed-out visitors
+revoke select, insert, update, delete on all tables in schema public from anon;
+revoke execute on all functions in schema public from public, anon;
+grant execute on function teamhub_ping(), teamhub_join_rules() to anon;`;
+
 /** Syncs config-owned rows (teams, subteams, config positions, season, first-run links). */
 export function configSyncSql(r: Resolved): string {
   const c = r.config;
@@ -303,6 +314,7 @@ export function planSql(r: Resolved, db: DbState | null, opts: PlanOptions = {})
     pol.push(`-- integration ${ix.manifest.id}\nselect teamhub_drop_policies(${lit(ix.manifest.prefix)});`);
     if (activeIx.has(ix.manifest.id) && ix.policies.trim()) pol.push(ix.policies);
   }
+  pol.push(ANON_LOCKDOWN);
   steps.push({ title: 'File storage', sql: buckets.join('\n') });
   steps.push({ title: 'Access rules (RLS)', sql: pol.join('\n\n') });
 

@@ -85,8 +85,8 @@ describe('core schema + RLS', () => {
   });
 
   it('notifications are private and anon sees nothing', async () => {
-    expect(await db.as(null, 'select * from profiles')).toEqual([]);
-    expect(await db.as(null, 'select * from notifications')).toEqual([]);
+    expect(await db.denied(null, 'select * from profiles')).toBe(true);
+    expect(await db.denied(null, 'select * from notifications')).toBe(true);
     const theirs = await db.as(memberB, 'select * from notifications where user_id <> $1', [memberB]);
     expect(theirs).toEqual([]);
   });

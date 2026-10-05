@@ -235,8 +235,8 @@ function MyOrder({ drive: d, order }: { drive: Drive; order: Order | null }) {
                 </div>
               ))}
               {canOrder && i.sizes.length > 1 && shown.length > 0 && (
-                <button className="text-[12px] text-accent hover:underline" onClick={() => setQty(i.id, i.sizes.find((z) => !qty(i.id, z)) ?? i.sizes[0], 1)}>
-                  + another size
+                <button type="button" className="inline-flex items-center gap-1 text-[12px] text-accent hover:underline" onClick={() => setQty(i.id, i.sizes.find((z) => !qty(i.id, z)) ?? i.sizes[0], 1)}>
+                  <Plus className="size-3.5" /> Another size
                 </button>
               )}
             </li>

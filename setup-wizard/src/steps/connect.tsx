@@ -385,13 +385,15 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
                 ))}
                 <li>Deploy server functions and configure sign-in</li>
               </ul>
-              <button className="text-[12.5px] text-accent hover:underline" onClick={() => setShowSql(!showSql)}>
-                {showSql ? 'Hide' : 'Show'} the SQL
-              </button>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1">
+                <Button variant="primary" onClick={apply} loading={busy}>
+                  {draft.done.applied ? 'Apply again' : 'Build my database'}
+                </Button>
+                <button type="button" className="text-[12.5px] text-accent hover:underline" onClick={() => setShowSql(!showSql)} aria-expanded={showSql}>
+                  {showSql ? 'Hide' : 'Show'} the SQL
+                </button>
+              </div>
               {showSql && <pre className="max-h-72 overflow-auto rounded-md bg-bg-subtle p-3 text-[11px] leading-relaxed">{plan.sql}</pre>}
-              <Button variant="primary" onClick={apply} loading={busy}>
-                {draft.done.applied ? 'Apply again' : 'Build my database'}
-              </Button>
             </>
           )}
           {log && <ApplyLog log={log} />}

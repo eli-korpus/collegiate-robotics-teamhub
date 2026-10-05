@@ -27,6 +27,10 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ### Fixed
 
+- Setup wizard > Publish: after a failed upload, pressing the button again said "Pushed to GitHub" without uploading
+  anything. It now uploads whatever is waiting, only reports success when GitHub accepts it, and explains failures in
+  plain language with a fix: use your private no-reply email (GitHub's email privacy block), get newer changes
+  first, or which account to sign in with.
 - Setup wizard > Tab options: clicking an option's description could remove its tags one by one (for example
   the Social Media platforms) or toggle a To Manufacture position.
 

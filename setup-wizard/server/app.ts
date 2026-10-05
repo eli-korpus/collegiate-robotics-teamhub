@@ -20,7 +20,7 @@ import {
 import { allCorePermissions, modulePermissions } from '@teamhub/sdk/define';
 import { forgetCreds, getCreds, rememberedOnDisk, setCreds } from './credentials';
 import { Mgmt, MgmtError, projectRefOf, projectUrl, type FetchLike } from './mgmt';
-import { gitStatus, publish, sh } from './git';
+import { gitStatus, publish, sh, useNoreplyEmail } from './git';
 import { checkForUpdate, installDependencies, mergeRelease, readState, revertUpdate, writeState } from './update';
 import { checkSite, existingHostPaths, hostFiles, keepaliveFile, updatesWorkflowFile, writeHostFiles } from './hosting';
 import { BACKUP_ROOT, exportData, importData } from './backup';
@@ -406,9 +406,11 @@ export function createApp(deps: AppDeps = {}) {
   app.post('/git/publish', async (c) => {
     const { message } = await c.req.json<{ message?: string }>();
     const paths = ['team', ...existingHostPaths()].filter((p) => existsSync(join(REPO_ROOT, p)));
-    const res = await publish(message ?? 'Update TeamHub config', paths);
-    return c.json({ ok: res.ok, log: (res.stdout + res.stderr).trim() });
+    const login = await sh('gh', ['api', 'user', '--jq', '.login']);
+    const repo = await sh('gh', ['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner']);
+    return c.json(await publish(message ?? 'Update TeamHub config', paths, undefined, { login: login.ok ? login.stdout.trim() : null, repo: repo.ok ? repo.stdout.trim() : null }));
   });
+  app.post('/git/use-noreply-email', async (c) => c.json(await useNoreplyEmail()));
   app.post('/git/pull', async (c) => {
     const res = await sh('git', ['pull', '--ff-only'], { timeout: 180_000 });
     return c.json({ ok: res.ok, log: (res.stdout + res.stderr).trim() });

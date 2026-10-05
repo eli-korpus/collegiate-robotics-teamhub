@@ -18,34 +18,76 @@ function useGit() {
   return { git, refresh };
 }
 
+interface PublishResult {
+  ok: boolean;
+  message: string;
+  problem?: string;
+  fix?: 'email' | 'pull' | null;
+  log: string;
+}
+
 export function PublishButton({ message, onDone, label = 'Commit & push to GitHub' }: { message: string; onDone?: () => void; label?: string }) {
-  const [busy, setBusy] = useState(false);
-  const [log, setLog] = useState<string | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [result, setResult] = useState<PublishResult | null>(null);
+  const [details, setDetails] = useState(false);
+  const run = async () => {
+    setBusy('Publishing…');
+    try {
+      const r = await api<PublishResult>('/git/publish', { message });
+      setResult(r);
+      if (r.ok) {
+        toast.success(r.message);
+        onDone?.();
+      }
+    } catch (e) {
+      setResult({ ok: false, message: 'Not uploaded to GitHub yet.', problem: (e as Error).message, log: '' });
+    } finally {
+      setBusy(null);
+    }
+  };
+  const fix = async () => {
+    if (!result?.fix) return;
+    setBusy(result.fix === 'email' ? 'Switching to your no-reply email…' : 'Getting the changes from GitHub…');
+    try {
+      const r = await api<{ ok: boolean; log: string }>(result.fix === 'email' ? '/git/use-noreply-email' : '/git/pull', {});
+      if (!r.ok) {
+        setResult({ ...result, problem: `That didn't work: ${r.log.split('\n')[0]}`, log: `${result.log}\n\n${r.log}` });
+        return;
+      }
+    } finally {
+      setBusy(null);
+    }
+    await run();
+  };
   return (
     <div className="space-y-2">
-      <Button
-        variant="primary"
-        icon={<GitBranch className="size-4" />}
-        loading={busy}
-        onClick={async () => {
-          setBusy(true);
-          try {
-            const r = await api<{ ok: boolean; log: string }>('/git/publish', { message });
-            setLog(r.log);
-            if (r.ok) {
-              toast.success('Pushed to GitHub');
-              onDone?.();
-            } else toast.error('Git push failed. See the details below.');
-          } catch (e) {
-            toast.error((e as Error).message);
-          } finally {
-            setBusy(false);
-          }
-        }}
-      >
+      <Button variant="primary" icon={<GitBranch className="size-4" />} loading={!!busy} onClick={run}>
         {label}
       </Button>
-      {log && <pre className="max-h-40 overflow-auto rounded-md bg-bg-subtle p-2 text-[11.5px]">{log}</pre>}
+      {busy && <p className="text-[12.5px] text-muted">{busy}</p>}
+      {result && !busy && (
+        <Banner tone={result.ok ? 'success' : 'danger'} title={result.message}>
+          {result.problem && <p>{result.problem}</p>}
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            {!result.ok && result.fix && (
+              <Button size="sm" variant="primary" onClick={fix}>
+                {result.fix === 'email' ? 'Use my no-reply email and try again' : 'Get the changes and try again'}
+              </Button>
+            )}
+            {!result.ok && !result.fix && (
+              <Button size="sm" onClick={run}>
+                Try again
+              </Button>
+            )}
+            {result.log && (
+              <button type="button" className="text-[12.5px] text-accent hover:underline" aria-expanded={details} onClick={() => setDetails(!details)}>
+                {details ? 'Hide' : 'Show'} details
+              </button>
+            )}
+          </div>
+          {details && result.log && <pre className="mt-2 max-h-40 overflow-auto rounded-md bg-bg-subtle p-2 text-[11.5px]">{result.log}</pre>}
+        </Banner>
+      )}
     </div>
   );
 }

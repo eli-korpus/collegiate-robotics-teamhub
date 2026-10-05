@@ -112,6 +112,7 @@ test.describe('who can join', () => {
 
 test.describe('required fields', () => {
   test('saving with an empty required field shows a message instead of saving', async ({ page }) => {
+    test.skip(!modules.includes('tasks'), 'Uses the Tasks tab');
     const errors = watchErrors(page);
     let inserts = 0;
     await mockSupabase(page);

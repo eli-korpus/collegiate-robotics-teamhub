@@ -1,0 +1,396 @@
+{
+  "configVersion": 1,
+  "program": {
+    "name": "Collegiate Robotics",
+    "logo": "branding/program.webp?v=muvrlq35",
+    "multiTeam": true
+  },
+  "teams": [
+    {
+      "id": "521d322f-ad78-4183-bc9a-a8d9af76d6fc",
+      "number": 23208,
+      "name": "Collegiate Dutchmen Blue",
+      "shortCode": "A",
+      "color": "#2563EB",
+      "logo": null,
+      "logoDark": null,
+      "school": "Collegiate School",
+      "city": "New York, NY"
+    },
+    {
+      "id": "f217c63f-b0e3-4913-8b54-10a3929c0221",
+      "number": 23209,
+      "name": "Collegiate Dutchmen Orange",
+      "shortCode": "B",
+      "color": "#FF8800",
+      "logo": null,
+      "logoDark": null,
+      "school": "Collegiate School",
+      "city": "New York, NY"
+    }
+  ],
+  "theme": {
+    "accent": "#3B82F6",
+    "secondary": null,
+    "corners": "soft",
+    "defaultMode": "system"
+  },
+  "season": "2026–27",
+  "modules": {
+    "announcements": {
+      "state": "active",
+      "settings": {}
+    },
+    "attendance": {
+      "state": "active",
+      "settings": {
+        "trackHours": false,
+        "selfCheckIn": false,
+        "codeRotateSeconds": 30,
+        "includeMentors": false
+      }
+    },
+    "bulletin": {
+      "state": "active",
+      "settings": {}
+    },
+    "calendar": {
+      "state": "active",
+      "settings": {}
+    },
+    "polls": {
+      "state": "active",
+      "settings": {}
+    },
+    "code-hub": {
+      "state": "active",
+      "settings": {}
+    },
+    "manufacture": {
+      "state": "active",
+      "settings": {
+        "methods": [
+          {
+            "id": "fdm",
+            "name": "3D printing",
+            "positions": [
+              "pos_3d_print_farm_manager"
+            ]
+          },
+          {
+            "id": "machine_shop",
+            "name": "Outsourced",
+            "positions": [
+              "pos_3d_print_farm_manager"
+            ]
+          }
+        ],
+        "autoDeleteDays": 14,
+        "maxFileMB": 25
+      }
+    },
+    "notebook": {
+      "state": "active",
+      "settings": {}
+    },
+    "purchases": {
+      "state": "active",
+      "settings": {}
+    },
+    "competition-day": {
+      "state": "active",
+      "settings": {}
+    },
+    "checklists": {
+      "state": "active",
+      "settings": {}
+    },
+    "judging": {
+      "state": "active",
+      "settings": {}
+    },
+    "events": {
+      "state": "active",
+      "settings": {}
+    },
+    "rules": {
+      "state": "active",
+      "settings": {}
+    },
+    "scouting": {
+      "state": "active",
+      "settings": {}
+    },
+    "media": {
+      "state": "active",
+      "settings": {
+        "membersCanUpload": true,
+        "maxPhotosPerAlbum": 50
+      }
+    },
+    "social": {
+      "state": "active",
+      "settings": {
+        "platforms": [
+          "Instagram"
+        ]
+      }
+    }
+  },
+  "subteams": [
+    {
+      "id": "build",
+      "name": "Build"
+    },
+    {
+      "id": "programming",
+      "name": "Programming"
+    },
+    {
+      "id": "cad",
+      "name": "CAD"
+    },
+    {
+      "id": "outreach",
+      "name": "Outreach"
+    }
+  ],
+  "positions": [
+    {
+      "id": "pos_lead_programmer",
+      "name": "Lead Programmer",
+      "teamId": null,
+      "perTeam": false,
+      "grantsPermissions": true
+    },
+    {
+      "id": "pos_drive_coach",
+      "name": "Drive Coach",
+      "teamId": null,
+      "perTeam": true,
+      "grantsPermissions": true
+    },
+    {
+      "id": "pos_driver_1",
+      "name": "Driver 1",
+      "teamId": null,
+      "perTeam": true,
+      "grantsPermissions": true
+    },
+    {
+      "id": "pos_driver_2",
+      "name": "Driver 2",
+      "teamId": null,
+      "perTeam": true,
+      "grantsPermissions": true
+    },
+    {
+      "id": "pos_3d_print_farm_manager",
+      "name": "3D Print Farm Manager",
+      "teamId": null,
+      "perTeam": false,
+      "grantsPermissions": true
+    },
+    {
+      "id": "pos_media_lead",
+      "name": "Media Lead",
+      "teamId": null,
+      "perTeam": false,
+      "grantsPermissions": true
+    },
+    {
+      "id": "pos_scouting_lead",
+      "name": "Scouting Lead",
+      "teamId": null,
+      "perTeam": false,
+      "grantsPermissions": true
+    },
+    {
+      "id": "pos_lead_cad_designer",
+      "name": "Lead CAD Designer",
+      "teamId": null,
+      "perTeam": false,
+      "grantsPermissions": true
+    }
+  ],
+  "profileFields": [
+    {
+      "id": "grade",
+      "label": "Grade",
+      "type": "select",
+      "options": [
+        "9",
+        "10",
+        "11",
+        "12"
+      ],
+      "private": false
+    },
+    {
+      "id": "subteam",
+      "label": "Subteam",
+      "type": "select",
+      "options": [
+        "Build",
+        "Programming",
+        "CAD",
+        "Outreach"
+      ],
+      "private": false
+    },
+    {
+      "id": "shirt_size",
+      "label": "Shirt size",
+      "type": "select",
+      "options": [
+        "XS",
+        "S",
+        "M",
+        "L",
+        "XL",
+        "XXL"
+      ],
+      "private": false
+    }
+  ],
+  "permissions": {
+    "people.approve_leaders": {
+      "types": [
+        "captain"
+      ],
+      "positions": []
+    },
+    "people.approve_members": {
+      "types": [
+        "captain"
+      ],
+      "positions": []
+    },
+    "people.assign_positions": {
+      "types": [
+        "captain"
+      ],
+      "positions": []
+    },
+    "core.edit_links": {
+      "types": [
+        "captain",
+        "mentor"
+      ],
+      "positions": []
+    },
+    "competition-day.set_event": {
+      "types": [
+        "captain",
+        "mentor"
+      ],
+      "positions": []
+    },
+    "judging.manage": {
+      "types": [
+        "captain",
+        "mentor",
+        "member"
+      ],
+      "positions": []
+    },
+    "checklists.manage_lists": {
+      "types": [
+        "captain",
+        "mentor",
+        "member"
+      ],
+      "positions": []
+    },
+    "scouting.manage_template": {
+      "types": [
+        "captain",
+        "mentor"
+      ],
+      "positions": [
+        "pos_scouting_lead"
+      ]
+    },
+    "social.approve": {
+      "types": [],
+      "positions": [
+        "pos_media_lead"
+      ]
+    }
+  },
+  "home": {
+    "defaults": {
+      "member": [
+        "core:request-info",
+        "core:team",
+        "core:links",
+        "core:activity",
+        "announcements:unread",
+        "attendance:my-attendance",
+        "calendar:up-next",
+        "polls:open",
+        "manufacture:my-parts",
+        "competition-day:next-match",
+        "events:next-event",
+        "media:latest"
+      ],
+      "captain": [
+        "core:approvals",
+        "core:request-info",
+        "core:team",
+        "core:links",
+        "core:activity",
+        "announcements:unread",
+        "attendance:take-today",
+        "attendance:my-attendance",
+        "calendar:up-next",
+        "polls:open",
+        "manufacture:queue",
+        "notebook:recent",
+        "competition-day:next-match",
+        "events:next-event",
+        "media:latest",
+        "social:queue"
+      ],
+      "mentor": [
+        "core:approvals",
+        "core:request-info",
+        "core:team",
+        "core:links",
+        "core:activity",
+        "announcements:unread",
+        "attendance:take-today",
+        "calendar:up-next",
+        "polls:open",
+        "manufacture:queue",
+        "notebook:recent",
+        "purchases:to-order",
+        "competition-day:next-match",
+        "events:next-event",
+        "media:latest",
+        "social:queue"
+      ]
+    }
+  },
+  "nav": {
+    "order": []
+  },
+  "join": {
+    "allowedEmailDomains": [
+      "collegiateschool.org"
+    ]
+  },
+  "hosting": {
+    "provider": null,
+    "url": null,
+    "basePath": "/"
+  },
+  "supabase": {
+    "url": "https://acnhrbixkbmhainutkwl.supabase.co",
+    "anonKey": "sb_publishable_AVgNyPYJtRudAe-hyNro_Q_LExcBTIT",
+    "projectRef": "acnhrbixkbmhainutkwl"
+  },
+  "features": {
+    "email": false
+  }
+}

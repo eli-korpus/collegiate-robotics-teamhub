@@ -13,6 +13,14 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Fixed
+
+- Missing styles: since v1.0.0 parts of the dashboard and the setup wizard lost their styling, and the setup wizard's
+  tab **Details** windows opened off-screen, so the buttons seemed to do nothing.
+- Setup wizard: the preview's light/dark switch now changes the whole preview, not just the text.
+- Setup wizard: the season is now picked from a list (last, this or next season) instead of typed, with a clearer
+  explanation that seasons are named by their years, not the game's name.
+
 ## [1.0.0] - 2026-10-04
 
 ### Added

@@ -2,7 +2,6 @@
 @import './generated/theme.css';
 
 /* Tailwind scans these for class names (they live outside this app's folder). */
-@source '../../../packages/ui/src';
-@source '../../../packages/sdk/src';
-@source '../../../modules';
-@source '../../../integrations';
+@source '../../packages/ui/src';
+@source '../../packages/sdk/src';
+@source '../../tabs';

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { CheckCircle2, Clock, GitBranch, Database, Plus, Trash2, Upload, Wallet } from 'lucide-react';
-import { Banner, Button, Card, Field, IconButton, Input, PRESET_ACCENTS, Segmented, Spinner, cn, deriveAccent, toast } from '@teamhub/ui';
+import { Banner, Button, Card, Field, IconButton, Input, PRESET_ACCENTS, Segmented, Select, Spinner, cn, deriveAccent, toast } from '@teamhub/ui';
+import { defaultSeasonLabel, seasonYear } from '@teamhub/config-schema/util';
 import { getTeam } from '@teamhub/sdk/ftcscout';
 import { api } from '../api';
 import { processLogo, Section, StepShell, Why } from '../components';
@@ -331,10 +332,28 @@ export function Look({ onNext, onBack }: StepProps) {
         />
       </Section>
       <Section title="Season">
-        <Field label="Current season label" hint="Used to tag data and pick the FTCScout season. Format 2026–27.">
-          {(id) => <Input id={id} value={draft.config.season} onChange={(e) => update((x) => void (x.season = e.target.value.replace('-', '–')))} className="w-40" />}
+        <Field
+          label="Current FTC season"
+          hint="Already picked for you from today's date. Seasons are named by their years (they start in September), not by the game's name. It sets which FTCScout results you see and tags new data. You only change it once a year, with New Season."
+        >
+          {(id) => (
+            <Select id={id} value={draft.config.season} onChange={(e) => update((x) => void (x.season = e.target.value))} className="w-56">
+              {seasonChoices(draft.config.season).map((s) => (
+                <option key={s} value={s}>
+                  {s} season
+                </option>
+              ))}
+            </Select>
+          )}
         </Field>
       </Section>
     </StepShell>
   );
+}
+
+/** Last, current and next FTC season (plus the saved one, if it's something else). */
+function seasonChoices(saved: string): string[] {
+  const y = seasonYear(defaultSeasonLabel());
+  const list = [y - 1, y, y + 1].map((n) => defaultSeasonLabel(new Date(n, 8, 1)));
+  return list.includes(saved) ? list : [saved, ...list];
 }

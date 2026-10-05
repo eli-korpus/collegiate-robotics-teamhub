@@ -1,7 +1,7 @@
 @import '@teamhub/ui/styles.css';
 
-@source '../../../packages/ui/src';
-@source '../../../packages/sdk/src';
+@source '../../packages/ui/src';
+@source '../../packages/sdk/src';
 
 :root {
   --accent: #2563eb;

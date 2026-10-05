@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { icons, ChevronDown, ChevronRight, HelpCircle, ArrowLeft, ArrowRight, Box } from 'lucide-react';
-import { Button, Input, Select, Switch, Textarea, cn, deriveAccent, dominantColor, readableOn } from '@teamhub/ui';
+import { Button, Input, Select, Switch, Textarea, deriveAccent, dominantColor, readableOn } from '@teamhub/ui';
 import type { JsonSchema } from './api';
 
 export function ModuleIcon({ name, className }: { name: string; className?: string }) {
@@ -260,7 +260,7 @@ export function Preview({
   } as React.CSSProperties;
   const cats = ['team', 'engineering', 'competition', 'outreach'];
   return (
-    <div className={cn(dark && 'dark')} style={vars}>
+    <div className={dark ? 'dark' : 'light'} style={vars}>
       <div className="overflow-hidden rounded-lg border border-border bg-bg text-fg shadow-md" style={{ fontSize: 11 }}>
         <div className="flex h-[360px]">
           <div className="w-[140px] shrink-0 space-y-1 border-r border-border bg-bg-subtle/60 p-2">

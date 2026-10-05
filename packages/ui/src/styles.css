@@ -2,7 +2,8 @@
 @import 'tailwindcss';
 @import '@fontsource-variable/inter';
 
-@custom-variant dark (&:where(.dark, .dark *));
+/* .light / .dark on any element force that theme inside it (e.g. the setup wizard's light/dark preview). */
+@custom-variant dark (&:where(.dark, .dark *):not(:where(.light, .light *)));
 
 @theme inline {
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
@@ -35,7 +36,8 @@
   --shadow-md: var(--sh-md);
 }
 
-:root {
+:root,
+.light {
   --th-radius-sm: 8px;
   --th-radius-md: 10px;
   --th-radius-lg: 14px;
@@ -66,7 +68,8 @@
   color-scheme: light;
 }
 
-:root.dark {
+:root.dark,
+.dark {
   --bg: #121214;
   --bg-subtle: #18181b;
   --surface: #1c1c1f;

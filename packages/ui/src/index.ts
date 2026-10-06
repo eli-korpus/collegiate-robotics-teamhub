@@ -8,6 +8,7 @@ export * from './time';
 export * from './layout';
 export * from './lists';
 export * from './links';
+export * from './url';
 export * from './charts';
 export * from './calendar';
 export * from './kanban';

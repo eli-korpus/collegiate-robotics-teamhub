@@ -1,6 +1,7 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { REPO_ROOT } from '@teamhub/generator';
+import { createProgress, type Progress } from './progress';
 
 const run = promisify(execFile);
 
@@ -106,18 +107,42 @@ async function unpushed(cwd: string): Promise<number | null> {
  * Commit only what TeamHub owns in a fork (team/, host files, workflows) and push. Pushes whenever something is
  * waiting, even with nothing new to commit, and only reports success when GitHub accepted it.
  */
-export async function publish(message: string, paths: string[], cwd: string = REPO_ROOT, ctx: { login?: string | null; repo?: string | null } = {}): Promise<PublishResult> {
+export async function publish(
+  message: string,
+  paths: string[],
+  cwd: string = REPO_ROOT,
+  ctx: { login?: string | null; repo?: string | null } = {},
+  progress: Progress = createProgress(),
+): Promise<PublishResult> {
+  progress.plan([
+    { id: 'files', label: 'Collect your changed files' },
+    { id: 'commit', label: 'Save them as a commit' },
+    { id: 'push', label: 'Upload to GitHub' },
+  ]);
+  const fail = (id: string, r: Omit<PublishResult, 'ok'>): PublishResult => {
+    progress.set(id, 'failed', r.problem ?? r.message);
+    progress.skipRest();
+    return { ok: false, ...r };
+  };
   const out: string[] = [];
+  progress.set('files', 'running');
   const add = await sh('git', ['add', '--', ...paths], { cwd });
-  if (!add.ok) return { ok: false, message: 'Couldn\'t prepare your settings.', problem: 'Git couldn\'t add your settings files.', fix: null, log: add.stderr };
-  const staged = await sh('git', ['diff', '--cached', '--name-only'], { cwd });
-  if (staged.stdout.trim()) {
+  if (!add.ok) return fail('files', { message: 'Couldn\'t prepare your settings.', problem: 'Git couldn\'t add your settings files.', fix: null, log: add.stderr });
+  const staged = (await sh('git', ['diff', '--cached', '--name-only'], { cwd })).stdout.trim().split('\n').filter(Boolean);
+  progress.set('files', 'done', staged.length ? `${staged.length} changed: ${staged.slice(0, 4).join(', ')}${staged.length > 4 ? '…' : ''}` : 'No new changes');
+  if (staged.length) {
+    progress.set('commit', 'running');
     const commit = await sh('git', ['commit', '-m', message], { cwd });
     out.push(commit.stdout + commit.stderr);
-    if (!commit.ok) return { ok: false, message: 'Couldn\'t save your settings.', ...explainPushError(commit.stderr, ctx), log: out.join('\n').trim() };
-  }
+    if (!commit.ok) return fail('commit', { message: 'Couldn\'t save your settings.', ...explainPushError(commit.stderr, ctx), log: out.join('\n').trim() });
+    progress.set('commit', 'done', message);
+  } else progress.set('commit', 'skipped', 'Nothing new to save');
   const waiting = await unpushed(cwd);
-  if (waiting === 0) return { ok: true, message: 'Already up to date on GitHub.', log: out.join('\n').trim() || 'Nothing new to upload.' };
+  if (waiting === 0) {
+    progress.set('push', 'done', 'GitHub already has everything');
+    return { ok: true, message: 'Already up to date on GitHub.', log: out.join('\n').trim() || 'Nothing new to upload.' };
+  }
+  progress.set('push', 'running', waiting ? `${waiting} commit${waiting === 1 ? '' : 's'} to upload` : undefined);
   let push = await sh('git', ['push'], { cwd, timeout: 180_000 });
   if (!push.ok && waiting === null) {
     // First publish of this branch: set its GitHub copy.
@@ -126,7 +151,8 @@ export async function publish(message: string, paths: string[], cwd: string = RE
   }
   out.push(push.stdout + push.stderr);
   const log = out.join('\n').trim();
-  if (!push.ok) return { ok: false, message: 'Not uploaded to GitHub yet.', ...explainPushError(log, ctx), log };
+  if (!push.ok) return fail('push', { message: 'Not uploaded to GitHub yet.', ...explainPushError(log, ctx), log });
+  progress.set('push', 'done', 'GitHub accepted it');
   return { ok: true, message: 'Uploaded to GitHub. Your host rebuilds the site in a minute or two.', log };
 }
 

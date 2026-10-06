@@ -2,7 +2,16 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Lock, Pencil, Plus, Trash2 } from 'lucide-react';
 import { fieldLevel, type FieldLevel } from '@teamhub/config-schema/util';
-import { Badge, Banner, Button, Card, Dialog, Field, IconButton, Input, Select, Spinner, TagListInput, toast, useConfirm, validateRequired } from '@teamhub/ui';
+
+const ROLES = [
+  { id: 'member', label: 'Members' },
+  { id: 'captain', label: 'Captains' },
+  { id: 'mentor', label: 'Mentors' },
+] as const;
+type Role = (typeof ROLES)[number]['id'];
+/** "Members, captains" for the list (nothing when everyone is asked). */
+const askedText = (t?: Role[]) => (t?.length && t.length < 3 ? `Asked of ${t.map((r) => ROLES.find((x) => x.id === r)!.label.toLowerCase()).join(' and ')}` : null);
+import { Badge, Banner, Button, Card, Checkbox, Dialog, Field, IconButton, Input, Select, Spinner, TagListInput, toast, useConfirm, validateRequired } from '@teamhub/ui';
 import { friendlyError, runtime, useSettingsRow, useSupabase, type ExtraProfileField } from '@teamhub/sdk';
 
 const LEVEL_LABEL: Record<FieldLevel, string> = {
@@ -48,7 +57,10 @@ export function ProfileFieldsAdmin() {
           <ul className="divide-y divide-border">
             {base.map((f) => (
               <li key={f.id} className="flex flex-wrap items-center gap-2 py-2">
-                <span className="flex-1 font-medium">{f.label}</span>
+                <span className="flex-1">
+                  <span className="font-medium">{f.label}</span>
+                  {askedText(f.askTypes) && <span className="block text-[12px] text-muted">{askedText(f.askTypes)}</span>}
+                </span>
                 <LevelBadge level={fieldLevel(f)} />
               </li>
             ))}
@@ -57,7 +69,7 @@ export function ProfileFieldsAdmin() {
           <p className="text-muted">None.</p>
         )}
         <p className="mt-2 text-[12.5px] text-muted">
-          To change these, or who can see them, run <code>npm run setup</code> and choose <strong>Edit</strong> &gt; People.
+          To change these, who fills them in, or who can see them, run <code>npm run setup</code> and choose <strong>Edit</strong> &gt; People.
         </p>
       </Card>
 
@@ -70,6 +82,7 @@ export function ProfileFieldsAdmin() {
                 <span className="flex-1">
                   <span className="font-medium">{f.label}</span>
                   {f.type === 'select' && f.options?.length ? <span className="text-muted"> · {f.options.join(', ')}</span> : null}
+                  {askedText(f.askTypes) && <span className="block text-[12px] text-muted">{askedText(f.askTypes)}</span>}
                 </span>
                 <LevelBadge level={fieldLevel(f)} />
                 <IconButton label={`Edit ${f.label}`} size="sm" onClick={() => setEditing({ index: i, field: f })}>
@@ -138,6 +151,7 @@ function FieldDialog({ initial, isNew, taken, onClose, onSave }: { initial: Extr
   const [type, setType] = useState<'text' | 'select'>(initial.type === 'select' ? 'select' : 'text');
   const [options, setOptions] = useState<string[]>(initial.options ?? []);
   const [level, setLevel] = useState<FieldLevel>(fieldLevel(initial));
+  const [asked, setAsked] = useState<Role[]>(initial.askTypes?.length ? initial.askTypes : ['member', 'captain', 'mentor']);
   const [busy, setBusy] = useState(false);
   return (
     <Dialog
@@ -159,7 +173,7 @@ function FieldDialog({ initial, isNew, taken, onClose, onSave }: { initial: Extr
               if (taken.includes(id)) return toast.error('There is already a field with that name');
               if (type === 'select' && !options.length) return toast.error('Add at least one choice');
               setBusy(true);
-              await onSave({ id, label: label.trim().slice(0, 60), type, options: type === 'select' ? options : [], visibility: level });
+              await onSave({ id, label: label.trim().slice(0, 60), type, options: type === 'select' ? options : [], visibility: level, ...(asked.length < 3 ? { askTypes: asked } : {}) });
               setBusy(false);
             }}
           >
@@ -186,6 +200,23 @@ function FieldDialog({ initial, isNew, taken, onClose, onSave }: { initial: Extr
             <TagListInput value={options} onChange={setOptions} label="Choice" />
           </div>
         )}
+        <div role="group" aria-label="Who fills it in" className="space-y-1.5">
+          <p className="text-[13px] font-medium">Who fills it in</p>
+          <div className="flex flex-wrap gap-x-4 gap-y-1">
+            {ROLES.map((r) => (
+              <Checkbox
+                key={r.id}
+                checked={asked.includes(r.id)}
+                label={r.label}
+                onChange={(v) => {
+                  const next = v ? [...asked, r.id] : asked.filter((x) => x !== r.id);
+                  if (next.length) setAsked(next);
+                }}
+              />
+            ))}
+          </div>
+          <p className="text-[12px] text-muted">Only these people are asked for it on My profile and by Request info.</p>
+        </div>
         {isNew ? (
           <Field label="Who can see the answers" hint="People always see their own answers, and admins see everything. This can't be changed later, so pick carefully.">
             {(id) => (

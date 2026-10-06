@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Check, Download, ExternalLink, FileCheck2, Pencil, Plus } from 'lucide-react';
-import { Banner, Button, Checkbox, Dialog, DueDate, EmptyState, Field, Input, Select, Spinner, Switch, downloadText, toCsv, toast, useConfirm } from '@teamhub/ui';
+import { Banner, Button, Checkbox, Dialog, DueDate, EmptyState, Field, Input, Select, Spinner, Switch, downloadText, toCsv, toast, useConfirm, safeHref } from '@teamhub/ui';
 import { canWith, friendlyError, ModuleHeader, ModulePurpose, TeamScopePicker, useActivePeople, useCan, useMe, useRows, useSeason, useSupabase, useTeamScope, type PersonInfo } from '@teamhub/sdk';
 
 export interface Item {
@@ -68,7 +68,7 @@ export default function PaperworkRoutes() {
                       <span className="flex-1">{i.name}</span>
                       <DueDate date={i.due} done={isDone(i.id, me.id)} />
                       {i.url && (
-                        <a href={i.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[12.5px] text-accent hover:underline">
+                        <a href={safeHref(i.url)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-[12.5px] text-accent hover:underline">
                           Get the form <ExternalLink className="size-3" />
                         </a>
                       )}

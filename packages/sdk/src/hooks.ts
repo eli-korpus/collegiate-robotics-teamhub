@@ -94,6 +94,8 @@ export interface ExtraProfileField {
   options?: string[];
   /** Who can see answers; fixed once added. Missing means everyone. */
   visibility?: 'everyone' | 'leaders' | 'mentors';
+  /** Who is asked to fill it in. Missing means everyone. */
+  askTypes?: ('member' | 'captain' | 'mentor')[];
 }
 
 export function useSeason(): string {

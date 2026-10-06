@@ -30,6 +30,7 @@ import {
   useConfirm,
   type ProcessedFile,
   validateRequired,
+  safeHref,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -427,7 +428,7 @@ function JobSheet({ job: j, files, onClose }: { job: Job; files: MfgFile[]; onCl
             <>
               <dt className="text-muted">CAD</dt>
               <dd>
-                <a className="text-accent hover:underline" href={j.onshape_url} target="_blank" rel="noreferrer">
+                <a className="text-accent hover:underline" href={safeHref(j.onshape_url)} target="_blank" rel="noreferrer">
                   Open link <ExternalLink className="inline size-3" aria-hidden />
                 </a>
               </dd>

@@ -2,6 +2,7 @@ import type { MouseEvent as ReactMouseEvent, ReactNode } from 'react';
 import { HoverCard } from 'radix-ui';
 import { cn } from './cn';
 import { Avatar, PositionBadge, TeamDot, TYPE_LABEL } from './people';
+import { safeHref } from './url';
 
 export interface PersonChipData {
   name: string;
@@ -43,7 +44,7 @@ export function PersonChip({
   return (
     <HoverCard.Root openDelay={350} closeDelay={80}>
       <HoverCard.Trigger asChild>
-        <Trigger href={href} onClick={onClick} className="inline-flex min-w-0 max-w-full rounded-md text-left hover:opacity-90">
+        <Trigger href={safeHref(href)} onClick={onClick} className="inline-flex min-w-0 max-w-full rounded-md text-left hover:opacity-90">
           {chip}
         </Trigger>
       </HoverCard.Trigger>

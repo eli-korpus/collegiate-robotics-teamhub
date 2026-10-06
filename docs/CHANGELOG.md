@@ -13,6 +13,42 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-10-06
+### Security
+
+- Links people save (tool links, vendor pages, sponsor websites, notebook and manufacturing links…) are checked before
+  they are shown: only web, email and phone links work, so a saved "javascript:" link can no longer run code for
+  whoever clicks it. A test now checks every link in the app, and another checks that every database table has
+  access rules and is closed to signed-out visitors with all tabs on.
+
+### Added
+
+- Profile fields can be asked of members, captains and/or mentors only (setup wizard > People, or Admin > Profile fields
+  for fields added there). By default mentors aren't asked for a grade, subteam, shirt size or emergency contact: those
+  fields don't appear on their profile form, Request info doesn't ask them, and they don't count as "missing".
+
+### Changed
+
+- Setup wizard: every action that changes your database or website (building or updating the database, test builds,
+  uploading to GitHub, updating TeamHub, backups, imports, a new season, the email setting) shows a live checklist of
+  its steps: which one is running, what finished, and where it stopped if something failed. When it works the button
+  turns green with a check, and a "Next:" line says what to do now. After a new season or an email change, the dialog
+  offers to publish right away.
+- Updating TeamHub also uploads `package-lock.json` when installing changed it, so it never blocks the next update.
+
+### Fixed
+
+- Setup wizard: discarding an edit where you uploaded a logo now puts the old logo and browser-tab icon back, so the
+  discarded logo is never published by mistake.
+## [1.0.3] - 2026-10-06
+### Fixed
+
+- Setup wizard: Review & apply shows all three steps from the start (Apply to database, Test build, Commit & push).
+  The test build starts by itself after the database step, and Commit & push, which puts the change on your
+  website, no longer stays hidden until then.
+- After updating, `package-lock.json` showed as changed (its version number lagged behind), which blocked the next
+  update until it was committed. Releases now update it too.
+
 ## [1.0.2] - 2026-10-06
 ### Fixed
 

@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Hono, type MiddlewareHandler } from 'hono';
 import { z } from 'zod';
@@ -24,6 +24,7 @@ import { gitStatus, publish, sh, useNoreplyEmail } from './git';
 import { checkForUpdate, installDependencies, mergeRelease, readState, revertUpdate, writeState } from './update';
 import { checkSite, existingHostPaths, hostFiles, keepaliveFile, updatesWorkflowFile, writeHostFiles } from './hosting';
 import { BACKUP_ROOT, exportData, importData } from './backup';
+import { respondWithProgress, withStatus, type Progress } from './progress';
 import { applyConfig, computePlan, configureAuth, createAdmin, dataApiStatus, exposePublicSchema, newSeason, readDbState, removeEverything } from './provision';
 
 /** Hostnames the wizard answers to. Anything else is a DNS-rebinding attempt (a website pointing its own domain at 127.0.0.1). */
@@ -45,6 +46,25 @@ const localOnly: MiddlewareHandler = async (c, next) => {
 };
 
 const DRAFT = () => join(teamDir(), '.wizard-draft.json');
+/** Logo files an unapplied edit replaced (a ".new" marker means the file didn't exist before). */
+const BRANDING_ORIGINALS = () => join(teamDir(), '.wizard-branding-originals');
+function keepBrandingOriginal(name: string) {
+  const dir = BRANDING_ORIGINALS();
+  if (existsSync(join(dir, name)) || existsSync(join(dir, `${name}.new`))) return;
+  mkdirSync(dir, { recursive: true });
+  const file = join(teamDir(), 'branding', name);
+  if (existsSync(file)) copyFileSync(file, join(dir, name));
+  else writeFileSync(join(dir, `${name}.new`), '');
+}
+function restoreBranding() {
+  const dir = BRANDING_ORIGINALS();
+  if (!existsSync(dir)) return;
+  for (const f of readdirSync(dir)) {
+    if (f.endsWith('.new')) rmSync(join(teamDir(), 'branding', f.slice(0, -4)), { force: true });
+    else copyFileSync(join(dir, f), join(teamDir(), 'branding', f));
+  }
+  rmSync(dir, { recursive: true, force: true });
+}
 
 export interface AppDeps {
   fetch?: FetchLike;
@@ -151,6 +171,8 @@ export function createApp(deps: AppDeps = {}) {
   });
   app.delete('/draft', (c) => {
     rmSync(DRAFT(), { force: true });
+    // Discarding an edit also puts back any logo files it replaced, so a discarded logo is never published.
+    restoreBranding();
     return c.json({ ok: true });
   });
 
@@ -215,10 +237,15 @@ export function createApp(deps: AppDeps = {}) {
     const config = parseOr400(raw);
     const m = mgmt();
     const ref = projectRef(config);
-    const keys = await m.apiKeys(ref);
-    const result = await applyConfig(m, ref, keys, await catalogP, config, { backupModules, siteUrl, skipFunctions });
-    writeConfig(config);
-    return c.json(result);
+    return respondWithProgress(c, async (p) => {
+      const keys = await m.apiKeys(ref);
+      const result = await applyConfig(m, ref, keys, await catalogP, config, { backupModules, siteUrl, skipFunctions }, p);
+      p.plan([{ id: 'save', label: 'Save your settings on this computer' }]);
+      await p.step('save', async () => writeConfig(config), () => 'team/teamhub.config.json');
+      // The new logos are now part of the saved settings: no going back to the old files on Discard.
+      rmSync(BRANDING_ORIGINALS(), { recursive: true, force: true });
+      return result;
+    });
   });
 
   app.post('/admin', async (c) => {
@@ -247,9 +274,15 @@ export function createApp(deps: AppDeps = {}) {
     const config = readConfig();
     if (!config) throw new MgmtError('No config yet.', 400);
     const next = { ...config, features: { ...config.features, email: on } };
-    await configureAuth(mgmt(), projectRef(config), next, config.hosting.url);
-    writeConfig(next);
-    return c.json({ ok: true });
+    return respondWithProgress(c, async (p) => {
+      p.plan([
+        { id: 'auth', label: 'Save sign-in settings in Supabase' },
+        { id: 'save', label: 'Save your settings on this computer' },
+      ]);
+      await p.step('auth', () => configureAuth(mgmt(), projectRef(config), next, config.hosting.url), () => (on ? 'Email confirmation on' : 'Email confirmation off'));
+      await p.step('save', async () => writeConfig(next));
+      return { ok: true };
+    });
   });
 
   // ── Backup / import / season / danger ────────────────────────────────────
@@ -258,16 +291,14 @@ export function createApp(deps: AppDeps = {}) {
     const config = readConfig();
     const m = mgmt();
     const ref = projectRef(config);
-    const keys = await m.apiKeys(ref);
-    return c.json(await exportData(m, ref, keys.secret, await catalogP, config, { modules, label: 'teamhub-backup' }));
+    return respondWithProgress(c, async (p) => exportData(m, ref, (await m.apiKeys(ref)).secret, await catalogP, config, { modules, label: 'teamhub-backup' }, p));
   });
   app.post('/import', async (c) => {
     const { path } = await c.req.json<{ path: string }>();
     if (!existsSync(path)) throw new MgmtError('Backup file not found.', 400);
     const m = mgmt();
     const ref = projectRef(readConfig());
-    const keys = await m.apiKeys(ref);
-    return c.json(await importData(m, ref, keys.secret, path));
+    return respondWithProgress(c, async (p) => importData(m, ref, (await m.apiKeys(ref)).secret, path, p));
   });
   app.post('/season', async (c) => {
     const { label, modules } = await c.req.json<{ label: string; modules: string[] }>();
@@ -276,11 +307,19 @@ export function createApp(deps: AppDeps = {}) {
     if (!config) throw new MgmtError('No config yet.', 400);
     const m = mgmt();
     const ref = projectRef(config);
-    const keys = await m.apiKeys(ref);
-    const backup = await exportData(m, ref, keys.secret, await catalogP, config, { label: 'before-new-season' });
-    const res = await newSeason(m, ref, await catalogP, config, label.replace('-', '–'), modules);
-    writeConfig({ ...config, season: label.replace('-', '–') });
-    return c.json({ ...res, backup });
+    const next = label.replace('-', '–');
+    return respondWithProgress(c, async (p) => {
+      p.plan([
+        { id: 'backup', label: 'Back up everything first' },
+        { id: 'rollover', label: `Roll over your tabs and start ${next}` },
+        { id: 'save', label: 'Save the new season in your settings' },
+      ]);
+      const keys = await m.apiKeys(ref);
+      const backup = await p.step('backup', async () => exportData(m, ref, keys.secret, await catalogP, config, { label: 'before-new-season' }), (b) => b.path);
+      const res = await p.step('rollover', async () => newSeason(m, ref, await catalogP, config, next, modules), (r) => (r.ran.length ? `Rolled over: ${r.ran.join(', ')}` : 'Label only'));
+      await p.step('save', async () => writeConfig({ ...config, season: next }));
+      return { ...res, backup };
+    });
   });
   app.post('/danger/remove', async (c) => {
     const { confirm } = await c.req.json<{ confirm: string }>();
@@ -290,10 +329,16 @@ export function createApp(deps: AppDeps = {}) {
     if (confirm !== expected) throw new MgmtError(`Type ${expected} to confirm.`, 400);
     const m = mgmt();
     const ref = projectRef(config);
-    const keys = await m.apiKeys(ref);
-    const backup = await exportData(m, ref, keys.secret, await catalogP, config, { label: 'before-removal' });
-    await removeEverything(m, ref, keys.secret, await catalogP);
-    return c.json({ ok: true, backup });
+    return respondWithProgress(c, async (p) => {
+      p.plan([
+        { id: 'backup', label: 'Back up everything first' },
+        { id: 'remove', label: 'Remove TeamHub from the database' },
+      ]);
+      const keys = await m.apiKeys(ref);
+      const backup = await p.step('backup', async () => exportData(m, ref, keys.secret, await catalogP, config, { label: 'before-removal' }), (b) => b.path);
+      await p.step('remove', async () => removeEverything(m, ref, keys.secret, await catalogP));
+      return { ok: true, backup };
+    });
   });
 
   // ── Files: config, branding, host files ─────────────────────────────────
@@ -321,6 +366,7 @@ export function createApp(deps: AppDeps = {}) {
     const buf = Buffer.from(m[3], 'base64');
     if (buf.length > 600 * 1024) throw new MgmtError('Logo is too large after optimizing (max 600 KB)', 400);
     mkdirSync(join(teamDir(), 'branding'), { recursive: true });
+    keepBrandingOriginal(name);
     writeFileSync(join(teamDir(), 'branding', name), buf);
     return c.json({ path: `branding/${name}` });
   });
@@ -338,11 +384,30 @@ export function createApp(deps: AppDeps = {}) {
   });
 
   // ── Build & git ─────────────────────────────────────────────────────────
+  /** Test build: the same steps your host runs, so a broken site is caught before anything is published. */
+  const buildSite = async (p: Progress) => {
+    p.plan([
+      { id: 'generate', label: 'Turn your settings into site code' },
+      { id: 'bundle', label: 'Build the website (a test: nothing is published)' },
+    ]);
+    const tail = (r: { stdout: string; stderr: string }) => String(r.stdout + r.stderr).split('\n').slice(-40).join('\n');
+    p.set('generate', 'running');
+    const gen = await sh('npm', ['run', 'generate'], { timeout: 300_000 });
+    if (!gen.ok) {
+      p.set('generate', 'failed', 'Your settings couldn’t be turned into site code');
+      p.skipRest();
+      return { ok: false, log: tail(gen) };
+    }
+    p.set('generate', 'done');
+    p.set('bundle', 'running', 'Usually under a minute');
+    const res = await sh('npm', ['run', 'build', '-w', '@teamhub/dashboard'], { timeout: 600_000 });
+    p.set('bundle', res.ok ? 'done' : 'failed', res.ok ? 'The site builds' : 'The build failed: your live site is untouched');
+    return { ok: res.ok, log: tail(res) };
+  };
   app.post('/build', async (c) => {
     const config = readConfig();
     if (!config) throw new MgmtError('Save your config first.', 400);
-    const res = await sh('npm', ['run', 'build'], { timeout: 600_000 });
-    return c.json({ ok: res.ok, log: (res.stdout + res.stderr).split('\n').slice(-40).join('\n') });
+    return respondWithProgress(c, (p) => buildSite(p));
   });
   app.get('/git', async (c) => c.json(await gitStatus()));
 
@@ -352,6 +417,10 @@ export function createApp(deps: AppDeps = {}) {
     if (push.ok) return push;
     const branch = String((await sh('git', ['rev-parse', '--abbrev-ref', 'HEAD'])).stdout).trim();
     return sh('git', ['push', '-u', 'origin', branch], { timeout: 180_000 });
+  };
+  const ghContext = async () => {
+    const [login, repo] = await Promise.all([sh('gh', ['api', 'user', '--jq', '.login']), sh('gh', ['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner'])]);
+    return { login: login.ok ? login.stdout.trim() : null, repo: repo.ok ? repo.stdout.trim() : null };
   };
   app.get('/update/check', async (c) => c.json(await checkForUpdate(REPO_ROOT)));
   app.get('/update/state', async (c) => c.json(await readState(REPO_ROOT)));
@@ -363,15 +432,31 @@ export function createApp(deps: AppDeps = {}) {
     if (!config) throw new MgmtError('Finish setup before updating.', 400);
     const m = mgmt();
     const ref = projectRef(config);
-    const keys = await m.apiKeys(ref);
-    const backup = await exportData(m, ref, keys.secret, await catalogP, config, { label: `before-update-to-${tag}` });
-    const merged = await mergeRelease(REPO_ROOT, tag, backup.path);
-    if (!merged.ok) return c.json({ ok: false, conflicts: merged.conflicts, message: merged.message, backup: backup.path }, 409);
-    const install = await installDependencies(REPO_ROOT);
-    if (!install.ok) {
-      return c.json({ ok: false, conflicts: [], message: `The new version was downloaded, but installing it failed. Run "npm install" in a terminal, then "npm run setup" > Update again.\n${String(install.stderr).slice(-1500)}`, backup: backup.path }, 500);
-    }
-    return c.json({ ok: true, restart: true, state: merged.state, backup: backup.path });
+    return respondWithProgress(c, async (p) => {
+      p.plan([
+        { id: 'backup', label: 'Back up your data' },
+        { id: 'download', label: `Get TeamHub ${tag.slice(1)}` },
+        { id: 'install', label: 'Install it' },
+      ]);
+      const keys = await m.apiKeys(ref);
+      const backup = await p.step('backup', async () => exportData(m, ref, keys.secret, await catalogP, config, { label: `before-update-to-${tag}` }), (b) => `Saved to ${b.path}`);
+      p.set('download', 'running');
+      const merged = await mergeRelease(REPO_ROOT, tag, backup.path);
+      if (!merged.ok) {
+        p.set('download', 'failed', merged.message);
+        p.skipRest();
+        return withStatus({ ok: false, conflicts: merged.conflicts, message: merged.message, backup: backup.path }, 409);
+      }
+      p.set('download', 'done');
+      p.set('install', 'running', 'This can take a minute');
+      const install = await installDependencies(REPO_ROOT);
+      if (!install.ok) {
+        p.set('install', 'failed', 'npm install failed');
+        return withStatus({ ok: false, conflicts: [], message: `The new version was downloaded, but installing it failed. Run "npm install" in a terminal, then "npm run setup" > Update again.\n${String(install.stderr).slice(-1500)}`, backup: backup.path }, 500);
+      }
+      p.set('install', 'done');
+      return { ok: true, restart: true, state: merged.state, backup: backup.path };
+    });
   });
   /** Step 2 (running the new code): update the database and server functions, test-build, then publish. */
   app.post('/update/finish', async (c) => {
@@ -381,20 +466,23 @@ export function createApp(deps: AppDeps = {}) {
     if (!config) throw new MgmtError('No config found.', 400);
     const m = mgmt();
     const ref = projectRef(config);
-    const keys = await m.apiKeys(ref);
-    const catalog = await catalogP;
-    const { log } = await applyConfig(m, ref, keys, catalog, config);
-    await generate(config, catalog);
-    const build = await sh('npm', ['run', 'build'], { timeout: 600_000 });
-    if (!build.ok) {
-      log.push({ step: 'Test build failed: nothing was published, your live site is unchanged', ok: false, detail: String(build.stdout + build.stderr).split('\n').slice(-30).join('\n') });
-      return c.json({ ok: false, log });
-    }
-    log.push({ step: 'Test build passed', ok: true });
-    const push = await pushCurrentBranch();
-    log.push(push.ok ? { step: 'Published: your host is rebuilding the site', ok: true } : { step: 'Publish failed', ok: false, detail: String(push.stderr).trim() });
-    if (push.ok) await writeState(REPO_ROOT, { ...state, stage: 'done', at: new Date().toISOString() });
-    return c.json({ ok: push.ok, log, version: state.to });
+    return respondWithProgress(c, async (p) => {
+      const keys = await m.apiKeys(ref);
+      const catalog = await catalogP;
+      const { log } = await applyConfig(m, ref, keys, catalog, config, {}, p);
+      const build = await buildSite(p);
+      if (!build.ok) {
+        log.push({ step: 'Test build failed: nothing was published, your live site is unchanged', ok: false, detail: build.log });
+        p.skipRest();
+        return { ok: false, log };
+      }
+      log.push({ step: 'Test build passed', ok: true });
+      // Installing can rewrite package-lock.json; it goes up with the update so the next one isn't blocked by it.
+      const pushed = await publish(`Update TeamHub to v${state.to}`, [...publishPaths(), 'package-lock.json'].filter((x) => existsSync(join(REPO_ROOT, x))), undefined, await ghContext(), p);
+      log.push(pushed.ok ? { step: 'Published: your host is rebuilding the site', ok: true } : { step: 'Publish failed', ok: false, detail: pushed.problem ?? pushed.log });
+      if (pushed.ok) await writeState(REPO_ROOT, { ...state, stage: 'done', at: new Date().toISOString() });
+      return { ok: pushed.ok, log, version: state.to, problem: pushed.problem, fix: pushed.fix };
+    });
   });
   /** Undo the last update's code and publish (the database stays: its changes are add-only and compatible). */
   app.post('/update/rollback', async (c) => {
@@ -422,7 +510,7 @@ export function createApp(deps: AppDeps = {}) {
     const paths = publishPaths();
     const login = await sh('gh', ['api', 'user', '--jq', '.login']);
     const repo = await sh('gh', ['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner']);
-    return c.json(await publish(message ?? 'Update TeamHub config', paths, undefined, { login: login.ok ? login.stdout.trim() : null, repo: repo.ok ? repo.stdout.trim() : null }));
+    return respondWithProgress(c, (p) => publish(message ?? 'Update TeamHub config', paths, undefined, { login: login.ok ? login.stdout.trim() : null, repo: repo.ok ? repo.stdout.trim() : null }, p));
   });
   app.post('/git/use-noreply-email', async (c) => c.json(await useNoreplyEmail()));
   app.post('/git/pull', async (c) => {

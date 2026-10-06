@@ -23,6 +23,7 @@ import {
   useConfirm,
   validateRequired,
   OptionalTag,
+  safeHref,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -116,7 +117,7 @@ function SkillCard({ s, done, onEdit, onSign }: { s: Skill; done?: Signoff; onEd
             </span>
           )}
           {s.url && (
-            <a href={s.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-accent hover:underline">
+            <a href={safeHref(s.url)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-accent hover:underline">
               Training material <ExternalLink className="size-3" />
             </a>
           )}

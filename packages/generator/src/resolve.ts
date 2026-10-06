@@ -62,12 +62,3 @@ export function resolveConfig(config: TeamhubConfig, catalog: Catalog): Resolved
   }
   return { config, catalog, modules, installedIntegrations, activeIntegrations, permissionDefs, matrix, errors };
 }
-
-/** Builds a default permission matrix for the wizard (all defaults). */
-export function defaultMatrix(defs: PermissionDefs, positionIds: Set<string>): Record<string, PermissionGrant> {
-  const out: Record<string, PermissionGrant> = {};
-  for (const [k, d] of Object.entries(defs)) {
-    out[k] = { types: [...d.default], positions: (d.positions ?? []).filter((p) => positionIds.has(p)) };
-  }
-  return out;
-}

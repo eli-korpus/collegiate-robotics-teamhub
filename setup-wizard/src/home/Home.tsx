@@ -4,7 +4,8 @@ import { Banner, Button, Card, Checkbox, Dialog, Input, Switch, toast } from '@t
 import { api, type Catalog, type ServerState } from '../api';
 import { ModuleIcon } from '../components';
 import { UpdateDialog } from './Update';
-import { WaitingToPublish } from '../steps/publish';
+import { ActionButton, Checklist, NextStep, useAction } from '../progress';
+import { PublishButton, WaitingToPublish } from '../steps/publish';
 
 /** Existing install: Edit, Update, Backup & Export, Import, New Season, Email, Danger zone (spec §5.1). */
 export function ExistingHome({ server, catalog, onEdit, refresh }: { server: ServerState; catalog: Catalog; onEdit: () => void; refresh: () => Promise<void> }) {
@@ -126,35 +127,20 @@ function ConnectDialog({ onClose, refresh }: { onClose: () => void; refresh: () 
 }
 
 function BackupDialog({ server, onClose }: { server: ServerState; onClose: () => void }) {
-  const [busy, setBusy] = useState(false);
-  const [res, setRes] = useState<{ path: string; tables: Record<string, number>; files: number } | null>(null);
+  const action = useAction<{ path: string; tables: Record<string, number>; files: number }>();
+  const res = action.result;
   return (
-    <Dialog open onOpenChange={(v) => !v && onClose()} title="Backup & Export" description={`Saves all data and files as a zip in ${server.backupRoot}.`}>
+    <Dialog open onOpenChange={(v) => !v && action.state !== 'running' && onClose()} title="Backup & Export" description={`Saves all data and files as a zip in ${server.backupRoot}.`}>
       <div className="space-y-3 text-[13.5px]">
-        <Button
-          variant="primary"
-          icon={<Archive className="size-4" />}
-          loading={busy}
-          onClick={async () => {
-            setBusy(true);
-            try {
-              setRes(await api('/backup', {}));
-            } catch (e) {
-              toast.error((e as Error).message);
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          Create backup
-        </Button>
+        <ActionButton state={action.state} label="Create backup" doneLabel="Backup saved" icon={<Archive className="size-4" />} onClick={() => action.run('/backup', {})} />
+        <Checklist steps={action.steps} />
+        {action.error && <Banner tone="danger" title="No backup was made">{action.error}</Banner>}
         {res && (
-          <Banner tone="success" title="Backup saved">
-            <span className="break-all">{res.path}</span>
-            <br />
-            {Object.values(res.tables).reduce((a, b) => a + b, 0)} rows, {res.files} files
-          </Banner>
+          <p className="text-[12.5px] text-muted">
+            {Object.values(res.tables).reduce((a, b) => a + b, 0)} rows and {res.files} files, saved to <span className="break-all">{res.path}</span>
+          </p>
         )}
+        {res && <NextStep>keep the zip somewhere safe (for example a shared drive). Nothing else to do.</NextStep>}
         <p className="text-[12.5px] text-muted">Logins (passwords) can't be exported: after restoring into a new project, people sign up again and are re-approved; their history is kept.</p>
       </div>
     </Dialog>
@@ -163,34 +149,15 @@ function BackupDialog({ server, onClose }: { server: ServerState; onClose: () =>
 
 function ImportDialog({ onClose }: { onClose: () => void }) {
   const [path, setPath] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [res, setRes] = useState<{ restored: Record<string, number>; files: number } | null>(null);
+  const action = useAction<{ restored: Record<string, number>; files: number }>();
   return (
-    <Dialog open onOpenChange={(v) => !v && onClose()} title="Import a backup" description="Restores rows and files into the connected project. Existing rows are kept (duplicates are skipped). Apply your config first so all tables exist.">
+    <Dialog open onOpenChange={(v) => !v && action.state !== 'running' && onClose()} title="Import a backup" description="Restores rows and files into the connected project. Existing rows are kept (duplicates are skipped). Apply your config first so all tables exist.">
       <div className="space-y-3">
         <Input placeholder="/Users/you/TeamHub Backups/2026-10-01/teamhub-backup-….zip" value={path} onChange={(e) => setPath(e.target.value)} aria-label="Backup file path" />
-        <Button
-          variant="primary"
-          loading={busy}
-          disabled={!path.endsWith('.zip')}
-          onClick={async () => {
-            setBusy(true);
-            try {
-              setRes(await api('/import', { path }));
-            } catch (e) {
-              toast.error((e as Error).message);
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          Import
-        </Button>
-        {res && (
-          <Banner tone="success">
-            Restored {Object.values(res.restored).reduce((a, b) => a + b, 0)} rows and {res.files} files.
-          </Banner>
-        )}
+        <ActionButton state={action.state} label="Import" doneLabel="Backup restored" icon={<Upload className="size-4" />} disabled={!path.endsWith('.zip')} onClick={() => action.run('/import', { path })} />
+        <Checklist steps={action.steps} />
+        {action.error && <Banner tone="danger" title="Not restored">{action.error}</Banner>}
+        {action.result && <NextStep>open your dashboard to check everything is back. People sign up again and are re-approved.</NextStep>}
       </div>
     </Dialog>
   );
@@ -202,10 +169,9 @@ function SeasonDialog({ server, catalog, onClose, refresh }: { server: ServerSta
   const [label, setLabel] = useState(`${y}–${String((y + 1) % 100).padStart(2, '0')}`);
   const options = catalog.modules.filter((m) => m.id in c.modules);
   const [picked, setPicked] = useState<string[]>(options.map((m) => m.id));
-  const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState<string | null>(null);
+  const action = useAction<{ backup: { path: string } }>();
   return (
-    <Dialog open onOpenChange={(v) => !v && onClose()} title="New season" description="Exports everything first, then sets the new label and runs each tab's rollover (e.g. archive scouting, reset checklists, close polls)." size="lg">
+    <Dialog open onOpenChange={(v) => !v && action.state !== 'running' && onClose()} title="New season" description="Exports everything first, then sets the new label and runs each tab's rollover (e.g. archive scouting, reset checklists, close polls)." size="lg">
       {(
         <div className="space-y-3 text-[13.5px]">
           <label className="flex items-center gap-2">
@@ -216,28 +182,22 @@ function SeasonDialog({ server, catalog, onClose, refresh }: { server: ServerSta
               <Checkbox key={m.id} checked={picked.includes(m.id)} onChange={(v) => setPicked(v ? [...picked, m.id] : picked.filter((x) => x !== m.id))} label={`Roll over ${m.name}`} />
             ))}
           </div>
-          <Button
-            variant="primary"
-            loading={busy}
+          <ActionButton
+            state={action.state}
+            label={`Start ${label}`}
+            doneLabel={`${label} started`}
+            icon={<CalendarRange className="size-4" />}
             onClick={async () => {
-              setBusy(true);
-              try {
-                const r = await api<{ backup: { path: string } }>('/season', { label, modules: picked });
-                setDone(r.backup.path);
-                await refresh();
-              } catch (e) {
-                toast.error((e as Error).message);
-              } finally {
-                setBusy(false);
-              }
+              if (await action.run('/season', { label, modules: picked })) await refresh();
             }}
-          >
-            Start {label}
-          </Button>
-          {done && (
-            <Banner tone="success" title={`Welcome to ${label}!`}>
-              Backup: <span className="break-all">{done}</span>. To free storage from last season's files, use Admin &gt; Storage &gt; Delete old files in the dashboard.
-            </Banner>
+          />
+          <Checklist steps={action.steps} />
+          {action.error && <Banner tone="danger" title="The new season didn't start">{action.error}</Banner>}
+          {action.state === 'done' && (
+            <>
+              <NextStep>publish, so your website shows {label}. To free storage from last season's files, use Admin &gt; Storage &gt; Delete old files afterwards.</NextStep>
+              <PublishButton message={`Start the ${label} season`} label="Publish to your website" doneLabel="Published" next="nothing else. Your site shows the new season in a minute or two." />
+            </>
           )}
         </div>
       )}
@@ -247,7 +207,7 @@ function SeasonDialog({ server, catalog, onClose, refresh }: { server: ServerSta
 
 function EmailDialog({ server, onClose, refresh }: { server: ServerState; onClose: () => void; refresh: () => Promise<void> }) {
   const [on, setOn] = useState(server.config!.features.email);
-  const [busy, setBusy] = useState(false);
+  const action = useAction<{ ok: boolean }>();
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()} title="Email" description="Supabase's built-in email only reaches your own Supabase team members, so TeamHub works without email by default.">
       <div className="space-y-4 text-[13.5px]">
@@ -256,25 +216,22 @@ function EmailDialog({ server, onClose, refresh }: { server: ServerState; onClos
           <li>Turn this on. New signups then confirm their email, and the login page offers “Forgot your password?”.</li>
         </ol>
         <Switch checked={on} onChange={setOn} label="Email confirmation & self-serve password reset" />
-        <Button
-          variant="primary"
-          loading={busy}
+        <ActionButton
+          state={action.state}
+          label="Save"
+          doneLabel="Saved"
           onClick={async () => {
-            setBusy(true);
-            try {
-              await api('/email', { on });
-              await refresh();
-              toast.success('Saved. Publish it from the home screen so the login page updates.');
-              onClose();
-            } catch (e) {
-              toast.error((e as Error).message);
-            } finally {
-              setBusy(false);
-            }
+            if (await action.run('/email', { on })) await refresh();
           }}
-        >
-          Save
-        </Button>
+        />
+        <Checklist steps={action.steps} />
+        {action.error && <Banner tone="danger" title="Not saved">{action.error}</Banner>}
+        {action.state === 'done' && (
+          <>
+            <NextStep>publish, so your login page matches.</NextStep>
+            <PublishButton message={on ? 'Turn on email confirmation' : 'Turn off email confirmation'} label="Publish to your website" doneLabel="Published" next="nothing else. Your login page updates in a minute or two." />
+          </>
+        )}
       </div>
     </Dialog>
   );
@@ -284,10 +241,9 @@ function DangerDialog({ server, onClose }: { server: ServerState; onClose: () =>
   const t = server.config!.teams[0];
   const expected = String(t.number ?? t.shortCode);
   const [typed, setTyped] = useState('');
-  const [busy, setBusy] = useState(false);
-  const [done, setDone] = useState<string | null>(null);
+  const action = useAction<{ backup: { path: string } }>();
   return (
-    <Dialog open onOpenChange={(v) => !v && onClose()} title="Remove TeamHub from the database" description="Deletes every TeamHub table, file, function and job from your Supabase project. A full backup is saved first. Logins are kept.">
+    <Dialog open onOpenChange={(v) => !v && action.state !== 'running' && onClose()} title="Remove TeamHub from the database" description="Deletes every TeamHub table, file, function and job from your Supabase project. A full backup is saved first. Logins are kept.">
       <div className="space-y-3 text-[13.5px]">
         <label className="block space-y-1.5">
           <span>
@@ -295,25 +251,16 @@ function DangerDialog({ server, onClose }: { server: ServerState; onClose: () =>
           </span>
           <Input value={typed} onChange={(e) => setTyped(e.target.value)} className="w-40" />
         </label>
-        <Button
-          variant="danger"
-          disabled={typed !== expected}
-          loading={busy}
-          onClick={async () => {
-            setBusy(true);
-            try {
-              const r = await api<{ backup: { path: string } }>('/danger/remove', { confirm: typed });
-              setDone(r.backup.path);
-            } catch (e) {
-              toast.error((e as Error).message);
-            } finally {
-              setBusy(false);
-            }
-          }}
-        >
-          Remove everything
-        </Button>
-        {done && <Banner tone="success">Removed. Backup saved to {done}</Banner>}
+        {action.state === 'done' ? (
+          <ActionButton state="done" label="" doneLabel="Removed" onClick={() => {}} />
+        ) : (
+          <Button variant="danger" disabled={typed !== expected} loading={action.state === 'running'} onClick={() => action.run('/danger/remove', { confirm: typed })}>
+            Remove everything
+          </Button>
+        )}
+        <Checklist steps={action.steps} />
+        {action.error && <Banner tone="danger" title="Not removed">{action.error}</Banner>}
+        {action.result && <p className="text-[12.5px] text-muted">Backup saved to <span className="break-all">{action.result.backup.path}</span></p>}
       </div>
     </Dialog>
   );

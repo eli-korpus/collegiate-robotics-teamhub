@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { asksRoles } from '@teamhub/config-schema/util';
 import { useQueryClient } from '@tanstack/react-query';
 import { Check, UserPlus, X } from 'lucide-react';
 import { Avatar, Button, Checkbox, Dialog, EmptyState, RelativeTime, Segmented, TYPE_LABEL, toast, useConfirm, VisibilityNote, OptionalTag } from '@teamhub/ui';
@@ -70,8 +71,9 @@ function ApproveDialog({ p, m, onClose }: { p: PersonInfo; m: Membership; onClos
   const me = useMe();
   const qc = useQueryClient();
   const positions = usePositions();
-  const fields = useProfileFields().filter((f) => !f.private);
   const [type, setType] = useState<T>((m.requested_type ?? m.type) as T);
+  // Everyone-visible fields this role is asked for (a new mentor isn't asked for a shirt size).
+  const fields = useProfileFields().filter((f) => !f.private && asksRoles(f, [type]));
   const [pos, setPos] = useState<string[]>([]);
   const [details, setDetails] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);

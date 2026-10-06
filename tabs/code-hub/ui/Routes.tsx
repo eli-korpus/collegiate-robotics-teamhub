@@ -19,6 +19,7 @@ import {
   Textarea,
   toast,
   useConfirm,
+  safeHref,
 } from '@teamhub/ui';
 import { canWith, friendlyError, ModuleHeader, ModulePurpose, Slot, TeamBadge, TeamScopePicker, useCan, useLinks, useMe, useRows, useSupabase, useTeamScope } from '@teamhub/sdk';
 import { CONTROL_LABEL, CONTROLS, Gamepad, type Control } from './Gamepad';
@@ -129,7 +130,7 @@ export default function CodeHubRoutes() {
             ) : !gh.data || gh.data.private ? (
               <p className="text-muted">
                 This repository is private (or not on GitHub), so activity can't be shown.{' '}
-                <a className="text-accent hover:underline" href={repoUrl} target="_blank" rel="noreferrer">
+                <a className="text-accent hover:underline" href={safeHref(repoUrl)} target="_blank" rel="noreferrer">
                   Open it <ExternalLink className="inline size-3" aria-hidden />
                 </a>
               </p>
@@ -141,7 +142,7 @@ export default function CodeHubRoutes() {
                     <ul className="mb-3 space-y-1">
                       {gh.data.pulls.map((p) => (
                         <li key={p.number}>
-                          <a href={p.html_url} target="_blank" rel="noreferrer" className="flex items-start gap-1.5 hover:underline">
+                          <a href={safeHref(p.html_url)} target="_blank" rel="noreferrer" className="flex items-start gap-1.5 hover:underline">
                             <GitPullRequest className="mt-0.5 size-3.5 shrink-0 text-success" /> #{p.number} {p.title}
                           </a>
                         </li>
@@ -153,7 +154,7 @@ export default function CodeHubRoutes() {
                 <ul className="space-y-1.5">
                   {gh.data.commits.map((c) => (
                     <li key={c.sha}>
-                      <a href={c.html_url} target="_blank" rel="noreferrer" className="block hover:underline">
+                      <a href={safeHref(c.html_url)} target="_blank" rel="noreferrer" className="block hover:underline">
                         <span className="block truncate">{c.commit.message.split('\n')[0]}</span>
                         <span className="text-[11.5px] text-faint">
                           {c.commit.author.name} · <RelativeTime date={c.commit.author.date} />

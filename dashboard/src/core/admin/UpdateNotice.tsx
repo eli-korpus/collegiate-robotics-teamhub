@@ -1,5 +1,5 @@
 import { ExternalLink } from 'lucide-react';
-import { Banner } from '@teamhub/ui';
+import { Banner, safeHref } from '@teamhub/ui';
 import { runtime } from '@teamhub/sdk';
 import { useAvailableUpdate } from '../shell/updates';
 
@@ -19,7 +19,7 @@ export function UpdateNotice() {
       </p>
       <p className="mt-1">
         To update, run <code>npm run setup</code> on your computer and choose <strong>Update</strong>. It backs up your data, updates your database, then your site.{' '}
-        <a href={u.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-accent hover:underline">
+        <a href={safeHref(u.url)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-accent hover:underline">
           What’s new <ExternalLink className="size-3" aria-hidden />
         </a>
       </p>

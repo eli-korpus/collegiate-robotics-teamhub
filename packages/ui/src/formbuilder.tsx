@@ -253,7 +253,3 @@ export function summarizeField(f: FieldDef, values: FieldValue[]): string {
   }
 }
 
-export function numericAverage(values: FieldValue[]): number | null {
-  const nums = values.filter((v) => typeof v === 'number') as number[];
-  return nums.length ? nums.reduce((a, b) => a + b, 0) / nums.length : null;
-}

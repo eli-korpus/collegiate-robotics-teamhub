@@ -24,7 +24,7 @@ Run `npm run setup` and choose **Edit** for any of these. Don't hand-edit code f
 - adding or removing tabs, and each tab's options
 - program name, teams, colors, logos, light/dark default
 - subteams, positions, permissions (who can do what)
-- profile fields and who can see each one (extra fields can also be added in the dashboard: Admin > Profile fields)
+- profile fields, who fills each one in and who can see it (extra fields can also be added in the dashboard: Admin > Profile fields)
 - tool links (also editable in the dashboard: Admin > Tool links)
 - who can join (email domains; also editable in the dashboard: Admin > Who can join)
 

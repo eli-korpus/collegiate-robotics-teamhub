@@ -45,8 +45,15 @@ if (!skipChecks) {
   npm('test');
 }
 writeFileSync(pkgPath, `${JSON.stringify({ ...pkg, version: next }, null, 2)}\n`);
+// The lockfile repeats the version; if it's left behind, every team's `npm install` rewrites it after an update and
+// the next update is blocked by that uncommitted change.
+const lockPath = join(root, 'package-lock.json');
+const lock = JSON.parse(readFileSync(lockPath, 'utf8')) as { version: string; packages: Record<string, { version?: string }> };
+lock.version = next;
+if (lock.packages['']) lock.packages[''].version = next;
+writeFileSync(lockPath, `${JSON.stringify(lock, null, 2)}\n`);
 writeFileSync(changelogPath, changelog);
-git('add', 'package.json', 'docs/CHANGELOG.md');
+git('add', 'package.json', 'package-lock.json', 'docs/CHANGELOG.md');
 git('commit', '-m', `Release v${next}`);
 git('tag', '-a', `v${next}`, '-m', `TeamHub v${next}`);
 console.log(`\nCommitted and tagged v${next}. Publish it with:\n\n  git push && git push --tags\n\nThe release workflow then runs the checks and the upgrade test, and creates the GitHub Release.`);

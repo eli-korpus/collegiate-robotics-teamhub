@@ -49,6 +49,8 @@ export const ProfileFieldSchema = z.object({
   private: z.boolean().default(false),
   /** Who can see it: everyone in the program, team leaders (captains and mentors) or mentors only. */
   visibility: z.enum(['everyone', 'leaders', 'mentors']).optional(),
+  /** Who is asked to fill it in (e.g. members and captains for shirt sizes). Missing = everyone. */
+  askTypes: z.array(ProfileTypeSchema).optional(),
 });
 export type ProfileFieldConfig = z.infer<typeof ProfileFieldSchema>;
 
@@ -207,16 +209,3 @@ function crossValidate(c: TeamhubConfig): ConfigIssue[] {
   }
   return issues;
 }
-
-/** Module ids of enabled modules (active or dormant both count as installed in the DB). */
-export function installedModules(c: TeamhubConfig): string[] {
-  return Object.keys(c.modules).sort();
-}
-export function activeModules(c: TeamhubConfig): string[] {
-  return Object.entries(c.modules)
-    .filter(([, m]) => m.state === 'active')
-    .map(([id]) => id)
-    .sort();
-}
-
-

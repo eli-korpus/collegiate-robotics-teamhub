@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { calendarOverlays, useSupabase, type CalendarOverlayItem, type Sb } from '@teamhub/sdk';
 import { addDays, startOfDay } from '@teamhub/ui';
 import { dateKey, expand, parseRule } from './rrule';
-import { KINDS, type Kind } from './kinds';
+import type { Kind } from './kinds';
 
 export interface CalEvent {
   id: string;
@@ -122,10 +122,6 @@ export function useCalendarData(from: Date, to: Date, teamId: string | null) {
     manual.some((o) => o.event.event_code!.toUpperCase() === code.toUpperCase() && (!o.event.team_id || o.event.team_id === team));
   const overlayItems = (overlays.data ?? []).filter((o) => inScope(o.teamId) && !(o.eventCode && replaced(o.eventCode, o.teamId)));
   return { occurrences, overlays: overlayItems, isLoading: events.isLoading, error: events.error, refetch: events.refetch };
-}
-
-export function kindColor(k: Kind): string {
-  return KINDS[k]?.color ?? KINDS.other.color;
 }
 
 export function startOfToday(): Date {

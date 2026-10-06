@@ -173,7 +173,8 @@ export function People({ onNext, onBack }: StepProps) {
             const cur = c.profileFields.find((x) => x.id === f.id);
             const on = !!cur;
             return (
-              <div key={f.id} className="flex min-h-9 flex-wrap items-center gap-x-3 gap-y-1.5">
+              <div key={f.id} className="space-y-1.5">
+                <div className="flex min-h-9 flex-wrap items-center gap-x-3 gap-y-1.5">
                 <Checkbox
                   checked={on}
                   onChange={(v) =>
@@ -204,6 +205,32 @@ export function People({ onNext, onBack }: StepProps) {
                       </option>
                     ))}
                   </Select>
+                )}
+                </div>
+                {cur && (
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pl-7 text-[12.5px]" role="group" aria-label={`Who fills in ${f.label.toLowerCase()}`}>
+                    <span className="text-muted">Asked of:</span>
+                    {(['member', 'captain', 'mentor'] as const).map((t) => {
+                      const asked = !cur.askTypes?.length || cur.askTypes.includes(t);
+                      return (
+                        <Checkbox
+                          key={t}
+                          checked={asked}
+                          label={<span className="text-[12.5px]">{t === 'member' ? 'Members' : t === 'captain' ? 'Captains' : 'Mentors'}</span>}
+                          onChange={(v) =>
+                            update((x) => {
+                              const y = x.profileFields.find((z) => z.id === f.id)!;
+                              const now = y.askTypes?.length ? [...y.askTypes] : ['member', 'captain', 'mentor'];
+                              const next = v ? [...new Set([...now, t])] : now.filter((z) => z !== t);
+                              // Asking nobody makes no sense: keep at least one.
+                              if (!next.length) return;
+                              y.askTypes = next.length === 3 ? undefined : (next as typeof y.askTypes);
+                            })
+                          }
+                        />
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             );

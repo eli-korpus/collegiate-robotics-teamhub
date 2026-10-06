@@ -25,6 +25,7 @@ import {
   toast,
   useConfirm,
   renderMarkdown,
+  safeHref,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -365,7 +366,7 @@ function EntryDetail({ entry: e, onEdit, onDeleted }: { entry: Entry; onEdit: ()
         </div>
       )}
       {e.onshape_url && (
-        <a href={e.onshape_url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[13px] font-medium text-accent hover:underline">
+        <a href={safeHref(e.onshape_url)} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[13px] font-medium text-accent hover:underline">
           Open in Onshape <ExternalLink className="size-3.5" />
         </a>
       )}
@@ -405,7 +406,7 @@ function EntryDetail({ entry: e, onEdit, onDeleted }: { entry: Entry; onEdit: ()
         <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
           {images.data!.map((img) => (
             <figure key={img.id} className="group relative">
-              <a href={urls.data?.get(img.path)} target="_blank" rel="noreferrer">
+              <a href={safeHref(urls.data?.get(img.path))} target="_blank" rel="noreferrer">
                 <img src={urls.data?.get(img.path)} alt={img.caption ?? ''} className="aspect-square w-full rounded-md bg-bg-subtle object-cover" loading="lazy" />
               </a>
               {canEdit && (

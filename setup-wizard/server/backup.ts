@@ -11,6 +11,7 @@ import type { Catalog } from '@teamhub/generator';
 import type { TeamhubConfig } from '@teamhub/config-schema';
 import { lit } from '@teamhub/generator';
 import { projectUrl, type Mgmt } from './mgmt';
+import { createProgress, type Progress } from './progress';
 
 export const BACKUP_ROOT = process.env.TEAMHUB_BACKUPS ?? join(homedir(), 'TeamHub Backups');
 
@@ -35,7 +36,14 @@ export async function exportData(
   catalog: Catalog,
   config: TeamhubConfig | null,
   opts: { modules?: string[]; includeCore?: boolean; label?: string } = {},
+  progress: Progress = createProgress(),
 ): Promise<ExportResult> {
+  progress.plan([
+    { id: 'export-data', label: 'Copy your data' },
+    { id: 'export-files', label: 'Copy your files (photos, uploads)' },
+    { id: 'export-save', label: 'Save the backup zip on this computer' },
+  ]);
+  progress.set('export-data', 'running');
   const moduleIds = opts.modules ?? Object.keys(config?.modules ?? {});
   const tables = [...(opts.includeCore === false ? [] : CORE_TABLES)];
   const buckets = new Set<string>(opts.includeCore === false ? [] : ['avatars']);
@@ -53,6 +61,8 @@ export async function exportData(
     data[t] = r?.rows ?? [];
     counts[t] = data[t].length;
   }
+  progress.set('export-data', 'done', `${Object.values(counts).reduce((a, b) => a + b, 0)} rows from ${Object.keys(counts).length} tables`);
+  progress.set('export-files', 'running');
   const files: Record<string, Uint8Array> = {};
   let bytes = 0;
   if (buckets.size) {
@@ -69,6 +79,8 @@ export async function exportData(
       bytes += buf.length;
     }
   }
+  progress.set('export-files', 'done', `${Object.keys(files).length} files`);
+  progress.set('export-save', 'running');
   const stamp = new Date().toISOString().replace(/[:T]/g, '-').slice(0, 16);
   const dir = join(BACKUP_ROOT, stamp.slice(0, 10));
   mkdirSync(dir, { recursive: true });
@@ -77,14 +89,23 @@ export async function exportData(
   const zip = zipSync({ 'data.json': strToU8(JSON.stringify(manifest)), ...files }, { level: 6 });
   const path = join(dir, name);
   writeFileSync(path, zip);
+  progress.set('export-save', 'done', path);
   return { path, tables: counts, files: Object.keys(files).length, bytes };
 }
 
 /** Restore a backup into the connected project (rows that already exist are skipped). */
-export async function importData(m: Mgmt, ref: string, secretKey: string, zipPath: string) {
+export async function importData(m: Mgmt, ref: string, secretKey: string, zipPath: string, progress: Progress = createProgress()) {
+  progress.plan([
+    { id: 'import-read', label: 'Open the backup' },
+    { id: 'import-data', label: 'Restore your data' },
+    { id: 'import-files', label: 'Restore your files' },
+  ]);
+  progress.set('import-read', 'running');
   const entries = unzipSync(new Uint8Array(readFileSync(zipPath)));
   const manifest = JSON.parse(strFromU8(entries['data.json']));
   if (manifest.format !== 'teamhub-backup') throw new Error('That file is not a TeamHub backup.');
+  progress.set('import-read', 'done', `Made ${String(manifest.exported_at).slice(0, 10)}`);
+  progress.set('import-data', 'running');
   const restored: Record<string, number> = {};
   const order = [...CORE_TABLES, ...Object.keys(manifest.tables).filter((t) => !CORE_TABLES.includes(t))];
   for (const t of order) {
@@ -96,6 +117,8 @@ export async function importData(m: Mgmt, ref: string, secretKey: string, zipPat
     }
     restored[t] = rows.length;
   }
+  progress.set('import-data', 'done', `${Object.values(restored).reduce((a, b) => a + b, 0)} rows (rows already there are kept)`);
+  progress.set('import-files', 'running');
   const sb = createClient(projectUrl(ref), secretKey, { auth: { persistSession: false } });
   let files = 0;
   for (const [k, v] of Object.entries(entries)) {
@@ -104,6 +127,7 @@ export async function importData(m: Mgmt, ref: string, secretKey: string, zipPat
     const { error } = await sb.storage.from(bucket).upload(rest.join('/'), v, { upsert: true });
     if (!error) files++;
   }
+  progress.set('import-files', 'done', `${files} files`);
   return { restored, files, exportedAt: manifest.exported_at as string };
 }
 

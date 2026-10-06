@@ -20,6 +20,7 @@ import {
   hostOf,
   toast,
   useConfirm,
+  safeHref,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -247,7 +248,7 @@ function RequestSheet({ r, onClose }: { r: PRequest; onClose: () => void }) {
           <TeamBadge teamId={r.team_id} />
         </div>
         {r.url && (
-          <a href={r.url} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 text-[13.5px] font-medium text-accent hover:underline">
+          <a href={safeHref(r.url)} target="_blank" rel="noreferrer noopener" className="inline-flex items-center gap-1 text-[13.5px] font-medium text-accent hover:underline">
             {hostOf(r.url)} <ExternalLink className="size-3.5" />
           </a>
         )}

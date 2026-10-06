@@ -22,6 +22,7 @@ import {
   toast,
   useConfirm,
   type CalendarView,
+  safeHref,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -260,7 +261,7 @@ function PostDialog({ post, draft, onClose }: { post: Post | null; draft: string
                 </p>
               )}
               {v.media_ref && isUrl(v.media_ref) && (
-                <a href={v.media_ref} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-[12.5px] text-accent hover:underline">
+                <a href={safeHref(v.media_ref)} target="_blank" rel="noreferrer" className="mt-1 inline-flex items-center gap-1 text-[12.5px] text-accent hover:underline">
                   Open <ExternalLink className="size-3" />
                 </a>
               )}
@@ -278,7 +279,7 @@ function PostDialog({ post, draft, onClose }: { post: Post | null; draft: string
               <>
                 {' '}
                 ·{' '}
-                <a href={social.url} target="_blank" rel="noreferrer" className="text-accent hover:underline">
+                <a href={safeHref(social.url)} target="_blank" rel="noreferrer" className="text-accent hover:underline">
                   Open {social.label} <ExternalLink className="inline size-3" aria-hidden />
                 </a>
               </>

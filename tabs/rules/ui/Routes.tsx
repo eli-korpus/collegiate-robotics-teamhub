@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { BookMarked, CircleHelp, ExternalLink, Plus, Scale, Trash2 } from 'lucide-react';
-import { Badge, Button, Card, Dialog, EmptyState, Field, IconButton, Input, Markdown, RelativeTime, SearchInput, Segmented, Select, Spinner, Textarea, matches, toast, useConfirm } from '@teamhub/ui';
+import { Badge, Button, Card, Dialog, EmptyState, Field, IconButton, Input, Markdown, RelativeTime, SearchInput, Segmented, Select, Spinner, Textarea, matches, toast, useConfirm, safeHref } from '@teamhub/ui';
 import { canWith, friendlyError, ModuleHeader, ModulePurpose, PersonName, TeamChatLink, useCan, useCreateShortcut, useMe, useNewParam, useRows, useSeason, useSupabase } from '@teamhub/sdk';
 
 interface RuleItem {
@@ -115,7 +115,7 @@ function RuleCard({ item: i }: { item: RuleItem }) {
               </>
             )}
             {i.source_url && (
-              <a href={i.source_url} target="_blank" rel="noreferrer" className="ml-2 inline-flex items-center gap-1 text-accent hover:underline">
+              <a href={safeHref(i.source_url)} target="_blank" rel="noreferrer" className="ml-2 inline-flex items-center gap-1 text-accent hover:underline">
                 Source <ExternalLink className="size-3" />
               </a>
             )}

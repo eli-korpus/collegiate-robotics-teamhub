@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { GraduationCap } from 'lucide-react';
-import { Card, CardHeader } from '@teamhub/ui';
+import { Card, CardHeader, safeHref } from '@teamhub/ui';
 import { useMe } from '@teamhub/sdk';
 import { nextSkills, useSignoffs, useSkills } from './Routes';
 
@@ -17,7 +17,7 @@ export default function NextSkills({ teamId }: { teamId: string | null }) {
         {next.slice(0, 4).map((s) => (
           <li key={s.id} className="truncate">
             {s.url ? (
-              <a href={s.url} target="_blank" rel="noreferrer" className="hover:underline">
+              <a href={safeHref(s.url)} target="_blank" rel="noreferrer" className="hover:underline">
                 {s.name}
               </a>
             ) : (

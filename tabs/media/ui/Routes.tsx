@@ -17,6 +17,7 @@ import {
   useConfirm,
   type ProcessedFile,
   validateRequired,
+  safeHref,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -200,7 +201,7 @@ function AlbumPage() {
       />
       <div className="mx-auto max-w-6xl space-y-5 px-4 py-5 sm:px-6">
         {album.external_url && (
-          <a href={album.external_url} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-border bg-surface p-3 text-[13.5px] font-medium hover:border-accent">
+          <a href={safeHref(album.external_url)} target="_blank" rel="noreferrer" className="flex items-center gap-2 rounded-lg border border-border bg-surface p-3 text-[13.5px] font-medium hover:border-accent">
             <ExternalLink className="size-4 text-accent" /> Full album (Google Photos / Drive)
           </a>
         )}
@@ -239,7 +240,7 @@ function AlbumPage() {
                 const thumb = videoThumb(i.url!);
                 return (
                   <li key={i.id} className="group relative">
-                    <a href={i.url!} target="_blank" rel="noreferrer" className="block aspect-square overflow-hidden rounded-md border border-border bg-bg-subtle">
+                    <a href={safeHref(i.url!)} target="_blank" rel="noreferrer" className="block aspect-square overflow-hidden rounded-md border border-border bg-bg-subtle">
                       {thumb ? <img src={thumb} alt="" loading="lazy" referrerPolicy="no-referrer" className="size-full object-cover" /> : <span className="grid size-full place-items-center p-2 text-center text-[12px] text-muted"><ExternalLink className="mb-1 size-5" />{new URL(i.url!).hostname}</span>}
                     </a>
                     {(i.uploaded_by === me.id || canDeleteAny) && (
@@ -299,7 +300,7 @@ function Lightbox({ item, url, canDelete, canEdit, onPrev, onNext, onDelete, onC
             </Button>
           )}
           {url && (
-            <a href={url} download className="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-[13px] hover:bg-bg-subtle">
+            <a href={safeHref(url)} download className="inline-flex h-8 items-center gap-1.5 rounded-md px-3 text-[13px] hover:bg-bg-subtle">
               <Download className="size-4" /> Download
             </a>
           )}

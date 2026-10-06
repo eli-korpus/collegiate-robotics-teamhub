@@ -1,6 +1,6 @@
 import { NavLink, useLocation, useNavigate } from 'react-router';
 import { Check, ChevronsUpDown, ExternalLink, Home as HomeIcon, LogOut, MessagesSquare, Monitor, Moon, Search, Settings, Shield, Sun, User, Users } from 'lucide-react';
-import { Avatar, Kbd, Menu, ModKey, SidebarItem, SidebarSection, TeamDot, cn, useMediaQuery } from '@teamhub/ui';
+import { Avatar, Kbd, Menu, ModKey, SidebarItem, SidebarSection, TeamDot, cn, useMediaQuery, safeHref } from '@teamhub/ui';
 import { canWith, isMultiTeam, runtime, setTeamScope, useCan, useToolLink, useMe, usePeople, useSession, useTeamScope, type LoadedModule } from '@teamhub/sdk';
 import { nav } from '../../generated/nav';
 import { useAvailableUpdate } from './updates';
@@ -78,7 +78,7 @@ export function Sidebar({ onNavigate, onSearch }: { onNavigate: () => void; onSe
       <div className="space-y-1 border-t border-border p-2">
         {chat && (
           <a
-            href={chat.url}
+            href={safeHref(chat.url)}
             target="_blank"
             rel="noreferrer noopener"
             className="flex h-8 items-center gap-2.5 rounded-md px-2.5 text-[13px] text-fg/85 hover:bg-bg-subtle"

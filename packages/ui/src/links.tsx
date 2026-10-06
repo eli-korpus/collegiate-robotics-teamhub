@@ -1,6 +1,7 @@
 import { useState, type ReactNode } from 'react';
 import { Link2, ExternalLink } from 'lucide-react';
 import { cn } from './cn';
+import { safeHref } from './url';
 
 export function hostOf(url: string): string {
   try {
@@ -33,7 +34,7 @@ export function LinkCard({ label, url, description, actions, badge }: { label: s
       <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-md bg-bg-subtle">
         <Favicon url={url} size={16} />
       </span>
-      <a href={url} target="_blank" rel="noreferrer noopener" className="min-w-0 flex-1">
+      <a href={safeHref(url)} target="_blank" rel="noreferrer noopener" className="min-w-0 flex-1">
         <p className="flex items-center gap-1.5 truncate text-[13.5px] font-medium">
           {label}
           <ExternalLink className="size-3 shrink-0 text-faint opacity-0 transition-opacity group-hover:opacity-100" />

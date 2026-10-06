@@ -13,6 +13,13 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Security
+
+- Links people save (tool links, vendor pages, sponsor websites, notebook and manufacturing links…) are checked before
+  they are shown: only web, email and phone links work, so a saved "javascript:" link can no longer run code for
+  whoever clicks it. A test now checks every link in the app, and another checks that every database table has
+  access rules and is closed to signed-out visitors with all tabs on.
+
 ### Added
 
 - Profile fields can be asked of members, captains and/or mentors only (setup wizard > People, or Admin > Profile fields

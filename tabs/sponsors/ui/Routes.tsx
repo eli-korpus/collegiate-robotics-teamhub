@@ -22,6 +22,7 @@ import {
   toast,
   useConfirm,
   validateRequired,
+  safeHref,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -292,7 +293,7 @@ function SponsorDialog({ sponsor, canManage, onClose }: { sponsor: Sponsor | nul
                 <div className="flex gap-1">
                   <Input id={id} type="url" value={v.website} onChange={set('website')} placeholder="https://" />
                   {v.website && (
-                    <a className="grid place-items-center px-1 text-muted hover:text-fg" href={v.website} target="_blank" rel="noreferrer" aria-label="Open website">
+                    <a className="grid place-items-center px-1 text-muted hover:text-fg" href={safeHref(v.website)} target="_blank" rel="noreferrer" aria-label="Open website">
                       <ExternalLink className="size-4" />
                     </a>
                   )}

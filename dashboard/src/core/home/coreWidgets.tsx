@@ -2,7 +2,7 @@ import { lazy, Suspense } from 'react';
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Activity, Link2, UserPlus } from 'lucide-react';
-import { Card, CardHeader, Favicon, RelativeTime, buttonClass, hostOf } from '@teamhub/ui';
+import { Card, CardHeader, Favicon, RelativeTime, buttonClass, hostOf, safeHref } from '@teamhub/ui';
 import {
   isMultiTeam,
   runtime,
@@ -102,7 +102,7 @@ function QuickLinks() {
         <ul className="grid grid-cols-1 gap-0.5 px-2 pb-3">
           {pinned.map((l) => (
             <li key={l.id}>
-              <a href={l.url} target="_blank" rel="noreferrer noopener" className="flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] hover:bg-bg-subtle">
+              <a href={safeHref(l.url)} target="_blank" rel="noreferrer noopener" className="flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] hover:bg-bg-subtle">
                 <Favicon url={l.url} size={16} />
                 <span className="min-w-0 flex-1 truncate font-medium">{l.label}</span>
                 <span className="truncate text-[11.5px] text-faint">{hostOf(l.url)}</span>

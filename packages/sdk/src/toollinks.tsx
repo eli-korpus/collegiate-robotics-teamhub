@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { ExternalLink, MessagesSquare } from 'lucide-react';
-import { Button, Favicon, Input, Select, cn, hostOf, OptionalTag } from '@teamhub/ui';
+import { Button, Favicon, Input, Select, cn, hostOf, OptionalTag, safeHref } from '@teamhub/ui';
 import { useSlotLinks, useToolLink, type LinkRow } from './hooks';
 import { TOOL_SLOT_LABELS } from './slots';
 import { TeamScopePicker } from './teams';
@@ -15,7 +15,7 @@ export function ToolLinks({ slots, className, label = 'Quick links' }: { slots: 
       {shown.map((l) => (
         <a
           key={l.id}
-          href={l.url}
+          href={safeHref(l.url)}
           target="_blank"
           rel="noreferrer noopener"
           title={`${l.label} (${hostOf(l.url)})`}
@@ -35,7 +35,7 @@ export function TeamChatLink({ prefix = 'Questions? Ask in', className }: { pref
   return (
     <p className={cn('flex items-center gap-1.5 text-[12.5px] text-muted', className)}>
       <MessagesSquare className="size-3.5" /> {prefix}{' '}
-      <a href={chat.url} target="_blank" rel="noreferrer noopener" className="font-medium text-accent hover:underline">
+      <a href={safeHref(chat.url)} target="_blank" rel="noreferrer noopener" className="font-medium text-accent hover:underline">
         {chat.label} <ExternalLink className="inline size-3" aria-hidden />
       </a>
     </p>

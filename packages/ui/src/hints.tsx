@@ -3,6 +3,7 @@ import { Eye, Lock, Info, ArrowRight, Plus, ChevronDown } from 'lucide-react';
 import { cn } from './cn';
 import { Button } from './primitives';
 import { Menu, type MenuItem } from './overlays';
+import { safeHref } from './url';
 
 /**
  * "Who will see this?": rendered next to every composer, field group, upload and response UI (spec P6, §10.8).
@@ -40,7 +41,7 @@ export function PurposeHint({ purpose, notFor, className, compact }: { purpose: 
               {n.href && (
                 <>
                   {': '}
-                  <a href={n.href} target={n.external ? '_blank' : undefined} rel={n.external ? 'noreferrer' : undefined} className="font-medium text-accent hover:underline">
+                  <a href={safeHref(n.href)} target={n.external ? '_blank' : undefined} rel={n.external ? 'noreferrer' : undefined} className="font-medium text-accent hover:underline">
                     {n.label ?? 'go there'}
                   </a>
                 </>

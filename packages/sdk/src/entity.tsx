@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Ban } from 'lucide-react';
-import { Favicon, cn, hostOf } from '@teamhub/ui';
+import { Favicon, cn, hostOf, safeHref } from '@teamhub/ui';
 import { getModule } from './runtime';
 import { useSupabase } from './hooks';
 import { parseRef } from './refs';
@@ -26,7 +26,7 @@ export function EntityLink({ refStr, className }: { refStr: string | null | unde
   });
   if (refStr && /^https?:\/\//.test(refStr)) {
     return (
-      <a href={refStr} target="_blank" rel="noreferrer noopener" className={cn('inline-flex items-center gap-1.5 text-[13px] text-accent hover:underline', className)}>
+      <a href={safeHref(refStr)} target="_blank" rel="noreferrer noopener" className={cn('inline-flex items-center gap-1.5 text-[13px] text-accent hover:underline', className)}>
         <Favicon url={refStr} size={14} /> {hostOf(refStr)}
       </a>
     );

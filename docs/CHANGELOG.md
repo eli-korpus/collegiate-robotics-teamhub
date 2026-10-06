@@ -13,6 +13,11 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Changed
+
+- The GitHub workflows the setup wizard installs (GitHub Pages deploy, keep-awake and update check) use the current
+  GitHub Actions versions, which run on Node.js 24. GitHub is retiring the Node.js 20 versions they used.
+
 ## [1.0.5] - 2026-10-06
 ### Added
 

@@ -15,6 +15,15 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ### Added
 
+- Tool links (code repository, portfolio, CAD…) can be one for the whole program or one per team.
+- Tool links are kept private: the setup wizard saves them only in the team's database, never in the settings file
+  that is public on GitHub.
+- Required fields are checked in every setup step and Save button ("Please fill this in."), and optional fields all
+  show the same "Optional" tag.
+- Setup wizard: Publish explains upload problems in plain language with one-click fixes (private no-reply email,
+  getting newer changes first) and only reports success when GitHub accepted the upload.
+- Setup wizard: the Teams step asks whether you have one team or several, and per-team options only appear when
+  you have several teams.
 - People can be on several subteams: Subteam is a multi-choice field (existing single answers keep working), and the
   People filter finds someone in any of their subteams.
 - An **Edit** button on someone's profile (admins, and people who manage that team) opens one window for their name,
@@ -38,6 +47,8 @@ How to update your dashboard: [docs/updating.md](updating.md).
 - On phones and tablets, the buttons to delete a comment or a notebook photo were invisible (they only appeared
   on mouse hover). They now always show on touch screens.
 - Admin > Help showed a stray "All teams" label.
+- Setup wizard: clicking a tab option's description no longer removes its tags, and the Build my database button
+  no longer touches Show the SQL.
 
 ### Changed
 
@@ -93,10 +104,3 @@ How to update your dashboard: [docs/updating.md](updating.md).
 - Social Media Planner works with a single platform (like Instagram) without asking where each post goes.
 - Setup wizard: season picker, a light/dark preview that switches the whole preview, clearly optional tool links,
   position pickers for To Manufacture methods, and options that only show when they apply.
-- Tool links (code repository, portfolio, CAD…) can be one for the whole program or one per team.
-- Tool links are kept private: the setup wizard saves them only in the team's database, never in the settings file
-  that is public on GitHub.
-- Required fields are checked in every setup step and Save button ("Please fill this in."), and optional fields all
-  show the same "Optional" tag.
-- Setup wizard: Publish explains upload problems in plain language with one-click fixes (private no-reply email,
-  getting newer changes first) and only reports success when GitHub accepted the upload.

@@ -13,6 +13,7 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-10-06
 ### Added
 
 - Tool links (code repository, portfolio, CAD…) can be one for the whole program or one per team.

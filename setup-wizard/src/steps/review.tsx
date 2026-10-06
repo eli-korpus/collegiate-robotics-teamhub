@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Archive, CheckCircle2, Hammer, Minus, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Archive, CheckCircle2, GitBranch, Hammer, Minus, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { TeamhubConfig } from '@teamhub/config-schema';
 import { Banner, Button, Input, Segmented, Spinner, cn, toast } from '@teamhub/ui';
 import { api } from '../api';
@@ -51,18 +51,24 @@ export function Review({ onBack }: StepProps) {
       await api('/config', cfg);
       setLog(r.log);
       setDraft((d) => ({ ...d, done: { ...d.done, applied: true } }));
+      // Straight on to the test build, so Commit & push is ready without another click to find.
+      if (r.log.every((l) => l.ok)) return void (await build());
     } catch (e) {
       setLog([{ step: 'Nothing was changed: the update runs as one transaction and was rolled back.', ok: false, detail: (e as Error).message }]);
-    } finally {
-      setBusy(null);
     }
+    setBusy(null);
   };
 
   const build = async () => {
     setBusy('build');
-    const r = await api<{ ok: boolean; log: string }>('/build', {});
-    setBuildLog(r);
-    setBusy(null);
+    setBuildLog(null);
+    try {
+      setBuildLog(await api<{ ok: boolean; log: string }>('/build', {}));
+    } catch (e) {
+      setBuildLog({ ok: false, log: (e as Error).message });
+    } finally {
+      setBusy(null);
+    }
   };
 
   return (
@@ -118,7 +124,17 @@ export function Review({ onBack }: StepProps) {
         <Button icon={<Hammer className="size-4" />} onClick={build} loading={busy === 'build'} disabled={!draft.done.applied}>
           2. Test build
         </Button>
+        {!buildLog?.ok && (
+          <Button icon={<GitBranch className="size-4" />} disabled>
+            3. Commit &amp; push
+          </Button>
+        )}
       </div>
+      {!buildLog?.ok && (
+        <p className="text-[12.5px] text-muted">
+          Three steps: the database first, then a test build (it starts by itself after step 1), then <strong>Commit &amp; push</strong>, which puts the change on your website.
+        </p>
+      )}
       {!server.supabase.connected && <Banner tone="warning">Connect Supabase first (wizard home &gt; Connect).</Banner>}
       {log && <ApplyLog log={log} />}
       {buildLog && (
@@ -126,7 +142,7 @@ export function Review({ onBack }: StepProps) {
           <p className="mb-1 flex items-center gap-1.5 font-medium">
             {buildLog.ok ? (
               <>
-                <CheckCircle2 className="size-4 text-success" /> The site builds. Push to publish it.
+                <CheckCircle2 className="size-4 text-success" /> The site builds. Last step: Commit &amp; push, below, to put it on your website.
               </>
             ) : (
               'The build failed. Your live site is untouched. Details:'

@@ -13,14 +13,14 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
-### Fixed
-
-- After updating, `package-lock.json` showed as changed (its version number lagged behind), which blocked the next
-  update until it was committed. Releases now update it too.
-
 ## [1.0.2] - 2026-10-06
 ### Fixed
 
+- Setup wizard: Review & apply shows all three steps from the start (Apply to database, Test build, Commit & push).
+  The test build starts by itself after the database step, and Commit & push, which puts the change on your
+  website, no longer stays hidden until then.
+- After updating, `package-lock.json` showed as changed (its version number lagged behind), which blocked the next
+  update until it was committed. Releases now update it too.
 - A new browser-tab icon (favicon) now shows right after publishing: its link carries a version, so browsers stop
   using the old one they saved.
 - Setup wizard: the list of changes before applying now says when the program logo and browser-tab icon change.

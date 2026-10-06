@@ -1,5 +1,5 @@
 import { useRef, useState, type ReactNode } from 'react';
-import { icons, ChevronDown, ChevronRight, HelpCircle, ArrowLeft, ArrowRight, Box } from 'lucide-react';
+import { icons, ChevronDown, ChevronRight, ExternalLink, HelpCircle, ArrowLeft, ArrowRight, Box } from 'lucide-react';
 import { Button, Field, Input, Select, Switch, TagListInput, deriveAccent, dominantColor, readableOn, validateRequired } from '@teamhub/ui';
 import type { JsonSchema } from './api';
 
@@ -19,6 +19,39 @@ export function Why({ children, title = 'Why do we need this?' }: { children: Re
         {open ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
       </button>
       {open && <div className="space-y-2 px-3 pb-3 text-[13px] leading-relaxed text-muted">{children}</div>}
+    </div>
+  );
+}
+
+/** How to make a Supabase personal access token, how long it should last, and how to replace it. */
+export function TokenSteps() {
+  return (
+    <div className="space-y-2">
+      <ol className="list-decimal space-y-1 pl-5 text-[13.5px] text-muted">
+        <li>
+          Open{' '}
+          <a className="font-medium text-accent hover:underline" href="https://supabase.com/dashboard/account/tokens" target="_blank" rel="noreferrer">
+            Account &gt; Access Tokens <ExternalLink className="inline size-3" />
+          </a>{' '}
+          and click “Generate new token”.
+        </li>
+        <li>Name it “TeamHub wizard”.</li>
+        <li>
+          <strong>Expires in</strong>: pick <strong>30 days</strong>. Not “Never”: this token can change everything in your Supabase account, so a short one is safer if
+          this computer is lost or shared. If you’ll make changes all season, a custom date up to a year is OK too.
+        </li>
+        <li>Click Generate and copy the token (it starts with sbp_). Supabase only shows it once.</li>
+      </ol>
+      <Why title="What happens when the token runs out?">
+        <p>
+          Only this wizard uses the token. Your website, logins and data never do, so they keep working when it expires. The token is only needed while you set up or
+          change things here (Edit, Update, Backup, New Season, Email).
+        </p>
+        <p>
+          When it runs out, the wizard forgets it and asks you to connect again. Make a new token with the same steps, paste it in wizard home &gt; Connect, then delete the
+          old one in Account &gt; Access Tokens. To stop the wizard having access sooner, delete the token there any time.
+        </p>
+      </Why>
     </div>
   );
 }

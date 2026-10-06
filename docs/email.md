@@ -68,7 +68,9 @@ School Google accounts often have app passwords turned off. Ask your IT departme
    your website** so the sign-in page shows "Forgot your password?".
 
 The wizard won't turn email on until a provider is saved, because new members couldn't get their confirmation email
-and couldn't join.
+and couldn't join. The same goes for every other wizard step that saves sign-in settings: if your settings have email
+on but the Supabase project has no provider (for example after moving to a new project with Import), email
+confirmation stays off and the wizard tells you to add a provider in wizard home > Email.
 
 ### Or set it up in Supabase yourself
 

@@ -205,7 +205,7 @@ function MyOrder({ drive: d, order }: { drive: Drive; order: Order | null }) {
         </div>
       )}
       {needsSize && canOrder && (
-        <Field label={`Your ${field!.label.toLowerCase()}`} hint="Saved to your profile so you're never asked again">
+        <Field label={`Your ${field!.label.toLowerCase()}`} required hint="Saved to your profile so you're never asked again">
           {(id) =>
             field!.type === 'select' && field!.options.length ? (
               <Select id={id} value={askSize} onChange={(e) => setAskSize(e.target.value)} className="w-40">

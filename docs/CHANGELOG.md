@@ -13,6 +13,39 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Security
+
+- The setup wizard forgets a Supabase access token as soon as Supabase rejects it (expired or deleted), instead of
+  keeping it on your computer, and the wizard home asks for a new one. The wizard now explains how long to make the
+  token (30 days, never "Never") and how to replace it ([docs/setup-wizard.md](setup-wizard.md)).
+- Email confirmation can no longer be turned on without an email provider. Applying settings (Edit, Update) and
+  saving the site address used to trust the email setting alone; on a Supabase project with no provider (for example
+  after Import into a new project) that stopped new members from joining. Confirmation now stays off, and the wizard
+  says why.
+
+### Added
+
+- The setup wizard home now has everything from the last setup page: links to your dashboard, Supabase project and
+  GitHub copy, the invite message with its QR code and printable "How to join" page, the AI assistant prompt, and
+  the "tell us you're using TeamHub" form.
+- Edit > Review & apply shows a green "All done" message when all three steps worked, with a **Back to wizard home**
+  button below it. The Update dialog ends the same way.
+
+### Changed
+
+- Once setup is complete, the wizard always opens on its home page. An unfinished edit is offered there (Continue
+  editing or Discard) instead of reopening by itself.
+- **Back to wizard home** only asks you to discard edits when there are changes that haven't been applied.
+- Profile fields in the wizard label each choice: "Who can see it" for the dropdown and "Who fills it in" for the
+  checkboxes.
+- Required and optional fields are marked consistently: the merch size is required before ordering, the driver in
+  Driver practice and the email sender name are marked optional, and the new season label in the wizard is checked
+  before starting.
+- The email provider form checks the sender address the same way Supabase does, so a mistake shows a clear message
+  instead of an error from Supabase.
+- The change list in Review & apply now also counts team numbers, dark-mode logos, the second color, who can join and
+  tab order, so those edits can always be applied.
+
 ## [1.0.6] - 2026-10-06
 ### Added
 

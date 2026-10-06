@@ -1,8 +1,8 @@
 import { useEffect, useState, type ComponentType } from 'react';
-import { Check, Moon, RotateCcw, Sun } from 'lucide-react';
+import { Check, House, Moon, RotateCcw, Sun } from 'lucide-react';
 import { Banner, Button, ErrorState, IconButton, Spinner, cn, useConfirm } from '@teamhub/ui';
 import { api, type Catalog, type Draft, type ServerState } from './api';
-import { DraftProvider, hasSeveralTeams, newDraft, useDraft } from './draft';
+import { DraftProvider, hasSeveralTeams, newDraft, rebaseEdit, useDraft, useLeaveEdit } from './draft';
 import { Preview } from './components';
 import { Look, Program, Teams, Welcome, logoUrl, type StepProps } from './steps/basics';
 import { ChooseTabs, TabOptions, recomputeHomeDefaults } from './steps/tabs';
@@ -62,7 +62,10 @@ export function App() {
       const [s, c] = await Promise.all([api<ServerState>('/state'), api<Catalog>('/catalog')]);
       setServer(s);
       setCatalog(c);
-      if (s.draft && (s.mode === 'setup' || s.draft.flow === 'edit')) setDraft(s.draft);
+      // Setup that hasn't reached its last page picks up where it left off. Once setup is complete, the wizard always
+      // opens on its home page; an unfinished edit is offered there (Continue editing) instead of reopening by itself.
+      const unfinishedSetup = s.draft?.flow === 'setup' && (s.mode === 'setup' || s.draft.step < SETUP.length - 1);
+      if (unfinishedSetup) setDraft(s.draft);
       else if (s.mode === 'setup') {
         const d = newDraft('setup');
         recomputeHomeDefaults(d.config, c.modules);
@@ -92,7 +95,7 @@ export function App() {
         server={server}
         catalog={catalog}
         refresh={async () => setServer(await api('/state'))}
-        onEdit={() => setDraft(newDraft('edit', server.config))}
+        onEdit={(resume) => setDraft(resume ? rebaseEdit(resume, server.config!) : newDraft('edit', server.config))}
       />
     );
   }
@@ -103,8 +106,9 @@ export function App() {
       catalog={catalog}
       server={server}
       onExit={async (d) => {
-        setDraft(d);
+        // Fresh state first: wizard home must not see the draft that was just discarded or finished.
         setServer(await api('/state'));
+        setDraft(d);
       }}
     >
       <Layout />
@@ -113,8 +117,9 @@ export function App() {
 }
 
 function Layout() {
-  const { draft, go, catalog, reset } = useDraft();
+  const { draft, go, catalog } = useDraft();
   const confirm = useConfirm();
+  const leaveEdit = useLeaveEdit();
   const steps = draft.flow === 'setup' ? SETUP : EDIT;
   const idx = Math.min(draft.step, steps.length - 1);
   const Step = steps[idx].C;
@@ -158,20 +163,24 @@ function Layout() {
           })}
         </ol>
         <div className="border-t border-border p-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            icon={<RotateCcw className="size-3.5" />}
-            onClick={async () => {
-              const editing = draft.flow === 'edit';
-              if (!(await confirm({ title: editing ? 'Discard these edits?' : 'Start setup over?', body: editing ? 'Nothing has been applied unless you clicked Apply. Logos you uploaded in this edit are put back too.' : 'Your answers are cleared. Nothing in Supabase or GitHub is undone.', danger: true, confirmLabel: editing ? 'Discard' : 'Start over' }))) return;
-              await api('/draft', undefined, 'DELETE');
-              if (editing) reset(null);
-              else location.reload();
-            }}
-          >
-            {draft.flow === 'edit' ? 'Back to wizard home' : 'Start over'}
-          </Button>
+          {draft.flow === 'edit' ? (
+            <Button size="sm" variant="ghost" icon={<House className="size-3.5" />} onClick={leaveEdit}>
+              Back to wizard home
+            </Button>
+          ) : (
+            <Button
+              size="sm"
+              variant="ghost"
+              icon={<RotateCcw className="size-3.5" />}
+              onClick={async () => {
+                if (!(await confirm({ title: 'Start setup over?', body: 'Your answers are cleared. Nothing in Supabase or GitHub is undone.', danger: true, confirmLabel: 'Start over' }))) return;
+                await api('/draft', undefined, 'DELETE');
+                location.reload();
+              }}
+            >
+              Start over
+            </Button>
+          )}
         </div>
       </aside>
       <main id="wizard-main" className="min-w-0 flex-1 relative overflow-y-auto">

@@ -116,6 +116,7 @@ export interface ServerState {
   supabase: { connected: boolean; projectRef: string | null; remembered: boolean };
   backupRoot: string;
   hostFiles: string[];
+  brandingPending?: boolean;
 }
 
 export interface Draft {

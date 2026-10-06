@@ -4,7 +4,7 @@ import type { TeamhubConfig } from '@teamhub/config-schema';
 import { Banner, Button, Checkbox, Field, Input, Segmented, Select, Spinner, toast, validateRequired } from '@teamhub/ui';
 import { TOOL_SLOT_LABELS } from '@teamhub/sdk';
 import { api } from '../api';
-import { Section, StepShell, Why } from '../components';
+import { Section, StepShell, TokenSteps, Why } from '../components';
 import { hasSeveralTeams, useDraft } from '../draft';
 import { ActionButton, Checklist, NextStep, useAction } from '../progress';
 import type { StepProps } from './basics';
@@ -280,7 +280,7 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
           <p>The other choices (automatic exposure, automatic RLS, region, compute) don’t change how TeamHub works.</p>
         </Why>
       </Section>
-      <Section title="2. Let this wizard talk to Supabase" description="A personal access token lets the wizard set up your database. It stays on this computer.">
+      <Section title="2. Let this wizard talk to Supabase" description="A personal access token lets the wizard set up your database. It stays on this computer and is never put on your website.">
         {server.supabase.connected ? (
           <p className="flex items-center gap-2 text-[13.5px]">
             <CheckCircle2 className="size-4 text-success" /> Connected{server.supabase.remembered ? ' (remembered on this computer)' : ''}.{' '}
@@ -297,16 +297,7 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
           </p>
         ) : (
           <>
-            <ol className="list-decimal space-y-1 pl-5 text-[13.5px] text-muted">
-              <li>
-                Open{' '}
-                <a className="font-medium text-accent hover:underline" href="https://supabase.com/dashboard/account/tokens" target="_blank" rel="noreferrer">
-                  Account &gt; Access Tokens <ExternalLink className="inline size-3" />
-                </a>
-                .
-              </li>
-              <li>Click “Generate new token”, name it “TeamHub wizard”, and copy it (it starts with sbp_).</li>
-            </ol>
+            <TokenSteps />
             <div className="flex gap-2">
               <Input type="password" value={pat} onChange={(e) => setPat(e.target.value)} placeholder="sbp_…" aria-label="Access token" />
               <Button variant="primary" icon={<KeyRound className="size-4" />} onClick={connect} loading={busy} disabled={!pat}>

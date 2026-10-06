@@ -41,6 +41,17 @@ export function forgetCreds() {
   rmSync(CRED_FILE, { force: true });
 }
 
+/** Drops only the token (keeps the chosen project), in memory and on disk. */
+export function forgetToken() {
+  const rest = { ...getCreds() };
+  delete rest.pat;
+  memory = rest;
+  if (existsSync(CRED_FILE)) {
+    if (Object.keys(rest).length) writeFileSync(CRED_FILE, JSON.stringify(rest, null, 2), { mode: 0o600 });
+    else rmSync(CRED_FILE, { force: true });
+  }
+}
+
 export function rememberedOnDisk(): boolean {
   return existsSync(CRED_FILE);
 }

@@ -166,7 +166,7 @@ export function People({ onNext, onBack }: StepProps) {
 
       <Section
         title="Profile fields"
-        description="Optional extra info on each profile, and who can see it. People always see their own answers, and admins see everything. Mentors can ask for missing values with People > Request info: the safe way to collect personal info."
+        description="Optional extra info on each profile. Tick a field to use it, then choose who can see the answers and who is asked to fill it in. People always see their own answers, and admins see everything. Mentors can ask for missing values with People > Request info: the safe way to collect personal info."
       >
         <div className="space-y-2">
           {SUGGESTED_FIELDS.map((f) => {
@@ -174,42 +174,44 @@ export function People({ onNext, onBack }: StepProps) {
             const on = !!cur;
             return (
               <div key={f.id} className="space-y-1.5">
-                <div className="flex min-h-9 flex-wrap items-center gap-x-3 gap-y-1.5">
-                <Checkbox
-                  checked={on}
-                  onChange={(v) =>
-                    update((x) => {
-                      if (v) x.profileFields.push({ ...f, options: f.id === 'subteam' ? x.subteams.map((s) => s.name) : f.options });
-                      else x.profileFields = x.profileFields.filter((y) => y.id !== f.id);
-                    })
-                  }
-                  label={f.label}
-                  className="w-44"
-                />
-                {cur && (
-                  <Select
-                    aria-label={`Who can see ${f.label.toLowerCase()}`}
-                    className="w-auto min-w-0 sm:w-64"
-                    value={fieldLevel(cur)}
-                    onChange={(e) =>
+                <div className="flex min-h-9 items-center">
+                  <Checkbox
+                    checked={on}
+                    onChange={(v) =>
                       update((x) => {
-                        const y = x.profileFields.find((z) => z.id === f.id)!;
-                        y.visibility = e.target.value as FieldLevel;
-                        y.private = y.visibility === 'mentors';
+                        if (v) x.profileFields.push({ ...f, options: f.id === 'subteam' ? x.subteams.map((s) => s.name) : f.options });
+                        else x.profileFields = x.profileFields.filter((y) => y.id !== f.id);
                       })
                     }
-                  >
-                    {LEVELS.map((l) => (
-                      <option key={l.value} value={l.value}>
-                        {l.label}
-                      </option>
-                    ))}
-                  </Select>
-                )}
+                    label={f.label}
+                  />
                 </div>
                 {cur && (
+                  <label className="flex flex-wrap items-center gap-x-3 gap-y-1 pl-7 text-[12.5px]">
+                    <span className="w-28 shrink-0 text-muted">Who can see it:</span>
+                    <Select
+                      aria-label={`Who can see ${f.label.toLowerCase()}`}
+                      className="w-auto min-w-0 sm:w-64"
+                      value={fieldLevel(cur)}
+                      onChange={(e) =>
+                        update((x) => {
+                          const y = x.profileFields.find((z) => z.id === f.id)!;
+                          y.visibility = e.target.value as FieldLevel;
+                          y.private = y.visibility === 'mentors';
+                        })
+                      }
+                    >
+                      {LEVELS.map((l) => (
+                        <option key={l.value} value={l.value}>
+                          {l.label}
+                        </option>
+                      ))}
+                    </Select>
+                  </label>
+                )}
+                {cur && (
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 pl-7 text-[12.5px]" role="group" aria-label={`Who fills in ${f.label.toLowerCase()}`}>
-                    <span className="text-muted">Asked of:</span>
+                    <span className="w-28 shrink-0 text-muted">Who fills it in:</span>
                     {(['member', 'captain', 'mentor'] as const).map((t) => {
                       const asked = !cur.askTypes?.length || cur.askTypes.includes(t);
                       return (

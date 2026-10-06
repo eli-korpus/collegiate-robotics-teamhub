@@ -146,9 +146,8 @@ export async function applyConfig(
     log.push({ step: 'Sign-up rule saved', ok: true, detail: joinDetail });
   } else progress.set('join', 'done', `No change (${joinDetail})`);
 
-  const authDetail = config.features.email ? 'email confirmation on' : 'no email needed (approval is the gate)';
-  await progress.step('auth', () => configureAuth(m, ref, config, opts.siteUrl ?? config.hosting.url), () => authDetail);
-  log.push({ step: 'Sign-in settings configured', ok: true, detail: authDetail });
+  const auth = await progress.step('auth', () => configureAuth(m, ref, config, opts.siteUrl ?? config.hosting.url), (a) => authDetail(config, a.emailConfirmation));
+  log.push({ step: 'Sign-in settings configured', ok: true, detail: authDetail(config, auth.emailConfirmation) });
 
   // Last: prove the website will be able to talk to the database.
   progress.set('check', 'running');
@@ -202,16 +201,28 @@ export async function pingDataApi(m: Mgmt, ref: string, publishableKey: string):
 }
 
 /** Email/password on, signups on, confirmation off unless the team added SMTP (spec §7.5); site URL + redirects. */
-export async function configureAuth(m: Mgmt, ref: string, config: TeamhubConfig, siteUrl?: string | null) {
+/** Why email confirmation stayed off although the settings turn it on. */
+export const EMAIL_NEEDS_PROVIDER = 'Email is on in your settings, but no email provider is saved in this Supabase project, so email confirmation stays off (new people could never confirm). Add one in wizard home > Email.';
+
+/**
+ * Sign-in settings. Email confirmation is only turned on when an email provider (SMTP) is saved in the project:
+ * without one, Supabase can't send the confirmation email and nobody new could join (for example after moving to a
+ * new Supabase project with Import). Returns whether confirmation is on.
+ */
+const authDetail = (config: TeamhubConfig, on: boolean) => (on ? 'email confirmation on' : config.features.email ? EMAIL_NEEDS_PROVIDER : 'no email needed (approval is the gate)');
+
+export async function configureAuth(m: Mgmt, ref: string, config: TeamhubConfig, siteUrl?: string | null): Promise<{ emailConfirmation: boolean }> {
   const urls = new Set<string>(['http://localhost:5173/**', 'http://localhost:4173/**']);
   if (siteUrl) urls.add(`${siteUrl.replace(/\/$/, '')}/**`);
+  const emailConfirmation = config.features.email && !!(await readSmtp(m, ref));
   await m.updateAuthConfig(ref, {
     disable_signup: false,
     external_email_enabled: true,
-    mailer_autoconfirm: !config.features.email,
+    mailer_autoconfirm: !emailConfirmation,
     ...(siteUrl ? { site_url: siteUrl } : {}),
     uri_allow_list: [...urls].join(','),
   });
+  return { emailConfirmation };
 }
 
 /** An email provider (SMTP) as the wizard shows it. The password is never read back from Supabase. */
@@ -235,6 +246,9 @@ export async function readSmtp(m: Mgmt, ref: string): Promise<SmtpSettings | nul
  * Saves the email provider in Supabase (Authentication > Emails > SMTP Settings). The password goes straight to
  * Supabase and is never written to this computer or the repository. Leave it blank to keep the saved one.
  */
+/** The pattern Supabase's Management API checks smtp_admin_email against (its OpenAPI spec), so it never rejects what passes here. */
+const SENDER_EMAIL = /^(?!\.)(?!.*\.\.)([A-Za-z0-9_'+\-.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9-]*\.)+[A-Za-z]{2,}$/;
+
 export async function saveSmtp(m: Mgmt, ref: string, s: SmtpSettings & { pass?: string }) {
   const host = s.host.trim();
   const port = Number(s.port);
@@ -242,7 +256,7 @@ export async function saveSmtp(m: Mgmt, ref: string, s: SmtpSettings & { pass?: 
   if (!host || /\s|:\/\//.test(host)) throw new MgmtError('Enter the server name only, like smtp-relay.brevo.com (no https:// or spaces).', 400);
   if (!Number.isInteger(port) || port < 1 || port > 65535) throw new MgmtError('The port is a number, usually 465 or 587.', 400);
   if (!s.user.trim()) throw new MgmtError('Enter the username (login) from your email provider.', 400);
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(senderEmail)) throw new MgmtError('Enter the email address messages come from, like robotics@yourschool.org.', 400);
+  if (!SENDER_EMAIL.test(senderEmail)) throw new MgmtError('Enter the email address messages come from, like robotics@yourschool.org.', 400);
   const current = await m.getAuthConfig(ref);
   const pass = s.pass?.trim();
   if (!pass && !(typeof current.smtp_host === 'string' && current.smtp_host)) throw new MgmtError('Enter the password (or API key) from your email provider.', 400);

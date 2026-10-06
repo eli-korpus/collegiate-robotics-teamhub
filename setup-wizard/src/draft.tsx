@@ -1,5 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { defaultSeasonLabel, type TeamhubConfig } from '@teamhub/config-schema';
+import { useConfirm } from '@teamhub/ui';
 import { api, type Catalog, type Draft, type ServerState } from './api';
 
 /** Students only: mentors aren't asked for their grade, subteam, shirt size or an emergency contact. */
@@ -88,6 +89,10 @@ export function DraftProvider({ initial, catalog, server: initialServer, childre
       api('/draft', draft, 'PUT').catch(() => {});
     }, 500);
   }, [draft]);
+  // Leaving (Back to wizard home, Finish) deletes the draft: a save still waiting must not bring it back.
+  useEffect(() => () => {
+    if (timer.current) clearTimeout(timer.current);
+  }, []);
 
   const setDraft = useCallback((fn: (d: Draft) => Draft) => setDraftState((d) => fn(d)), []);
   const update = useCallback(
@@ -119,4 +124,41 @@ export function useDraft(): Ctx {
   const c = useContext(DraftCtx);
   if (!c) throw new Error('useDraft outside provider');
   return c;
+}
+
+/**
+ * Whether an edit has anything not applied yet: the same change list Review & apply shows, plus a replaced logo.
+ * When it can't tell (the wizard server didn't answer), it says yes, so nothing is thrown away without asking.
+ */
+export async function editHasChanges(config: TeamhubConfig): Promise<boolean> {
+  try {
+    const [diff, state] = await Promise.all([api<{ lines: unknown[] }>('/diff', config), api<ServerState>('/state')]);
+    return diff.lines.length > 0 || !!state.brandingPending;
+  } catch {
+    return true;
+  }
+}
+
+/** Settings an edit doesn't change, taken from the saved config (they may have changed on wizard home since). */
+export function rebaseEdit(d: Draft, saved: TeamhubConfig): Draft {
+  return { ...d, config: { ...d.config, supabase: saved.supabase, hosting: saved.hosting, features: saved.features, season: saved.season } };
+}
+
+/** "Back to wizard home" from an edit: asks before discarding only when there's something to lose. */
+export function useLeaveEdit() {
+  const { draft, reset } = useDraft();
+  const confirm = useConfirm();
+  return async () => {
+    if (await editHasChanges(draft.config)) {
+      const ok = await confirm({
+        title: 'Discard these edits?',
+        body: 'They haven’t been applied to your database or website. Logos you uploaded in this edit are put back too.',
+        danger: true,
+        confirmLabel: 'Discard',
+      });
+      if (!ok) return;
+    }
+    await api('/draft', undefined, 'DELETE');
+    reset(null);
+  };
 }

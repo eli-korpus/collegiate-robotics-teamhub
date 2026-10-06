@@ -131,6 +131,22 @@ After you pick the project, the wizard checks that the Data API serves the publi
 shows exactly what it will create, builds your database for only the tabs you picked, and finally tests that your
 website will be able to reach it. The token stays on your computer.
 
+### The access token: how long it lasts and how to replace it
+
+Make the token at [Account > Access Tokens](https://supabase.com/dashboard/account/tokens) > **Generate new token**.
+Name it "TeamHub wizard" and set **Expires in** to **30 days**. Don't choose "Never": the token can change everything
+in your Supabase account, so a short one is safer if your computer is lost or shared. If you'll make changes all
+season, a custom date up to a year is fine. Supabase shows the token only once (it starts with `sbp_`).
+
+Only the wizard uses the token. Your website, logins and data never do, so nothing breaks when it expires. When it
+does, the wizard forgets it and the home screen says "Your Supabase access token has expired". To replace it:
+
+1. Make a new token with the same steps.
+2. In the wizard home, click **Connect** and paste it.
+3. Delete the old token in Account > Access Tokens.
+
+You can delete the token any time to stop the wizard having access, and make a new one when you next need it.
+
 ![Connect Supabase step](screenshots/wizard-supabase.png)
 
 ## 11–12. Admin account and publish
@@ -152,7 +168,8 @@ assistant (see [AGENTS.md](../AGENTS.md)).
 
 ## Running it again later
 
-Run `npm run setup` any time. Because your settings already exist, the wizard opens a home screen with:
+Run `npm run setup` any time. Once setup is complete, the wizard always opens on its home screen (an edit you didn't
+finish is offered there, with **Continue editing** or **Discard**). The home screen has:
 
 - **Edit**: change tabs, branding or permissions. It shows a summary of the changes and backs up any tab you remove
   before touching the database.
@@ -160,3 +177,9 @@ Run `npm run setup` any time. Because your settings already exist, the wizard op
 - **Email**: connect an email provider (SMTP) and turn on email confirmation and "Forgot your password?". See
   [email.md](email.md).
 - **Backup & Export**, **New Season**, and a **Danger zone** for removing TeamHub entirely.
+- Links to your dashboard, your Supabase project and your GitHub copy; the invite message with its QR code and
+  printable "How to join" page; the AI assistant prompt; and the optional "tell us you're using TeamHub" form.
+
+When **Edit > Review & apply** finishes all three steps, a green "All done" message confirms it worked, with a
+**Back to wizard home** button below it. Going back to wizard home only asks you to discard edits when some changes
+haven't been applied yet.

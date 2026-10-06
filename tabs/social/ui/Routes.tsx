@@ -235,7 +235,7 @@ function PostDialog({ post, draft, onClose }: { post: Post | null; draft: string
           </div>
         </fieldset>
         )}
-        <Field label="Caption" hint={`${v.caption.length} characters`}>
+        <Field label="Caption" hint={`${v.caption.length} characters. Optional for an idea; needed before it goes for approval.`}>
           {(id) => (
             <div className="relative">
               <Textarea id={id} rows={5} maxLength={5000} value={v.caption} onChange={(e) => setV({ ...v, caption: e.target.value })} placeholder="Idea: show the intake prototype eating 3 samples in a row" />

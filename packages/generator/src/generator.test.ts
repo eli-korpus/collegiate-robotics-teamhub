@@ -84,4 +84,15 @@ describe('generator', async () => {
     b.program.logo = 'branding/program.webp?v=2';
     expect(diffConfigs(a, b, catalog).map((x) => x.text)).toContain('Program logo and browser-tab icon updated');
   });
+
+  it('never reports "no changes" when something differs', () => {
+    const a = cfg();
+    expect(diffConfigs(a, cfg(), catalog)).toEqual([]);
+    const b = cfg();
+    b.teams[0].number = 99999;
+    expect(diffConfigs(a, b, catalog).map((x) => x.text).join(' ')).toMatch(/team number/);
+    const c = cfg();
+    c.season = '2030–31';
+    expect(diffConfigs(a, c, catalog).map((x) => x.text)).toEqual(['Other settings updated']);
+  });
 });

@@ -18,14 +18,14 @@ import {
   type Catalog,
 } from '@teamhub/generator';
 import { allCorePermissions, modulePermissions } from '@teamhub/sdk/define';
-import { forgetCreds, getCreds, rememberedOnDisk, setCreds } from './credentials';
+import { forgetCreds, forgetToken, getCreds, rememberedOnDisk, setCreds } from './credentials';
 import { Mgmt, MgmtError, projectRefOf, projectUrl, type FetchLike } from './mgmt';
 import { gitStatus, publish, sh, useNoreplyEmail } from './git';
 import { checkForUpdate, installDependencies, mergeRelease, readState, revertUpdate, writeState } from './update';
 import { checkSite, existingHostPaths, hostFiles, keepaliveFile, updatesWorkflowFile, writeHostFiles } from './hosting';
 import { BACKUP_ROOT, exportData, importData } from './backup';
 import { respondWithProgress, withStatus, type Progress } from './progress';
-import { applyConfig, computePlan, configureAuth, createAdmin, dataApiStatus, exposePublicSchema, newSeason, readDbState, readSmtp, removeEverything, saveSmtp } from './provision';
+import { applyConfig, computePlan, configureAuth, createAdmin, dataApiStatus, exposePublicSchema, newSeason, readDbState, readSmtp, removeEverything, saveSmtp, EMAIL_NEEDS_PROVIDER } from './provision';
 
 /** Hostnames the wizard answers to. Anything else is a DNS-rebinding attempt (a website pointing its own domain at 127.0.0.1). */
 export const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
@@ -80,7 +80,10 @@ export function createApp(deps: AppDeps = {}) {
   const mgmt = () => {
     const pat = getCreds().pat;
     if (!pat) throw new MgmtError('Connect your Supabase account first (step “Connect Supabase”).', 400);
-    return new Mgmt(pat, deps.fetch);
+    // A rejected (expired) token is forgotten, so the wizard asks for a new one instead of failing on every step.
+    return new Mgmt(pat, deps.fetch, () => {
+      if (getCreds().pat === pat) forgetToken();
+    });
   };
   const projectRef = (c?: TeamhubConfig | null) => {
     const ref = getCreds().projectRef ?? c?.supabase.projectRef;
@@ -118,6 +121,8 @@ export function createApp(deps: AppDeps = {}) {
       supabase: { connected: !!creds.pat, projectRef: creds.projectRef ?? config?.supabase.projectRef ?? null, remembered: rememberedOnDisk() },
       backupRoot: BACKUP_ROOT,
       hostFiles: existingHostPaths(),
+      // A logo replaced during an edit that isn't applied yet (it's put back on Discard).
+      brandingPending: existsSync(BRANDING_ORIGINALS()),
     });
   });
 
@@ -264,9 +269,9 @@ export function createApp(deps: AppDeps = {}) {
     const config = readConfig();
     if (!config) throw new MgmtError('Save your config first.', 400);
     const next = { ...config, hosting: { ...config.hosting, url } };
-    await configureAuth(mgmt(), projectRef(config), next, url);
+    const auth = await configureAuth(mgmt(), projectRef(config), next, url);
     writeConfig(next);
-    return c.json({ ok: true });
+    return c.json({ ok: true, note: config.features.email && !auth.emailConfirmation ? EMAIL_NEEDS_PROVIDER : null });
   });
 
   app.get('/email', async (c) => {

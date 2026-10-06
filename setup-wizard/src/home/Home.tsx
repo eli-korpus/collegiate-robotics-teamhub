@@ -1,16 +1,40 @@
 import { useEffect, useState } from 'react';
 import { Archive, CalendarRange, CheckCircle2, DatabaseZap, Download, ExternalLink, Mail, Pencil, ShieldAlert, Upload, KeyRound } from 'lucide-react';
 import { TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
-import { Banner, Button, Card, Checkbox, Dialog, Field, Input, Select, Spinner, Switch, toast } from '@teamhub/ui';
-import { api, type Catalog, type ServerState } from '../api';
-import { ModuleIcon } from '../components';
+import { Banner, Button, Card, Checkbox, Dialog, Field, Input, Select, Spinner, Switch, toast, useConfirm } from '@teamhub/ui';
+import { api, type Catalog, type Draft, type ServerState } from '../api';
+import { ModuleIcon, Section, TokenSteps } from '../components';
+import { editHasChanges } from '../draft';
 import { UpdateDialog } from './Update';
 import { ActionButton, Checklist, NextStep, useAction } from '../progress';
-import { PublishButton, WaitingToPublish } from '../steps/publish';
+import { AiAssistant, Credit, InviteTeam, PublishButton, TellUs, WaitingToPublish } from '../steps/publish';
 
 /** Existing install: Edit, Update, Backup & Export, Import, New Season, Email, Danger zone (spec §5.1). */
-export function ExistingHome({ server, catalog, onEdit, refresh }: { server: ServerState; catalog: Catalog; onEdit: () => void; refresh: () => Promise<void> }) {
+export function ExistingHome({ server, catalog, onEdit, refresh }: { server: ServerState; catalog: Catalog; onEdit: (resume?: Draft) => void; refresh: () => Promise<void> }) {
   const c = server.config!;
+  const confirm = useConfirm();
+  const [tokenExpired, setTokenExpired] = useState(false);
+  // An edit left unfinished last time: offered here instead of reopening by itself. Dropped quietly if it changes nothing.
+  const [pendingEdit, setPendingEdit] = useState<Draft | null>(null);
+  useEffect(() => {
+    const d = server.draft;
+    setPendingEdit(null);
+    if (d?.flow !== 'edit') return;
+    editHasChanges(d.config).then((changed) => {
+      if (changed) setPendingEdit(d);
+      else api('/draft', undefined, 'DELETE').catch(() => {});
+    });
+  }, [server.draft]);
+  useEffect(() => {
+    // A remembered token can expire between sessions: check it, so the page asks for a new one up front.
+    if (!server.supabase.connected) return;
+    api('/supabase/projects').catch(async (e) => {
+      if (/expired/.test((e as Error).message)) {
+        setTokenExpired(true);
+        await refresh();
+      }
+    });
+  }, []);
   const [dialog, setDialog] = useState<null | 'update' | 'backup' | 'import' | 'season' | 'email' | 'danger' | 'connect'>(null);
   const [resume, setResume] = useState(false);
   const [latest, setLatest] = useState<{ current: string; latest: string | null; available: boolean } | null>(null);
@@ -51,13 +75,46 @@ export function ExistingHome({ server, catalog, onEdit, refresh }: { server: Ser
         ))}
       </div>
       {!server.supabase.connected && (
-        <Banner tone="info" className="mt-6" title="Connect Supabase to make changes" action={<Button size="sm" onClick={() => setDialog('connect')}>Connect</Button>}>
-          Editing, updating and backups need your Supabase access token for this session.
+        <Banner
+          tone={tokenExpired ? 'warning' : 'info'}
+          className="mt-6"
+          title={tokenExpired ? 'Your Supabase access token has expired' : 'Connect Supabase to make changes'}
+          action={<Button size="sm" onClick={() => setDialog('connect')}>Connect</Button>}
+        >
+          {tokenExpired
+            ? 'Your website and data are fine: only this wizard uses the token. Make a new one and paste it here, then delete the old one in Supabase.'
+            : 'Editing, updating and backups need a Supabase access token.'}
+        </Banner>
+      )}
+      {pendingEdit && (
+        <Banner
+          tone="info"
+          className="mt-6"
+          title="You have edits that haven’t been applied"
+          action={
+            <div className="flex gap-2">
+              <Button size="sm" variant="primary" onClick={() => onEdit(pendingEdit)}>
+                Continue editing
+              </Button>
+              <Button
+                size="sm"
+                onClick={async () => {
+                  if (!(await confirm({ title: 'Discard these edits?', body: 'They were never applied. Logos you uploaded in that edit are put back too.', danger: true, confirmLabel: 'Discard' }))) return;
+                  await api('/draft', undefined, 'DELETE');
+                  setPendingEdit(null);
+                }}
+              >
+                Discard
+              </Button>
+            </div>
+          }
+        >
+          They’re saved on this computer. Continue to review and apply them, or discard them.
         </Banner>
       )}
       <WaitingToPublish className="mt-6" recheck={dialog} />
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
-        <Tile icon={<Pencil />} title="Edit" body="Add or remove tabs, rebrand, change positions or permissions." onClick={onEdit} primary />
+        <Tile icon={<Pencil />} title="Edit" body="Add or remove tabs, rebrand, change positions or permissions." onClick={() => onEdit(pendingEdit ?? undefined)} primary />
         <Tile
           icon={<DatabaseZap />}
           title={latest?.available ? `Update to ${latest.latest}` : 'Update'}
@@ -71,6 +128,13 @@ export function ExistingHome({ server, catalog, onEdit, refresh }: { server: Ser
         <Tile icon={<Mail />} title="Email" body={c.features.email ? 'Email confirmation and “Forgot your password?” are on.' : 'Connect an email provider for confirmations and “Forgot your password?”.'} onClick={() => setDialog('email')} />
         <Tile icon={<ShieldAlert />} title="Danger zone" body="Remove TeamHub from the database." onClick={() => setDialog('danger')} danger />
       </div>
+      <div className="mt-10 space-y-6">
+        <SiteLinks server={server} />
+        <InviteTeam config={c} />
+        <AiAssistant config={c} catalog={catalog} />
+        <TellUs config={c} />
+        <Credit />
+      </div>
       {dialog === 'connect' && <ConnectDialog onClose={() => setDialog(null)} refresh={refresh} />}
       {dialog === 'update' && <UpdateDialog server={server} resume={resume} onClose={() => (setDialog(null), setResume(false))} />}
       {dialog === 'backup' && <BackupDialog server={server} onClose={() => setDialog(null)} />}
@@ -81,6 +145,38 @@ export function ExistingHome({ server, catalog, onEdit, refresh }: { server: Ser
     </div>
   );
 }
+
+/** Quick links: the live site, its Supabase project and the GitHub fork it's built from. */
+function SiteLinks({ server }: { server: ServerState }) {
+  const c = server.config!;
+  const ref = c.supabase.projectRef ?? server.supabase.projectRef;
+  const repo = server.git.gh?.repo ?? githubRepoOf(server.git.remote);
+  const links = [
+    c.hosting.url && { href: c.hosting.url, label: 'Open your dashboard', hint: 'Sign in with your admin account. Approve new people in People > Requests.' },
+    ref && { href: `https://supabase.com/dashboard/project/${ref}`, label: 'Your Supabase project', hint: 'Database, logins and storage use. If it ever pauses, click Restore there.' },
+    repo && { href: `https://github.com/${repo}`, label: 'Your GitHub copy', hint: 'Your settings and any code changes. Your host rebuilds the site from it.' },
+    { href: `https://github.com/${TEAMHUB_UPSTREAM_REPO}/tree/main/docs`, label: 'TeamHub guides', hint: 'Hosting, email, configuration and troubleshooting.' },
+  ].filter(Boolean) as { href: string; label: string; hint: string }[];
+  return (
+    <Section title="Your dashboard" description={c.hosting.url ? undefined : 'Your site gets an address in the setup step “Host it”.'}>
+      <ul className="grid gap-2 sm:grid-cols-2">
+        {links.map((l) => (
+          <li key={l.href}>
+            <a href={l.href} target="_blank" rel="noreferrer" className="block rounded-md border border-border p-3 hover:bg-bg-subtle">
+              <span className="inline-flex items-center gap-1 font-medium text-accent">
+                {l.label} <ExternalLink className="size-3.5" />
+              </span>
+              <span className="block text-[12.5px] text-muted">{l.hint}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </Section>
+  );
+}
+
+/** "owner/name" from a GitHub remote (https or ssh), or null. */
+const githubRepoOf = (remote?: string | null) => remote?.match(/github\.com[:/]([^/]+\/[^/]+?)(?:\.git)?$/)?.[1] ?? null;
 
 function Tile({ icon, title, body, onClick, primary, danger }: { icon: React.ReactNode; title: string; body: string; onClick: () => void; primary?: boolean; danger?: boolean }) {
   return (
@@ -100,13 +196,15 @@ function ConnectDialog({ onClose, refresh }: { onClose: () => void; refresh: () 
   const [pat, setPat] = useState('');
   const [busy, setBusy] = useState(false);
   return (
-    <Dialog open onOpenChange={(v) => !v && onClose()} title="Connect Supabase" description="Paste a personal access token from supabase.com/dashboard/account/tokens. It stays on this computer.">
+    <Dialog open onOpenChange={(v) => !v && onClose()} title="Connect Supabase" description="Paste a personal access token. It stays on this computer (in ~/.teamhub, never in your repository or on your website).">
       <div className="space-y-3">
-        <Input type="password" placeholder="sbp_…" value={pat} onChange={(e) => setPat(e.target.value)} />
+        <TokenSteps />
+        <Input type="password" placeholder="sbp_…" value={pat} onChange={(e) => setPat(e.target.value)} aria-label="Access token" />
         <Button
           variant="primary"
           icon={<KeyRound className="size-4" />}
           loading={busy}
+          disabled={!pat.trim()}
           onClick={async () => {
             setBusy(true);
             try {
@@ -175,9 +273,9 @@ function SeasonDialog({ server, catalog, onClose, refresh }: { server: ServerSta
     <Dialog open onOpenChange={(v) => !v && action.state !== 'running' && onClose()} title="New season" description="Exports everything first, then sets the new label and runs each tab's rollover (e.g. archive scouting, reset checklists, close polls)." size="lg">
       {(
         <div className="space-y-3 text-[13.5px]">
-          <label className="flex items-center gap-2">
-            New season label <Input value={label} onChange={(e) => setLabel(e.target.value)} className="w-32" />
-          </label>
+          <Field label="New season label" required hint="Like 2026–27." error={label.trim() && !/^\d{4}[–-]\d{2}$/.test(label.trim()) ? 'Use the format 2026–27.' : undefined}>
+            {(id) => <Input id={id} value={label} onChange={(e) => setLabel(e.target.value)} className="w-32" />}
+          </Field>
           <div className="flex flex-col gap-2">
             {options.map((m) => (
               <Checkbox key={m.id} checked={picked.includes(m.id)} onChange={(v) => setPicked(v ? [...picked, m.id] : picked.filter((x) => x !== m.id))} label={`Roll over ${m.name}`} />
@@ -188,6 +286,7 @@ function SeasonDialog({ server, catalog, onClose, refresh }: { server: ServerSta
             label={`Start ${label}`}
             doneLabel={`${label} started`}
             icon={<CalendarRange className="size-4" />}
+            disabled={!/^\d{4}[–-]\d{2}$/.test(label.trim())}
             onClick={async () => {
               if (await action.run('/season', { label, modules: picked })) await refresh();
             }}
@@ -319,7 +418,7 @@ function EmailDialog({ server, onClose, refresh }: { server: ServerState; onClos
                 <Field label="Send from (email)" required hint="Must be allowed by your provider (a verified sender).">
                   {(id) => <Input id={id} type="email" value={form.senderEmail} placeholder="robotics@yourschool.org" onChange={(e) => set({ senderEmail: e.target.value })} />}
                 </Field>
-                <Field label="Sender name" hint="What people see in their inbox.">
+                <Field label="Sender name" optional hint="What people see in their inbox.">
                   {(id) => <Input id={id} value={form.senderName} onChange={(e) => set({ senderName: e.target.value })} />}
                 </Field>
               </div>

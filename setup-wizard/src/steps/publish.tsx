@@ -1,10 +1,10 @@
 import { useEffect, useState, type ReactNode } from 'react';
-import { Check, CheckCircle2, Copy, ExternalLink, GitBranch, HeartHandshake, PartyPopper, Printer, RefreshCw } from 'lucide-react';
-import type { HostProvider } from '@teamhub/config-schema';
+import { Check, CheckCircle2, Copy, ExternalLink, GitBranch, HeartHandshake, House, PartyPopper, Printer, RefreshCw } from 'lucide-react';
+import type { HostProvider, TeamhubConfig } from '@teamhub/config-schema';
 import { TEAMHUB_CREDIT, TEAMHUB_UPSTREAM_REPO, isUpstreamRemote, suggestedRepoName } from '@teamhub/config-schema/util';
 import { Banner, Button, Card, Checkbox, CopyBlock, Field, Input, QRCode, Spinner, cn, toast } from '@teamhub/ui';
 import { agentPrompt } from '@teamhub/sdk/agent-prompt';
-import { api, type GitState } from '../api';
+import { api, type Catalog, type GitState } from '../api';
 import { Section, StepShell, Why } from '../components';
 import { useDraft } from '../draft';
 import { ActionButton, Checklist, NextStep, useAction } from '../progress';
@@ -296,7 +296,8 @@ export function Host({ onNext, onBack }: StepProps) {
                       }
                     }
                     await api('/config', { ...c, hosting: { ...c.hosting, provider, url: clean.replace(/\/$/, '') } });
-                    await api('/auth/site-url', { url: clean.replace(/\/$/, '') });
+                    const auth = await api<{ note: string | null }>('/auth/site-url', { url: clean.replace(/\/$/, '') });
+                    if (auth.note) toast.info(auth.note);
                     update((x) => void (x.hosting.url = clean.replace(/\/$/, '')));
                     const r = await api<{ ok: boolean; message: string }>('/hosting/check', { url: clean });
                     setResult(r);
@@ -369,12 +370,93 @@ export function KeepAlive({ onNext, onBack }: StepProps) {
   );
 }
 
+/** Invite message, QR code and printable "How to join" page: on the last setup page and on wizard home. */
+export function InviteTeam({ config: c }: { config: TeamhubConfig }) {
+  const site = c.hosting.url;
+  const join = site ? `${site}/join` : null;
+  const invite = `Join ${c.program.name} on TeamHub: ${join ?? '(your site)/join'}. Sign up with your name, email and a password, pick your team, and a captain or mentor will approve you.`;
+  return (
+    <Section title="Invite your team" description="Share this with your team chat or email list. Everyone who signs up waits for a captain or mentor to approve them (People > Requests).">
+      <Field label="Message to share">{(id) => <textarea id={id} readOnly value={invite} rows={3} className="w-full rounded-md border border-border bg-surface p-2 text-[13px]" />}</Field>
+      <Button
+        icon={<Copy className="size-4" />}
+        onClick={async () => {
+          await navigator.clipboard.writeText(invite);
+          toast.success('Copied');
+        }}
+      >
+        Copy invite
+      </Button>
+      {join ? (
+        <div className="flex items-center gap-4">
+          <QRCode value={join} size={120} />
+          <a href={`${site}/help/join`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-accent hover:underline">
+            <Printer className="size-4" /> Printable “How to join” page with this QR code
+          </a>
+        </div>
+      ) : (
+        <p className="text-[12.5px] text-muted">The QR code and printable page appear once your site has an address (setup step “Host it”).</p>
+      )}
+    </Section>
+  );
+}
+
+/** The copy-paste prompt for AI coding assistants (also in the dashboard: Admin > AI assistant). */
+export function AiAssistant({ config: c, catalog }: { config: TeamhubConfig; catalog: Catalog }) {
+  return (
+    <Section
+      title="Customize it with an AI assistant"
+      description="For changes the wizard can't make (wording, layouts, new fields), paste this into an AI coding assistant like Claude Code, Cursor or GitHub Copilot, opened in your copy of TeamHub. It points the assistant to AGENTS.md, a guide to the code and its safety rules. You can find this prompt later in your dashboard under Admin > AI assistant."
+    >
+      <CopyBlock
+        label="Prompt"
+        rows={12}
+        text={agentPrompt({ programName: c.program.name, tabs: catalog.modules.filter((m) => m.id in c.modules && c.modules[m.id].state === 'active').map((m) => m.name) })}
+      />
+    </Section>
+  );
+}
+
+/** Optional: add the team to the public list of teams using TeamHub. */
+export function TellUs({ config: c }: { config: TeamhubConfig }) {
+  return (
+    <Section
+      title="Tell us you're using TeamHub (optional)"
+      description="Opens a short public form on GitHub with your team numbers filled in. Your team is added to the list of teams using TeamHub, which helps FTC Team 23208 show how many teams it's helping. It asks for team numbers only, never students' details."
+    >
+      <a
+        href={`https://github.com/${TEAMHUB_UPSTREAM_REPO}/issues/new?template=teamhub-team.yml&teams=${encodeURIComponent(
+          c.teams
+            .map((t) => t.number)
+            .filter(Boolean)
+            .join(', '),
+        )}`}
+        target="_blank"
+        rel="noreferrer"
+        className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-accent hover:underline"
+      >
+        <HeartHandshake className="size-4" /> Add our team to the list <ExternalLink className="size-3.5" />
+      </a>
+    </Section>
+  );
+}
+
+export function Credit() {
+  return (
+    <p className="text-[12.5px] text-muted">
+      TeamHub FTC is made by{' '}
+      <a href={TEAMHUB_CREDIT.url} target="_blank" rel="noreferrer" className="font-medium text-accent hover:underline">
+        {TEAMHUB_CREDIT.team}
+      </a>{' '}
+      and shared free with every FTC team. Good luck this season!
+    </p>
+  );
+}
+
 export function Done() {
   const { draft, reset, catalog } = useDraft();
   const c = draft.config;
   const site = c.hosting.url;
-  const join = site ? `${site}/join` : null;
-  const invite = `Join ${c.program.name} on TeamHub: ${join ?? '(your site)/join'}. Sign up with your name, email and a password, pick your team, and a captain or mentor will approve you.`;
   return (
     <StepShell title="You're all set!" subtitle="Your dashboard is live. Here's how to bring your team in.">
       <WaitingToPublish />
@@ -391,76 +473,28 @@ export function Done() {
           <p className="text-muted">Sign in with your admin account, then approve people as they join (People &gt; Requests).</p>
         </div>
       </Card>
-      <Section title="Invite your team">
-        <Field label="Message to share">{(id) => <textarea id={id} readOnly value={invite} rows={3} className="w-full rounded-md border border-border bg-surface p-2 text-[13px]" />}</Field>
-        <Button
-          icon={<Copy className="size-4" />}
-          onClick={async () => {
-            await navigator.clipboard.writeText(invite);
-            toast.success('Copied');
-          }}
-        >
-          Copy invite
-        </Button>
-        {join && (
-          <div className="flex items-center gap-4">
-            <QRCode value={join} size={120} />
-            <a href={`${site}/help/join`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-accent hover:underline">
-              <Printer className="size-4" /> Printable “How to join” page with this QR code
-            </a>
-          </div>
-        )}
-      </Section>
-      <Section
-        title="Customize it with an AI assistant"
-        description="For changes the wizard can't make (wording, layouts, new fields), paste this into an AI coding assistant like Claude Code, Cursor or GitHub Copilot, opened in your copy of TeamHub. It points the assistant to AGENTS.md, a guide to the code and its safety rules. You can find this prompt later in your dashboard under Admin > AI assistant."
-      >
-        <CopyBlock
-          label="Prompt"
-          rows={12}
-          text={agentPrompt({ programName: c.program.name, tabs: catalog.modules.filter((m) => m.id in c.modules && c.modules[m.id].state === 'active').map((m) => m.name) })}
-        />
-      </Section>
-      <Section
-        title="Tell us you're using TeamHub (optional)"
-        description="Opens a short public form on GitHub with your team numbers filled in. Your team is added to the list of teams using TeamHub, which helps FTC Team 23208 show how many teams it's helping. It asks for team numbers only, never students' details."
-      >
-        <a
-          href={`https://github.com/${TEAMHUB_UPSTREAM_REPO}/issues/new?template=teamhub-team.yml&teams=${encodeURIComponent(
-            c.teams
-              .map((t) => t.number)
-              .filter(Boolean)
-              .join(', '),
-          )}`}
-          target="_blank"
-          rel="noreferrer"
-          className="inline-flex items-center gap-1.5 text-[13.5px] font-medium text-accent hover:underline"
-        >
-          <HeartHandshake className="size-4" /> Add our team to the list <ExternalLink className="size-3.5" />
-        </a>
-      </Section>
+      <InviteTeam config={c} />
+      <AiAssistant config={c} catalog={catalog} />
+      <TellUs config={c} />
       <Section title="Later">
         <ul className="list-disc space-y-1 pl-5 text-[13px] text-muted">
           <li>
-            Run <code>npm run setup</code> again any time to add or remove tabs, rebrand, or change permissions (Edit mode).
+            Run <code>npm run setup</code> again any time. It opens on the wizard home, with everything on this page plus Edit (tabs, branding, permissions), Update, Backup
+            and more.
           </li>
           <li>When TeamHub releases an update, admins see a notice in the dashboard. Run setup &gt; Update: it updates your database, then your site, and you can undo it.</li>
         </ul>
       </Section>
-      <p className="text-[12.5px] text-muted">
-        TeamHub FTC is made by{' '}
-        <a href={TEAMHUB_CREDIT.url} target="_blank" rel="noreferrer" className="font-medium text-accent hover:underline">
-          {TEAMHUB_CREDIT.team}
-        </a>{' '}
-        and shared free with every FTC team. Good luck this season!
-      </p>
+      <Credit />
       <Button
+        variant="primary"
+        icon={<House className="size-4" />}
         onClick={async () => {
           await api('/draft', undefined, 'DELETE');
           reset(null);
         }}
       >
-        Finish
+        Finish and go to wizard home
       </Button>
     </StepShell>
   );

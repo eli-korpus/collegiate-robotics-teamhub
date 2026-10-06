@@ -257,7 +257,7 @@ function LogDialog({ fields, onClose, run }: { fields: FieldDef[]; onClose: () =
       <div className="space-y-4">
         <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="driver-practice.log" label="Team" />
         <div className="grid gap-3 sm:grid-cols-2">
-          <Field label="Driver">{() => <PersonPicker value={v.driver} onChange={(driver) => setV({ ...v, driver })} />}</Field>
+          <Field label="Driver" optional>{() => <PersonPicker value={v.driver} onChange={(driver) => setV({ ...v, driver })} />}</Field>
           <Field label="Operator" optional>{() => <PersonPicker value={v.operator} onChange={(operator) => setV({ ...v, operator })} />}</Field>
           <Field label="Date" required>{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
           <Field label="Run type">

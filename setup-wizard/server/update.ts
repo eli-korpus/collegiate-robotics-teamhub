@@ -162,7 +162,17 @@ export async function mergeRelease(root: string, tag: string, backupPath: string
       return { ok: false, conflicts: [], message: `Couldn't re-apply the update you undid earlier: ${redo.stderr || redo.stdout}` };
     }
   }
-  const merge = await git(root, ['merge', '--no-ff', '--no-edit', '-m', `Update TeamHub to ${tag}`, tag]);
+  let merge = await git(root, ['merge', '--no-ff', '--no-edit', '-m', `Update TeamHub to ${tag}`, tag]);
+  if (!merge.ok) {
+    // package-lock.json is written by npm, never by hand: if it's the only conflict, take the release's copy
+    // (installing the update rewrites it to match anyway).
+    const only = lines((await git(root, ['diff', '--name-only', '--diff-filter=U'])).stdout);
+    if (only.length === 1 && only[0] === 'package-lock.json') {
+      const take = await git(root, ['checkout', '--theirs', '--', 'package-lock.json']);
+      const add = take.ok ? await git(root, ['add', 'package-lock.json']) : take;
+      merge = add.ok ? await git(root, ['commit', '--no-edit']) : add;
+    }
+  }
   if (!merge.ok) {
     const conflicts = lines((await git(root, ['diff', '--name-only', '--diff-filter=U'])).stdout);
     await git(root, ['merge', '--abort']);

@@ -110,4 +110,20 @@ describe('updating a fork', () => {
     const c = await checkForUpdate(local);
     expect(c).toMatchObject({ latest: '2.0.0', major: true });
   });
+
+  it('takes the release’s package-lock.json when that is the only conflict', async () => {
+    release('2.0.1', 'package-lock.json', '{\n  "version": "2.0.1"\n}\n', [['2.0.1', 'Lockfile']]);
+    await checkForUpdate(local);
+    const first = await mergeRelease(local, 'v2.0.1', null);
+    expect(first, JSON.stringify(first)).toMatchObject({ ok: true });
+    // Installing on the team's computer rewrote it, and they committed that (this blocked updates before).
+    write(local, 'package-lock.json', '{\n  "version": "2.0.1-local"\n}\n');
+    git(local, 'commit', '-am', 'package-lock after install');
+    release('2.0.2', 'package-lock.json', '{\n  "version": "2.0.2"\n}\n', [['2.0.2', 'Lockfile again']]);
+    await checkForUpdate(local);
+    const r = await mergeRelease(local, 'v2.0.2', null);
+    expect(r, JSON.stringify(r)).toMatchObject({ ok: true });
+    expect(readFileSync(join(local, 'package-lock.json'), 'utf8')).toContain('"2.0.2"');
+    expect(git(local, 'status', '--porcelain')).toBe('');
+  });
 });

@@ -13,6 +13,14 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Fixed
+
+- Updating TeamHub stopped right after the backup for copies whose `package-lock.json` had been changed (for example
+  by committing it after an install): git reported a conflict in that file. The update now takes the new release's
+  copy, since npm writes that file and installing the update rewrites it anyway.
+- The setup wizard's page no longer reloads by itself when an update replaces the wizard's own files, so update
+  progress and any error message stay on screen.
+
 ## [1.0.4] - 2026-10-06
 ### Security
 

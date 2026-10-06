@@ -15,6 +15,9 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ### Changed
 
+- The browser-tab icon (favicon) made from your logo has rounded corners: a solid square logo fills it edge to
+  edge, and a logo with a transparent background sits on a white rounded tile. Re-upload your logo in the setup
+  wizard (Edit > Program) to update an existing one.
 - With the Calendar tab on, attendance is taken for calendar events instead of separate practices: the Attendance
   tab's **Take attendance** lists this week's practices and events from the calendar (or offers to add one), and
   every event except deadlines (practices, meetings, competitions, outreach, socials) has a Take attendance button.

@@ -293,7 +293,12 @@ async function loadImage(src: string): Promise<HTMLImageElement> {
   });
 }
 
-function render(img: HTMLImageElement, size: number, type: string, padBg?: string): string {
+/**
+ * Draws the logo at a size. `padBg` fills the square behind it; `rounded` makes it a rounded tile (the favicon), the
+ * shape browsers and app icons use. Not for the Apple icon: iOS rounds that itself and pre-rounded corners show black.
+ * `fill` stretches a square, solid logo edge to edge (it then gets the rounded corners itself).
+ */
+function render(img: HTMLImageElement, size: number, type: string, padBg?: string, rounded = false, fill = false): string {
   const c = document.createElement('canvas');
   const scale = Math.min(1, size / Math.max(img.naturalWidth || size, img.naturalHeight || size));
   const w = type === 'image/png' ? size : Math.round((img.naturalWidth || size) * scale);
@@ -301,12 +306,18 @@ function render(img: HTMLImageElement, size: number, type: string, padBg?: strin
   c.width = w;
   c.height = h;
   const ctx = c.getContext('2d')!;
+  if (rounded) {
+    ctx.beginPath();
+    ctx.roundRect(0, 0, w, h, Math.round(Math.min(w, h) * 0.22));
+    ctx.clip();
+  }
   if (padBg) {
     ctx.fillStyle = padBg;
     ctx.fillRect(0, 0, w, h);
   }
   if (type === 'image/png') {
-    const s = Math.min(w / (img.naturalWidth || w), h / (img.naturalHeight || h)) * 0.86;
+    // Inset a little more on a rounded tile so the logo doesn't touch the curved corners.
+    const s = fill ? Math.max(w / (img.naturalWidth || w), h / (img.naturalHeight || h)) : Math.min(w / (img.naturalWidth || w), h / (img.naturalHeight || h)) * (rounded ? 0.78 : 0.86);
     const dw = (img.naturalWidth || w) * s;
     const dh = (img.naturalHeight || h) * s;
     ctx.drawImage(img, (w - dw) / 2, (h - dh) / 2, dw, dh);
@@ -327,12 +338,16 @@ export async function processLogo(file: File): Promise<ProcessedLogo> {
   sample.height = 48;
   const sctx = sample.getContext('2d')!;
   sctx.drawImage(img, 0, 0, 48, 48);
-  const suggestedColor = dominantColor(sctx.getImageData(0, 0, 48, 48).data);
+  const pixels = sctx.getImageData(0, 0, 48, 48).data;
+  const suggestedColor = dominantColor(pixels);
+  // A solid square logo (all four corners opaque) fills the favicon edge to edge; one with a transparent background
+  // sits on a white tile.
+  const solid = Math.abs((img.naturalWidth || 1) / (img.naturalHeight || 1) - 1) < 0.08 && [0, 47 * 4, 47 * 48 * 4, (47 * 48 + 47) * 4].every((i) => pixels[i + 3] > 240);
   const isSvg = file.type === 'image/svg+xml';
   return {
     main: isSvg ? dataUrl : render(img, 512, 'image/webp'),
     ext: isSvg ? 'svg' : 'webp',
-    favicon: render(img, 64, 'image/png'),
+    favicon: render(img, 64, 'image/png', '#FFFFFF', true, solid),
     apple: render(img, 180, 'image/png', '#FFFFFF'),
     suggestedColor,
     preview: dataUrl,

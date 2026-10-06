@@ -7,6 +7,9 @@ import { join, relative } from 'node:path';
 
 export const API = 'https://api.supabase.com/v1';
 
+export const TOKEN_REJECTED =
+  'Supabase rejected the access token: it has expired or was deleted. Create a new one at supabase.com/dashboard/account/tokens and paste it in wizard home > Connect.';
+
 export class MgmtError extends Error {
   constructor(
     message: string,
@@ -37,6 +40,8 @@ export class Mgmt {
   constructor(
     private pat: string,
     private f: FetchLike = fetch,
+    /** Called when Supabase rejects the token (expired or deleted), so a dead token isn't kept on this computer. */
+    private onUnauthorized?: () => void,
   ) {}
 
   async req<T>(path: string, init: RequestInit = {}): Promise<T> {
@@ -51,7 +56,10 @@ export class Mgmt {
         const j = JSON.parse(text);
         msg = j.message ?? j.error ?? text;
       } catch {}
-      if (res.status === 401) msg = 'Supabase rejected the access token. Create a new one at supabase.com/dashboard/account/tokens.';
+      if (res.status === 401) {
+        this.onUnauthorized?.();
+        msg = TOKEN_REJECTED;
+      }
       throw new MgmtError(msg || `Supabase API error ${res.status}`, res.status);
     }
     return (text ? JSON.parse(text) : null) as T;

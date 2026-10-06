@@ -89,5 +89,19 @@ export function diffConfigs(before: TeamhubConfig, after: TeamhubConfig, catalog
   if (JSON.stringify(before.subteams) !== JSON.stringify(after.subteams)) out.push({ kind: '~', text: 'Subteams updated' });
   if (JSON.stringify(before.profileFields) !== JSON.stringify(after.profileFields)) out.push({ kind: '~', text: 'Profile fields updated' });
   if (JSON.stringify(before.home) !== JSON.stringify(after.home)) out.push({ kind: '~', text: 'Home widget defaults updated' });
+  for (const t of after.teams) {
+    const p = before.teams.find((x) => x.id === t.id);
+    if (!p) continue;
+    if (p.number !== t.number) out.push({ kind: '~', text: `${t.name} team number: ${p.number ?? 'none'} to ${t.number ?? 'none'}` });
+    if (p.logoDark !== t.logoDark) out.push({ kind: '~', text: `${t.name} dark-mode logo updated` });
+    if (p.shortCode !== t.shortCode || p.school !== t.school || p.city !== t.city) out.push({ kind: '~', text: `${t.name} details updated` });
+  }
+  if (before.theme.secondary !== after.theme.secondary) out.push({ kind: '~', text: 'Second color updated' });
+  if (before.program.multiTeam !== after.program.multiTeam) out.push({ kind: '~', text: after.program.multiTeam ? 'Program now has several teams' : 'Program now has one team' });
+  if (JSON.stringify(before.join) !== JSON.stringify(after.join)) out.push({ kind: '~', text: 'Who can join updated' });
+  if (JSON.stringify(before.nav) !== JSON.stringify(after.nav)) out.push({ kind: '~', text: 'Tab order updated' });
+  // Anything else that differs still counts as a change, so an edit is never treated as "nothing to apply".
+  const rest = (c: TeamhubConfig) => JSON.stringify({ ...c, toolLinks: undefined });
+  if (!out.length && rest(before) !== rest(after)) out.push({ kind: '~', text: 'Other settings updated' });
   return out;
 }

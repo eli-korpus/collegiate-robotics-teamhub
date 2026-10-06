@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, ArrowRight, Check, CheckCircle2, Database, RotateCcw } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Check, CheckCircle2, Database, House, RotateCcw } from 'lucide-react';
 import { TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
 import { Banner, Button, Checkbox, CopyBlock, Dialog, Markdown, Spinner, toast } from '@teamhub/ui';
 import { api, apiProgress, type ProgressStep, type ServerState, type StepStatus } from '../api';
@@ -252,7 +252,19 @@ export function UpdateDialog({ server, onClose, resume }: { server: ServerState;
 
         {failed && <Failure failed={failed} check={check} />}
         {publishProblem && <PublishButton message={`Update TeamHub to ${check?.latest ?? 'the new version'}`} label="Publish the update" doneLabel="Update published" next="your host rebuilds the site in a minute or two." onDone={() => { setPublishProblem(false); setFailed(null); setPhase('done'); }} />}
-        {done && <NextStep>nothing else to do. Your host puts the new version live in a minute or two; reload your site then.</NextStep>}
+        {done && (
+          <>
+            <Banner tone="success" title={`All done: TeamHub is updated to ${check?.latest ?? 'the new version'}`}>
+              Your data was backed up, your database is updated and the new version is uploaded. Your host puts it live in a minute or two; reload your site then.
+              There’s nothing else to do.
+            </Banner>
+            <div className="flex justify-end border-t border-border pt-4">
+              <Button variant="primary" icon={<House className="size-4" />} onClick={onClose}>
+                Back to wizard home
+              </Button>
+            </div>
+          </>
+        )}
 
         {!running && check?.last?.stage === 'done' && (
           <div className="flex flex-wrap items-center gap-3 border-t border-border pt-3">

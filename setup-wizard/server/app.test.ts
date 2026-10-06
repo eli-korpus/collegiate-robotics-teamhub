@@ -189,6 +189,24 @@ describe('wizard API', () => {
     expect(r.body.backup.path).toContain(tmp);
   });
 
+  it('keeps email confirmation off when the settings turn email on but no email provider is saved', async () => {
+    // E.g. a team moving to a new Supabase project with Import: confirmation emails could never be sent.
+    const state = await call('GET', '/state');
+    const withEmail = { ...state.body.config, features: { ...state.body.config.features, email: true } };
+    const applied = await call('POST', '/apply', { config: withEmail });
+    expect(applied.status).toBe(200);
+    const lastAuth = () => calls.filter((c) => c.method === 'PATCH' && c.path.endsWith('/config/auth')).at(-1);
+    expect(lastAuth()?.body).toMatchObject({ mailer_autoconfirm: true });
+    expect(applied.body.log.find((l: { step: string }) => l.step === 'Sign-in settings configured').detail).toMatch(/no email provider is saved/);
+
+    const site = await call('POST', '/auth/site-url', { url: 'https://robots.example.org' });
+    expect(site.body.note).toMatch(/no email provider is saved/);
+    expect(lastAuth()?.body).toMatchObject({ mailer_autoconfirm: true, site_url: 'https://robots.example.org' });
+
+    // Put the settings back for the next test.
+    await call('POST', '/apply', { config: state.body.config });
+  });
+
   it('turns email confirmation on only after an email provider (SMTP) is saved in Supabase', async () => {
     expect((await call('GET', '/email')).body).toEqual({ on: false, smtp: null });
     const refused = await call('POST', '/email', { on: true });
@@ -237,6 +255,25 @@ describe('wizard API', () => {
     const s = await call('GET', '/state');
     expect(s.body.mode).toBe('existing');
     expect(s.body.config.teams[0].id).toBe(TEAM_A);
+  });
+
+  it('forgets a remembered token once Supabase rejects it (expired), and asks for a new one', async () => {
+    await call('POST', '/supabase/token', { pat: 'sbp_test123', remember: true });
+    await call('POST', '/supabase/select', { ref: REF, remember: true });
+    const credFile = join(tmp, 'home', 'credentials.json');
+    expect(readFileSync(credFile, 'utf8')).toContain('sbp_test123');
+    // The remembered token expires: Supabase now answers 401 to it.
+    const { setCreds } = await import('./credentials');
+    setCreds({ pat: 'sbp_expired' }, true);
+    const r = await call('GET', '/supabase/projects');
+    expect(r.status).toBe(401);
+    expect(r.body.error).toMatch(/expired/);
+    const s = await call('GET', '/state');
+    expect(s.body.supabase.connected).toBe(false);
+    expect(s.body.supabase.projectRef).toBe(REF);
+    expect(readFileSync(credFile, 'utf8')).not.toContain('sbp_');
+    // Reconnect for anything after this.
+    await call('POST', '/supabase/token', { pat: 'sbp_test123', remember: true });
   });
 });
 

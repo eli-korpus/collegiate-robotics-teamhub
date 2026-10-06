@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Archive, Database, GitBranch, Hammer, Minus, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Archive, CheckCircle2, Database, ExternalLink, GitBranch, Hammer, House, Minus, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { TeamhubConfig } from '@teamhub/config-schema';
-import { Banner, Button, Input, Segmented, Spinner, toast } from '@teamhub/ui';
+import { Banner, Button, Card, Input, Segmented, Spinner, toast } from '@teamhub/ui';
 import { api } from '../api';
 import { Section, StepShell } from '../components';
-import { useDraft } from '../draft';
+import { useDraft, useLeaveEdit } from '../draft';
 import { ActionButton, Checklist, NextStep, useAction } from '../progress';
 import { PublishButton, WaitingToPublish } from './publish';
 import type { StepProps } from './basics';
@@ -19,7 +19,10 @@ interface DiffLine {
 /** Edit mode: diff summary → per-removed-tab choice → backup + transactional apply → local build → push (spec §5.3, §5.6). */
 export function Review({ onBack }: StepProps) {
   const { draft, setDraft, server } = useDraft();
+  const leaveEdit = useLeaveEdit();
   const [lines, setLines] = useState<DiffLine[] | null>(null);
+  // What was applied, kept on screen afterwards (the saved settings now match, so a fresh diff would be empty).
+  const [applied, setApplied] = useState<DiffLine[] | null>(null);
   const [typed, setTyped] = useState('');
   const applyAction = useAction<{ log: { step: string; ok: boolean; detail?: string }[] }>();
   const buildAction = useAction<{ ok: boolean; log: string }>();
@@ -51,22 +54,26 @@ export function Review({ onBack }: StepProps) {
     const dormantNow = Object.entries(cfg.modules).filter(([id, m]) => m.state === 'dormant' && server.config!.modules[id]?.state !== 'dormant').map(([id]) => id);
     const r = await applyAction.run('/apply', { config: cfg, backupModules: [...removed, ...dormantNow.filter((d) => !removed.includes(d))] }, (x) => x.log.every((l) => l.ok));
     if (!r) return;
-    setDraft((d) => ({ ...d, done: { ...d.done, applied: true } }));
+    setApplied(lines);
+    // The draft now matches what was saved (tabs kept dormant included), so leaving asks nothing unless more is edited.
+    setDraft((d) => ({ ...d, config: cfg, done: { ...d.done, applied: true } }));
     // Straight on to the test build, so Commit & push is ready without another click to find.
     if (r.log.every((l) => l.ok)) await build();
   };
 
+  const shown = applied ?? lines;
+  const allDone = published && buildAction.state === 'done';
   return (
     <StepShell title="Review & apply" subtitle="Here's everything that will change. Removing a tab always exports its data first." onBack={onBack}>
-      {!lines?.length && <WaitingToPublish recheck={draft.done.published} />}
-      {!lines ? (
+      {!shown?.length && <WaitingToPublish recheck={draft.done.published} />}
+      {!shown ? (
         <Spinner />
-      ) : !lines.length ? (
-        <Banner tone="info">No changes yet. Use the steps on the left to edit your dashboard.</Banner>
+      ) : !shown.length ? (
+        <Banner tone="info">No changes yet. Use the steps on the left to edit your dashboard, or go back to wizard home.</Banner>
       ) : (
-        <Section title="Changes to apply">
+        <Section title={applied ? 'Changes applied' : 'Changes to apply'}>
           <ul className="space-y-1.5 font-mono text-[12.5px]">
-            {lines.map((l, i) => (
+            {shown.map((l, i) => (
               <li key={i} className="flex items-start gap-2">
                 {l.kind === '+' ? <Plus className="mt-0.5 size-3.5 text-success" /> : l.kind === '-' ? <Minus className="mt-0.5 size-3.5 text-danger" /> : <Pencil className="mt-0.5 size-3.5 text-muted" />}
                 <span>
@@ -111,7 +118,7 @@ export function Review({ onBack }: StepProps) {
               doneLabel="1. Database updated"
               icon={<Database className="size-4" />}
               onClick={apply}
-              disabled={!lines?.length || (deleting.length > 0 && typed !== confirmText) || !server.supabase.connected}
+              disabled={!lines?.length || !!applied || (deleting.length > 0 && typed !== confirmText) || !server.supabase.connected}
             />
             {!server.supabase.connected && <Banner tone="warning">Connect Supabase first (wizard home &gt; Connect).</Banner>}
             <Checklist steps={applyAction.steps} />
@@ -151,7 +158,6 @@ export function Review({ onBack }: StepProps) {
                 message="Update TeamHub configuration"
                 label="3. Commit & push"
                 doneLabel="3. Uploaded: your site is rebuilding"
-                next="you're done. Your host puts the new version live in a minute or two; reload your site then."
                 onDone={() => {
                   setPublished(true);
                   setDraft((d) => ({ ...d, done: { ...d.done, published: true } }));
@@ -168,6 +174,28 @@ export function Review({ onBack }: StepProps) {
         {!published && applyAction.state === 'done' && buildAction.state === 'running' && <NextStep>wait for the test build, then Commit &amp; push.</NextStep>}
         {buildAction.state === 'done' && !published && <NextStep>3. Commit &amp; push, to put it on your website.</NextStep>}
       </Section>
+      {allDone && (
+        <Card className="flex items-start gap-3 border-success p-4" role="status">
+          <CheckCircle2 className="mt-0.5 size-6 shrink-0 text-success" />
+          <div className="space-y-1 text-[13.5px]">
+            <p className="text-[15px] font-semibold">All done: your changes worked</p>
+            <p className="text-muted">
+              Your database is updated, the site built, and the change is uploaded to GitHub. Your host puts it live in a minute or two; reload your site then. There’s
+              nothing else to do.
+            </p>
+            {server.config?.hosting.url && (
+              <a href={server.config.hosting.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-accent hover:underline">
+                Open your site <ExternalLink className="size-3.5" />
+              </a>
+            )}
+          </div>
+        </Card>
+      )}
+      <div className="flex justify-end border-t border-border pt-4">
+        <Button variant={allDone ? 'primary' : 'secondary'} icon={<House className="size-4" />} onClick={leaveEdit}>
+          Back to wizard home
+        </Button>
+      </div>
     </StepShell>
   );
 }

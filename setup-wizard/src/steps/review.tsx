@@ -6,7 +6,7 @@ import { api } from '../api';
 import { Section, StepShell } from '../components';
 import { useDraft } from '../draft';
 import { ApplyLog } from './connect';
-import { PublishButton } from './publish';
+import { PublishButton, WaitingToPublish } from './publish';
 import type { StepProps } from './basics';
 
 interface DiffLine {
@@ -67,6 +67,7 @@ export function Review({ onBack }: StepProps) {
 
   return (
     <StepShell title="Review & apply" subtitle="Here's everything that will change. Removing a tab always exports its data first." onBack={onBack}>
+      {!lines?.length && <WaitingToPublish recheck={draft.done.published} />}
       {!lines ? (
         <Spinner />
       ) : !lines.length ? (

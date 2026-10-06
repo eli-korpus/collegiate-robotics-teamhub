@@ -18,6 +18,35 @@ function useGit() {
   return { git, refresh };
 }
 
+/**
+ * Things saved on this computer that aren't on the website yet (a new logo and browser-tab icon, an email setting,
+ * host or keep-alive files, commits that never uploaded), with a Publish button. Shows nothing when all is published.
+ */
+export function WaitingToPublish({ className, recheck }: { className?: string; recheck?: unknown }) {
+  const [waiting, setWaiting] = useState<{ files: string[]; commits: number } | null>(null);
+  const load = () =>
+    api<{ files: string[]; commits: number }>('/git/waiting')
+      .then(setWaiting)
+      .catch(() => setWaiting(null));
+  useEffect(() => {
+    load();
+  }, [recheck]);
+  if (!waiting || (!waiting.files.length && !waiting.commits)) return null;
+  const names = waiting.files.map((f) => f.replace(/^team\//, '').replace(/\/$/, ''));
+  return (
+    <Banner tone="warning" className={className} title="Saved, but not on your website yet">
+      <p>
+        {names.length > 0 && <>Changed here: {names.join(', ')}. </>}
+        {waiting.commits > 0 && <>{waiting.commits === 1 ? '1 saved change hasn’t' : `${waiting.commits} saved changes haven’t`} been uploaded. </>}
+        Publish uploads them to GitHub, and your host rebuilds the site in a minute or two.
+      </p>
+      <div className="mt-2">
+        <PublishButton message="Update TeamHub settings and branding" label="Publish to your website" onDone={load} />
+      </div>
+    </Banner>
+  );
+}
+
 interface PublishResult {
   ok: boolean;
   message: string;
@@ -337,6 +366,7 @@ export function Done() {
   const invite = `Join ${c.program.name} on TeamHub: ${join ?? '(your site)/join'}. Sign up with your name, email and a password, pick your team, and a captain or mentor will approve you.`;
   return (
     <StepShell title="You're all set!" subtitle="Your dashboard is live. Here's how to bring your team in.">
+      <WaitingToPublish />
       <Card className="flex items-start gap-3 p-4">
         <PartyPopper className="mt-0.5 size-6 shrink-0 text-accent" />
         <div className="space-y-1 text-[13.5px]">

@@ -19,12 +19,12 @@ export async function gitStatus() {
   const [branch, remote, status, user, upstream] = await Promise.all([
     sh('git', ['rev-parse', '--abbrev-ref', 'HEAD']),
     sh('git', ['remote', 'get-url', 'origin']),
-    sh('git', ['status', '--porcelain']),
+    sh('git', ['status', '--porcelain', '--untracked-files=all']),
     sh('git', ['config', 'user.name']),
     sh('git', ['remote', 'get-url', 'upstream']),
   ]);
   const remoteUrl = remote.ok ? remote.stdout.trim() : null;
-  const gh = await ghStatus(remoteUrl);
+  const [gh, waiting] = await Promise.all([ghStatus(remoteUrl), unpushed(REPO_ROOT)]);
   return {
     isRepo: true,
     branch: branch.stdout.trim(),
@@ -35,6 +35,8 @@ export async function gitStatus() {
       .filter(Boolean)
       .map((l: string) => l.slice(3)),
     userConfigured: !!user.stdout.trim(),
+    /** Commits made here that aren't on GitHub yet (null when there's nothing to compare with). */
+    unpushed: waiting,
     gh,
   } as const;
 }

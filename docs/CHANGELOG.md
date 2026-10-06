@@ -18,6 +18,10 @@ How to update your dashboard: [docs/updating.md](updating.md).
 - A new browser-tab icon (favicon) now shows right after publishing: its link carries a version, so browsers stop
   using the old one they saved.
 - Setup wizard: the list of changes before applying now says when the program logo and browser-tab icon change.
+- Setup wizard: things saved on your computer but not yet on your website (a new logo or browser-tab icon, the email
+  setting, host or keep-alive files, uploads that didn't finish) used to be stuck when Review said "No changes yet".
+  The wizard's home screen, Review & apply and the last setup screen now list them with a **Publish to your website**
+  button.
 
 ## [1.0.1] - 2026-10-06
 ### Added

@@ -209,16 +209,3 @@ function crossValidate(c: TeamhubConfig): ConfigIssue[] {
   }
   return issues;
 }
-
-/** Module ids of enabled modules (active or dormant both count as installed in the DB). */
-export function installedModules(c: TeamhubConfig): string[] {
-  return Object.keys(c.modules).sort();
-}
-export function activeModules(c: TeamhubConfig): string[] {
-  return Object.entries(c.modules)
-    .filter(([, m]) => m.state === 'active')
-    .map(([id]) => id)
-    .sort();
-}
-
-

@@ -138,9 +138,3 @@ export function greeting(d = new Date()): string {
   return pool[seed % pool.length]!;
 }
 
-export function durationLabel(ms: number): string {
-  const m = Math.round(ms / 60000);
-  if (m < 60) return `${m} min`;
-  const h = Math.floor(m / 60);
-  return m % 60 ? `${h} h ${m % 60} min` : `${h} h`;
-}

@@ -11,8 +11,6 @@ export * from './sql';
 export * from './codegen';
 export * from './diff';
 
-export const DEFAULT_CONFIG_PATH = 'team/teamhub.config.json';
-
 export class ConfigError extends Error {}
 
 export function readConfigFile(path: string): TeamhubConfig {

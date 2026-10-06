@@ -13,6 +13,7 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-10-06
 ### Fixed
 
 - A new browser-tab icon (favicon) now shows right after publishing: its link carries a version, so browsers stop

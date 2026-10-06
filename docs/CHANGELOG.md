@@ -19,6 +19,9 @@ How to update your dashboard: [docs/updating.md](updating.md).
   tab's **Take attendance** lists this week's practices and events from the calendar (or offers to add one), and
   every event except deadlines (practices, meetings, competitions, outreach, socials) has a Take attendance button.
   Repeating events, cancelled dates and moved times are handled.
+- Calendar competitions belong to one team (two teams at the same event = two calendar events) and are picked from
+  that team's FTCScout schedule instead of typing a code. They link to **Results & matches** (Events) and **Open
+  Competition Day**, and each team can have a competition on the calendar only once.
 
 ## [1.0.0] - 2026-10-05
 

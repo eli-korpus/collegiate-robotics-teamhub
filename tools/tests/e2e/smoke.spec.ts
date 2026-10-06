@@ -155,3 +155,32 @@ test.describe('attendance from the calendar', () => {
     expect(errors).toEqual([]);
   });
 });
+
+test.describe('competitions on the calendar', () => {
+  test('a competition needs its team, and links to results, Competition Day and attendance', async ({ page }) => {
+    test.skip(!['calendar', 'events', 'competition-day', 'attendance'].every((m) => modules.includes(m)), 'Needs Calendar, Events, Competition Day and Attendance');
+    const errors = watchErrors(page);
+    let inserts = 0;
+    const { config } = loadGenerated();
+    const teamA = config.teams[0].id;
+    const today = new Date();
+    const day = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+    await mockSupabase(page, {
+      tables: { cal_events: [{ id: 'c1', title: 'League Qualifier', kind: 'competition', team_id: teamA, event_code: 'USNYQ1', starts_at: `${day}T00:00:00`, ends_at: null, all_day: true, recurrence: null, location: null, notes: null, created_by: null }] },
+    });
+    await page.route('**/rest/v1/cal_events*', (route) => (route.request().method() === 'POST' ? (inserts++, route.fulfill({ status: 201, json: [] })) : route.fallback()));
+
+    await page.goto(`/calendar?event=c1:${day}`);
+    for (const name of ['Results & matches', 'Open Competition Day', 'Take attendance']) await expect(page.getByText(name, { exact: true }).first()).toBeVisible();
+
+    await page.goto('/calendar?new=1&kind=competition');
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByText('Competing team', { exact: true })).toBeVisible();
+    await expect(dialog.getByText(/If two of your teams go, add an event for each/)).toBeVisible();
+    await dialog.getByLabel('Title').fill('Qualifier');
+    await dialog.getByRole('button', { name: 'Add to calendar' }).click();
+    await expect(dialog.getByText('Please fill this in.')).toBeVisible();
+    expect(inserts).toBe(0);
+    expect(errors).toEqual([]);
+  });
+});

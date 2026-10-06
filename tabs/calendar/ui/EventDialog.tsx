@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Button, Checkbox, Dialog, Field, Input, Select, Switch, Textarea, toast, toDateInput, validateRequired } from '@teamhub/ui';
-import { friendlyError, ModulePurpose, ScopeVisibility, TeamScopePicker, useMe, useSupabase, useTeamScope } from '@teamhub/sdk';
+import { canWith, friendlyError, isMultiTeam, ModulePurpose, runtime, ScopeVisibility, TeamScopePicker, useMe, useSupabase, useTeamScope } from '@teamhub/sdk';
 import { KINDS, type Kind } from '../kinds';
 import { WEEKDAYS, formatRule, parseRule, type Weekday } from '../rrule';
 import { allDayToDate, dateToAllDay, type CalEvent } from '../data';
+import { CompetitionPicker } from './CompetitionPicker';
 
 type Repeat = 'none' | 'daily' | 'weekly' | 'biweekly' | 'monthly';
 
@@ -40,8 +41,21 @@ export function EventDialog({ open, onClose, event, draft, onSaved }: { open: bo
   const [days, setDays] = useState<Weekday[]>(rule?.byDay.length ? rule.byDay : [WEEKDAYS[(start ?? new Date(`${date}T12:00`)).getDay()]]);
   const [until, setUntil] = useState(rule?.until ? toDateInput(rule.until) : '');
   const [busy, setBusy] = useState(false);
+  // A competition belongs to one team (two teams at the same event = two calendar events), so the Events and
+  // Competition Day pages know whose competition it is.
+  const oneTeam = kind === 'competition' && isMultiTeam();
 
   const save = async () => {
+    if (oneTeam && !teamId) {
+      validateRequired();
+      return toast.error('Pick the team that is competing');
+    }
+    if (kind === 'competition' && eventCode.trim()) {
+      let dup = sb.from('cal_events').select('id').eq('kind', 'competition').ilike('event_code', eventCode.trim());
+      dup = teamId ? dup.eq('team_id', teamId) : dup.is('team_id', null);
+      const { data } = await dup;
+      if ((data ?? []).some((d: { id: string }) => d.id !== event?.id)) return toast.error('This team already has this competition on the calendar.');
+    }
 
     if (!validateRequired()) return;
     if (!title.trim()) return toast.error('Give the event a title');
@@ -101,7 +115,25 @@ export function EventDialog({ open, onClose, event, draft, onSaved }: { open: bo
     >
       <div className="space-y-4">
         {!event && <ModulePurpose moduleId="calendar" compact />}
-        <TeamScopePicker value={teamId} onChange={setTeamId} perm="calendar.create" />
+        {oneTeam ? (
+          <Field label="Competing team" required hint="One team per competition. If two of your teams go, add an event for each.">
+            {(id) => (
+              <Select id={id} value={teamId ?? ''} onChange={(e) => setTeamId(e.target.value || null)}>
+                <option value="">Pick a team</option>
+                {runtime()
+                  .config.teams.filter((t) => canWith(me, 'calendar.create', t.id))
+                  .map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                      {t.number ? ` (${t.number})` : ''}
+                    </option>
+                  ))}
+              </Select>
+            )}
+          </Field>
+        ) : (
+          <TeamScopePicker value={teamId} onChange={setTeamId} perm="calendar.create" />
+        )}
         <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
           <Field label="Title" required>{(id) => <Input id={id} autoFocus value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Build practice" />}</Field>
           <Field label="Kind">
@@ -157,9 +189,18 @@ export function EventDialog({ open, onClose, event, draft, onSaved }: { open: bo
         )}
         <Field label="Location" optional>{(id) => <Input id={id} value={location} maxLength={200} onChange={(e) => setLocation(e.target.value)} />}</Field>
         {kind === 'competition' && (
-          <Field label="FTC event code" optional hint="e.g. USNYNYBRQ2: merges this event with its FTCScout results (keep your travel notes here).">
-            {(id) => <Input id={id} value={eventCode} maxLength={20} onChange={(e) => setEventCode(e.target.value)} />}
-          </Field>
+          <CompetitionPicker
+            teamId={teamId}
+            code={eventCode}
+            onCode={setEventCode}
+            onPick={(c) => {
+              setEventCode(c.code);
+              if (!title.trim()) setTitle(c.name);
+              setAllDay(true);
+              setDate(c.start.slice(0, 10));
+              setEndDate(c.end.slice(0, 10));
+            }}
+          />
         )}
         <Field label="Notes" optional>{(id) => <Textarea id={id} rows={3} maxLength={2000} value={notes} onChange={(e) => setNotes(e.target.value)} />}</Field>
         <ScopeVisibility teamId={teamId} />

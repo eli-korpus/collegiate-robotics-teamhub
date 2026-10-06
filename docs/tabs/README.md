@@ -63,9 +63,10 @@ Small units that switch on automatically when both tabs are enabled:
 | Integration | What it adds |
 |---|---|
 | `attendance+calendar` | Attendance is taken for events on the calendar: every practice, meeting or event gets a "Take attendance" button, and the Attendance tab picks from the calendar instead of creating separate practices. |
+| `competition-day+calendar` | A competition on the calendar opens Competition Day for that team and event in one tap. |
 | `competition-day+checklists` | Competition Day shows your robot/pit checklists with today’s progress. |
 | `competition-day+scouting` | “Scout this match” on Competition Day opens Scouting on the right event and match; partners show your scouting. |
-| `events+calendar` | Your FTCScout competitions appear on the calendar automatically (merged with any calendar event that has the same event code). |
+| `events+calendar` | Your FTCScout competitions appear on the calendar automatically (merged with the calendar event for the same team and event), and calendar competitions link to their results. |
 | `judging+checklists` | Judging Prep shows shortcuts to your judging/pit and portfolio checklists. |
 | `manufacture+inventory` | Finished parts can be added to the parts inventory. |
 | `notebook+code-hub` | "Add to notebook" on code-hub items creates a pre-filled notebook entry that links back to it. |

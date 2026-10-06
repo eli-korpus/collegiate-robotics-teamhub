@@ -224,7 +224,12 @@
         "11",
         "12"
       ],
-      "private": false
+      "private": false,
+      "visibility": "everyone",
+      "askTypes": [
+        "member",
+        "captain"
+      ]
     },
     {
       "id": "subteam",
@@ -236,7 +241,11 @@
         "CAD",
         "Outreach"
       ],
-      "private": false
+      "private": false,
+      "askTypes": [
+        "member",
+        "captain"
+      ]
     },
     {
       "id": "shirt_size",
@@ -251,7 +260,11 @@
         "XXL"
       ],
       "private": false,
-      "visibility": "leaders"
+      "visibility": "leaders",
+      "askTypes": [
+        "member",
+        "captain"
+      ]
     }
   ],
   "permissions": {

@@ -1,4 +1,5 @@
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, relative } from 'node:path';
 import { deriveAccent } from '@teamhub/ui/color';
 import { MODULE_CATEGORIES } from '@teamhub/config-schema';
@@ -138,13 +139,19 @@ export function generateDashboardFiles(r: Resolved, outDir = 'dashboard/src/gene
   files.push({ path: `${outDir}/theme.css`, content: themeCss(r).css });
 
   const firstLogo = c.program.logo ?? c.teams.find((t) => t.logo)?.logo ?? null;
+  // Browsers keep favicons for a long time, so the link carries a version from the file's contents.
+  const brandingDir = join(process.env.TEAMHUB_TEAM_DIR ?? join(root, 'team'), 'branding');
+  const versioned = (name: string) => {
+    const file = join(brandingDir, name);
+    return existsSync(file) ? `branding/${name}?v=${createHash('sha1').update(readFileSync(file)).digest('hex').slice(0, 8)}` : null;
+  };
   files.push({
     path: `${outDir}/html.json`,
     content: json({
       title: c.program.name,
       base: c.hosting.basePath || '/',
-      favicon: existsSync(join(process.env.TEAMHUB_TEAM_DIR ?? join(root, 'team'), 'branding', 'favicon.png')) ? 'branding/favicon.png' : null,
-      appleTouchIcon: existsSync(join(process.env.TEAMHUB_TEAM_DIR ?? join(root, 'team'), 'branding', 'apple-touch-icon.png')) ? 'branding/apple-touch-icon.png' : null,
+      favicon: versioned('favicon.png'),
+      appleTouchIcon: versioned('apple-touch-icon.png'),
       logo: firstLogo,
       themeColor: c.theme.accent,
       defaultMode: c.theme.defaultMode,

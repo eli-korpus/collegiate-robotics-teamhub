@@ -53,4 +53,12 @@ describe('generator', async () => {
     const d = diffConfigs(a, b, catalog);
     expect(d.map((x) => x.text)).toEqual(expect.arrayContaining(['Accent: #3B82F6 to #10B981', 'B color: #FACC15 to #000000']));
   });
+
+  it('lists a new program logo (and the browser-tab icon made from it) in the changes', () => {
+    const a = cfg();
+    const b = cfg();
+    a.program.logo = 'branding/program.webp?v=1';
+    b.program.logo = 'branding/program.webp?v=2';
+    expect(diffConfigs(a, b, catalog).map((x) => x.text)).toContain('Program logo and browser-tab icon updated');
+  });
 });

@@ -13,6 +13,11 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Fixed
+
+- After updating, `package-lock.json` showed as changed (its version number lagged behind), which blocked the next
+  update until it was committed. Releases now update it too.
+
 ## [1.0.2] - 2026-10-06
 ### Fixed
 

@@ -1,10 +1,9 @@
-import { useMemo, useState } from 'react';
+import { lazy, Suspense } from 'react';
 import { Link } from 'react-router';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Activity, ClipboardList, Link2, UserPlus } from 'lucide-react';
-import { Button, Card, CardHeader, Favicon, Input, RelativeTime, Select, VisibilityNote, buttonClass, hostOf, toast } from '@teamhub/ui';
+import { useQuery } from '@tanstack/react-query';
+import { Activity, Link2, UserPlus } from 'lucide-react';
+import { Card, CardHeader, Favicon, RelativeTime, buttonClass, hostOf } from '@teamhub/ui';
 import {
-  friendlyError,
   isMultiTeam,
   runtime,
   useCan,
@@ -12,81 +11,13 @@ import {
   useSlotLinks,
   useMe,
   usePeople,
-  useSettingsRow,
   useSupabase,
   PersonName,
   type ActivityItem,
   type WidgetDef,
 } from '@teamhub/sdk';
 import { TeamLogo } from '../auth/AuthLayout';
-
-export interface ProfileFieldDef {
-  id: string;
-  label: string;
-  type: 'text' | 'select';
-  options: string[];
-  private: boolean;
-}
-
-/** Config fields + simple fields added later in-app (never private, spec §12.2). */
-export function useProfileFields(): ProfileFieldDef[] {
-  const s = useSettingsRow();
-  return useMemo(() => {
-    const base = runtime().config.profileFields.map((f) => ({ ...f, options: f.options ?? [] }));
-    const extra = (s.data?.extra_profile_fields ?? []).filter((f) => !base.some((b) => b.id === f.id)).map((f) => ({ ...f, options: f.options ?? [], private: false }));
-    return [...base, ...extra];
-  }, [s.data]);
-}
-
-export function useMyPrivate() {
-  const sb = useSupabase();
-  const me = useMe();
-  return useQuery({
-    queryKey: ['core', 'private', me.id],
-    queryFn: async () => {
-      const { data } = await sb.from('profiles_private').select('data').eq('user_id', me.id).maybeSingle();
-      return (data?.data ?? {}) as Record<string, string>;
-    },
-  });
-}
-
-/** Saves profile field values to the right place (details vs. private), merging with existing values. */
-export async function saveProfileFields(
-  sb: ReturnType<typeof useSupabase>,
-  userId: string,
-  fields: ProfileFieldDef[],
-  values: Record<string, string>,
-  current: { details: Record<string, string>; private: Record<string, string> },
-) {
-  const pub: Record<string, string> = {};
-  const priv: Record<string, string> = {};
-  for (const [k, v] of Object.entries(values)) {
-    const f = fields.find((x) => x.id === k);
-    if (!f) continue;
-    (f.private ? priv : pub)[k] = v;
-  }
-  if (Object.keys(pub).length) {
-    const { error } = await sb.from('profiles').update({ details: { ...current.details, ...pub } }).eq('id', userId);
-    if (error) throw error;
-  }
-  if (Object.keys(priv).length) {
-    const { error } = await sb.from('profiles_private').upsert({ user_id: userId, data: { ...current.private, ...priv } });
-    if (error) throw error;
-  }
-}
-
-export function ProfileFieldInput({ field, value, onChange }: { field: ProfileFieldDef; value: string; onChange: (v: string) => void }) {
-  return field.type === 'select' ? (
-    <Select value={value} onChange={(e) => onChange(e.target.value)} aria-label={field.label}>
-      <option value="">Choose…</option>
-      {field.options.map((o) => (
-        <option key={o}>{o}</option>
-      ))}
-    </Select>
-  ) : (
-    <Input value={value} onChange={(e) => onChange(e.target.value)} aria-label={field.label} maxLength={200} />
-  );
-}
+import type { InfoRequest } from '../people/profileFields';
 
 // ── Pending approvals (approvers) ──────────────────────────────────────────
 function Approvals() {
@@ -108,64 +39,25 @@ function Approvals() {
 }
 
 // ── Request info cards (spec §12.2) ────────────────────────────────────────
+const RequestInfoForm = lazy(() => import('../people/profileFields').then((m) => ({ default: m.RequestInfoForm })));
 function RequestInfoCards() {
   const sb = useSupabase();
   const me = useMe();
-  const qc = useQueryClient();
-  const fields = useProfileFields();
-  const priv = useMyPrivate();
   const reqs = useQuery({
     queryKey: ['core', 'info-requests'],
     queryFn: async () => {
       const { data, error } = await sb.from('info_requests').select('*').order('created_at', { ascending: false });
       if (error) throw error;
-      return data as { id: string; fields: string[]; team_id: string | null; message: string | null; created_by: string; closes_at: string | null }[];
+      return data as InfoRequest[];
     },
   });
-  const [values, setValues] = useState<Record<string, string>>({});
-  const [busy, setBusy] = useState(false);
   const myTeams = new Set(me.memberships.filter((m) => m.status === 'active').map((m) => m.team_id));
-  const has = (f: string) => !!(me.profile.details?.[f] || priv.data?.[f]);
-  const open = (reqs.data ?? []).filter(
-    (r) => (!r.closes_at || new Date(r.closes_at) > new Date()) && (!r.team_id || myTeams.has(r.team_id)) && r.fields.some((f) => !has(f)),
-  );
-  if (!open.length || priv.isLoading) return null;
-  const missing = [...new Set(open.flatMap((r) => r.fields.filter((f) => !has(f))))].map((id) => fields.find((f) => f.id === id)).filter(Boolean) as ProfileFieldDef[];
-  if (!missing.length) return null;
+  const open = (reqs.data ?? []).filter((r) => (!r.closes_at || new Date(r.closes_at) > new Date()) && (!r.team_id || myTeams.has(r.team_id)));
+  if (!open.length) return null;
   return (
-    <Card className="border-warning/40">
-      <CardHeader icon={<ClipboardList className="size-4" />} title={`Please add your ${missing.map((f) => f.label.toLowerCase()).join(', ')}`} subtitle={open[0].message ? `“${open[0].message}” · ` : undefined} />
-      <form
-        className="space-y-2.5 px-4 pb-4"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          setBusy(true);
-          try {
-            await saveProfileFields(sb, me.id, fields, values, { details: me.profile.details ?? {}, private: priv.data ?? {} });
-            toast.success('Saved to your profile');
-            qc.invalidateQueries({ queryKey: ['core'] });
-          } catch (err) {
-            toast.error(friendlyError(err));
-          } finally {
-            setBusy(false);
-          }
-        }}
-      >
-        {missing.map((f) => (
-          <label key={f.id} className="block space-y-1">
-            <span className="text-[12.5px] font-medium">{f.label}</span>
-            <ProfileFieldInput field={f} value={values[f.id] ?? ''} onChange={(v) => setValues({ ...values, [f.id]: v })} />
-            <VisibilityNote locked={f.private}>{f.private ? 'Private: only you and mentors can see this' : 'Saved to your profile, visible to your team'}</VisibilityNote>
-          </label>
-        ))}
-        <p className="text-[12px] text-muted">
-          Requested by <PersonName id={open[0].created_by} />
-        </p>
-        <Button type="submit" size="sm" variant="primary" loading={busy}>
-          Save to my profile
-        </Button>
-      </form>
-    </Card>
+    <Suspense fallback={null}>
+      <RequestInfoForm requests={open} />
+    </Suspense>
   );
 }
 

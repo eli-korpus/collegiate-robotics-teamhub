@@ -1,11 +1,20 @@
 import { createElement } from 'react';
+import { Link } from 'react-router';
 import { Trophy } from 'lucide-react';
-import { seasonYear } from '@teamhub/config-schema/util';
+import { defaultSeasonLabel, seasonYear } from '@teamhub/config-schema/util';
 import { runtime, type CalendarOverlayItem, type IntegrationClient } from '@teamhub/sdk';
-import { parseDate } from '@teamhub/ui';
+import { buttonClass, parseDate } from '@teamhub/ui';
+
+/** "Results & matches" on a calendar competition: opens it in the Events tab. */
+function ResultsLink({ event, occurrence }: { event: { kind: string; event_code: string | null }; occurrence: { start: Date } }) {
+  if (event.kind !== 'competition' || !event.event_code) return null;
+  const season = seasonYear(defaultSeasonLabel(occurrence.start));
+  return createElement(Link, { to: `/events/${season}/${event.event_code}`, className: buttonClass('secondary', 'sm') }, createElement(Trophy, { className: 'size-4' }), 'Results & matches');
+}
 
 const client: IntegrationClient = {
   id: 'events+calendar',
+  slots: { 'calendar.event.actions': ResultsLink },
   calendarOverlays: [
     async (sb, { from, to }) => {
       const { data } = await sb.from('teamhub_settings').select('season_label').eq('id', 1).maybeSingle();

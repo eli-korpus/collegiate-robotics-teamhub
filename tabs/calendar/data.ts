@@ -115,9 +115,12 @@ export function useCalendarData(from: Date, to: Date, teamId: string | null) {
   });
   const inScope = (t: string | null | undefined) => !teamId || !t || t === teamId;
   const occurrences = events.data ? expandOccurrences(events.data.events.filter((e) => inScope(e.team_id)), events.data.exceptions, from, to) : [];
-  // A manual competition event with an event code merges with the FTCScout overlay (manual one keeps travel notes).
-  const codes = new Set(occurrences.map((o) => o.event.event_code?.toUpperCase()).filter(Boolean));
-  const overlayItems = (overlays.data ?? []).filter((o) => inScope(o.teamId) && !(o.eventCode && codes.has(o.eventCode.toUpperCase())));
+  // A calendar competition with an event code replaces that team's FTCScout entry (the calendar one keeps travel
+  // notes). A competition without a team (one-team programs) replaces it for every team.
+  const manual = occurrences.filter((o) => o.event.kind === 'competition' && o.event.event_code);
+  const replaced = (code: string, team: string | null | undefined) =>
+    manual.some((o) => o.event.event_code!.toUpperCase() === code.toUpperCase() && (!o.event.team_id || o.event.team_id === team));
+  const overlayItems = (overlays.data ?? []).filter((o) => inScope(o.teamId) && !(o.eventCode && replaced(o.eventCode, o.teamId)));
   return { occurrences, overlays: overlayItems, isLoading: events.isLoading, error: events.error, refetch: events.refetch };
 }
 

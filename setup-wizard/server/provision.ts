@@ -252,7 +252,7 @@ export async function removeEverything(m: Mgmt, ref: string, secretKey: string, 
      do $$ begin if exists (select 1 from pg_namespace where nspname = 'cron') then perform cron.unschedule(jobname) from cron.job where starts_with(jobname, 'teamhub_'); end if; end $$;
      drop trigger if exists teamhub_on_auth_user_created on auth.users;
      drop trigger if exists teamhub_on_auth_user_deleted on auth.users;
-     drop table if exists comments, notifications, info_requests, links, subteams, position_holders, positions, memberships, profiles_private, profiles, teams, teamhub_storage_trash, teamhub_settings, teamhub_modules cascade;
+     drop table if exists comments, notifications, info_requests, links, subteams, position_holders, positions, memberships, profiles_leaders, profiles_private, profiles, teams, teamhub_storage_trash, teamhub_settings, teamhub_modules cascade;
      drop schema if exists teamhub_private cascade;
      do $$ declare r record; begin
        for r in select p.oid::regprocedure sig from pg_proc p join pg_namespace n on n.oid = p.pronamespace

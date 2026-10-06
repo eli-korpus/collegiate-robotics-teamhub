@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { NavLink, Route, Routes } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Activity, BookOpen, Bot, Boxes, CalendarRange, Database, ExternalLink, HardDrive, Link2, MailCheck, Pencil, Plus, Shield, Trash2 } from 'lucide-react';
+import { Activity, BookOpen, Bot, Boxes, CalendarRange, Database, ExternalLink, HardDrive, IdCard, Link2, MailCheck, Pencil, Plus, Shield, Trash2 } from 'lucide-react';
 import {
   Badge,
   Banner,
@@ -53,12 +53,14 @@ import { agentPrompt } from '@teamhub/sdk/agent-prompt';
 import { TEAMHUB_CREDIT, TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
 import { UpdateNotice } from './UpdateNotice';
 import { WhoCanJoin } from './WhoCanJoin';
+import { ProfileFieldsAdmin } from './ProfileFieldsAdmin';
 
 const SECTIONS = [
   { path: '', label: 'Storage & usage', icon: HardDrive },
   { path: 'modules', label: 'Tabs & database', icon: Boxes },
   { path: 'admins', label: 'Admins', icon: Shield },
   { path: 'join', label: 'Who can join', icon: MailCheck },
+  { path: 'fields', label: 'Profile fields', icon: IdCard },
   { path: 'season', label: 'Season', icon: CalendarRange },
   { path: 'links', label: 'Tool links', icon: Link2 },
   { path: 'keepalive', label: 'Keep-alive', icon: Activity },
@@ -90,6 +92,7 @@ export default function AdminPage() {
           <Route path="modules" element={<Modules />} />
           <Route path="admins" element={<Admins />} />
           <Route path="join" element={<WhoCanJoin />} />
+          <Route path="fields" element={<ProfileFieldsAdmin />} />
           <Route path="season" element={<Season />} />
           <Route path="links" element={<ToolLinksAdmin />} />
           <Route path="keepalive" element={<KeepAlive />} />
@@ -651,8 +654,20 @@ function Help() {
         </p>
       </Card>
       <Card className="space-y-2 p-4">
-        <p className="font-semibold">Things that live in Supabase or the wizard</p>
+        <p className="font-semibold">Change right here, no wizard needed</p>
         <ul className="list-disc space-y-1 pl-5 text-muted">
+          <li>Approving new members: People &gt; Requests.</li>
+          <li>Someone's name, teams, role and profile answers: open them in People &gt; Edit. Positions: People &gt; Positions.</li>
+          <li>Deactivating or deleting an account, or a password reset link: the menu on their profile.</li>
+          <li>Admins, who can join, extra profile fields, the season label and tool links: the sections above.</li>
+          <li>Old files: Storage &amp; usage &gt; Delete old files.</li>
+          <li>Everything inside a tab (events, tasks, checklists…): in that tab.</li>
+        </ul>
+      </Card>
+      <Card className="space-y-2 p-4">
+        <p className="font-semibold">Needs the setup wizard</p>
+        <ul className="list-disc space-y-1 pl-5 text-muted">
+          <li>Tabs and their options, teams, colors and logos, subteams, permissions, and who can see each setup profile field: wizard &gt; Edit. These are built into the site, so it rebuilds.</li>
           <li>Data backups and restore: wizard &gt; Backup &amp; Export.</li>
           <li>New season rollover: wizard &gt; New Season.</li>
           <li>Email (self-serve password reset): add SMTP in Supabase, then wizard &gt; Enable email.</li>
@@ -665,7 +680,6 @@ function Help() {
         </a>
         .
       </p>
-      <TeamBadge teamId={null} />
       <Card className="space-y-2 p-4">
         <p className="font-semibold">About TeamHub</p>
         <p className="text-muted">

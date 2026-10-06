@@ -28,3 +28,14 @@ describe('which tool link to show', () => {
     expect(resolveSlotLinks([link('portfolio', B, 'Folio')], ['portfolio'], A)).toEqual([]);
   });
 });
+
+describe('team labels on links', () => {
+  beforeAll(() => {
+    initRuntime({ config: { program: { name: 'Example Robotics', multiTeam: true }, teams: [{ id: A, shortCode: 'A', number: 12345, name: 'Gearheads' }, { id: B, shortCode: 'B', number: 67890, name: 'Sparks' }] } } as never);
+  });
+  it("doesn't repeat the team when the label already names it", () => {
+    const ls = [link('portfolio', A, 'Portfolio (12345)'), link('portfolio', B, 'Sparks portfolio'), link('cad', A, 'CAD'), link('cad', B, 'CAD')];
+    expect(resolveSlotLinks(ls, ['portfolio', 'cad'], null).map((l) => l.label)).toEqual(['Portfolio (12345)', 'Sparks portfolio', 'CAD (A)', 'CAD (B)']);
+    expect(resolveSlotLinks([link('drive', A, 'Get a quote'), link('drive', B, 'Drive')], ['drive'], null).map((l) => l.label)).toEqual(['Get a quote (A)', 'Drive (B)']);
+  });
+});

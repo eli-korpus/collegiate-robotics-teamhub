@@ -381,7 +381,7 @@ function SkillEditor({ skill, all, onClose }: { skill: Skill | null; all: Skill[
         <Field label="What it means" optional>{(id) => <Textarea id={id} rows={2} maxLength={2000} value={v.description} onChange={(e) => setV({ ...v, description: e.target.value })} />}</Field>
         <Field label="Training link" optional>{(id) => <Input id={id} type="url" value={v.url} onChange={(e) => setV({ ...v, url: e.target.value })} placeholder="https://…" />}</Field>
         {all.filter((s) => s.id !== skill?.id).length > 0 && (
-          <fieldset className="space-y-1">
+          <fieldset className="flex flex-col gap-2">
             <legend className="mb-1 text-[13px] font-medium">Learn these first <OptionalTag /></legend>
             {all
               .filter((s) => s.id !== skill?.id)

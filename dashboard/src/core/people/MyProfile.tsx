@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Download, Trash2, UserPlus } from 'lucide-react';
 import { Avatar, Button, Card, CardHeader, Field, Input, PageHeader, Select, Textarea, VisibilityNote, downloadText, toast, useConfirm, validateRequired } from '@teamhub/ui';
 import { friendlyError, isMultiTeam, runtime, useMe, usePeople, useSupabase, Upload, uploadFile } from '@teamhub/sdk';
-import { ProfileFieldInput, saveProfileFields, useMyPrivate, useProfileFields } from '../home/coreWidgets';
+import { LEVEL_NOTE, ProfileFieldInput, fieldValue, saveProfileFields, useMyPrivate, useProfileFields } from './profileFields';
 
 export default function MyProfile() {
   const sb = useSupabase();
@@ -21,7 +21,7 @@ export default function MyProfile() {
   const [joinNote, setJoinNote] = useState('');
 
   useEffect(() => {
-    setValues(Object.fromEntries(fields.map((f) => [f.id, (f.private ? priv.data?.[f.id] : me.profile.details?.[f.id]) ?? ''])));
+    setValues(Object.fromEntries(fields.map((f) => [f.id, fieldValue(f, me.profile.details, priv.data)])));
   }, [fields, priv.data, me.profile.details]);
 
   const refresh = () => qc.invalidateQueries({ queryKey: ['core'] });
@@ -78,11 +78,11 @@ export default function MyProfile() {
             <CardHeader title="Profile details" />
             <div className="grid gap-3 px-4 pb-4 sm:grid-cols-2">
               {fields.map((f) => (
-                <label key={f.id} className="block space-y-1.5">
-                  <span className="text-[13px] font-medium">{f.label}</span>
+                <div key={f.id} role="group" aria-label={f.label} className="space-y-1.5">
+                  <p className="text-[13px] font-medium">{f.label}</p>
                   <ProfileFieldInput field={f} value={values[f.id] ?? ''} onChange={(v) => setValues({ ...values, [f.id]: v })} />
-                  <VisibilityNote locked={f.private}>{f.private ? 'Only you and mentors' : 'Visible to your program'}</VisibilityNote>
-                </label>
+                  <VisibilityNote locked={f.private}>{LEVEL_NOTE[f.level]}</VisibilityNote>
+                </div>
               ))}
             </div>
           </Card>
@@ -98,7 +98,7 @@ export default function MyProfile() {
                   const { error } = await sb.from('profiles').update({ display_name: name.trim() }).eq('id', me.id);
                   if (error) throw error;
                 }
-                await saveProfileFields(sb, me.id, fields, values, { details: me.profile.details ?? {}, private: priv.data ?? {} });
+                await saveProfileFields(sb, me.id, fields, values, { details: me.profile.details ?? {}, hidden: priv.data ?? { leaders: {}, mentors: {} } });
                 toast.success('Profile saved');
                 refresh();
               } catch (e) {

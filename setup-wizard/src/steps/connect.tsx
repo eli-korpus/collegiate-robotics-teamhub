@@ -152,7 +152,7 @@ export function ToolLinksStep({ onNext, onBack }: StepProps) {
       nextDisabled={invalid}
     >
       <Banner tone="info">
-        Everything on this page is optional. Skip anything you don't use and press Continue. You can add or change links any time in the dashboard (Admin &gt; Tool links).
+        Everything on this page is optional. Skip anything you don't use and press Continue. These links are saved only in your team's private database, never in your public GitHub copy, and you can change them any time in the dashboard (Admin &gt; Tool links).
         {multi && ' Links like the code repository can be one for the whole program or one per team: people then see their own team’s link.'}
       </Banner>
       <Section title={multi ? 'Your links' : "Your team's links"}>
@@ -385,13 +385,15 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
                 ))}
                 <li>Deploy server functions and configure sign-in</li>
               </ul>
-              <button className="text-[12.5px] text-accent hover:underline" onClick={() => setShowSql(!showSql)}>
-                {showSql ? 'Hide' : 'Show'} the SQL
-              </button>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1">
+                <Button variant="primary" onClick={apply} loading={busy}>
+                  {draft.done.applied ? 'Apply again' : 'Build my database'}
+                </Button>
+                <button type="button" className="text-[12.5px] text-accent hover:underline" onClick={() => setShowSql(!showSql)} aria-expanded={showSql}>
+                  {showSql ? 'Hide' : 'Show'} the SQL
+                </button>
+              </div>
               {showSql && <pre className="max-h-72 overflow-auto rounded-md bg-bg-subtle p-3 text-[11px] leading-relaxed">{plan.sql}</pre>}
-              <Button variant="primary" onClick={apply} loading={busy}>
-                {draft.done.applied ? 'Apply again' : 'Build my database'}
-              </Button>
             </>
           )}
           {log && <ApplyLog log={log} />}

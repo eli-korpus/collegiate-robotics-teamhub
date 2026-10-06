@@ -45,7 +45,7 @@ const EDIT: StepDef[] = [
   { id: 'options', label: 'Tab options', C: TabOptions },
   { id: 'people', label: 'People & positions', C: People },
   { id: 'permissions', label: 'Permissions', C: Permissions },
-  { id: 'links', label: 'Tool links', C: ToolLinksStep },
+  // No Tool links step: after setup they live only in the database and are edited in the dashboard (Admin > Tool links).
   { id: 'review', label: 'Review & apply', C: Review, doneKey: 'applied' },
 ];
 

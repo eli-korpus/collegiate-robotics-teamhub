@@ -1,11 +1,11 @@
 import { Suspense, useState } from 'react';
 import type { PersonInfo } from '@teamhub/sdk';
 import { useNavigate, useParams } from 'react-router';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Copy, KeyRound, Lock, MoreHorizontal, Pencil, Shield, Trash2, UserCheck, UserX } from 'lucide-react';
-import { Avatar, Button, Card, CardHeader, Dialog, EmptyState, IconButton, Input, Menu, PositionBadge, Select, Spinner, TYPE_LABEL, toast, useConfirm } from '@teamhub/ui';
+import { Avatar, Button, Card, CardHeader, Dialog, EmptyState, Field, IconButton, Input, Menu, PositionBadge, Select, Spinner, TYPE_LABEL, toast, useConfirm } from '@teamhub/ui';
 import { canWith, friendlyError, isMultiTeam, runtime, useMe, usePeople, useSupabase, TeamBadge } from '@teamhub/sdk';
-import { ProfileFieldInput, saveProfileFields, useProfileFields } from '../home/coreWidgets';
+import { canSeeLevel, fieldValue, ProfileFieldInput, saveProfileFields, useHiddenValues, useProfileFields, type HiddenValues } from './profileFields';
 import { TeamLogo } from '../auth/AuthLayout';
 
 export function Profile() {
@@ -17,7 +17,7 @@ export function Profile() {
   if (people.isLoading) return <Spinner className="m-8" />;
   if (!p) return <EmptyState title="Person not found" body="They may have left the program." action={<Button onClick={() => nav('/people')}>Back to People</Button>} />;
   const isSelf = p.id === me.id;
-  const canManageTeams = isMultiTeam() && !isSelf && p.status === 'active' && (me.isAdmin || runtime().config.teams.some((t) => canWith(me, 'people.approve_members', t.id)));
+  const canManageTeams = !isSelf && p.status === 'active' && (me.isAdmin || runtime().config.teams.some((t) => canWith(me, 'people.approve_members', t.id)));
   return (
     <div className="mx-auto max-w-4xl px-4 py-5 sm:px-6">
       <button type="button" onClick={() => nav(-1)} className="mb-4 inline-flex items-center gap-1 text-[13px] text-muted hover:text-fg">
@@ -39,13 +39,16 @@ export function Profile() {
         {isSelf ? (
           <Button onClick={() => nav('/me')}>Edit my profile</Button>
         ) : (
-          <PersonActions userId={p.id} />
+          <div className="flex items-center gap-2">
+            <EditPersonButton p={p} canTeams={canManageTeams} variant="primary" />
+            <PersonActions userId={p.id} />
+          </div>
         )}
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2">
         <Card>
-          <CardHeader title={isMultiTeam() ? 'Teams' : 'Team'} action={canManageTeams && <TeamsButton p={p} />} />
+          <CardHeader title={isMultiTeam() ? 'Teams' : 'Team'} action={canManageTeams && isMultiTeam() && <TeamsButton p={p} />} />
           <ul className="space-y-2 px-4 pb-4">
             {p.memberships.map((m) => {
               const t = runtime().config.teams.find((x) => x.id === m.team_id);
@@ -59,7 +62,7 @@ export function Profile() {
             })}
           </ul>
         </Card>
-        <ProfileFieldsCard userId={p.id} details={p.details} name={p.name} memberships={p.memberships} />
+        <ProfileFieldsCard p={p} canTeams={canManageTeams} />
         {runtime().modules.flatMap((m) =>
           (m.client.profileSections ?? [])
             .filter((s) => !s.perm || isSelf || canWith(me, s.perm))
@@ -82,54 +85,44 @@ export function Profile() {
   );
 }
 
-function ProfileFieldsCard({ userId, details, name, memberships }: { userId: string; details: Record<string, string>; name: string; memberships: PersonInfo['memberships'] }) {
-  const sb = useSupabase();
+/** Who may edit what about someone (the same rules the database enforces), plus their private fields. */
+function usePersonEditing(p: PersonInfo) {
   const me = useMe();
-  const fields = useProfileFields();
-  const [editing, setEditing] = useState(false);
-  // Same rules as the database: people who assign positions edit profiles; people who see private fields edit them.
-  const canEdit = userId !== me.id && (me.isAdmin || memberships.some((m) => canWith(me, 'people.assign_positions', m.team_id)));
-  const canEditPrivate = userId !== me.id && (me.isAdmin || memberships.some((m) => canWith(me, 'people.view_private', m.team_id)));
-  const priv = useQuery({
-    queryKey: ['core', 'private', userId],
-    queryFn: async () => {
-      const { data } = await sb.from('profiles_private').select('data').eq('user_id', userId).maybeSingle();
-      return (data?.data ?? null) as Record<string, string> | null;
-    },
-  });
-  const canPrivate = userId === me.id || priv.data != null;
+  // People who assign positions edit profiles; team-only and mentors-only fields only appear to those who can see them.
+  const canEdit = p.id !== me.id && (me.isAdmin || p.memberships.some((m) => canWith(me, 'people.assign_positions', m.team_id)));
+  const fields = useProfileFields().filter((f) => canSeeLevel(me, f.level, p));
+  const hidden = useHiddenValues(p.id);
+  return { fields, canEdit, hidden: hidden.data ?? { leaders: {}, mentors: {} } };
+}
+
+/** "Edit": one window for someone's name, teams and roles, and profile fields (subteams, shirt size…). */
+function EditPersonButton({ p, canTeams, variant = 'ghost' }: { p: PersonInfo; canTeams: boolean; variant?: 'ghost' | 'primary' }) {
+  const e = usePersonEditing(p);
+  const [open, setOpen] = useState(false);
+  if (!e.canEdit && !canTeams) return null;
+  return (
+    <>
+      <Button size={variant === 'ghost' ? 'sm' : 'md'} variant={variant} icon={<Pencil className="size-3.5" />} onClick={() => setOpen(true)}>
+        Edit
+      </Button>
+      {open && <EditPersonDialog p={p} canProfile={e.canEdit} canTeams={canTeams} fields={e.fields} hidden={e.hidden} onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
+function ProfileFieldsCard({ p, canTeams }: { p: PersonInfo; canTeams: boolean }) {
+  const { fields, canEdit, hidden } = usePersonEditing(p);
   if (!fields.length && !canEdit) return null;
   return (
     <Card>
-      <CardHeader
-        title="Profile"
-        action={
-          canEdit && (
-            <Button size="sm" variant="ghost" icon={<Pencil className="size-3.5" />} onClick={() => setEditing(true)}>
-              Edit
-            </Button>
-          )
-        }
-      />
-      {editing && (
-        <EditPersonDialog
-          userId={userId}
-          name={name}
-          fields={fields.filter((f) => !f.private || canEditPrivate)}
-          details={details}
-          priv={priv.data ?? {}}
-          onClose={() => setEditing(false)}
-        />
-      )}
+      <CardHeader title="Profile" action={canEdit && <EditPersonButton p={p} canTeams={canTeams} />} />
       <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 px-4 pb-4 text-[13.5px]">
-        {fields
-          .filter((f) => !f.private || canPrivate)
-          .map((f) => (
+        {fields.map((f) => (
             <div key={f.id} className="contents">
               <dt className="flex items-center gap-1 text-muted">
-                {f.label} {f.private && <Lock className="size-3 text-warning" aria-label="Private" />}
+                {f.label} {f.private && <Lock className="size-3 text-warning" aria-label={f.level === 'leaders' ? 'Team leaders only' : 'Mentors only'} />}
               </dt>
-              <dd>{(f.private ? priv.data?.[f.id] : details[f.id]) || <span className="text-faint">–</span>}</dd>
+              <dd>{fieldValue(f, p.details, hidden) || <span className="text-faint">–</span>}</dd>
             </div>
           ))}
       </dl>
@@ -291,7 +284,7 @@ function TeamsButton({ p }: { p: PersonInfo }) {
   );
 }
 
-function TeamsDialog({ p, onClose }: { p: PersonInfo; onClose: () => void }) {
+function TeamsDialog({ p, onClose, embedded = false }: { p: PersonInfo; onClose: () => void; embedded?: boolean }) {
   const sb = useSupabase();
   const me = useMe();
   const qc = useQueryClient();
@@ -307,8 +300,7 @@ function TeamsDialog({ p, onClose }: { p: PersonInfo; onClose: () => void }) {
     qc.invalidateQueries({ queryKey: ['core'] });
   };
   const activeCount = p.memberships.filter((m) => m.status === 'active').length;
-  return (
-    <Dialog open onOpenChange={(v) => !v && onClose()} title={`Teams for ${p.name}`} description="Add them to a team, change their role on a team, or take them off one. Their past work stays attributed to them.">
+  const editor = (
       <ul className="divide-y divide-border rounded-lg border border-border">
         {runtime().config.teams.map((t) => {
           const m = p.memberships.find((x) => x.team_id === t.id);
@@ -376,27 +368,33 @@ function TeamsDialog({ p, onClose }: { p: PersonInfo; onClose: () => void }) {
           );
         })}
       </ul>
+  );
+  if (embedded) return editor;
+  return (
+    <Dialog open onOpenChange={(v) => !v && onClose()} title={`Teams for ${p.name}`} description="Add them to a team, change their role on a team, or take them off one. Their past work stays attributed to them.">
+      {editor}
       <p className="mt-2 text-[12px] text-faint">To move someone, add them to the new team, then remove them from the old one.</p>
     </Dialog>
   );
 }
 
-/** Mentors fix someone's name or profile fields (e.g. a misspelled name or a missing shirt size). */
-function EditPersonDialog({ userId, name, fields, details, priv, onClose }: { userId: string; name: string; fields: ReturnType<typeof useProfileFields>; details: Record<string, string>; priv: Record<string, string>; onClose: () => void }) {
+/** Fix someone's name and profile fields, and (if allowed) their teams and roles, in one window. */
+function EditPersonDialog({ p, canProfile, canTeams, fields, hidden, onClose }: { p: PersonInfo; canProfile: boolean; canTeams: boolean; fields: ReturnType<typeof useProfileFields>; hidden: HiddenValues; onClose: () => void }) {
   const sb = useSupabase();
   const qc = useQueryClient();
-  const [n, setN] = useState(name);
-  const [values, setValues] = useState<Record<string, string>>(Object.fromEntries(fields.map((f) => [f.id, (f.private ? priv[f.id] : details[f.id]) ?? ''])));
+  const [n, setN] = useState(p.name);
+  const [values, setValues] = useState<Record<string, string>>(Object.fromEntries(fields.map((f) => [f.id, fieldValue(f, p.details, hidden)])));
   const [busy, setBusy] = useState(false);
   const save = async () => {
+    if (!canProfile) return onClose();
     if (!n.trim()) return toast.error('Enter a name');
     setBusy(true);
     try {
-      if (n.trim() !== name) {
-        const { error } = await sb.from('profiles').update({ display_name: n.trim().slice(0, 80) }).eq('id', userId);
+      if (n.trim() !== p.name) {
+        const { error } = await sb.from('profiles').update({ display_name: n.trim().slice(0, 80) }).eq('id', p.id);
         if (error) throw error;
       }
-      await saveProfileFields(sb, userId, fields, values, { details, private: priv });
+      await saveProfileFields(sb, p.id, fields, values, { details: p.details, hidden });
       qc.invalidateQueries({ queryKey: ['core'] });
       toast.success('Profile updated');
       onClose();
@@ -407,20 +405,42 @@ function EditPersonDialog({ userId, name, fields, details, priv, onClose }: { us
     }
   };
   return (
-    <Dialog open onOpenChange={(o) => !o && onClose()} title={`Edit ${name}`} description="Changes show on their profile right away. Private fields stay visible only to them and mentors." footer={<Button variant="primary" loading={busy} onClick={save}>Save</Button>}>
-      <div className="space-y-3">
-        <label className="block space-y-1">
-          <span className="text-[13px] font-medium">Name</span>
-          <Input value={n} maxLength={80} onChange={(e) => setN(e.target.value)} />
-        </label>
-        {fields.map((f) => (
-          <label key={f.id} className="block space-y-1">
-            <span className="flex items-center gap-1 text-[13px] font-medium">
-              {f.label} {f.private && <Lock className="size-3 text-warning" aria-label="Private" />}
-            </span>
-            <ProfileFieldInput field={f} value={values[f.id] ?? ''} onChange={(v) => setValues({ ...values, [f.id]: v })} />
-          </label>
-        ))}
+    <Dialog
+      open
+      onOpenChange={(o) => !o && onClose()}
+      title={`Edit ${p.name}`}
+      description="Changes show on their profile right away. Fields with a lock stay hidden from the rest of the program."
+      size="lg"
+      footer={
+        <Button variant="primary" loading={busy} onClick={save}>
+          {canProfile ? 'Save' : 'Done'}
+        </Button>
+      }
+    >
+      <div className="space-y-5">
+        {canProfile && (
+          <Field label="Name" required>
+            {(id) => <Input id={id} value={n} maxLength={80} onChange={(e) => setN(e.target.value)} />}
+          </Field>
+        )}
+        {canTeams && (
+          <section className="space-y-2">
+            <div>
+              <p className="text-[13px] font-medium">{isMultiTeam() ? 'Teams and roles' : 'Role'}</p>
+              <p className="text-[12px] text-muted">{isMultiTeam() ? 'Saved as soon as you change them. To move someone, add them to the new team, then remove them from the old one.' : 'Saved as soon as you change it.'}</p>
+            </div>
+            <TeamsDialog p={p} onClose={onClose} embedded />
+          </section>
+        )}
+        {canProfile &&
+          fields.map((f) => (
+            <div key={f.id} className="space-y-1.5" role="group" aria-label={f.label}>
+              <p className="flex items-center gap-1 text-[13px] font-medium">
+                {f.label} {f.private && <Lock className="size-3 text-warning" aria-label={f.level === 'leaders' ? 'Team leaders only' : 'Mentors only'} />}
+              </p>
+              <ProfileFieldInput field={f} value={values[f.id] ?? ''} onChange={(v) => setValues({ ...values, [f.id]: v })} />
+            </div>
+          ))}
       </div>
     </Dialog>
   );

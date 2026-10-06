@@ -173,7 +173,9 @@ export function UpdateDialog({ server, onClose, resume }: { server: ServerState;
                 <a href={majorGuide} target="_blank" rel="noreferrer" className="font-medium text-accent hover:underline">
                   Open the upgrade guide
                 </a>
-                <Checkbox className="mt-2" checked={readGuide} onChange={setReadGuide} label="I read the upgrade guide" />
+                <div className="mt-2">
+                  <Checkbox checked={readGuide} onChange={setReadGuide} label="I read the upgrade guide" />
+                </div>
               </Banner>
             )}
             <section className="max-h-64 space-y-3 overflow-y-auto rounded-md border border-border p-3">

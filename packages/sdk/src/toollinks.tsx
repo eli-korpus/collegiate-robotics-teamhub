@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { ExternalLink, MessagesSquare } from 'lucide-react';
 import { Button, Favicon, Input, Select, cn, hostOf, OptionalTag } from '@teamhub/ui';
 import { useSlotLinks, useToolLink, type LinkRow } from './hooks';
+import { TOOL_SLOT_LABELS } from './slots';
 import { TeamScopePicker } from './teams';
 
 // ── Tool links (spec §10.6) ────────────────────────────────────────────────
@@ -130,21 +131,4 @@ export function LinkEditor({
   );
 }
 
-export const TOOL_SLOT_LABELS: Record<string, string> = {
-  team_chat: 'Team chat',
-  portfolio: 'Portfolio doc',
-  code_repo: 'Code repository',
-  cad: 'CAD (Onshape)',
-  drive: 'Shared Drive folder',
-  website: 'Team website',
-  social: 'Social media',
-  ftcscout: 'FTCScout team page',
-  manual: 'Competition manual',
-  gm0: 'Game Manual 0',
-  ftc_docs: 'FTC Docs',
-  qa_forum: 'Rules Q&A forum',
-  scouting_sheet: 'Scouting sheet',
-  printer_dashboard: 'Printer dashboard',
-  outreach_doc: 'Outreach log doc',
-  sdk_docs: 'SDK / library docs',
-};
+export { TOOL_SLOT_LABELS } from './slots';

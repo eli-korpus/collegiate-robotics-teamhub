@@ -7,7 +7,8 @@
     ".": "./src/index.ts",
     "./define": "./src/define.ts",
     "./ftcscout": "./src/ftcscout.ts",
-    "./agent-prompt": "./src/agent-prompt.ts"
+    "./agent-prompt": "./src/agent-prompt.ts",
+    "./rrule": "./src/rrule.ts"
   },
   "dependencies": {
     "@supabase/auth-js": "2.117.2",

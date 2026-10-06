@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardList, Lock, Plus, Trash2 } from 'lucide-react';
 import { Banner, Button, Card, Checkbox, Dialog, EmptyState, Field, IconButton, Input, RelativeTime, Textarea, VisibilityNote, toast, useConfirm } from '@teamhub/ui';
 import { friendlyError, useMe, useSupabase, Person, TeamBadge, TeamScopePicker } from '@teamhub/sdk';
-import { useProfileFields } from '../home/coreWidgets';
+import { useProfileFields } from './profileFields';
 
 interface InfoRequest {
   id: string;
@@ -97,22 +97,21 @@ export function RequestInfo() {
         }
       >
         <div className="space-y-4">
-          <div className="space-y-1.5">
-            <p className="text-[13px] font-medium">Which fields?</p>
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-1 text-[13px] font-medium">Which fields?</legend>
             {fields.map((f) => (
               <Checkbox
                 key={f.id}
-                className="flex"
                 checked={picked.includes(f.id)}
                 onChange={(v) => setPicked(v ? [...picked, f.id] : picked.filter((x) => x !== f.id))}
                 label={
                   <span className="inline-flex items-center gap-1.5">
-                    {f.label} {f.private && <Lock className="size-3 text-warning" aria-label="private" />}
+                    {f.label} {f.private && <Lock className="size-3 text-warning" aria-label={f.level === 'leaders' ? 'Team leaders only' : 'Mentors only'} />}
                   </span>
                 }
               />
             ))}
-          </div>
+          </fieldset>
           <Field label="Message" optional>
             {(id) => <Textarea id={id} rows={2} maxLength={500} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="e.g. Ordering team shirts on Friday" />}
           </Field>
@@ -121,7 +120,7 @@ export function RequestInfo() {
           </Field>
           <TeamScopePicker value={team} onChange={setTeam} perm="people.request_info" label="Ask" />
           <VisibilityNote locked={picked.some((p) => fields.find((f) => f.id === p)?.private)}>
-            Each answer keeps its field’s privacy: private fields are visible only to the person and mentors.
+            Each answer keeps its field’s privacy. Fields with a lock are seen only by the person and their captains and mentors (or only mentors), never the whole program.
           </VisibilityNote>
         </div>
       </Dialog>

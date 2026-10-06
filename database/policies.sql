@@ -6,6 +6,7 @@ alter table teamhub_storage_trash enable row level security;
 alter table teams enable row level security;
 alter table profiles enable row level security;
 alter table profiles_private enable row level security;
+alter table profiles_leaders enable row level security;
 alter table memberships enable row level security;
 alter table positions enable row level security;
 alter table position_holders enable row level security;
@@ -49,6 +50,19 @@ create policy core_private_read on profiles_private for select to authenticated 
   user_id = (select auth.uid())
   or exists (select 1 from memberships m where m.user_id = profiles_private.user_id and teamhub_can('people.view_private', m.team_id))
 );
+-- Team-only fields (shirt sizes…): the person, and people who see team-only fields on one of their teams.
+create policy core_leaders_read on profiles_leaders for select to authenticated using (
+  user_id = (select auth.uid())
+  or exists (select 1 from memberships m where m.user_id = profiles_leaders.user_id and teamhub_can('people.view_team_info', m.team_id))
+);
+create policy core_leaders_insert on profiles_leaders for insert to authenticated
+  with check (user_id = (select auth.uid()) or exists (
+    select 1 from memberships m where m.user_id = profiles_leaders.user_id and teamhub_can('people.view_team_info', m.team_id)));
+create policy core_leaders_update on profiles_leaders for update to authenticated
+  using (user_id = (select auth.uid()) or exists (
+    select 1 from memberships m where m.user_id = profiles_leaders.user_id and teamhub_can('people.view_team_info', m.team_id)))
+  with check (user_id = (select auth.uid()) or exists (
+    select 1 from memberships m where m.user_id = profiles_leaders.user_id and teamhub_can('people.view_team_info', m.team_id)));
 create policy core_private_insert on profiles_private for insert to authenticated
   with check (user_id = (select auth.uid()) or exists (
     select 1 from memberships m where m.user_id = profiles_private.user_id and teamhub_can('people.view_private', m.team_id)));
@@ -148,7 +162,7 @@ grant execute on all functions in schema public to authenticated, service_role;
 -- Internal helpers stay locked (re-applied because the grant above covers every function).
 revoke execute on function teamhub_drop_policies(text), teamhub_make_dormant(text), teamhub_drop_prefix(text),
   teamhub_trash(text, text[]), teamhub_notify(uuid[], text, text), teamhub_realtime_add(text),
-  teamhub_email_allowed(text)
+  teamhub_email_allowed(text), teamhub_place_profile_field(text, text)
   from public, anon, authenticated;
 
 -- Defense in depth: TRUNCATE bypasses RLS, so client roles never get it (PostgREST doesn't expose it, but direct

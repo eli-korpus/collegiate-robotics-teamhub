@@ -46,4 +46,13 @@ describe('calendar RLS', () => {
     expect((await db.admin(`select cal_ical('nope') ics`))[0].ics).toBeNull();
     expect(await db.denied(null, `select cal_ical($1)`, [f.token])).toBe(true);
   });
+
+  it('a competition is on the calendar once per team (two teams at the same event = two events)', async () => {
+    const comp = (team: string | null, code: string) =>
+      db.as(mentorA, `insert into cal_events (team_id, title, kind, event_code, starts_at, created_by) values ($1, 'Qualifier', 'competition', $2, now(), $3) returning id`, [team, code, mentorA]);
+    await comp(TEAM_A, 'USNYQ1');
+    await expect(comp(TEAM_A, 'usnyq1')).rejects.toThrow(/duplicate|unique/);
+    await db.as(admin, `insert into cal_events (team_id, title, kind, event_code, starts_at, created_by) values ($1, 'Qualifier', 'competition', 'USNYQ1', now(), $2)`, [TEAM_B, admin]);
+    expect((await db.admin(`select count(*)::int n from cal_events where upper(event_code) = 'USNYQ1'`))[0].n).toBe(2);
+  });
 });

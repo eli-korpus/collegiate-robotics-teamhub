@@ -80,10 +80,20 @@ export function useSettingsRow() {
         allowed_email_domains?: string[];
         storage_limits: { db_mb: number; files_mb: number };
         storage_history: { month: string; db: number; files: number }[];
-        extra_profile_fields: { id: string; label: string; type: 'text' | 'select'; options?: string[] }[];
+        extra_profile_fields: ExtraProfileField[];
       } | null;
     },
   });
+}
+
+/** A profile field an admin added in the dashboard (Admin > Profile fields). */
+export interface ExtraProfileField {
+  id: string;
+  label: string;
+  type: 'text' | 'select';
+  options?: string[];
+  /** Who can see answers; fixed once added. Missing means everyone. */
+  visibility?: 'everyone' | 'leaders' | 'mentors';
 }
 
 export function useSeason(): string {
@@ -211,6 +221,16 @@ export function useLinks() {
   });
 }
 
+/** "Code (A)", unless the label already says which team (its number, name or letter). */
+function withTeam(label: string, teamId: string | null): string {
+  const t = teamById(teamId);
+  if (!t) return label;
+  const word = (x: string, flags: string) => new RegExp(`(^|[^\\w])${x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}($|[^\\w])`, flags).test(label);
+  // The letter must match exactly (so the word "a" isn't mistaken for team A).
+  const says = (t.number && word(String(t.number), '')) || (t.name && word(t.name, 'i')) || word(t.shortCode, '');
+  return says ? label : `${label} (${t.shortCode})`;
+}
+
 /**
  * Which tool links to show for these slots. Viewing one team: that team's own link, else the program-wide one.
  * Viewing all teams: the program-wide link, else every team's own link (labelled with the team's short code).
@@ -222,7 +242,7 @@ export function resolveSlotLinks(links: LinkRow[], slots: string[], scope: strin
     const own = scope ? all.find((l) => l.team_id === scope) : undefined;
     const program = all.find((l) => !l.team_id);
     if (own ?? program) out.push((own ?? program)!);
-    else if (!scope) out.push(...all.map((l) => (all.length > 1 ? { ...l, label: `${l.label} (${teamById(l.team_id)?.shortCode ?? 'team'})` } : l)));
+    else if (!scope) out.push(...all.map((l) => (all.length > 1 ? { ...l, label: withTeam(l.label, l.team_id) } : l)));
   }
   return out;
 }

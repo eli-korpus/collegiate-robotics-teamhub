@@ -209,9 +209,9 @@ function SeasonDialog({ server, catalog, onClose, refresh }: { server: ServerSta
           <label className="flex items-center gap-2">
             New season label <Input value={label} onChange={(e) => setLabel(e.target.value)} className="w-32" />
           </label>
-          <div className="space-y-1.5">
+          <div className="flex flex-col gap-2">
             {options.map((m) => (
-              <Checkbox key={m.id} className="flex" checked={picked.includes(m.id)} onChange={(v) => setPicked(v ? [...picked, m.id] : picked.filter((x) => x !== m.id))} label={`Roll over ${m.name}`} />
+              <Checkbox key={m.id} checked={picked.includes(m.id)} onChange={(v) => setPicked(v ? [...picked, m.id] : picked.filter((x) => x !== m.id))} label={`Roll over ${m.name}`} />
             ))}
           </div>
           <Button

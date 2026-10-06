@@ -17,6 +17,7 @@ const REF = 'abcdefghijklmnopqrst';
 let db: TestDb;
 const calls: { method: string; path: string; body?: unknown }[] = [];
 let postgrestSchemas = 'public, graphql_public';
+let databaseDown = false;
 
 async function fakeFetch(input: string | URL | Request, init?: RequestInit): Promise<Response> {
   const url = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url);
@@ -33,6 +34,7 @@ async function fakeFetch(input: string | URL | Request, init?: RequestInit): Pro
   if (p === '/projects') return json([{ id: REF, name: 'Robotics', region: 'us-east-1', status: 'ACTIVE_HEALTHY' }]);
   if (p === `/projects/${REF}/api-keys`) return json([{ name: 'anon', api_key: 'pub-key', type: 'legacy' }, { name: 'service_role', api_key: 'secret-key', type: 'legacy' }]);
   if (p === `/projects/${REF}/database/query`) {
+    if (databaseDown) return json({ message: 'connection refused' }, 500);
     try {
       await db.pg.exec('reset role');
       const res = await db.pg.exec(body.query.replace(/create extension if not exists pg_(cron|net)[^;]*;/g, ''));
@@ -125,6 +127,41 @@ describe('wizard API', () => {
     expect(r.status).toBe(200);
     expect(r.body.backup.tables.cal_events).toBe(1);
     expect(await db.admin(`select to_regclass('public.cal_events') t`)).toEqual([{ t: null }]);
+  });
+
+  it('reports each step live when the page asks for a checklist', async () => {
+    const res = await app.request('/api/apply', {
+      method: 'POST',
+      body: JSON.stringify({ config: config() }),
+      headers: { 'content-type': 'application/json', accept: 'application/x-ndjson', 'x-teamhub-wizard': '1' },
+    });
+    expect(res.headers.get('content-type')).toContain('application/x-ndjson');
+    const events = (await res.text()).trim().split('\n').map((l) => JSON.parse(l));
+    const updates = events.filter((e) => e.type === 'steps');
+    // The database step is seen running before it is done, and the answer comes last.
+    const schema = updates.map((e) => e.steps.find((s: { id: string }) => s.id === 'schema')?.status);
+    expect(schema.indexOf('running')).toBeGreaterThan(-1);
+    expect(schema.indexOf('running')).toBeLessThan(schema.indexOf('done'));
+    const last = updates.at(-1).steps;
+    expect(last.map((s: { id: string }) => s.id)).toEqual(expect.arrayContaining(['connect', 'schema', 'join', 'auth', 'check', 'save']));
+    expect(last.filter((s: { status: string }) => s.status === 'running' || s.status === 'pending')).toEqual([]);
+    expect(events.at(-1)).toMatchObject({ type: 'result', status: 200 });
+    expect(events.at(-1).body.log.length).toBeGreaterThan(0);
+  });
+
+  it('reports a failure as a failed step and an error line', async () => {
+    databaseDown = true;
+    const res = await app.request('/api/apply', {
+      method: 'POST',
+      body: JSON.stringify({ config: config() }),
+      headers: { 'content-type': 'application/json', accept: 'application/x-ndjson', 'x-teamhub-wizard': '1' },
+    });
+    const events = (await res.text()).trim().split('\n').map((l) => JSON.parse(l));
+    databaseDown = false;
+    expect(events.at(-1).type).toBe('error');
+    expect(events.at(-1).message).toBeTruthy();
+    const steps = events.filter((e) => e.type === 'steps').at(-1).steps;
+    expect(steps.find((s: { id: string }) => s.id === 'connect').status).toBe('failed');
   });
 
   it('runs a new-season rollover and records the label', async () => {

@@ -13,6 +13,15 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Changed
+
+- Setup wizard: every action that changes your database or website (building or updating the database, test builds,
+  uploading to GitHub, updating TeamHub, backups, imports, a new season, the email setting) shows a live checklist of
+  its steps: which one is running, what finished, and where it stopped if something failed. When it works the button
+  turns green with a check, and a "Next:" line says what to do now. After a new season or an email change, the dialog
+  offers to publish right away.
+- Updating TeamHub also uploads `package-lock.json` when installing changed it, so it never blocks the next update.
+
 ## [1.0.3] - 2026-10-06
 ### Fixed
 

@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
-import { AlertTriangle, ArrowRight, CheckCircle2, Circle, Loader2, RotateCcw } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Check, CheckCircle2, Database, RotateCcw } from 'lucide-react';
 import { TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
-import { Banner, Button, Checkbox, CopyBlock, Dialog, Markdown, Spinner, cn, toast } from '@teamhub/ui';
-import { api, type ServerState } from '../api';
-import { ApplyLog } from '../steps/connect';
+import { Banner, Button, Checkbox, CopyBlock, Dialog, Markdown, Spinner, toast } from '@teamhub/ui';
+import { api, apiProgress, type ProgressStep, type ServerState, type StepStatus } from '../api';
+import { ActionButton, Checklist, NextStep, useAction } from '../progress';
+import { PublishButton } from '../steps/publish';
 
 interface Check {
   current: string;
@@ -25,7 +26,9 @@ interface UpdateState {
 }
 type LogLine = { step: string; ok: boolean; detail?: string };
 
+/** What an update does, shown before it starts. While it runs, the live checklist from the wizard server replaces it. */
 const STEPS = ['Back up your data', 'Get the new version', 'Install it', 'Restart the wizard', 'Update your database', 'Test build', 'Publish your site'] as const;
+const RESTART_LABEL = 'Restart the wizard on the new version (this page reconnects by itself)';
 
 /** Wait until the wizard answers again after restarting itself. */
 async function waitForWizard(): Promise<void> {
@@ -63,23 +66,32 @@ export function useUpdateCheck() {
 
 export function UpdateDialog({ server, onClose, resume }: { server: ServerState; onClose: () => void; resume?: boolean }) {
   const { check, loading, recheck } = useUpdateCheck();
-  const [step, setStep] = useState<number>(-1);
+  const [phase, setPhase] = useState<'idle' | 'running' | 'done' | 'failed'>('idle');
+  const [startSteps, setStartSteps] = useState<ProgressStep[]>([]);
+  const [restart, setRestart] = useState<StepStatus | null>(null);
+  const [finishSteps, setFinishSteps] = useState<ProgressStep[]>([]);
   const [failed, setFailed] = useState<{ message: string; conflicts: string[] } | null>(null);
-  const [log, setLog] = useState<LogLine[] | null>(null);
+  const [publishProblem, setPublishProblem] = useState(false);
   const [readGuide, setReadGuide] = useState(false);
   const [rolling, setRolling] = useState(false);
   const resumed = useRef(false);
 
   const finish = async () => {
-    setStep(4);
+    setPhase('running');
     try {
-      const r = await api<{ ok: boolean; log: LogLine[]; version?: string }>('/update/finish', {});
-      setLog(r.log);
-      setStep(r.ok ? STEPS.length : -1);
-      if (r.ok) toast.success(`Updated to TeamHub ${r.version}`);
+      const r = await apiProgress<{ ok: boolean; log: LogLine[]; version?: string; problem?: string }>('/update/finish', {}, setFinishSteps);
+      if (r.ok) {
+        setPhase('done');
+        toast.success(`Updated to TeamHub ${r.version}`);
+        return;
+      }
+      setPhase('failed');
+      // Built fine but the upload didn't go through: offer the upload again (with its one-click fixes).
+      if (r.log.some((l) => l.step === 'Test build passed')) setPublishProblem(true);
+      setFailed({ message: r.problem ?? r.log.filter((l) => !l.ok).map((l) => l.step).join('. ') ?? 'The update didn’t finish.', conflicts: [] });
     } catch (e) {
       setFailed({ message: (e as Error).message, conflicts: [] });
-      setStep(-1);
+      setPhase('failed');
     }
   };
 
@@ -94,27 +106,27 @@ export function UpdateDialog({ server, onClose, resume }: { server: ServerState;
   const start = async () => {
     if (!check?.latest) return;
     setFailed(null);
-    setLog(null);
+    setPublishProblem(false);
+    setStartSteps([]);
+    setFinishSteps([]);
+    setRestart(null);
+    setPhase('running');
     try {
-      setStep(0);
-      const res = await fetch('/api/update/start', {
-        method: 'POST',
-        headers: { 'content-type': 'application/json', 'x-teamhub-wizard': '1' },
-        body: JSON.stringify({ tag: `v${check.latest}` }),
-      });
-      const r = (await res.json()) as { ok: boolean; message?: string; conflicts?: string[]; error?: string };
+      const r = await apiProgress<{ ok: boolean; message?: string; conflicts?: string[] }>('/update/start', { tag: `v${check.latest}` }, setStartSteps);
       if (!r.ok) {
-        setFailed({ message: r.message ?? r.error ?? 'The update failed. Nothing was changed.', conflicts: r.conflicts ?? [] });
-        setStep(-1);
+        setFailed({ message: r.message ?? 'The update failed. Nothing was changed.', conflicts: r.conflicts ?? [] });
+        setPhase('failed');
         return;
       }
-      setStep(3);
+      setRestart('running');
       await api('/restart', {});
       await waitForWizard();
+      setRestart('done');
       await finish();
     } catch (e) {
+      setRestart((x) => (x === 'running' ? 'failed' : x));
       setFailed({ message: (e as Error).message, conflicts: [] });
-      setStep(-1);
+      setPhase('failed');
     }
   };
 
@@ -132,8 +144,9 @@ export function UpdateDialog({ server, onClose, resume }: { server: ServerState;
     }
   };
 
-  const running = step >= 0 && step < STEPS.length;
-  const done = step === STEPS.length;
+  const running = phase === 'running';
+  const done = phase === 'done';
+  const steps: ProgressStep[] = [...startSteps, ...(restart ? [{ id: 'restart', label: RESTART_LABEL, status: restart }] : resume ? [{ id: 'restart', label: RESTART_LABEL, status: 'done' as const }] : []), ...finishSteps];
   const security = check?.notes.some((n) => /^### Security\b/m.test(n.body));
   const majorGuide = check?.latest ? `https://github.com/${TEAMHUB_UPSTREAM_REPO}/blob/v${check.latest}/docs/upgrading/v${check.latest.split('.')[0]}.md` : '';
   const blocked = !server.supabase.connected || !!check?.dirty.length || (check?.major && !readGuide);
@@ -145,8 +158,15 @@ export function UpdateDialog({ server, onClose, resume }: { server: ServerState;
           <p className="flex items-center gap-2 text-muted">
             <Spinner /> Checking for updates…
           </p>
-        ) : running || done || resume ? (
-          <Progress step={step} />
+        ) : phase !== 'idle' || resume ? (
+          <>
+            {done && (
+              <Button variant="success" icon={<Check className="size-4" strokeWidth={3} />} onClick={onClose}>
+                Updated to {check?.latest ?? 'the new version'}
+              </Button>
+            )}
+            <Checklist steps={steps} />
+          </>
         ) : check?.error ? (
           <Banner tone="warning" title="Couldn’t check for updates">
             {check.error}
@@ -231,8 +251,8 @@ export function UpdateDialog({ server, onClose, resume }: { server: ServerState;
         ) : null}
 
         {failed && <Failure failed={failed} check={check} />}
-        {log && <ApplyLog log={log} />}
-        {done && <Banner tone="success" title="Update complete">Your host is rebuilding your site now. It’s usually live within a couple of minutes.</Banner>}
+        {publishProblem && <PublishButton message={`Update TeamHub to ${check?.latest ?? 'the new version'}`} label="Publish the update" doneLabel="Update published" next="your host rebuilds the site in a minute or two." onDone={() => { setPublishProblem(false); setFailed(null); setPhase('done'); }} />}
+        {done && <NextStep>nothing else to do. Your host puts the new version live in a minute or two; reload your site then.</NextStep>}
 
         {!running && check?.last?.stage === 'done' && (
           <div className="flex flex-wrap items-center gap-3 border-t border-border pt-3">
@@ -248,26 +268,6 @@ export function UpdateDialog({ server, onClose, resume }: { server: ServerState;
         {!running && !done && <DatabaseOnly server={server} />}
       </div>
     </Dialog>
-  );
-}
-
-function Progress({ step }: { step: number }) {
-  return (
-    <ol className="space-y-1.5">
-      {STEPS.map((s, i) => (
-        <li key={s} className={cn('flex items-center gap-2', i > step && 'text-faint')}>
-          {i < step || step === STEPS.length ? (
-            <CheckCircle2 className="size-4 text-success" />
-          ) : i === step ? (
-            <Loader2 className="size-4 animate-spin text-accent" />
-          ) : (
-            <Circle className="size-4" />
-          )}
-          {s}
-          {i === 3 && i === step && <span className="text-[12px] text-muted">(this page reconnects by itself)</span>}
-        </li>
-      ))}
-    </ol>
   );
 }
 
@@ -316,8 +316,7 @@ When you're done I'll run "npm run setup" and choose Update to finish (database 
 /** For copies already updated another way (GitHub "Sync fork" or a manual merge): just bring the database up to date. */
 function DatabaseOnly({ server }: { server: ServerState }) {
   const [plan, setPlan] = useState<{ summary: { migrations: { id: string; from: number; to: number }[] } } | null>(null);
-  const [log, setLog] = useState<LogLine[] | null>(null);
-  const [busy, setBusy] = useState(false);
+  const action = useAction<{ log: LogLine[] }>();
   return (
     <details className="rounded-md border border-border p-3">
       <summary className="cursor-pointer font-medium">Already updated the code another way?</summary>
@@ -348,30 +347,16 @@ function DatabaseOnly({ server }: { server: ServerState }) {
                   </li>
                 ))}
               </ul>
-              <Button
-                size="sm"
-                variant="primary"
-                loading={busy}
-                onClick={async () => {
-                  setBusy(true);
-                  try {
-                    setLog((await api<{ log: LogLine[] }>('/apply', { config: server.config })).log);
-                  } catch (e) {
-                    setLog([{ step: 'Update failed; nothing changed.', ok: false, detail: (e as Error).message }]);
-                  } finally {
-                    setBusy(false);
-                  }
-                }}
-              >
-                Update the database
-              </Button>
+              <ActionButton state={action.state} label="Update the database" doneLabel="Database updated" icon={<Database className="size-4" />} onClick={() => action.run('/apply', { config: server.config }, (r) => r.log.every((l) => l.ok))} />
             </>
           ) : (
             <p className="flex items-center gap-1.5 text-success">
               <CheckCircle2 className="size-4" /> Your database is up to date.
             </p>
           ))}
-        {log && <ApplyLog log={log} />}
+        <Checklist steps={action.steps} />
+        {action.error && <Banner tone="danger" title="Nothing was changed">{action.error}</Banner>}
+        {action.state === 'done' && <NextStep>nothing else: your database matches this version.</NextStep>}
       </div>
     </details>
   );

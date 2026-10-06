@@ -2,7 +2,7 @@ import { forwardRef, useEffect, useId, useRef, useState, type ButtonHTMLAttribut
 import { Check, Command, Info, AlertTriangle, XCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { cn } from './cn';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'soft' | 'quiet';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'soft' | 'quiet' | 'success';
 type Size = 'sm' | 'md' | 'lg';
 
 const variants: Record<Variant, string> = {
@@ -12,6 +12,8 @@ const variants: Record<Variant, string> = {
   quiet: 'text-muted hover:text-fg hover:bg-bg-subtle',
   soft: 'bg-accent-soft text-accent hover:brightness-95',
   danger: 'bg-danger text-white hover:brightness-110 shadow-sm',
+  /** A finished step ("Database updated"). The page background color keeps the text readable on both greens. */
+  success: 'bg-success text-bg hover:brightness-105 shadow-sm',
 };
 const sizes: Record<Size, string> = {
   sm: 'h-8 text-[13px] gap-1.5',

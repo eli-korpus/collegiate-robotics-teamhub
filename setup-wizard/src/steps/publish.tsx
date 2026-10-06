@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Check, CheckCircle2, Copy, ExternalLink, GitBranch, HeartHandshake, PartyPopper, Printer, RefreshCw } from 'lucide-react';
 import type { HostProvider } from '@teamhub/config-schema';
 import { TEAMHUB_CREDIT, TEAMHUB_UPSTREAM_REPO, isUpstreamRemote, suggestedRepoName } from '@teamhub/config-schema/util';
@@ -7,6 +7,7 @@ import { agentPrompt } from '@teamhub/sdk/agent-prompt';
 import { api, type GitState } from '../api';
 import { Section, StepShell, Why } from '../components';
 import { useDraft } from '../draft';
+import { ActionButton, Checklist, NextStep, useAction } from '../progress';
 import type { StepProps } from './basics';
 
 function useGit() {
@@ -24,6 +25,7 @@ function useGit() {
  */
 export function WaitingToPublish({ className, recheck }: { className?: string; recheck?: unknown }) {
   const [waiting, setWaiting] = useState<{ files: string[]; commits: number } | null>(null);
+  const [published, setPublished] = useState(false);
   const load = () =>
     api<{ files: string[]; commits: number }>('/git/waiting')
       .then(setWaiting)
@@ -31,17 +33,25 @@ export function WaitingToPublish({ className, recheck }: { className?: string; r
   useEffect(() => {
     load();
   }, [recheck]);
-  if (!waiting || (!waiting.files.length && !waiting.commits)) return null;
-  const names = waiting.files.map((f) => f.replace(/^team\//, '').replace(/\/$/, ''));
+  if (!published && (!waiting || (!waiting.files.length && !waiting.commits))) return null;
+  const names = (waiting?.files ?? []).map((f) => f.replace(/^team\//, '').replace(/\/$/, ''));
   return (
-    <Banner tone="warning" className={className} title="Saved, but not on your website yet">
-      <p>
-        {names.length > 0 && <>Changed here: {names.join(', ')}. </>}
-        {waiting.commits > 0 && <>{waiting.commits === 1 ? '1 saved change hasn’t' : `${waiting.commits} saved changes haven’t`} been uploaded. </>}
-        Publish uploads them to GitHub, and your host rebuilds the site in a minute or two.
-      </p>
+    <Banner tone={published ? 'success' : 'warning'} className={className} title={published ? 'Published' : 'Saved, but not on your website yet'}>
+      {!published && (
+        <p>
+          {names.length > 0 && <>Changed here: {names.join(', ')}. </>}
+          {!!waiting?.commits && <>{waiting.commits === 1 ? '1 saved change hasn’t' : `${waiting.commits} saved changes haven’t`} been uploaded. </>}
+          Publish uploads them to GitHub, and your host rebuilds the site in a minute or two.
+        </p>
+      )}
       <div className="mt-2">
-        <PublishButton message="Update TeamHub settings and branding" label="Publish to your website" onDone={load} />
+        <PublishButton
+          message="Update TeamHub settings and branding"
+          label="Publish to your website"
+          doneLabel="Published"
+          next="nothing else to do. Your host rebuilds the site in a minute or two; reload it then."
+          onDone={() => setPublished(true)}
+        />
       </div>
     </Banner>
   );
@@ -55,57 +65,58 @@ interface PublishResult {
   log: string;
 }
 
-export function PublishButton({ message, onDone, label = 'Commit & push to GitHub' }: { message: string; onDone?: () => void; label?: string }) {
-  const [busy, setBusy] = useState<string | null>(null);
-  const [result, setResult] = useState<PublishResult | null>(null);
+/**
+ * Upload to GitHub with a live checklist (collect files, commit, upload). When it works the button turns green and
+ * `next` says what to do now; when it doesn't, the checklist shows the step that failed with a one-click fix.
+ */
+export function PublishButton({
+  message,
+  onDone,
+  label = 'Commit & push to GitHub',
+  doneLabel = 'Uploaded to GitHub',
+  next,
+  disabled,
+}: {
+  message: string;
+  onDone?: () => void;
+  label?: string;
+  doneLabel?: string;
+  next?: ReactNode;
+  disabled?: boolean;
+}) {
+  const action = useAction<PublishResult>();
+  const [fixing, setFixing] = useState<string | null>(null);
   const [details, setDetails] = useState(false);
+  const result = action.result ?? (action.error ? { ok: false, message: 'Not uploaded to GitHub yet.', problem: action.error, log: '' } : null);
   const run = async () => {
-    setBusy('Publishing…');
-    try {
-      const r = await api<PublishResult>('/git/publish', { message });
-      setResult(r);
-      if (r.ok) {
-        toast.success(r.message);
-        onDone?.();
-      }
-    } catch (e) {
-      setResult({ ok: false, message: 'Not uploaded to GitHub yet.', problem: (e as Error).message, log: '' });
-    } finally {
-      setBusy(null);
-    }
+    const r = await action.run('/git/publish', { message }, (x) => x.ok);
+    if (r?.ok) onDone?.();
   };
   const fix = async () => {
     if (!result?.fix) return;
-    setBusy(result.fix === 'email' ? 'Switching to your no-reply email…' : 'Getting the changes from GitHub…');
+    setFixing(result.fix === 'email' ? 'Switching to your no-reply email…' : 'Getting the changes from GitHub…');
     try {
       const r = await api<{ ok: boolean; log: string }>(result.fix === 'email' ? '/git/use-noreply-email' : '/git/pull', {});
-      if (!r.ok) {
-        setResult({ ...result, problem: `That didn't work: ${r.log.split('\n')[0]}`, log: `${result.log}\n\n${r.log}` });
-        return;
-      }
+      if (!r.ok) return toast.error(`That didn't work: ${r.log.split('\n')[0]}`);
     } finally {
-      setBusy(null);
+      setFixing(null);
     }
     await run();
   };
   return (
     <div className="space-y-2">
-      <Button variant="primary" icon={<GitBranch className="size-4" />} loading={!!busy} onClick={run}>
-        {label}
-      </Button>
-      {busy && <p className="text-[12.5px] text-muted">{busy}</p>}
-      {result && !busy && (
-        <Banner tone={result.ok ? 'success' : 'danger'} title={result.message}>
+      <ActionButton state={fixing ? 'running' : action.state} label={label} doneLabel={doneLabel} icon={<GitBranch className="size-4" />} onClick={run} disabled={disabled} />
+      {fixing && <p className="text-[12.5px] text-muted">{fixing}</p>}
+      <Checklist steps={action.steps} />
+      {action.state === 'done' && result && <p className="text-[12.5px] text-muted">{result.message}</p>}
+      {action.state === 'done' && next && <NextStep>{next}</NextStep>}
+      {action.state === 'failed' && result && !fixing && (
+        <Banner tone="danger" title={result.message}>
           {result.problem && <p>{result.problem}</p>}
           <div className="mt-2 flex flex-wrap items-center gap-3">
-            {!result.ok && result.fix && (
+            {result.fix && (
               <Button size="sm" variant="primary" onClick={fix}>
                 {result.fix === 'email' ? 'Use my no-reply email and try again' : 'Get the changes and try again'}
-              </Button>
-            )}
-            {!result.ok && !result.fix && (
-              <Button size="sm" onClick={run}>
-                Try again
               </Button>
             )}
             {result.log && (
@@ -181,7 +192,7 @@ export function Publish({ onNext, onBack }: StepProps) {
               <li>team/branding/ (logos)</li>
             </ul>
           </Section>
-          <PublishButton message="Set up TeamHub" onDone={() => setDraft((d) => ({ ...d, done: { ...d.done, published: true } }))} />
+          <PublishButton message="Set up TeamHub" next="click Continue to put your site online with a free host." onDone={() => setDraft((d) => ({ ...d, done: { ...d.done, published: true } }))} />
           <Button variant="ghost" size="sm" icon={<RefreshCw className="size-4" />} onClick={refresh}>
             Refresh status
           </Button>
@@ -256,7 +267,7 @@ export function Host({ onNext, onBack }: StepProps) {
       {provider && (
         <>
           <Section title="1. Push the host settings file" description="We added a small settings file for your host. Push it so the host can read it.">
-            {filesWritten || c.hosting.provider === provider ? <PublishButton message={`Add ${provider} hosting settings`} label="Push host settings" /> : <Spinner />}
+            {filesWritten || c.hosting.provider === provider ? <PublishButton message={`Add ${provider} hosting settings`} label="Push host settings" doneLabel="Host settings uploaded" next="follow the steps for your host below, then paste your site's address." /> : <Spinner />}
           </Section>
           <Section title="2. Connect the host to your fork">
             <ol className="list-decimal space-y-1.5 pl-5 text-[13.5px]">
@@ -342,7 +353,7 @@ export function KeepAlive({ onNext, onBack }: StepProps) {
             </Button>
           </div>
         ) : (
-          <PublishButton message="Add TeamHub keep-alive and update-check workflows" label="Push it" onDone={() => setDraft((d) => ({ ...d, done: { ...d.done, keepalive: true } }))} />
+          <PublishButton message="Add TeamHub keep-alive and update-check workflows" label="Push it" doneLabel="Keep-alive uploaded" next="click Continue to finish." onDone={() => setDraft((d) => ({ ...d, done: { ...d.done, keepalive: true } }))} />
         )}
         {draft.done.keepalive && (
           <p className="flex items-center gap-1.5 text-[13px] text-success">

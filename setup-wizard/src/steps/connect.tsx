@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { CheckCircle2, ExternalLink, KeyRound, XCircle } from 'lucide-react';
+import { CheckCircle2, Database, ExternalLink, KeyRound } from 'lucide-react';
 import type { TeamhubConfig } from '@teamhub/config-schema';
 import { Banner, Button, Checkbox, Field, Input, Segmented, Select, Spinner, toast, validateRequired } from '@teamhub/ui';
 import { TOOL_SLOT_LABELS } from '@teamhub/sdk';
 import { api } from '../api';
 import { Section, StepShell, Why } from '../components';
 import { hasSeveralTeams, useDraft } from '../draft';
+import { ActionButton, Checklist, NextStep, useAction } from '../progress';
 import type { StepProps } from './basics';
 
 const HINTS: Record<string, string> = {
@@ -181,7 +182,6 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
   const [busy, setBusy] = useState(false);
   const [plan, setPlan] = useState<{ lines: string[]; sql: string; fresh: boolean } | null>(null);
   const [showSql, setShowSql] = useState(false);
-  const [log, setLog] = useState<{ step: string; ok: boolean; detail?: string }[] | null>(null);
   const [existing, setExisting] = useState(false);
   const [dataApi, setDataApi] = useState<{ schemas: string[]; ok: boolean } | null>(null);
 
@@ -218,20 +218,15 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
       setBusy(false);
     }
   };
+  const applyAction = useAction<{ log: { step: string; ok: boolean; detail?: string }[] }>();
   const apply = async () => {
-    setBusy(true);
-    setLog(null);
     try {
       await api('/config', c);
-      const r = await api<{ log: { step: string; ok: boolean; detail?: string }[] }>('/apply', { config: c });
-      setLog(r.log);
-      setDraft((d) => ({ ...d, done: { ...d.done, applied: true } }));
-      toast.success('Your database is ready');
     } catch (e) {
-      setLog([{ step: 'Apply failed. Nothing was changed (the whole update runs in one transaction).', ok: false, detail: (e as Error).message }]);
-    } finally {
-      setBusy(false);
+      return toast.error((e as Error).message);
     }
+    const r = await applyAction.run('/apply', { config: c }, (x) => x.log.every((l) => l.ok));
+    if (r) setDraft((d) => ({ ...d, done: { ...d.done, applied: true } }));
   };
 
   return (
@@ -386,9 +381,7 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
                 <li>Deploy server functions and configure sign-in</li>
               </ul>
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2 pt-1">
-                <Button variant="primary" onClick={apply} loading={busy}>
-                  {draft.done.applied ? 'Apply again' : 'Build my database'}
-                </Button>
+                <ActionButton state={applyAction.state === 'idle' && draft.done.applied ? 'done' : applyAction.state} label="Build my database" doneLabel="Database built" icon={<Database className="size-4" />} onClick={apply} disabled={busy} />
                 <button type="button" className="text-[12.5px] text-accent hover:underline" onClick={() => setShowSql(!showSql)} aria-expanded={showSql}>
                   {showSql ? 'Hide' : 'Show'} the SQL
                 </button>
@@ -396,26 +389,13 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
               {showSql && <pre className="max-h-72 relative overflow-auto rounded-md bg-bg-subtle p-3 text-[11px] leading-relaxed">{plan.sql}</pre>}
             </>
           )}
-          {log && <ApplyLog log={log} />}
+          <Checklist steps={applyAction.steps} />
+          {applyAction.error && <Banner tone="danger" title="Nothing was changed">The database build runs as one step and was rolled back: {applyAction.error}</Banner>}
+          {applyAction.state === 'failed' && !applyAction.error && <p className="text-[12.5px] text-danger">Your tables are ready, but a step after them didn't finish (see the list). Fix it and build again; it's safe to repeat.</p>}
+          {(applyAction.state === 'done' || (applyAction.state === 'idle' && draft.done.applied)) && <NextStep>click Continue to create your admin account.</NextStep>}
         </Section>
       )}
     </StepShell>
-  );
-}
-
-export function ApplyLog({ log }: { log: { step: string; ok: boolean; detail?: string }[] }) {
-  return (
-    <ul className="space-y-1 rounded-md border border-border p-3 text-[13px]">
-      {log.map((l, i) => (
-        <li key={i} className="flex items-start gap-2">
-          {l.ok ? <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" /> : <XCircle className="mt-0.5 size-4 shrink-0 text-danger" />}
-          <span>
-            {l.step}
-            {l.detail && <span className="block break-all text-[12px] text-muted">{l.detail}</span>}
-          </span>
-        </li>
-      ))}
-    </ul>
   );
 }
 

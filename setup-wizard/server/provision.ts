@@ -11,6 +11,7 @@ import { LAYOUT, lit, planSql, planToSql, resolveConfig, type Catalog, type DbSt
 import { CORE_FUNCTIONS, PUBLIC_FUNCTIONS } from '@teamhub/sdk/define';
 import { deleteBuckets, exportData, type ExportResult } from './backup';
 import { projectUrl, type Mgmt } from './mgmt';
+import { createProgress, type Progress } from './progress';
 
 export interface StepLog {
   step: string;
@@ -55,24 +56,42 @@ export async function applyConfig(
   catalog: Catalog,
   config: TeamhubConfig,
   opts: ApplyOptions = {},
+  progress: Progress = createProgress(),
 ): Promise<{ log: StepLog[]; backup?: ExportResult }> {
   const log: StepLog[] = [];
-  const db = await readDbState(m, ref);
+  const backingUp = !!opts.backupModules?.length;
+  progress.plan([{ id: 'connect', label: 'Connect to your database' }, ...(backingUp ? [{ id: 'backup', label: 'Back up the tabs you are removing' }] : [])]);
+
+  const db = await progress.step('connect', async () => {
+    const state = await readDbState(m, ref);
+    // Extensions for scheduled cleanup (available on every Supabase project).
+    await m.query(ref, `create extension if not exists pg_cron with schema pg_catalog; create extension if not exists pg_net with schema extensions;`);
+    return state;
+  });
   let backup: ExportResult | undefined;
-  if (opts.backupModules?.length && db) {
-    backup = await exportData(m, ref, keys.secret, catalog, config, { modules: opts.backupModules, includeCore: false, label: `before-removing-${opts.backupModules.join('-')}` });
-    log.push({ step: `Backed up ${opts.backupModules.join(', ')}`, ok: true, detail: backup.path });
+  if (backingUp) {
+    if (db) {
+      backup = await progress.step('backup', () => exportData(m, ref, keys.secret, catalog, config, { modules: opts.backupModules, includeCore: false, label: `before-removing-${opts.backupModules!.join('-')}` }), (b) => `Saved to ${b.path}`);
+      log.push({ step: `Backed up ${opts.backupModules!.join(', ')}`, ok: true, detail: backup.path });
+    } else progress.set('backup', 'skipped', 'Nothing to back up yet');
   }
 
-  // Extensions for scheduled cleanup (available on every Supabase project).
-  await m.query(ref, `create extension if not exists pg_cron with schema pg_catalog; create extension if not exists pg_net with schema extensions;`);
-
   const plan = computePlan(catalog, config, db);
-  await m.query(ref, planToSql(plan, true));
-  log.push({ step: 'Database updated', ok: true, detail: `${plan.summary.migrations.map((x) => `${x.id} v${x.from} to v${x.to}`).join(', ') || 'no schema changes'}` });
+  progress.plan([
+    { id: 'schema', label: 'Update tables and security rules' },
+    ...(plan.bucketsToDelete.length ? [{ id: 'storage', label: 'Delete file storage of removed tabs' }] : []),
+    ...(opts.skipFunctions ? [] : [{ id: 'functions', label: 'Install server functions (password links, cleanup)' }]),
+    { id: 'join', label: 'Save who can sign up' },
+    { id: 'auth', label: 'Save sign-in settings' },
+    { id: 'check', label: 'Check that your website can reach the database' },
+  ]);
+
+  const migrated = plan.summary.migrations.map((x) => `${x.id} v${x.from} to v${x.to}`).join(', ') || 'no table changes, rules refreshed';
+  await progress.step('schema', () => m.query(ref, planToSql(plan, true)), () => migrated);
+  log.push({ step: 'Database updated', ok: true, detail: migrated });
 
   if (plan.bucketsToDelete.length) {
-    await deleteBuckets(m, ref, keys.secret, plan.bucketsToDelete);
+    await progress.step('storage', () => deleteBuckets(m, ref, keys.secret, plan.bucketsToDelete), () => plan.bucketsToDelete.join(', '));
     log.push({ step: `Deleted file storage: ${plan.bucketsToDelete.join(', ')}`, ok: true });
   }
 
@@ -86,19 +105,25 @@ export async function applyConfig(
   );
 
   if (!opts.skipFunctions) {
+    progress.set('functions', 'running');
     const fnRoot = join(catalog.root, LAYOUT.functions);
     const fns = new Set<string>(CORE_FUNCTIONS);
     for (const [id] of Object.entries(config.modules).filter(([, e]) => e.state === 'active')) {
       for (const f of catalog.modules.get(id)?.manifest.functions ?? []) fns.add(f);
     }
+    const failed: string[] = [];
+    let n = 0;
     for (const f of fns) {
       const dir = join(fnRoot, f);
       if (!existsSync(dir)) continue;
+      progress.set('functions', 'running', `Installing ${f}…`);
       try {
         await m.deployFunction(ref, f, dir, !PUBLIC_FUNCTIONS.includes(f));
         log.push({ step: `Deployed function ${f}`, ok: true });
+        n++;
       } catch (e) {
         log.push({ step: `Deploy function ${f}`, ok: false, detail: (e as Error).message });
+        failed.push(`${f}: ${(e as Error).message}`);
       }
     }
     try {
@@ -106,26 +131,33 @@ export async function applyConfig(
       log.push({ step: 'Function secrets set', ok: true });
     } catch (e) {
       log.push({ step: 'Set function secrets', ok: false, detail: (e as Error).message });
+      failed.push(`secrets: ${(e as Error).message}`);
     }
+    // A function that didn't install is reported but doesn't stop the rest (the database is already updated).
+    progress.set('functions', failed.length ? 'failed' : 'done', failed.length ? failed.join('; ') : `${n} installed`);
   }
 
   const [lastJoin] = await m.query<{ value: string | null }>(ref, `select value from teamhub_private.config where key = 'wizard_join_domains'`);
   const joinSql = joinRulesSql(config, lastJoin?.value ?? null);
+  const d = config.join.allowedEmailDomains;
+  const joinDetail = d.length ? `only ${d.map((x) => '@' + x).join(', ')} emails` : 'anyone with the join link';
   if (joinSql) {
-    await m.query(ref, joinSql);
-    const d = config.join.allowedEmailDomains;
-    log.push({ step: 'Sign-up rule saved', ok: true, detail: d.length ? `only ${d.map((x) => '@' + x).join(', ')} emails` : 'anyone with the join link' });
-  }
+    await progress.step('join', () => m.query(ref, joinSql), () => joinDetail);
+    log.push({ step: 'Sign-up rule saved', ok: true, detail: joinDetail });
+  } else progress.set('join', 'done', `No change (${joinDetail})`);
 
-  await configureAuth(m, ref, config, opts.siteUrl ?? config.hosting.url);
-  log.push({ step: 'Sign-in settings configured', ok: true, detail: config.features.email ? 'email confirmation on' : 'no email needed (approval is the gate)' });
+  const authDetail = config.features.email ? 'email confirmation on' : 'no email needed (approval is the gate)';
+  await progress.step('auth', () => configureAuth(m, ref, config, opts.siteUrl ?? config.hosting.url), () => authDetail);
+  log.push({ step: 'Sign-in settings configured', ok: true, detail: authDetail });
 
   // Last: prove the website will be able to talk to the database.
+  progress.set('check', 'running');
   const keysForPing = await m.apiKeys(ref).catch(() => null);
   if (keysForPing) {
     const ping = await pingDataApi(m, ref, keysForPing.publishable);
     log.push({ step: ping.ok ? 'Data API check passed' : 'Data API check failed', ok: ping.ok, detail: ping.detail });
-  }
+    progress.set('check', ping.ok ? 'done' : 'failed', ping.detail);
+  } else progress.set('check', 'skipped', 'Couldn’t read the project keys to check');
   return { log, backup };
 }
 

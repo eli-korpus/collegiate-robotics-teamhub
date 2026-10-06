@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { Archive, CheckCircle2, GitBranch, Hammer, Minus, Pencil, Plus, Trash2 } from 'lucide-react';
+import { Archive, Database, GitBranch, Hammer, Minus, Pencil, Plus, Trash2 } from 'lucide-react';
 import type { TeamhubConfig } from '@teamhub/config-schema';
-import { Banner, Button, Input, Segmented, Spinner, cn, toast } from '@teamhub/ui';
+import { Banner, Button, Input, Segmented, Spinner, toast } from '@teamhub/ui';
 import { api } from '../api';
 import { Section, StepShell } from '../components';
 import { useDraft } from '../draft';
-import { ApplyLog } from './connect';
+import { ActionButton, Checklist, NextStep, useAction } from '../progress';
 import { PublishButton, WaitingToPublish } from './publish';
 import type { StepProps } from './basics';
 
@@ -21,9 +21,10 @@ export function Review({ onBack }: StepProps) {
   const { draft, setDraft, server } = useDraft();
   const [lines, setLines] = useState<DiffLine[] | null>(null);
   const [typed, setTyped] = useState('');
-  const [busy, setBusy] = useState<'apply' | 'build' | null>(null);
-  const [log, setLog] = useState<{ step: string; ok: boolean; detail?: string }[] | null>(null);
-  const [buildLog, setBuildLog] = useState<{ ok: boolean; log: string } | null>(null);
+  const applyAction = useAction<{ log: { step: string; ok: boolean; detail?: string }[] }>();
+  const buildAction = useAction<{ ok: boolean; log: string }>();
+  const [published, setPublished] = useState(false);
+  const [showBuildLog, setShowBuildLog] = useState(false);
   const confirmText = String(draft.config.teams[0]?.number ?? draft.config.teams[0]?.shortCode ?? '');
 
   useEffect(() => {
@@ -41,34 +42,18 @@ export function Review({ onBack }: StepProps) {
     return c;
   };
 
-  const apply = async () => {
-    setBusy('apply');
-    setLog(null);
-    try {
-      const cfg = finalConfig();
-      const dormantNow = Object.entries(cfg.modules).filter(([id, m]) => m.state === 'dormant' && server.config!.modules[id]?.state !== 'dormant').map(([id]) => id);
-      const r = await api<{ log: { step: string; ok: boolean; detail?: string }[]; backup?: { path: string } }>('/apply', { config: cfg, backupModules: [...removed, ...dormantNow.filter((d) => !removed.includes(d))] });
-      await api('/config', cfg);
-      setLog(r.log);
-      setDraft((d) => ({ ...d, done: { ...d.done, applied: true } }));
-      // Straight on to the test build, so Commit & push is ready without another click to find.
-      if (r.log.every((l) => l.ok)) return void (await build());
-    } catch (e) {
-      setLog([{ step: 'Nothing was changed: the update runs as one transaction and was rolled back.', ok: false, detail: (e as Error).message }]);
-    }
-    setBusy(null);
-  };
+  const build = () => buildAction.run('/build', {}, (r) => r.ok);
 
-  const build = async () => {
-    setBusy('build');
-    setBuildLog(null);
-    try {
-      setBuildLog(await api<{ ok: boolean; log: string }>('/build', {}));
-    } catch (e) {
-      setBuildLog({ ok: false, log: (e as Error).message });
-    } finally {
-      setBusy(null);
-    }
+  const apply = async () => {
+    buildAction.reset();
+    setPublished(false);
+    const cfg = finalConfig();
+    const dormantNow = Object.entries(cfg.modules).filter(([id, m]) => m.state === 'dormant' && server.config!.modules[id]?.state !== 'dormant').map(([id]) => id);
+    const r = await applyAction.run('/apply', { config: cfg, backupModules: [...removed, ...dormantNow.filter((d) => !removed.includes(d))] }, (x) => x.log.every((l) => l.ok));
+    if (!r) return;
+    setDraft((d) => ({ ...d, done: { ...d.done, applied: true } }));
+    // Straight on to the test build, so Commit & push is ready without another click to find.
+    if (r.log.every((l) => l.ok)) await build();
   };
 
   return (
@@ -117,41 +102,72 @@ export function Review({ onBack }: StepProps) {
           <Input value={typed} onChange={(e) => setTyped(e.target.value)} className="w-40" />
         </label>
       )}
-      <div className="flex flex-wrap gap-2">
-        <Button variant="primary" onClick={apply} loading={busy === 'apply'} disabled={!lines?.length || (deleting.length > 0 && typed !== confirmText) || !server.supabase.connected}>
-          1. Apply to database
-        </Button>
-        <Button icon={<Hammer className="size-4" />} onClick={build} loading={busy === 'build'} disabled={!draft.done.applied}>
-          2. Test build
-        </Button>
-        {!buildLog?.ok && (
-          <Button icon={<GitBranch className="size-4" />} disabled>
-            3. Commit &amp; push
-          </Button>
-        )}
-      </div>
-      {!buildLog?.ok && (
-        <p className="text-[12.5px] text-muted">
-          Three steps: the database first, then a test build (it starts by itself after step 1), then <strong>Commit &amp; push</strong>, which puts the change on your website.
-        </p>
-      )}
-      {!server.supabase.connected && <Banner tone="warning">Connect Supabase first (wizard home &gt; Connect).</Banner>}
-      {log && <ApplyLog log={log} />}
-      {buildLog && (
-        <div className={cn('rounded-md border p-3 text-[12.5px]', buildLog.ok ? 'border-success/40' : 'border-danger/40')}>
-          <p className="mb-1 flex items-center gap-1.5 font-medium">
-            {buildLog.ok ? (
-              <>
-                <CheckCircle2 className="size-4 text-success" /> The site builds. Last step: Commit &amp; push, below, to put it on your website.
-              </>
-            ) : (
-              'The build failed. Your live site is untouched. Details:'
+      <Section title="Put it live" description="Three steps, in order. Each one shows what it's doing, and turns green when it worked.">
+        <ol className="space-y-4">
+          <li className="space-y-2">
+            <ActionButton
+              state={applyAction.state}
+              label="1. Apply to database"
+              doneLabel="1. Database updated"
+              icon={<Database className="size-4" />}
+              onClick={apply}
+              disabled={!lines?.length || (deleting.length > 0 && typed !== confirmText) || !server.supabase.connected}
+            />
+            {!server.supabase.connected && <Banner tone="warning">Connect Supabase first (wizard home &gt; Connect).</Banner>}
+            <Checklist steps={applyAction.steps} />
+            {applyAction.error && <Banner tone="danger" title="Nothing was changed">The database update runs as one step and was rolled back: {applyAction.error}</Banner>}
+            {applyAction.state === 'failed' && !applyAction.error && (
+              <p className="text-[12.5px] text-danger">The database is updated, but a step after it didn't finish (see the list). Fix it and run step 1 again; it's safe to repeat.</p>
             )}
-          </p>
-          {!buildLog.ok && <pre className="max-h-60 relative overflow-auto text-[11px]">{buildLog.log}</pre>}
-        </div>
-      )}
-      {buildLog?.ok && <PublishButton message="Update TeamHub configuration" label="3. Commit & push (your host redeploys)" onDone={() => setDraft((d) => ({ ...d, done: { ...d.done, published: true } }))} />}
+          </li>
+          <li className="space-y-2">
+            <ActionButton
+              state={buildAction.state}
+              label="2. Test build"
+              doneLabel="2. The site builds"
+              icon={<Hammer className="size-4" />}
+              onClick={build}
+              disabled={!draft.done.applied}
+              current={applyAction.state === 'done' || (draft.done.applied && applyAction.state === 'idle')}
+            />
+            {!draft.done.applied && <p className="text-[12.5px] text-muted">Starts by itself after step 1.</p>}
+            <Checklist steps={buildAction.steps} />
+            {buildAction.state === 'failed' && (
+              <div className="space-y-1">
+                <p className="text-[12.5px] text-danger">The build failed. Nothing was published and your live site is untouched.</p>
+                {buildAction.result?.log && (
+                  <button type="button" className="text-[12.5px] text-accent hover:underline" aria-expanded={showBuildLog} onClick={() => setShowBuildLog(!showBuildLog)}>
+                    {showBuildLog ? 'Hide' : 'Show'} details
+                  </button>
+                )}
+                {showBuildLog && <pre className="max-h-60 relative overflow-auto rounded-md bg-bg-subtle p-2 text-[11px]">{buildAction.result?.log ?? buildAction.error}</pre>}
+                {buildAction.error && <p className="text-[12.5px] text-danger">{buildAction.error}</p>}
+              </div>
+            )}
+          </li>
+          <li className="space-y-2">
+            {buildAction.state === 'done' ? (
+              <PublishButton
+                message="Update TeamHub configuration"
+                label="3. Commit & push"
+                doneLabel="3. Uploaded: your site is rebuilding"
+                next="you're done. Your host puts the new version live in a minute or two; reload your site then."
+                onDone={() => {
+                  setPublished(true);
+                  setDraft((d) => ({ ...d, done: { ...d.done, published: true } }));
+                }}
+              />
+            ) : (
+              <Button icon={<GitBranch className="size-4" />} disabled>
+                3. Commit &amp; push
+              </Button>
+            )}
+            {buildAction.state !== 'done' && <p className="text-[12.5px] text-muted">Puts the change on your website. Ready once the test build passes.</p>}
+          </li>
+        </ol>
+        {!published && applyAction.state === 'done' && buildAction.state === 'running' && <NextStep>wait for the test build, then Commit &amp; push.</NextStep>}
+        {buildAction.state === 'done' && !published && <NextStep>3. Commit &amp; push, to put it on your website.</NextStep>}
+      </Section>
     </StepShell>
   );
 }

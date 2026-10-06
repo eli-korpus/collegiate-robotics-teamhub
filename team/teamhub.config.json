@@ -250,7 +250,8 @@
         "XL",
         "XXL"
       ],
-      "private": false
+      "private": false,
+      "visibility": "leaders"
     }
   ],
   "permissions": {

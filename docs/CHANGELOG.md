@@ -13,6 +13,7 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+## [1.0.7] - 2026-10-06
 ### Security
 
 - The setup wizard forgets a Supabase access token as soon as Supabase rejects it (expired or deleted), instead of

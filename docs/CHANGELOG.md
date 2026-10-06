@@ -13,6 +13,7 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+## [1.0.3] - 2026-10-06
 ### Fixed
 
 - Setup wizard: Review & apply shows all three steps from the start (Apply to database, Test build, Commit & push).

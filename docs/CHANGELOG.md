@@ -13,11 +13,6 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
-### Fixed
-
-- Setup wizard: discarding an edit where you uploaded a logo now puts the old logo and browser-tab icon back, so the
-  discarded logo is never published by mistake.
-
 ### Security
 
 - Links people save (tool links, vendor pages, sponsor websites, notebook and manufacturing links…) are checked before
@@ -40,6 +35,10 @@ How to update your dashboard: [docs/updating.md](updating.md).
   offers to publish right away.
 - Updating TeamHub also uploads `package-lock.json` when installing changed it, so it never blocks the next update.
 
+### Fixed
+
+- Setup wizard: discarding an edit where you uploaded a logo now puts the old logo and browser-tab icon back, so the
+  discarded logo is never published by mistake.
 ## [1.0.3] - 2026-10-06
 ### Fixed
 

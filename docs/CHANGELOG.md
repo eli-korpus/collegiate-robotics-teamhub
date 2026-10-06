@@ -23,6 +23,9 @@ How to update your dashboard: [docs/updating.md](updating.md).
   (the person, their captains and mentors, admins) or mentors only. Shirt size and dietary needs now default to team
   leaders, so other students can't see them. Captains and mentors get the new "See team-only profile fields"
   permission. Changing a field's level moves the existing answers when you apply it (database update required).
+- **Admin > Profile fields**: see every profile field and who can see it, and add, rename or remove extra fields
+  (typed or pick-from-a-list, with their own visibility) without opening the setup wizard.
+- Admin > Help lists what you can change right in the dashboard and what needs the setup wizard.
 
 ### Fixed
 
@@ -32,6 +35,9 @@ How to update your dashboard: [docs/updating.md](updating.md).
   already says which team it is.
 - Checkbox lists ran together on one line: People > Request info ("Which fields?"), Skills ("Learn these first"),
   and the setup wizard's New Season and Update screens now show one item per line.
+- On phones and tablets, the buttons to delete a comment or a notebook photo were invisible (they only appeared
+  on mouse hover). They now always show on touch screens.
+- Admin > Help showed a stray "All teams" label.
 
 ### Changed
 

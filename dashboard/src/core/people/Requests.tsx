@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Check, UserPlus, X } from 'lucide-react';
 import { Avatar, Button, Checkbox, Dialog, EmptyState, RelativeTime, Segmented, TYPE_LABEL, toast, useConfirm, VisibilityNote, OptionalTag } from '@teamhub/ui';
 import { canWith, friendlyError, runtime, useMe, usePeople, usePositions, useSupabase, TeamBadge, type Membership, type PersonInfo } from '@teamhub/sdk';
-import { ProfileFieldInput, useProfileFields } from '../home/coreWidgets';
+import { ProfileFieldInput, useProfileFields } from './profileFields';
 
 type T = 'member' | 'captain' | 'mentor';
 

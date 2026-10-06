@@ -227,6 +227,58 @@ test.describe('admins edit people', () => {
     expect((saved as unknown as { details: { subteam: string } }).details.subteam).toBe('Build, CAD');
     expect(errors).toEqual([]);
   });
+
+  test('shirt sizes are team-only: other students never see them', async ({ page }) => {
+    const { config } = loadGenerated();
+    const team = config.teams[0].id;
+    const ALEX = '00000000-0000-4000-8000-0000000000a1';
+    const now = new Date().toISOString();
+    const people = (meType: string) => ({
+      profiles: [
+        { id: ME, display_name: 'Sam Rivera', avatar_path: null, is_admin: false, status: 'active', details: {}, home_prefs: null, created_at: now },
+        { id: ALEX, display_name: 'Alex Kim', avatar_path: null, is_admin: false, status: 'active', details: { grade: '10' }, home_prefs: null, created_at: now },
+      ],
+      memberships: [
+        { user_id: ME, team_id: team, type: meType, status: 'active', requested_type: null, note: null, created_at: now },
+        { user_id: ALEX, team_id: team, type: 'member', status: 'active', requested_type: null, note: null, created_at: now },
+      ],
+      profiles_leaders: [{ user_id: ALEX, data: { shirt_size: 'M' } }],
+    });
+    await mockSupabase(page, { tables: people('member') });
+    await page.goto(`/people/${ALEX}`);
+    await expect(page.getByText('Grade', { exact: true })).toBeVisible();
+    await expect(page.getByText('Shirt size', { exact: true })).toHaveCount(0);
+    await mockSupabase(page, { tables: people('captain') });
+    await page.goto(`/people/${ALEX}`);
+    await expect(page.getByText('Shirt size', { exact: true })).toBeVisible();
+    await expect(page.getByLabel('Team leaders only').first()).toBeVisible();
+  });
+
+  test('admins add a profile field without the setup wizard', async ({ page }) => {
+    const errors = watchErrors(page);
+    let saved: { extra_profile_fields: { id: string; label: string; type: string; options: string[]; visibility: string }[] } | null = null;
+    await mockSupabase(page);
+    await page.route('**/rest/v1/teamhub_settings*', async (route) => {
+      if (route.request().method() === 'PATCH') {
+        saved = route.request().postDataJSON();
+        return route.fulfill({ status: 204, body: '' });
+      }
+      return route.fallback();
+    });
+    await page.goto('/admin/fields');
+    await expect(page.getByText('From setup')).toBeVisible();
+    await page.getByRole('button', { name: 'Add a field' }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByLabel('Name').fill('Hoodie size');
+    await dialog.getByLabel('Answer', { exact: true }).selectOption('select');
+    await dialog.getByPlaceholder('Type one, then Add').fill('S, M, L');
+    await expect(dialog.getByRole('button', { name: 'Remove L' })).toBeVisible();
+    await dialog.getByLabel('Who can see the answers').selectOption('leaders');
+    await dialog.getByRole('button', { name: 'Add field' }).click();
+    await expect.poll(() => saved).not.toBeNull();
+    expect(saved!.extra_profile_fields).toEqual([{ id: 'x_hoodie_size', label: 'Hoodie size', type: 'select', options: ['S', 'M', 'L'], visibility: 'leaders' }]);
+    expect(errors).toEqual([]);
+  });
 });
 
 test('icon-only buttons show their icons at full size @phone', async ({ page }) => {

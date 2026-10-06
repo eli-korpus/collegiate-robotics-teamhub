@@ -10,8 +10,8 @@ import type { StepProps } from './basics';
 
 const LEVELS: { value: FieldLevel; label: string }[] = [
   { value: 'everyone', label: 'Everyone in the program' },
-  { value: 'leaders', label: 'Only the person, captains and mentors' },
-  { value: 'mentors', label: 'Only the person and mentors' },
+  { value: 'leaders', label: 'Captains and mentors only' },
+  { value: 'mentors', label: 'Mentors only' },
 ];
 
 const GENERIC_POSITIONS = ['Lead Programmer', 'Drive Coach', 'Driver 1', 'Driver 2', 'Safety Captain'];
@@ -166,7 +166,7 @@ export function People({ onNext, onBack }: StepProps) {
 
       <Section
         title="Profile fields"
-        description="Optional extra info on each profile, and who can see it. Admins can always see everything. Mentors can ask for missing values with People > Request info: the safe way to collect personal info."
+        description="Optional extra info on each profile, and who can see it. People always see their own answers, and admins see everything. Mentors can ask for missing values with People > Request info: the safe way to collect personal info."
       >
         <div className="space-y-2">
           {SUGGESTED_FIELDS.map((f) => {
@@ -188,7 +188,7 @@ export function People({ onNext, onBack }: StepProps) {
                 {cur && (
                   <Select
                     aria-label={`Who can see ${f.label.toLowerCase()}`}
-                    className="w-auto min-w-0 sm:w-72"
+                    className="w-auto min-w-0 sm:w-64"
                     value={fieldLevel(cur)}
                     onChange={(e) =>
                       update((x) => {

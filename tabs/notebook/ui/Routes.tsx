@@ -413,7 +413,7 @@ function EntryDetail({ entry: e, onEdit, onDeleted }: { entry: Entry; onEdit: ()
                   label="Delete photo"
                   size="sm"
                   variant="secondary"
-                  className="absolute right-1 top-1 opacity-0 group-hover:opacity-100"
+                  className="absolute right-1 top-1 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:focus-visible:opacity-100"
                   onClick={async () => {
                     const { error } = await sb.from('nb_images').delete().eq('id', img.id);
                     if (error) toast.error(friendlyError(error));

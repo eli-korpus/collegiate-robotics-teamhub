@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardList, Lock, Plus, Trash2 } from 'lucide-react';
 import { Banner, Button, Card, Checkbox, Dialog, EmptyState, Field, IconButton, Input, RelativeTime, Textarea, VisibilityNote, toast, useConfirm } from '@teamhub/ui';
 import { friendlyError, useMe, useSupabase, Person, TeamBadge, TeamScopePicker } from '@teamhub/sdk';
-import { useProfileFields } from '../home/coreWidgets';
+import { useProfileFields } from './profileFields';
 
 interface InfoRequest {
   id: string;

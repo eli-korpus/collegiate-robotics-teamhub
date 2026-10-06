@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Download, Trash2, UserPlus } from 'lucide-react';
 import { Avatar, Button, Card, CardHeader, Field, Input, PageHeader, Select, Textarea, VisibilityNote, downloadText, toast, useConfirm, validateRequired } from '@teamhub/ui';
 import { friendlyError, isMultiTeam, runtime, useMe, usePeople, useSupabase, Upload, uploadFile } from '@teamhub/sdk';
-import { LEVEL_NOTE, ProfileFieldInput, fieldValue, saveProfileFields, useMyPrivate, useProfileFields } from '../home/coreWidgets';
+import { LEVEL_NOTE, ProfileFieldInput, fieldValue, saveProfileFields, useMyPrivate, useProfileFields } from './profileFields';
 
 export default function MyProfile() {
   const sb = useSupabase();

@@ -80,10 +80,20 @@ export function useSettingsRow() {
         allowed_email_domains?: string[];
         storage_limits: { db_mb: number; files_mb: number };
         storage_history: { month: string; db: number; files: number }[];
-        extra_profile_fields: { id: string; label: string; type: 'text' | 'select'; options?: string[] }[];
+        extra_profile_fields: ExtraProfileField[];
       } | null;
     },
   });
+}
+
+/** A profile field an admin added in the dashboard (Admin > Profile fields). */
+export interface ExtraProfileField {
+  id: string;
+  label: string;
+  type: 'text' | 'select';
+  options?: string[];
+  /** Who can see answers; fixed once added. Missing means everyone. */
+  visibility?: 'everyone' | 'leaders' | 'mentors';
 }
 
 export function useSeason(): string {

@@ -5,7 +5,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Copy, KeyRound, Lock, MoreHorizontal, Pencil, Shield, Trash2, UserCheck, UserX } from 'lucide-react';
 import { Avatar, Button, Card, CardHeader, Dialog, EmptyState, Field, IconButton, Input, Menu, PositionBadge, Select, Spinner, TYPE_LABEL, toast, useConfirm } from '@teamhub/ui';
 import { canWith, friendlyError, isMultiTeam, runtime, useMe, usePeople, useSupabase, TeamBadge } from '@teamhub/sdk';
-import { canSeeLevel, fieldValue, ProfileFieldInput, saveProfileFields, useHiddenValues, useProfileFields, type HiddenValues } from '../home/coreWidgets';
+import { canSeeLevel, fieldValue, ProfileFieldInput, saveProfileFields, useHiddenValues, useProfileFields, type HiddenValues } from './profileFields';
 import { TeamLogo } from '../auth/AuthLayout';
 
 export function Profile() {

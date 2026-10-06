@@ -1,13 +1,13 @@
 import { useMemo, useState } from 'react';
 import { Route, Routes, useNavigate, useSearchParams } from 'react-router';
 import { Users } from 'lucide-react';
-import { Avatar, EmptyState, PageHeader, PositionBadge, SearchInput, Segmented, Select, Spinner, TYPE_LABEL, TeamDot, cn, matches } from '@teamhub/ui';
+import { Avatar, Checkbox, EmptyState, PageHeader, PositionBadge, SearchInput, Segmented, Select, Spinner, TYPE_LABEL, TeamDot, cn, matches } from '@teamhub/ui';
 import { isMultiTeam, runtime, useCan, usePeople, usePositions, useTeamScope, type PersonInfo } from '@teamhub/sdk';
 import { Requests } from './Requests';
 import { Positions } from './Positions';
 import { RequestInfo } from './RequestInfo';
 import { Profile } from './Profile';
-import { splitChoices } from '../home/coreWidgets';
+import { splitChoices } from './profileFields';
 
 export default function PeoplePage() {
   return (
@@ -109,9 +109,7 @@ function Directory() {
             ))}
           </Select>
         )}
-        <label className="flex items-center gap-1.5 text-[12.5px] text-muted">
-          <input type="checkbox" checked={showInactive} onChange={(e) => setShowInactive(e.target.checked)} /> Former / inactive
-        </label>
+        <Checkbox checked={showInactive} onChange={setShowInactive} label={<span className="text-[12.5px] text-muted">Former / inactive</span>} />
       </div>
       {!list.length ? (
         <EmptyState icon={<Users />} title="No one matches" body="Try a different search or filter." />

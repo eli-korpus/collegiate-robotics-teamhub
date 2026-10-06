@@ -130,3 +130,28 @@ test.describe('required fields', () => {
     expect(errors).toEqual([]);
   });
 });
+
+test.describe('attendance from the calendar', () => {
+  test('Take attendance picks the practice from the calendar instead of making a separate one', async ({ page }) => {
+    test.skip(!modules.includes('attendance') || !modules.includes('calendar'), 'Needs Attendance and Calendar');
+    const errors = watchErrors(page);
+    const now = new Date();
+    const at = (h: number) => new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, 30).toISOString();
+    await mockSupabase(page, {
+      tables: {
+        cal_events: [
+          { id: 'e1', title: 'Build practice', kind: 'practice', team_id: null, starts_at: at(15), ends_at: at(17), all_day: false, recurrence: null },
+          { id: 'e2', title: 'Forms due', kind: 'deadline', team_id: null, starts_at: at(9), ends_at: null, all_day: false, recurrence: null },
+        ],
+      },
+    });
+    await page.goto('/attendance');
+    await page.getByRole('button', { name: 'Take attendance', exact: true }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByText('Build practice')).toBeVisible();
+    await expect(dialog.getByText('Forms due')).toHaveCount(0);
+    await expect(dialog.getByRole('button', { name: /Not on the calendar\? Add it/ })).toBeVisible();
+    await expect(page.getByText('Name', { exact: true })).toHaveCount(0);
+    expect(errors).toEqual([]);
+  });
+});

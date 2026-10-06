@@ -3,7 +3,7 @@ import { Link } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { Play, UserCheck } from 'lucide-react';
 import { Button, Card, CardHeader, buttonClass, toDateInput } from '@teamhub/ui';
-import { Slot, useSupabase } from '@teamhub/sdk';
+import { Slot, hasSlot, useSupabase } from '@teamhub/sdk';
 import { sessionTitle, type Session } from '../data';
 import { StartDialog } from '../ui/Routes';
 
@@ -11,6 +11,7 @@ import { StartDialog } from '../ui/Routes';
 export default function TakeToday() {
   const sb = useSupabase();
   const [starting, setStarting] = useState(false);
+  const fromCalendar = hasSlot('attendance.picker');
   const q = useQuery({
     queryKey: ['attendance', 'today-all'],
     queryFn: async () => {
@@ -35,7 +36,7 @@ export default function TakeToday() {
           </Button>
         )}
       </div>
-      {starting && <StartDialog onClose={() => setStarting(false)} />}
+      {starting && (fromCalendar ? <Slot name="attendance.picker" props={{ onClose: () => setStarting(false) }} /> : <StartDialog onClose={() => setStarting(false)} />)}
     </Card>
   );
 }

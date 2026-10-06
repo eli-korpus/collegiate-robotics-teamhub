@@ -13,6 +13,13 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Changed
+
+- With the Calendar tab on, attendance is taken for calendar events instead of separate practices: the Attendance
+  tab's **Take attendance** lists this week's practices and events from the calendar (or offers to add one), and
+  every event except deadlines (practices, meetings, competitions, outreach, socials) has a Take attendance button.
+  Repeating events, cancelled dates and moved times are handled.
+
 ## [1.0.0] - 2026-10-05
 
 ### Added

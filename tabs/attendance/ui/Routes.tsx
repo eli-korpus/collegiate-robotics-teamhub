@@ -30,6 +30,7 @@ import {
   friendlyError,
   ModuleHeader,
   Slot,
+  hasSlot,
   TeamBadge,
   TeamScopePicker,
   useActivePeople,
@@ -66,6 +67,8 @@ function Overview() {
   const [tab, setTab] = useState<Tab>(canTake || canViewAll ? 'sessions' : 'me');
   const [starting, setStarting] = useState(false);
   const nav = useNavigate();
+  // With the Calendar tab, attendance is always taken for a calendar event (no separate practices).
+  const fromCalendar = hasSlot('attendance.picker');
   useCreateShortcut(() => setStarting(true), canTake);
   return (
     <div>
@@ -80,7 +83,7 @@ function Overview() {
             )}
             {canTake && (
               <Button variant="primary" icon={<Play className="size-4" />} onClick={() => setStarting(true)}>
-                Start a practice
+                {fromCalendar ? 'Take attendance' : 'Start a practice'}
               </Button>
             )}
           </>
@@ -103,7 +106,7 @@ function Overview() {
         {tab === 'sessions' && <SessionsList />}
         {tab === 'report' && <Report />}
       </div>
-      {starting && <StartDialog onClose={() => setStarting(false)} />}
+      {starting && (fromCalendar ? <Slot name="attendance.picker" props={{ onClose: () => setStarting(false) }} /> : <StartDialog onClose={() => setStarting(false)} />)}
     </div>
   );
 }

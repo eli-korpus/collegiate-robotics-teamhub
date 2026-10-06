@@ -62,7 +62,7 @@ Small units that switch on automatically when both tabs are enabled:
 
 | Integration | What it adds |
 |---|---|
-| `attendance+calendar` | Practices on the calendar get a one-tap "Take attendance" button, and sessions remember which event they belong to. |
+| `attendance+calendar` | Attendance is taken for events on the calendar: every practice, meeting or event gets a "Take attendance" button, and the Attendance tab picks from the calendar instead of creating separate practices. |
 | `competition-day+checklists` | Competition Day shows your robot/pit checklists with today’s progress. |
 | `competition-day+scouting` | “Scout this match” on Competition Day opens Scouting on the right event and match; partners show your scouting. |
 | `events+calendar` | Your FTCScout competitions appear on the calendar automatically (merged with any calendar event that has the same event code). |

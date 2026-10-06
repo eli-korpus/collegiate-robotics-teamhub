@@ -228,3 +228,16 @@ test.describe('admins edit people', () => {
     expect(errors).toEqual([]);
   });
 });
+
+test('icon-only buttons show their icons at full size @phone', async ({ page }) => {
+  await mockSupabase(page);
+  await page.goto('/');
+  await expect(page.getByRole('heading', { name: HOME_GREETING })).toBeVisible();
+  const sizes = await page.evaluate(() =>
+    [...document.querySelectorAll('button')]
+      .filter((b) => !b.textContent?.trim() && b.querySelector('svg') && b.offsetParent)
+      .map((b) => ({ label: b.getAttribute('aria-label'), px: Math.round(b.querySelector('svg')!.getBoundingClientRect().width) })),
+  );
+  expect(sizes.length).toBeGreaterThan(0);
+  expect(sizes.filter((s) => s.px < 14)).toEqual([]);
+});

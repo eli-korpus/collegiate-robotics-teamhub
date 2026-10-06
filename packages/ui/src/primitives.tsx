@@ -13,10 +13,13 @@ const variants: Record<Variant, string> = {
   danger: 'bg-danger text-white hover:brightness-110 shadow-sm',
 };
 const sizes: Record<Size, string> = {
-  sm: 'h-8 px-2.5 text-[13px] gap-1.5',
-  md: 'h-9 px-3.5 text-sm gap-2',
-  lg: 'h-11 px-5 text-[15px] gap-2',
+  sm: 'h-8 text-[13px] gap-1.5',
+  md: 'h-9 text-sm gap-2',
+  lg: 'h-11 text-[15px] gap-2',
 };
+// Padding is separate so a caller's px-… (icon buttons use px-0) actually applies: cn() doesn't merge classes, and
+// with both present the stylesheet order decided, which squeezed icons to 8px.
+const padding: Record<Size, string> = { sm: 'px-2.5', md: 'px-3.5', lg: 'px-5' };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -36,9 +39,10 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
       data-variant={variant}
       disabled={disabled || loading}
       className={cn(
-        'inline-flex items-center justify-center rounded-md font-medium whitespace-nowrap transition-colors duration-150 disabled:opacity-50 select-none',
+        'inline-flex items-center justify-center rounded-md font-medium whitespace-nowrap transition-colors duration-150 disabled:opacity-50 select-none [&_svg]:shrink-0',
         variants[variant],
         sizes[size],
+        !/(^|\s)px-/.test(className ?? '') && padding[size],
         className,
       )}
       {...rest}
@@ -450,9 +454,10 @@ export function Divider({ className }: { className?: string }) {
 /** Classes for a link styled as a button (e.g. <Link className={buttonClass('primary')}>). */
 export function buttonClass(variant: Variant = 'secondary', size: Size = 'md', extra?: string): string {
   return cn(
-    'inline-flex items-center justify-center rounded-md font-medium whitespace-nowrap transition-colors duration-150 select-none',
+    'inline-flex items-center justify-center rounded-md font-medium whitespace-nowrap transition-colors duration-150 select-none [&_svg]:shrink-0',
     variants[variant],
     sizes[size],
+    !/(^|\s)px-/.test(extra ?? '') && padding[size],
     extra,
   );
 }

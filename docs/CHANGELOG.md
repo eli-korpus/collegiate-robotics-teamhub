@@ -13,6 +13,7 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+## [1.0.5] - 2026-10-06
 ### Added
 
 - A welcome tour of your dashboard: on someone's first visit it walks through the tabs your team chose (grouped like

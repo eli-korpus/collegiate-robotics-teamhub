@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { fieldLevel, type FieldLevel } from '@teamhub/config-schema/util';
 import { Link } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Activity, ClipboardList, Link2, UserPlus } from 'lucide-react';
@@ -7,6 +8,7 @@ import {
   friendlyError,
   isMultiTeam,
   runtime,
+  canWith,
   useCan,
   TOOL_SLOT_LABELS,
   useSlotLinks,
@@ -26,52 +28,89 @@ export interface ProfileFieldDef {
   /** `multiselect` keeps several choices as "A, B" (Subteam always allows several). */
   type: 'text' | 'select' | 'multiselect';
   options: string[];
+  /** Not "everyone": only some people can see it (see level). */
   private: boolean;
+  /** Who can see it: everyone in the program, the team's leaders (captains, mentors) or mentors only. */
+  level: FieldLevel;
 }
 
-/** Config fields + simple fields added later in-app (never private, spec §12.2). */
+export type { FieldLevel };
+export const LEVEL_NOTE: Record<FieldLevel, string> = {
+  everyone: 'Visible to your program',
+  leaders: 'Only you, your captains and mentors',
+  mentors: 'Only you and mentors',
+};
+
+/** Config fields + simple fields added later in-app (visible to everyone, spec §12.2). */
 export function useProfileFields(): ProfileFieldDef[] {
   const s = useSettingsRow();
   return useMemo(() => {
-    const base = runtime().config.profileFields.map((f) => ({ ...f, options: f.options ?? [] }));
-    const extra = (s.data?.extra_profile_fields ?? []).filter((f) => !base.some((b) => b.id === f.id)).map((f) => ({ ...f, options: f.options ?? [], private: false }));
+    const base = runtime().config.profileFields.map((f) => {
+      const level = fieldLevel(f);
+      return { id: f.id, label: f.label, type: f.type, options: f.options ?? [], level, private: level !== 'everyone' };
+    });
+    const extra = (s.data?.extra_profile_fields ?? [])
+      .filter((f) => !base.some((b) => b.id === f.id))
+      .map((f) => ({ ...f, options: f.options ?? [], level: 'everyone' as const, private: false }));
     return [...base, ...extra];
   }, [s.data]);
 }
 
-export function useMyPrivate() {
+/** Someone's fields that not everyone can see: team-only (leaders) and mentors-only. Empty where you can't see them. */
+export interface HiddenValues {
+  leaders: Record<string, string>;
+  mentors: Record<string, string>;
+}
+export function useHiddenValues(userId: string) {
   const sb = useSupabase();
-  const me = useMe();
   return useQuery({
-    queryKey: ['core', 'private', me.id],
-    queryFn: async () => {
-      const { data } = await sb.from('profiles_private').select('data').eq('user_id', me.id).maybeSingle();
-      return (data?.data ?? {}) as Record<string, string>;
+    queryKey: ['core', 'private', userId],
+    queryFn: async (): Promise<HiddenValues> => {
+      const [l, p] = await Promise.all([
+        sb.from('profiles_leaders').select('data').eq('user_id', userId).maybeSingle(),
+        sb.from('profiles_private').select('data').eq('user_id', userId).maybeSingle(),
+      ]);
+      return { leaders: (l.data?.data ?? {}) as Record<string, string>, mentors: (p.data?.data ?? {}) as Record<string, string> };
     },
   });
 }
+export const useMyPrivate = () => useHiddenValues(useMe().id);
 
-/** Saves profile field values to the right place (details vs. private), merging with existing values. */
+/** A field's value from wherever its level keeps it. */
+export function fieldValue(f: ProfileFieldDef, details: Record<string, string> | null | undefined, hidden: HiddenValues | null | undefined): string {
+  return (f.level === 'everyone' ? details?.[f.id] : f.level === 'leaders' ? hidden?.leaders[f.id] : hidden?.mentors[f.id]) ?? '';
+}
+
+/** Whether the viewer can see (and edit) this level of someone's profile: same rules as the database. */
+export function canSeeLevel(me: ReturnType<typeof useMe>, level: FieldLevel, person: { id: string; memberships: { team_id: string }[] }): boolean {
+  if (level === 'everyone' || person.id === me.id || me.isAdmin) return true;
+  const perm = level === 'leaders' ? 'people.view_team_info' : 'people.view_private';
+  return person.memberships.some((m) => canWith(me, perm, m.team_id));
+}
+
+/** Saves profile field values to the right place for each field's level, merging with existing values. */
 export async function saveProfileFields(
   sb: ReturnType<typeof useSupabase>,
   userId: string,
   fields: ProfileFieldDef[],
   values: Record<string, string>,
-  current: { details: Record<string, string>; private: Record<string, string> },
+  current: { details: Record<string, string>; hidden: HiddenValues },
 ) {
-  const pub: Record<string, string> = {};
-  const priv: Record<string, string> = {};
+  const by: Record<FieldLevel, Record<string, string>> = { everyone: {}, leaders: {}, mentors: {} };
   for (const [k, v] of Object.entries(values)) {
     const f = fields.find((x) => x.id === k);
-    if (!f) continue;
-    (f.private ? priv : pub)[k] = v;
+    if (f) by[f.level][k] = v;
   }
-  if (Object.keys(pub).length) {
-    const { error } = await sb.from('profiles').update({ details: { ...current.details, ...pub } }).eq('id', userId);
+  if (Object.keys(by.everyone).length) {
+    const { error } = await sb.from('profiles').update({ details: { ...current.details, ...by.everyone } }).eq('id', userId);
     if (error) throw error;
   }
-  if (Object.keys(priv).length) {
-    const { error } = await sb.from('profiles_private').upsert({ user_id: userId, data: { ...current.private, ...priv } });
+  if (Object.keys(by.leaders).length) {
+    const { error } = await sb.from('profiles_leaders').upsert({ user_id: userId, data: { ...current.hidden.leaders, ...by.leaders } });
+    if (error) throw error;
+  }
+  if (Object.keys(by.mentors).length) {
+    const { error } = await sb.from('profiles_private').upsert({ user_id: userId, data: { ...current.hidden.mentors, ...by.mentors } });
     if (error) throw error;
   }
 }
@@ -157,7 +196,7 @@ function RequestInfoCards() {
   const [values, setValues] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const myTeams = new Set(me.memberships.filter((m) => m.status === 'active').map((m) => m.team_id));
-  const has = (f: string) => !!(me.profile.details?.[f] || priv.data?.[f]);
+  const has = (id: string) => { const f = fields.find((x) => x.id === id); return !!(f ? fieldValue(f, me.profile.details, priv.data) : me.profile.details?.[id]); };
   const open = (reqs.data ?? []).filter(
     (r) => (!r.closes_at || new Date(r.closes_at) > new Date()) && (!r.team_id || myTeams.has(r.team_id)) && r.fields.some((f) => !has(f)),
   );
@@ -173,7 +212,7 @@ function RequestInfoCards() {
           e.preventDefault();
           setBusy(true);
           try {
-            await saveProfileFields(sb, me.id, fields, values, { details: me.profile.details ?? {}, private: priv.data ?? {} });
+            await saveProfileFields(sb, me.id, fields, values, { details: me.profile.details ?? {}, hidden: priv.data ?? { leaders: {}, mentors: {} } });
             toast.success('Saved to your profile');
             qc.invalidateQueries({ queryKey: ['core'] });
           } catch (err) {

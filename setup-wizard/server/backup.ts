@@ -14,7 +14,7 @@ import { projectUrl, type Mgmt } from './mgmt';
 
 export const BACKUP_ROOT = process.env.TEAMHUB_BACKUPS ?? join(homedir(), 'TeamHub Backups');
 
-export const CORE_TABLES = ['teamhub_settings', 'profiles', 'profiles_private', 'memberships', 'positions', 'position_holders', 'subteams', 'links', 'info_requests', 'comments'];
+export const CORE_TABLES = ['teamhub_settings', 'profiles', 'profiles_private', 'profiles_leaders', 'memberships', 'positions', 'position_holders', 'subteams', 'links', 'info_requests', 'comments'];
 
 export interface ExportResult {
   path: string;

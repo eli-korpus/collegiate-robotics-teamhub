@@ -222,6 +222,7 @@
     {
       "id": "shirt_size",
       "label": "Shirt size",
+      "visibility": "leaders",
       "type": "select",
       "options": [
         "XS",

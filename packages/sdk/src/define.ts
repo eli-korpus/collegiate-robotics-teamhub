@@ -116,6 +116,7 @@ export const corePermissions = definePermissions('people', {
   approve_leaders: { label: 'Approve new Captains and Mentors', default: ['mentor'], simple: true },
   assign_positions: { label: 'Assign positions to people', default: ['mentor'], simple: true },
   assign_badges: { label: 'Assign badge-only positions', default: ['mentor'] },
+  view_team_info: { label: 'See team-only profile fields (shirt sizes, dietary needs)', default: ['captain', 'mentor'] },
   view_private: { label: 'See private profile fields (emergency contacts)', default: ['mentor'] },
   reset_password: { label: 'Generate password reset links', default: ['mentor'] },
   deactivate: { label: 'Deactivate or remove people', default: ['mentor'] },

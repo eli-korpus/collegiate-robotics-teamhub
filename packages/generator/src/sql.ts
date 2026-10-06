@@ -1,4 +1,5 @@
 import type { PermissionGrant } from '@teamhub/config-schema';
+import { fieldLevel } from '@teamhub/config-schema/util';
 import type { BucketDef } from '@teamhub/sdk/define';
 import type { Resolved } from './resolve';
 
@@ -189,6 +190,8 @@ export function configSyncSql(r: Resolved): string {
     `delete from positions where source = 'config' and id not in (${c.positions.map((p) => lit(p.id)).join(', ') || "''"});`,
   );
   lines.push(`insert into teamhub_settings (id, season_label) values (1, ${lit(c.season)}) on conflict (id) do nothing;`);
+  // Profile answers live where each field's visibility says (moves them when a field's level changes).
+  for (const f of c.profileFields) lines.push(`select teamhub_place_profile_field(${lit(f.id)}, ${lit(fieldLevel(f))});`);
   if (c.toolLinks.length) {
     const vals = c.toolLinks
       // A team's own link only when that team exists (and the program really has several teams).

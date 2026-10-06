@@ -23,7 +23,7 @@ The file is validated by `packages/config-schema` (zod) every time the app is ge
 | `modules` | object | Tabs, keyed by id: `{ "state": "active" \| "dormant", "settings": { … } }`. Missing = not installed. See [tabs/README.md](tabs/README.md). |
 | `subteams` | array | `{ id, name }`: one list used by People, Tasks, Notebook and Skills. |
 | `positions` | array | `{ id: "pos_…", name, teamId (null = program-wide), grantsPermissions }`. |
-| `profileFields` | array | Extra profile fields: `{ id, label, type: "text" \| "select", options, private }`. Private fields are visible only to the person and mentors. A field with id `shirt_size` is used by Merch & Orders. |
+| `profileFields` | array | Extra profile fields: `{ id, label, type: "text" \| "select" \| "multiselect", options, visibility }`. `visibility` is who can see the answers: `"everyone"` in the program (default), `"leaders"` (the person, captains and mentors on their team, and admins; e.g. shirt sizes) or `"mentors"` (the person, mentors on their team, and admins; e.g. emergency contacts). The database enforces it, and changing it moves existing answers when you apply. Older files may say `"private": true`, which means `"mentors"`. A field with id `shirt_size` is used by Merch & Orders. |
 | `permissions` | object | Overrides of the default permission matrix: `{ "tasks.assign": { "types": ["captain", "mentor"], "positions": ["pos_lead_programmer"] } }`. Anything missing uses the tab's defaults. Admins always have every permission. |
 | `home` | object | `defaults.member/captain/mentor`: ordered widget ids for each profile type's Home page. People can still reorder or hide their own. |
 | `nav` | object | `order`: optional explicit sidebar order of tab ids. |

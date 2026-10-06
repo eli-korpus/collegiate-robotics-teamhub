@@ -17,7 +17,7 @@
   "profileFields": [
     { "id": "grade", "label": "Grade", "type": "select", "options": ["9", "10", "11", "12"] },
     { "id": "subteam", "label": "Subteam", "type": "select", "options": ["Build", "Programming", "CAD", "Outreach"] },
-    { "id": "shirt_size", "label": "Shirt size", "type": "select", "options": ["XS", "S", "M", "L", "XL", "XXL"] },
+    { "id": "shirt_size", "label": "Shirt size", "visibility": "leaders", "type": "select", "options": ["XS", "S", "M", "L", "XL", "XXL"] },
     { "id": "emergency_contact", "label": "Emergency contact", "type": "text", "private": true }
   ],
   "toolLinks": [

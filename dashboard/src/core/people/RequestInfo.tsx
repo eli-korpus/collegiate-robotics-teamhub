@@ -106,7 +106,7 @@ export function RequestInfo() {
                 onChange={(v) => setPicked(v ? [...picked, f.id] : picked.filter((x) => x !== f.id))}
                 label={
                   <span className="inline-flex items-center gap-1.5">
-                    {f.label} {f.private && <Lock className="size-3 text-warning" aria-label="private" />}
+                    {f.label} {f.private && <Lock className="size-3 text-warning" aria-label={f.level === 'leaders' ? 'Team leaders only' : 'Mentors only'} />}
                   </span>
                 }
               />
@@ -120,7 +120,7 @@ export function RequestInfo() {
           </Field>
           <TeamScopePicker value={team} onChange={setTeam} perm="people.request_info" label="Ask" />
           <VisibilityNote locked={picked.some((p) => fields.find((f) => f.id === p)?.private)}>
-            Each answer keeps its field’s privacy: private fields are visible only to the person and mentors.
+            Each answer keeps its field’s privacy. Fields with a lock are seen only by the person and their captains and mentors (or only mentors), never the whole program.
           </VisibilityNote>
         </div>
       </Dialog>

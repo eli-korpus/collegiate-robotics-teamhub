@@ -107,3 +107,9 @@ export function isUpstreamRemote(remote: string | null | undefined): boolean {
   const up = TEAMHUB_UPSTREAM_REPO.toLowerCase();
   return r.endsWith(`github.com/${up}`) || r.endsWith(`github.com:${up}`);
 }
+
+export type FieldLevel = 'everyone' | 'leaders' | 'mentors';
+/** Who can see a profile field. Older configs only say private: true, which meant mentors only. */
+export const fieldLevel = (f: { visibility?: FieldLevel | null; private?: boolean }): FieldLevel => f.visibility ?? (f.private ? 'mentors' : 'everyone');
+/** Where each level's answers are stored: on the profile, or in a table only some people can read. */
+export const FIELD_TABLE = { everyone: 'profiles', leaders: 'profiles_leaders', mentors: 'profiles_private' } as const;

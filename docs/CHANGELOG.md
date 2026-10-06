@@ -19,6 +19,10 @@ How to update your dashboard: [docs/updating.md](updating.md).
   People filter finds someone in any of their subteams.
 - An **Edit** button on someone's profile (admins, and people who manage that team) opens one window for their name,
   teams and roles, and profile fields such as subteams and shirt size.
+- Profile fields have three visibility levels, chosen per field in the setup wizard: the whole program, team leaders
+  (the person, their captains and mentors, admins) or mentors only. Shirt size and dietary needs now default to team
+  leaders, so other students can't see them. Captains and mentors get the new "See team-only profile fields"
+  permission. Changing a field's level moves the existing answers when you apply it (database update required).
 
 ### Fixed
 

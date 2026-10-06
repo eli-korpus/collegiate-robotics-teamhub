@@ -1,12 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Lock, Plus, Trash2 } from 'lucide-react';
-import { normalizeEmailDomain, positionIdFor, slugify, type PermissionGrant, type ProfileType } from '@teamhub/config-schema';
+import { Plus, Trash2 } from 'lucide-react';
+import { fieldLevel, normalizeEmailDomain, positionIdFor, slugify, type FieldLevel, type PermissionGrant, type ProfileType } from '@teamhub/config-schema';
 import type { PermissionDefs } from '@teamhub/sdk/define';
-import { Badge, Button, Checkbox, IconButton, Input, PendingAddHint, RemovableTag, Segmented, Spinner, submitOnBlur } from '@teamhub/ui';
+import { Button, Checkbox, IconButton, Input, PendingAddHint, RemovableTag, Segmented, Select, Spinner, submitOnBlur } from '@teamhub/ui';
 import { api } from '../api';
 import { Section, StepShell, Why } from '../components';
 import { SUGGESTED_FIELDS, hasSeveralTeams, useDraft } from '../draft';
 import type { StepProps } from './basics';
+
+const LEVELS: { value: FieldLevel; label: string }[] = [
+  { value: 'everyone', label: 'Everyone in the program' },
+  { value: 'leaders', label: 'Only the person, captains and mentors' },
+  { value: 'mentors', label: 'Only the person and mentors' },
+];
 
 const GENERIC_POSITIONS = ['Lead Programmer', 'Drive Coach', 'Driver 1', 'Driver 2', 'Safety Captain'];
 
@@ -158,12 +164,16 @@ export function People({ onNext, onBack }: StepProps) {
         <p className="text-[12.5px] text-muted">Mentors can also create badge-only positions later in the dashboard. Proven abilities (“Certified driver”) belong in Skills & Training.</p>
       </Section>
 
-      <Section title="Profile fields" description="Optional extra info on each profile. Mentors can ask for missing values with People > Request info: the safe way to collect personal info.">
+      <Section
+        title="Profile fields"
+        description="Optional extra info on each profile, and who can see it. Admins can always see everything. Mentors can ask for missing values with People > Request info: the safe way to collect personal info."
+      >
         <div className="space-y-2">
           {SUGGESTED_FIELDS.map((f) => {
-            const on = c.profileFields.some((x) => x.id === f.id);
+            const cur = c.profileFields.find((x) => x.id === f.id);
+            const on = !!cur;
             return (
-              <div key={f.id} className="flex items-center gap-3">
+              <div key={f.id} className="flex min-h-9 flex-wrap items-center gap-x-3 gap-y-1.5">
                 <Checkbox
                   checked={on}
                   onChange={(v) =>
@@ -173,16 +183,33 @@ export function People({ onNext, onBack }: StepProps) {
                     })
                   }
                   label={f.label}
+                  className="w-44"
                 />
-                {f.private && (
-                  <Badge tone="warning">
-                    <Lock className="size-3" /> Only the person and mentors
-                  </Badge>
+                {cur && (
+                  <Select
+                    aria-label={`Who can see ${f.label.toLowerCase()}`}
+                    className="w-auto min-w-0 sm:w-72"
+                    value={fieldLevel(cur)}
+                    onChange={(e) =>
+                      update((x) => {
+                        const y = x.profileFields.find((z) => z.id === f.id)!;
+                        y.visibility = e.target.value as FieldLevel;
+                        y.private = y.visibility === 'mentors';
+                      })
+                    }
+                  >
+                    {LEVELS.map((l) => (
+                      <option key={l.value} value={l.value}>
+                        {l.label}
+                      </option>
+                    ))}
+                  </Select>
                 )}
               </div>
             );
           })}
         </div>
+        <p className="text-[12.5px] text-muted">Changing who can see a field later moves everyone's answers to match when you apply the change.</p>
         <p className="text-[12.5px] text-muted">TeamHub never asks for birthdays, addresses or phone numbers by default. Keep personal data to what you really need (FIRST Youth Protection).</p>
       </Section>
     </StepShell>

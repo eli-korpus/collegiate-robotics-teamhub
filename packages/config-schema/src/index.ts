@@ -45,7 +45,10 @@ export const ProfileFieldSchema = z.object({
   label: z.string().min(1).max(60),
   type: z.enum(['text', 'select', 'multiselect']),
   options: z.array(z.string()).default([]),
+  /** Older setting: true = mentors only. Use `visibility`. */
   private: z.boolean().default(false),
+  /** Who can see it: everyone in the program, team leaders (captains and mentors) or mentors only. */
+  visibility: z.enum(['everyone', 'leaders', 'mentors']).optional(),
 });
 export type ProfileFieldConfig = z.infer<typeof ProfileFieldSchema>;
 

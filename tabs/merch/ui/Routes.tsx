@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { FIELD_TABLE, fieldLevel } from '@teamhub/config-schema/util';
 import { Download, Minus, Plus, Shirt, Trash2, X } from 'lucide-react';
 import {
   Avatar,
@@ -138,14 +139,39 @@ function sizeField() {
   return runtime().config.profileFields.find((f) => f.id === 'shirt_size' || /shirt/i.test(f.label)) ?? null;
 }
 
+/** Your own answers in the size field's storage (on your profile, or in the team-only or mentors-only table). */
+function useMySizeStore() {
+  const sb = useSupabase();
+  const me = useMe();
+  const field = sizeField();
+  const level = field ? fieldLevel(field) : 'everyone';
+  const q = useQuery({
+    queryKey: ['core', 'private', me.id, 'merch-size'],
+    enabled: !!field && level !== 'everyone',
+    queryFn: async () => {
+      const { data } = await sb.from(FIELD_TABLE[level]).select('data').eq('user_id', me.id).maybeSingle();
+      return (data?.data ?? {}) as Record<string, string>;
+    },
+  });
+  const current = level === 'everyone' ? (me.profile.details ?? {}) : (q.data ?? {});
+  const save = async (size: string) => {
+    const next = { ...current, [field!.id]: size };
+    return level === 'everyone'
+      ? sb.from('profiles').update({ details: next }).eq('id', me.id)
+      : sb.from(FIELD_TABLE[level]).upsert({ user_id: me.id, data: next });
+  };
+  return { field, size: field ? (current[field.id] ?? '') : '', loading: level !== 'everyone' && q.isLoading, save };
+}
+
 function MyOrder({ drive: d, order }: { drive: Drive; order: Order | null }) {
   const sb = useSupabase();
   const me = useMe();
   const { refreshMe } = useSession();
   const qc = useQueryClient();
   const confirm = useConfirm();
-  const field = sizeField();
-  const profileSize = field && !field.private ? (me.profile.details?.[field.id] ?? '') : '';
+  const store = useMySizeStore();
+  const field = store.field;
+  const profileSize = store.size;
   const [lines, setLines] = useState<Line[]>(order?.lines ?? []);
   const [askSize, setAskSize] = useState('');
   const open = isOpen(d);
@@ -155,13 +181,14 @@ function MyOrder({ drive: d, order }: { drive: Drive; order: Order | null }) {
     const rest = lines.filter((l) => !(l.item === item && l.size === size));
     setLines(n > 0 ? [...rest, { item, size, qty: Math.min(20, n) }] : rest);
   };
-  const needsSize = !!field && !field.private && !profileSize && d.items.some((i) => i.sizes.length);
+  const needsSize = !!field && !store.loading && !profileSize && d.items.some((i) => i.sizes.length);
   const save = async () => {
     if (!validateRequired()) return;
     if (needsSize && askSize) {
-      const { error } = await sb.from('profiles').update({ details: { ...(me.profile.details ?? {}), [field!.id]: askSize } }).eq('id', me.id);
+      const { error } = await store.save(askSize);
       if (error) return toast.error(friendlyError(error));
       refreshMe();
+      qc.invalidateQueries({ queryKey: ['core', 'private', me.id] });
     }
     const { error } = order ? await sb.from('mer_orders').update({ lines }).eq('id', order.id) : await sb.from('mer_orders').insert({ drive_id: d.id, user_id: me.id, lines });
     if (error) return toast.error(friendlyError(error));

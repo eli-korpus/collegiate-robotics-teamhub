@@ -97,12 +97,11 @@ export function RequestInfo() {
         }
       >
         <div className="space-y-4">
-          <div className="space-y-1.5">
-            <p className="text-[13px] font-medium">Which fields?</p>
+          <fieldset className="flex flex-col gap-2">
+            <legend className="mb-1 text-[13px] font-medium">Which fields?</legend>
             {fields.map((f) => (
               <Checkbox
                 key={f.id}
-                className="flex"
                 checked={picked.includes(f.id)}
                 onChange={(v) => setPicked(v ? [...picked, f.id] : picked.filter((x) => x !== f.id))}
                 label={
@@ -112,7 +111,7 @@ export function RequestInfo() {
                 }
               />
             ))}
-          </div>
+          </fieldset>
           <Field label="Message" optional>
             {(id) => <Textarea id={id} rows={2} maxLength={500} value={message} onChange={(e) => setMessage(e.target.value)} placeholder="e.g. Ordering team shirts on Friday" />}
           </Field>

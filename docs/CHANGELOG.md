@@ -13,6 +13,11 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Fixed
+
+- Checkbox lists ran together on one line: People > Request info ("Which fields?"), Skills ("Learn these first"),
+  and the setup wizard's New Season and Update screens now show one item per line.
+
 ### Changed
 
 - The browser-tab icon (favicon) made from your logo has rounded corners: a solid square logo fills it edge to

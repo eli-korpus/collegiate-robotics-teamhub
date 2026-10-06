@@ -262,6 +262,24 @@ test.describe('admins edit people', () => {
     await expect(page.getByLabel('Team leaders only').first()).toBeVisible();
   });
 
+  test('mentors are not asked for a grade or shirt size; members are', async ({ page }) => {
+    const { config } = loadGenerated();
+    const now = new Date().toISOString();
+    const as = (type: string) => ({
+      profiles: [{ id: ME, display_name: 'Sam Rivera', avatar_path: null, is_admin: false, status: 'active', details: {}, home_prefs: null, created_at: now }],
+      memberships: [{ user_id: ME, team_id: config.teams[0].id, type, status: 'active', requested_type: null, note: null, created_at: now }],
+    });
+    await mockSupabase(page, { tables: as('mentor') });
+    await page.goto('/me');
+    await expect(page.getByRole('heading', { name: 'My profile' })).toBeVisible();
+    await expect(page.getByRole('group', { name: 'Grade' })).toHaveCount(0);
+    await expect(page.getByRole('group', { name: 'Shirt size' })).toHaveCount(0);
+    await mockSupabase(page, { tables: as('member') });
+    await page.goto('/me');
+    await expect(page.getByRole('group', { name: 'Grade' })).toBeVisible();
+    await expect(page.getByRole('group', { name: 'Shirt size' })).toBeVisible();
+  });
+
   test('admins add a profile field without the setup wizard', async ({ page }) => {
     const errors = watchErrors(page);
     let saved: { extra_profile_fields: { id: string; label: string; type: string; options: string[]; visibility: string }[] } | null = null;

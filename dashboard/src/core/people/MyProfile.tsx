@@ -1,17 +1,19 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Download, Trash2, UserPlus } from 'lucide-react';
 import { Avatar, Button, Card, CardHeader, Field, Input, PageHeader, Select, Textarea, VisibilityNote, downloadText, toast, useConfirm, validateRequired } from '@teamhub/ui';
 import { friendlyError, isMultiTeam, runtime, useMe, usePeople, useSupabase, Upload, uploadFile } from '@teamhub/sdk';
-import { LEVEL_NOTE, ProfileFieldInput, fieldValue, saveProfileFields, useMyPrivate, useProfileFields } from './profileFields';
+import { LEVEL_NOTE, ProfileFieldInput, askedFields, fieldValue, saveProfileFields, useMyPrivate, useProfileFields } from './profileFields';
 
 export default function MyProfile() {
   const sb = useSupabase();
   const me = useMe();
   const qc = useQueryClient();
   const confirm = useConfirm();
-  const fields = useProfileFields();
   const priv = useMyPrivate();
+  const allFields = useProfileFields();
+  // Fields you're asked for, plus any you've already answered (mentors aren't asked for shirt sizes, for example).
+  const fields = useMemo(() => allFields.filter((f) => askedFields([f], me).length || fieldValue(f, me.profile.details, priv.data)), [allFields, me, priv.data]);
   const people = usePeople();
   const [name, setName] = useState(me.profile.display_name);
   const [values, setValues] = useState<Record<string, string>>({});

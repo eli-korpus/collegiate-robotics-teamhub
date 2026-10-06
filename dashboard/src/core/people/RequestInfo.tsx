@@ -2,8 +2,8 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardList, Lock, Plus, Trash2 } from 'lucide-react';
 import { Banner, Button, Card, Checkbox, Dialog, EmptyState, Field, IconButton, Input, RelativeTime, Textarea, VisibilityNote, toast, useConfirm } from '@teamhub/ui';
-import { friendlyError, useMe, useSupabase, Person, TeamBadge, TeamScopePicker } from '@teamhub/sdk';
-import { useProfileFields } from './profileFields';
+import { friendlyError, useMe, usePeople, useSupabase, Person, TeamBadge, TeamScopePicker } from '@teamhub/sdk';
+import { askedFields, useProfileFields } from './profileFields';
 
 interface InfoRequest {
   id: string;
@@ -138,8 +138,18 @@ function RequestCard({ r, labels, onDelete, canDelete }: { r: InfoRequest; label
       return data as { user_id: string; missing: string[] }[];
     },
   });
-  const missing = (status.data ?? []).filter((s) => s.missing.length);
-  const total = status.data?.length ?? 0;
+  const people = usePeople();
+  const fields = useProfileFields();
+  // Only people who are asked for these fields count (mentors aren't asked for shirt sizes, for example).
+  const rows = (status.data ?? [])
+    .map((s) => {
+      const p = people.data?.get(s.user_id);
+      const asked = p ? new Set(askedFields(fields, p).map((f) => f.id)) : null;
+      return { ...s, asked: asked ? r.fields.some((f) => asked.has(f) || !fields.some((x) => x.id === f)) : true, missing: asked ? s.missing.filter((f) => asked.has(f) || !fields.some((x) => x.id === f)) : s.missing };
+    })
+    .filter((s) => s.asked);
+  const missing = rows.filter((s) => s.missing.length);
+  const total = rows.length;
   return (
     <Card className="p-4">
       <div className="flex items-start gap-3">

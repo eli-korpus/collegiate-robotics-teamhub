@@ -206,6 +206,10 @@
         "10",
         "11",
         "12"
+      ],
+      "askTypes": [
+        "member",
+        "captain"
       ]
     },
     {
@@ -217,6 +221,10 @@
         "Programming",
         "CAD",
         "Outreach"
+      ],
+      "askTypes": [
+        "member",
+        "captain"
       ]
     },
     {
@@ -231,13 +239,21 @@
         "L",
         "XL",
         "XXL"
+      ],
+      "askTypes": [
+        "member",
+        "captain"
       ]
     },
     {
       "id": "emergency_contact",
       "label": "Emergency contact",
       "type": "text",
-      "private": true
+      "private": true,
+      "askTypes": [
+        "member",
+        "captain"
+      ]
     }
   ],
   "toolLinks": [

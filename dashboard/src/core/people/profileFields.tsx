@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ClipboardList } from 'lucide-react';
-import { fieldLevel, type FieldLevel } from '@teamhub/config-schema/util';
+import { asksRoles, fieldLevel, type FieldLevel } from '@teamhub/config-schema/util';
 import { Button, Card, CardHeader, Input, Select, VisibilityNote, toast } from '@teamhub/ui';
 import { canWith, friendlyError, PersonName, runtime, useMe, useSettingsRow, useSupabase } from '@teamhub/sdk';
 
@@ -15,7 +15,14 @@ export interface ProfileFieldDef {
   private: boolean;
   /** Who can see it: everyone in the program, the team's leaders (captains, mentors) or mentors only. */
   level: FieldLevel;
+  /** Who is asked to fill it in (empty = everyone). */
+  askTypes: string[];
 }
+
+/** Someone's roles on their active teams (member, captain, mentor). */
+export const rolesOf = (person: { memberships: { type: string; status?: string }[] }) => [...new Set(person.memberships.filter((m) => !m.status || m.status === 'active').map((m) => m.type))];
+/** Fields this person is asked to fill in. */
+export const askedFields = (fields: ProfileFieldDef[], person: { memberships: { type: string; status?: string }[] }) => fields.filter((f) => asksRoles(f, rolesOf(person)));
 
 export type { FieldLevel };
 export const LEVEL_NOTE: Record<FieldLevel, string> = {
@@ -30,13 +37,13 @@ export function useProfileFields(): ProfileFieldDef[] {
   return useMemo(() => {
     const base = runtime().config.profileFields.map((f) => {
       const level = fieldLevel(f);
-      return { id: f.id, label: f.label, type: f.type, options: f.options ?? [], level, private: level !== 'everyone' };
+      return { id: f.id, label: f.label, type: f.type, options: f.options ?? [], level, private: level !== 'everyone', askTypes: f.askTypes ?? [] };
     });
     const extra = (s.data?.extra_profile_fields ?? [])
       .filter((f) => !base.some((b) => b.id === f.id))
       .map((f) => {
         const level = fieldLevel(f);
-        return { id: f.id, label: f.label, type: f.type, options: f.options ?? [], level, private: level !== 'everyone' };
+        return { id: f.id, label: f.label, type: f.type, options: f.options ?? [], level, private: level !== 'everyone', askTypes: f.askTypes ?? [] };
       });
     return [...base, ...extra];
   }, [s.data]);
@@ -166,9 +173,11 @@ export function RequestInfoForm({ requests }: { requests: InfoRequest[] }) {
     const f = fields.find((x) => x.id === id);
     return !!(f ? fieldValue(f, me.profile.details, priv.data) : me.profile.details?.[id]);
   };
-  const open = requests.filter((r) => r.fields.some((f) => !has(f)));
+  // Only fields this person is asked for (mentors aren't asked for shirt sizes, for example).
+  const asked = new Set(askedFields(fields, me).map((f) => f.id));
+  const open = requests.filter((r) => r.fields.some((f) => asked.has(f) && !has(f)));
   if (!open.length || priv.isLoading) return null;
-  const missing = [...new Set(open.flatMap((r) => r.fields.filter((f) => !has(f))))].map((id) => fields.find((f) => f.id === id)).filter(Boolean) as ProfileFieldDef[];
+  const missing = [...new Set(open.flatMap((r) => r.fields.filter((f) => asked.has(f) && !has(f))))].map((id) => fields.find((f) => f.id === id)).filter(Boolean) as ProfileFieldDef[];
   if (!missing.length) return null;
   return (
     <Card className="border-warning/40">

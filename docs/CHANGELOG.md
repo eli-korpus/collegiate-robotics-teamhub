@@ -13,6 +13,12 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Added
+
+- Profile fields can be asked of members, captains and/or mentors only (setup wizard > People, or Admin > Profile fields
+  for fields added there). By default mentors aren't asked for a grade, subteam, shirt size or emergency contact: those
+  fields don't appear on their profile form, Request info doesn't ask them, and they don't count as "missing".
+
 ### Changed
 
 - Setup wizard: every action that changes your database or website (building or updating the database, test builds,

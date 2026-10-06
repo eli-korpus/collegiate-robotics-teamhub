@@ -49,6 +49,8 @@ export const ProfileFieldSchema = z.object({
   private: z.boolean().default(false),
   /** Who can see it: everyone in the program, team leaders (captains and mentors) or mentors only. */
   visibility: z.enum(['everyone', 'leaders', 'mentors']).optional(),
+  /** Who is asked to fill it in (e.g. members and captains for shirt sizes). Missing = everyone. */
+  askTypes: z.array(ProfileTypeSchema).optional(),
 });
 export type ProfileFieldConfig = z.infer<typeof ProfileFieldSchema>;
 

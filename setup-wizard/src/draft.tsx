@@ -2,12 +2,14 @@ import { createContext, useCallback, useContext, useEffect, useRef, useState, ty
 import { defaultSeasonLabel, type TeamhubConfig } from '@teamhub/config-schema';
 import { api, type Catalog, type Draft, type ServerState } from './api';
 
+/** Students only: mentors aren't asked for their grade, subteam, shirt size or an emergency contact. */
+const STUDENTS: ('member' | 'captain' | 'mentor')[] = ['member', 'captain'];
 export const SUGGESTED_FIELDS = [
-  { id: 'grade', label: 'Grade', type: 'select' as const, options: ['9', '10', '11', '12'], private: false },
-  { id: 'subteam', label: 'Subteam', type: 'multiselect' as const, options: [] as string[], private: false },
-  { id: 'shirt_size', label: 'Shirt size', type: 'select' as const, options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], private: false, visibility: 'leaders' as const },
+  { id: 'grade', label: 'Grade', type: 'select' as const, options: ['9', '10', '11', '12'], private: false, askTypes: STUDENTS },
+  { id: 'subteam', label: 'Subteam', type: 'multiselect' as const, options: [] as string[], private: false, askTypes: STUDENTS },
+  { id: 'shirt_size', label: 'Shirt size', type: 'select' as const, options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], private: false, visibility: 'leaders' as const, askTypes: STUDENTS },
   { id: 'dietary', label: 'Dietary needs', type: 'text' as const, options: [], private: false, visibility: 'leaders' as const },
-  { id: 'emergency_contact', label: 'Emergency contact', type: 'text' as const, options: [], private: true, visibility: 'mentors' as const },
+  { id: 'emergency_contact', label: 'Emergency contact', type: 'text' as const, options: [], private: true, visibility: 'mentors' as const, askTypes: STUDENTS },
 ];
 
 /** Per-team options only make sense with several teams: "several teams" chosen and at least two added. */

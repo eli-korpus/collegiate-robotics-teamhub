@@ -29,7 +29,7 @@ export function PurposeHint({ purpose, notFor, className, compact }: { purpose: 
   return (
     <div className={cn('rounded-md border border-border bg-bg-subtle/60 px-3 py-2.5 text-[12.5px]', className)}>
       <p className="flex items-start gap-1.5 text-fg">
-        <Info className="mt-0.5 size-3.5 shrink-0 text-muted" />
+        <Info className="mt-0.5 size-3.5 shrink-0" />
         <span>{purpose}</span>
       </p>
       {!!notFor.length && (

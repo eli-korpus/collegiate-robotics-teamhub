@@ -33,8 +33,8 @@ export function SplitView({
   if (wide) {
     return (
       <div className="flex h-full min-h-0">
-        <div className={cn('shrink-0 overflow-y-auto border-r border-border', listWidth)}>{list}</div>
-        <div className="min-w-0 flex-1 overflow-y-auto bg-surface">
+        <div className={cn('shrink-0 relative overflow-y-auto border-r border-border', listWidth)}>{list}</div>
+        <div className="min-w-0 flex-1 relative overflow-y-auto bg-surface">
           {detail ?? <div className="grid h-full place-items-center p-8 text-center text-[13.5px] text-faint">{empty ?? 'Select an item to see details'}</div>}
         </div>
       </div>
@@ -42,7 +42,7 @@ export function SplitView({
   }
   return (
     <>
-      <div className="h-full overflow-y-auto">{list}</div>
+      <div className="h-full relative overflow-y-auto">{list}</div>
       <Sheet open={!!detail} onOpenChange={(v) => !v && onCloseDetail()} title={detailTitle ?? 'Details'} width="w-[min(100vw,640px)]">
         {detail}
       </Sheet>
@@ -232,7 +232,7 @@ export function DataTable<T>({
     : rows;
   if (!rows.length && empty) return <>{empty}</>;
   return (
-    <div className={cn('overflow-x-auto rounded-lg border border-border bg-surface', className)}>
+    <div className={cn('relative overflow-x-auto rounded-lg border border-border bg-surface', className)}>
       <table className="w-full text-[13px]">
         <thead>
           <tr className="border-b border-border bg-bg-subtle/60 text-left">

@@ -43,7 +43,7 @@ export function AppShell({
           </header>
         )}
         {banner}
-        <main id="main" className="min-h-0 flex-1 overflow-y-auto">
+        <main id="main" className="min-h-0 flex-1 relative overflow-y-auto">
           {children}
         </main>
       </div>
@@ -99,7 +99,7 @@ export function SidebarItem({
       )}
       {...rest}
     >
-      {icon && <span className={cn('shrink-0 [&>svg]:size-[17px]', active ? 'text-accent' : 'text-muted')}>{icon}</span>}
+      {icon && <span className={cn('shrink-0 [&>svg]:size-[17px]', active && 'text-accent')}>{icon}</span>}
       <span className="min-w-0 flex-1 truncate text-left">{label}</span>
       {dot && <span className="size-1.5 rounded-full bg-accent" />}
       {!!count && <span className={cn('tabular text-[11.5px] font-medium', active ? 'text-accent' : 'text-faint')}>{count > 99 ? '99+' : count}</span>}

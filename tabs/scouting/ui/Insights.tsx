@@ -120,7 +120,7 @@ function Compare({ ctx, stats, teams, onClear }: { ctx: EventContext; stats: Ret
   return (
     <Card>
       <CardHeader title="Side by side" action={<button className="text-[12px] text-accent" onClick={onClear}>Clear</button>} />
-      <div className="overflow-x-auto px-4 pb-4">
+      <div className="relative overflow-x-auto px-4 pb-4">
         <table className="w-full text-[13px]">
           <thead>
             <tr>

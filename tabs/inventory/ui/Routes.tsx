@@ -150,7 +150,7 @@ export default function InventoryRoutes() {
                   <span>
                     <span className="font-medium">{p.name}</span>
                     {p.url && (
-                      <a href={p.url} target="_blank" rel="noreferrer" className="ml-1 inline-block text-faint hover:text-accent" aria-label="Vendor page">
+                      <a href={p.url} target="_blank" rel="noreferrer" className="ml-1 inline-block text-muted hover:text-fg" aria-label="Vendor page">
                         <ExternalLink className="size-3.5" />
                       </a>
                     )}

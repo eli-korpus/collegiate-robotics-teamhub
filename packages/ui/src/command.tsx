@@ -90,7 +90,7 @@ export function CommandBar({
             />
             {loading && <Spinner className="[&_svg]:size-4" />}
           </div>
-          <div ref={listRef} id="th-cmd-list" role="listbox" className="min-h-0 flex-1 overflow-y-auto p-1.5">
+          <div ref={listRef} id="th-cmd-list" role="listbox" className="min-h-0 flex-1 relative overflow-y-auto p-1.5">
             {sections.map((s) =>
               s.items.length ? (
                 <div key={s.title} className="pb-1">
@@ -109,7 +109,7 @@ export function CommandBar({
                         onClick={() => run(it)}
                         className={cn('flex w-full items-center gap-2.5 rounded-md px-2.5 py-2 text-left text-[13.5px]', i === active && 'bg-accent-soft')}
                       >
-                        {it.icon && <span className={cn('shrink-0 text-muted [&>svg]:size-4', i === active && 'text-accent')}>{it.icon}</span>}
+                        {it.icon && <span className={cn('shrink-0 [&>svg]:size-4', i === active && 'text-accent')}>{it.icon}</span>}
                         <span className="min-w-0 flex-1 truncate">{it.label}</span>
                         {it.hint && <span className="shrink-0 truncate text-[12px] text-faint">{it.hint}</span>}
                         {i === active && <CornerDownLeft className="size-3.5 shrink-0 text-faint" />}

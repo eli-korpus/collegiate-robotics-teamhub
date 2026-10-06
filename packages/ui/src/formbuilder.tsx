@@ -87,7 +87,7 @@ export function FieldEditor({
               <IconButton label="Move down" size="sm" disabled={i === fields.length - 1} onClick={() => move(i, 1)}>
                 <ArrowDown className="size-4" />
               </IconButton>
-              <IconButton label="Remove field" size="sm" className="text-danger" onClick={() => onChange(fields.filter((_, j) => j !== i))}>
+              <IconButton label="Remove field" size="sm" onClick={() => onChange(fields.filter((_, j) => j !== i))}>
                 <Trash2 className="size-4" />
               </IconButton>
             </div>

@@ -92,7 +92,7 @@ export default function PaperworkRoutes() {
                     CSV
                   </Button>
                 </div>
-                <div className="overflow-x-auto rounded-lg border border-border bg-surface">
+                <div className="relative overflow-x-auto rounded-lg border border-border bg-surface">
                   <table className="w-full text-[13px]">
                     <thead className="bg-bg-subtle/60">
                       <tr>

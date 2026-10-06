@@ -114,7 +114,7 @@ export function PublishButton({ message, onDone, label = 'Commit & push to GitHu
               </button>
             )}
           </div>
-          {details && result.log && <pre className="mt-2 max-h-40 overflow-auto rounded-md bg-bg-subtle p-2 text-[11.5px]">{result.log}</pre>}
+          {details && result.log && <pre className="mt-2 max-h-40 relative overflow-auto rounded-md bg-bg-subtle p-2 text-[11.5px]">{result.log}</pre>}
         </Banner>
       )}
     </div>

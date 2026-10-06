@@ -40,7 +40,7 @@ export function Kanban<T>({
   };
 
   return (
-    <div className="flex h-full gap-3 overflow-x-auto p-4 sm:px-6">
+    <div className="flex h-full gap-3 relative overflow-x-auto p-4 sm:px-6">
       {columns.map((col) => (
         <section
           key={col.id}
@@ -61,7 +61,7 @@ export function Kanban<T>({
             <span className="flex-1 truncate">{col.title}</span>
             <span className="tabular text-faint">{col.items.length}</span>
           </header>
-          <ul className="min-h-16 flex-1 space-y-2 overflow-y-auto px-2 pb-2">
+          <ul className="min-h-16 flex-1 space-y-2 relative overflow-y-auto px-2 pb-2">
             {col.items.map((it, idx) => {
               const k = keyOf(it);
               return (

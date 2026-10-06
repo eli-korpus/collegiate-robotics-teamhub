@@ -60,7 +60,7 @@ export function PersonPicker({
       }
     >
       <Input autoFocus placeholder="Search people…" value={q} onChange={(e) => setQ(e.target.value)} className="mb-1" aria-label="Search people" />
-      <ul className="max-h-64 overflow-y-auto">
+      <ul className="max-h-64 relative overflow-y-auto">
         {options.map((p) => (
           <li key={p.id}>
             <button

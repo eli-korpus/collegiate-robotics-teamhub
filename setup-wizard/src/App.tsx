@@ -133,7 +133,7 @@ function Layout() {
           <p className="text-[12px] font-semibold uppercase tracking-wider text-faint">{draft.flow === 'setup' ? 'Set up TeamHub' : 'Edit your dashboard'}</p>
           <p className="mt-0.5 truncate text-[14px] font-semibold">{c.program.name || 'New program'}</p>
         </div>
-        <ol className="min-h-0 flex-1 space-y-px overflow-y-auto px-2">
+        <ol className="min-h-0 flex-1 space-y-px relative overflow-y-auto px-2">
           {steps.map((s, i) => {
             const done = s.doneKey ? !!draft.done[s.doneKey] : i < idx;
             return (
@@ -174,14 +174,14 @@ function Layout() {
           </Button>
         </div>
       </aside>
-      <main id="wizard-main" className="min-w-0 flex-1 overflow-y-auto">
+      <main id="wizard-main" className="min-w-0 flex-1 relative overflow-y-auto">
         <div className="border-b border-border px-5 py-2 text-[12.5px] text-muted md:hidden">
           Step {idx + 1} of {steps.length}: {steps[idx].label}
         </div>
         <Step key={steps[idx].id} onNext={() => go(Math.min(idx + 1, steps.length - 1))} onBack={idx > 0 ? () => go(idx - 1) : undefined} />
       </main>
       {showPreview && (
-        <aside className="hidden w-[460px] shrink-0 overflow-y-auto border-l border-border bg-bg-subtle/40 p-5 xl:block">
+        <aside className="hidden w-[460px] shrink-0 relative overflow-y-auto border-l border-border bg-bg-subtle/40 p-5 xl:block">
           <div className="mb-3 flex items-center justify-between">
             <p className="text-[12px] font-semibold uppercase tracking-wider text-faint">Preview</p>
             <IconButton label={dark ? 'Preview light mode' : 'Preview dark mode'} size="sm" onClick={() => setDark(!dark)}>

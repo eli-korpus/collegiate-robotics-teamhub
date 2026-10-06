@@ -92,7 +92,7 @@ export default function RepairsRoutes() {
   return (
     <div className="flex h-full flex-col">
       <ModuleHeader moduleId="repairs" actions={canReport && <ModuleNewMenu moduleId="repairs" label="Report a breakage" onNew={() => setCreating(true)} />} />
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 relative overflow-y-auto">
         {issues.isLoading ? (
           <Spinner className="m-8" />
         ) : (

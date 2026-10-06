@@ -18,10 +18,18 @@ How to update your dashboard: [docs/updating.md](updating.md).
 - A new browser-tab icon (favicon) now shows right after publishing: its link carries a version, so browsers stop
   using the old one they saved.
 - Setup wizard: the list of changes before applying now says when the program logo and browser-tab icon change.
+- Setup wizard: some steps (Permissions especially) let you keep scrolling into empty space far past the end of the
+  page. Every scrolling area now keeps its contents inside it, in the wizard and the dashboard.
 - Setup wizard: things saved on your computer but not yet on your website (a new logo or browser-tab icon, the email
   setting, host or keep-alive files, uploads that didn't finish) used to be stuck when Review said "No changes yet".
   The wizard's home screen, Review & apply and the last setup screen now list them with a **Publish to your website**
   button.
+
+### Changed
+
+- Icons match the text they sit next to (sidebar, menus, search, card titles, links), and icon-only buttons (the
+  bell, settings, edit, delete, close) are all the same grey and turn white on hover. Before, some were white and
+  some grey, a few delete buttons were red, and some turned red or blue on hover.
 
 ## [1.0.1] - 2026-10-06
 ### Added

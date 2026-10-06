@@ -267,7 +267,7 @@ function EventDetail({ occ, onClose, onChanged }: { occ: Occurrence; onClose: ()
           {occ.cancelled && <Badge tone="danger">Cancelled</Badge>}
         </div>
         <p className="flex items-center gap-2">
-          <Clock className="size-4 text-muted" /> {when}
+          <Clock className="size-4" /> {when}
         </p>
         {occ.recurring && (
           <p className="flex items-center gap-2 text-muted">
@@ -276,7 +276,7 @@ function EventDetail({ occ, onClose, onChanged }: { occ: Occurrence; onClose: ()
         )}
         {occ.location && (
           <p className="flex items-center gap-2">
-            <MapPin className="size-4 text-muted" />
+            <MapPin className="size-4 text-accent" />
             <a className="text-accent hover:underline" href={`https://maps.google.com/?q=${encodeURIComponent(occ.location)}`} target="_blank" rel="noreferrer">
               {occ.location}
             </a>

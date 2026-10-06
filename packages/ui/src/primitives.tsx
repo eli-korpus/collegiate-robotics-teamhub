@@ -2,13 +2,14 @@ import { forwardRef, useEffect, useId, useRef, useState, type ButtonHTMLAttribut
 import { Check, Command, Info, AlertTriangle, XCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { cn } from './cn';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'soft';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'soft' | 'quiet';
 type Size = 'sm' | 'md' | 'lg';
 
 const variants: Record<Variant, string> = {
   primary: 'bg-accent text-accent-fg hover:bg-accent-hover shadow-sm',
   secondary: 'bg-surface text-fg border border-border hover:bg-bg-subtle shadow-sm',
   ghost: 'text-fg hover:bg-bg-subtle',
+  quiet: 'text-muted hover:text-fg hover:bg-bg-subtle',
   soft: 'bg-accent-soft text-accent hover:brightness-95',
   danger: 'bg-danger text-white hover:brightness-110 shadow-sm',
 };
@@ -62,7 +63,7 @@ export const IconButton = forwardRef<HTMLButtonElement, ButtonProps & { label: s
       ref={ref}
       aria-label={label}
       title={label}
-      variant={variant}
+      variant={variant === 'ghost' ? 'quiet' : variant}
       size={size}
       className={cn(size === 'sm' ? 'w-8 px-0' : size === 'lg' ? 'w-11 px-0' : 'w-9 px-0', className)}
       {...rest}
@@ -332,7 +333,7 @@ export function CardHeader({ title, action, subtitle, icon }: { title: ReactNode
   return (
     <div className="flex items-start justify-between gap-3 px-4 pt-3.5 pb-2">
       <div className="min-w-0 flex items-center gap-2">
-        {icon && <span className="text-muted">{icon}</span>}
+        {icon && <span className="shrink-0">{icon}</span>}
         <div className="min-w-0">
           <h3 className="truncate text-[13.5px] font-semibold">{title}</h3>
           {subtitle && <p className="truncate text-[12.5px] text-muted">{subtitle}</p>}

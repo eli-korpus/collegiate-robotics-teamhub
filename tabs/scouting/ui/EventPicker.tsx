@@ -53,7 +53,7 @@ export function EventPicker({ value, name, onChange }: { value: string; name?: s
                   {ourEvents.map((e) => (
                     <li key={e.code}>
                       <button type="button" onClick={() => pick(e.code)} className="flex w-full items-center gap-2 rounded-md px-2 py-1.5 text-left text-[13.5px] hover:bg-bg-subtle">
-                        <CalendarDays className="size-4 text-muted" />
+                        <CalendarDays className="size-4" />
                         <span className="flex-1 font-medium">{e.name}</span>
                         <span className="text-[12px] text-faint">{formatDate(e.start)}</span>
                       </button>
@@ -117,7 +117,7 @@ export function EventPicker({ value, name, onChange }: { value: string; name?: s
                 <Search className="absolute left-2.5 top-2.5 size-4 text-faint" />
                 <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search by name, city or event code" className="pl-8" />
               </div>
-              <ul className="max-h-60 space-y-1 overflow-y-auto">
+              <ul className="max-h-60 space-y-1 relative overflow-y-auto">
                 {(results.data ?? []).map((e) => (
                   <li key={e.code}>
                     <button type="button" className="w-full rounded-md px-2 py-1.5 text-left text-[13px] hover:bg-bg-subtle" onClick={() => pick(e.code)}>

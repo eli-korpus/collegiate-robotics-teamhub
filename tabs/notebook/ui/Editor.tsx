@@ -218,7 +218,7 @@ function MatrixEditor({ value, onChange }: { value: Matrix | null; onChange: (m:
           <Trash2 className="size-4" />
         </IconButton>
       </div>
-      <div className="overflow-x-auto">
+      <div className="relative overflow-x-auto">
         <table className="text-[12.5px]">
           <thead>
             <tr>

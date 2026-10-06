@@ -74,7 +74,6 @@ export function Positions() {
                     <IconButton
                       label="Delete position"
                       size="sm"
-                      className="text-danger"
                       onClick={async () => {
                         if (!(await confirm({ title: `Delete “${pos.name}”?`, body: 'It is removed from everyone who holds it.', danger: true, confirmLabel: 'Delete' }))) return;
                         const { error } = await sb.from('positions').delete().eq('id', pos.id);

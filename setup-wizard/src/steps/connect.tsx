@@ -393,7 +393,7 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
                   {showSql ? 'Hide' : 'Show'} the SQL
                 </button>
               </div>
-              {showSql && <pre className="max-h-72 overflow-auto rounded-md bg-bg-subtle p-3 text-[11px] leading-relaxed">{plan.sql}</pre>}
+              {showSql && <pre className="max-h-72 relative overflow-auto rounded-md bg-bg-subtle p-3 text-[11px] leading-relaxed">{plan.sql}</pre>}
             </>
           )}
           {log && <ApplyLog log={log} />}

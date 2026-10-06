@@ -178,7 +178,7 @@ export function UpdateDialog({ server, onClose, resume }: { server: ServerState;
                 </div>
               </Banner>
             )}
-            <section className="max-h-64 space-y-3 overflow-y-auto rounded-md border border-border p-3">
+            <section className="max-h-64 space-y-3 relative overflow-y-auto rounded-md border border-border p-3">
               {check.notes.length ? (
                 check.notes.map((n) => (
                   <div key={n.version}>
@@ -195,7 +195,7 @@ export function UpdateDialog({ server, onClose, resume }: { server: ServerState;
             {check.customized.length > 0 && (
               <Banner tone="info" title={`Your team changed ${check.customized.length} TeamHub file${check.customized.length === 1 ? '' : 's'}`}>
                 <p>The update keeps your changes. If it changes the same lines, it stops and explains, and nothing is changed.</p>
-                <ul className="mt-1 max-h-24 list-disc overflow-y-auto pl-5 font-mono text-[12px]">
+                <ul className="mt-1 max-h-24 list-disc relative overflow-y-auto pl-5 font-mono text-[12px]">
                   {check.customized.map((f) => (
                     <li key={f}>{f}</li>
                   ))}

@@ -151,7 +151,7 @@ export function FileDrop({
             over ? 'border-accent bg-accent-soft' : 'border-border-strong bg-bg-subtle/50',
           )}
         >
-          {kind === 'photo' || kind === 'avatar' ? <ImageIcon className="size-5 text-muted" /> : kind === 'model' ? <Box className="size-5 text-muted" /> : <UploadCloud className="size-5 text-muted" />}
+          {kind === 'photo' || kind === 'avatar' ? <ImageIcon className="size-5" /> : kind === 'model' ? <Box className="size-5" /> : <UploadCloud className="size-5" />}
           <p className="text-[13px]">
             {label ?? 'Drop files here or'}{' '}
             <button type="button" className="font-medium text-accent hover:underline" onClick={() => input.current?.click()} disabled={working || busy}>
@@ -236,7 +236,7 @@ export function FileCard({
         </IconButton>
       )}
       {onDelete && (
-        <IconButton label="Delete file" size="sm" onClick={onDelete} className="text-danger">
+        <IconButton label="Delete file" size="sm" onClick={onDelete}>
           <Trash2 className="size-4" />
         </IconButton>
       )}

@@ -1,6 +1,7 @@
 import { lazy } from 'react';
+import { Link } from 'react-router';
 import { UserCheck } from 'lucide-react';
-import { Button, formatTime } from '@teamhub/ui';
+import { Button, Card, CardHeader, buttonClass, formatTime } from '@teamhub/ui';
 import { canWith, useMe, type IntegrationClient } from '@teamhub/sdk';
 import { ATTENDABLE, useAttendable, useTakeForEvent, type EventLike } from './occurrences';
 
@@ -39,11 +40,41 @@ function TodayPractices() {
   );
 }
 
+/**
+ * Home's "Attendance today" card with the Calendar tab: attendance still open today, plus today's practices and events
+ * without attendance yet. Nothing today: no card.
+ */
+function TodayCard({ open }: { open: { id: string; title: string }[] }) {
+  const today = useAttendable(0);
+  const take = useTakeForEvent();
+  if (today.isLoading) return null;
+  const list = today.data.filter((o) => !o.sessionId);
+  if (!open.length && !list.length) return null;
+  return (
+    <Card>
+      <CardHeader icon={<UserCheck className="size-4" />} title="Attendance today" />
+      <div className="space-y-2 px-4 pb-4">
+        {open.map((s) => (
+          <Link key={s.id} to={`/attendance/session/${s.id}`} className={buttonClass('primary', 'sm', 'w-full')}>
+            Continue: {s.title}
+          </Link>
+        ))}
+        {list.map((o) => (
+          <Button key={`${o.event.id}:${o.date}`} size="sm" variant="primary" className="w-full" icon={<UserCheck className="size-4" />} onClick={() => take(o.event, o.date, o.start)}>
+            Take attendance: {o.title}
+            {o.allDay ? '' : ` · ${formatTime(o.start)}`}
+          </Button>
+        ))}
+      </div>
+    </Card>
+  );
+}
+
 const client: IntegrationClient = {
   id: 'attendance+calendar',
   slots: {
     'calendar.event.actions': EventAction,
-    'attendance.today': TodayPractices,
+    'attendance.todayCard': TodayCard,
     'attendance.start': TodayPractices,
     // Replaces Attendance's own "start a practice" form: attendance is always for a calendar event.
     'attendance.picker': lazy(() => import('./picker')),

@@ -319,3 +319,45 @@ test('icon-only buttons show their icons at full size @phone', async ({ page }) 
   expect(sizes.length).toBeGreaterThan(0);
   expect(sizes.filter((s) => s.px < 14)).toEqual([]);
 });
+
+test.describe('welcome tour and an empty Home', () => {
+  test('the tour opens on a first visit, lists this dashboard’s tabs, and comes back from the menu', async ({ page }) => {
+    const errors = watchErrors(page);
+    await mockSupabase(page, { tour: true });
+    await page.goto('/');
+    const tour = page.getByRole('dialog');
+    await expect(tour.getByRole('heading', { name: /^Welcome to / })).toBeVisible();
+    // Every tab in the sidebar is explained somewhere in the tour (whatever tabs this build has).
+    const tabs = (await page.getByRole('navigation', { name: 'Main' }).getByRole('link').allInnerTexts())
+      .map((t) => t.split('\n')[0].trim())
+      .filter((t) => t && !['Home', 'People', 'Admin'].includes(t) && !/chat/i.test(t));
+    await tour.getByRole('button', { name: 'Show me around' }).click();
+    const seen: string[] = [];
+    for (;;) {
+      seen.push(await tour.innerText());
+      const next = tour.getByRole('button', { name: 'Next' });
+      if (!(await next.count())) break;
+      await next.click();
+    }
+    for (const t of tabs) expect(seen.join('\n'), t).toContain(t);
+    await tour.getByRole('button', { name: 'Start exploring' }).click();
+    await expect(tour).toHaveCount(0);
+    await page.reload();
+    await expect(page.getByRole('heading', { name: HOME_GREETING })).toBeVisible();
+    await expect(page.getByRole('dialog')).toHaveCount(0);
+    await page.getByRole('button', { name: 'Account menu' }).click();
+    await page.getByRole('menuitem', { name: 'Take the tour' }).click();
+    await expect(page.getByRole('dialog').getByRole('heading', { name: /^Welcome to / })).toBeVisible();
+    expect(errors).toEqual([]);
+  });
+
+  test('Home shows no placeholder cards when nothing is scheduled or written yet', async ({ page }) => {
+    await mockSupabase(page);
+    await page.goto('/');
+    await expect(page.getByRole('heading', { name: HOME_GREETING })).toBeVisible();
+    await page.waitForTimeout(800);
+    for (const text of ['Attendance today', 'Practice today', 'Start taking attendance', 'Nothing in the next 30 days', 'No entries yet', 'No tool links yet', 'Nothing yet']) {
+      await expect(page.getByText(text)).toHaveCount(0);
+    }
+  });
+});

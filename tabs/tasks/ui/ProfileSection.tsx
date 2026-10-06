@@ -6,6 +6,7 @@ export default function TasksProfile({ userId }: { userId: string }) {
   const tasks = useTasks();
   const open = (tasks.data ?? []).filter((t) => t.status !== 'done' && t.assignee.includes(userId));
   const done = (tasks.data ?? []).filter((t) => t.status === 'done' && t.assignee.includes(userId)).length;
+  if (!open.length && !done) return null;
   return (
     <div className="space-y-2 text-[13px]">
       <p className="text-muted">

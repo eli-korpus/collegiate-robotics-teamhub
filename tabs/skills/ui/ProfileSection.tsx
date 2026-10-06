@@ -7,7 +7,7 @@ export default function SkillBadges({ userId }: { userId: string }) {
   const signoffs = useSignoffs();
   const have = new Set((signoffs.data ?? []).filter((s) => s.user_id === userId).map((s) => s.skill_id));
   const list = (skills.data ?? []).filter((s) => have.has(s.id));
-  if (!list.length) return <p className="text-[13px] text-faint">No skills signed off yet.</p>;
+  if (!list.length) return null;
   return (
     <div className="flex flex-wrap gap-1.5">
       {list.map((s) => (

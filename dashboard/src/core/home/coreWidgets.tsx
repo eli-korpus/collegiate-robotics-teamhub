@@ -95,11 +95,12 @@ function TeamInfo() {
 function QuickLinks() {
   const pinned = useSlotLinks(Object.keys(TOOL_SLOT_LABELS)).slice(0, 10);
   const canEdit = useCan('core.edit_links');
+  // No placeholder card without links (admins add them in Admin > Tool links).
+  if (!pinned.length) return null;
   return (
     <Card>
       <CardHeader icon={<Link2 className="size-4" />} title="Team tools" action={canEdit ? <Link to="/admin/links" className="text-[12px] font-medium text-accent">Edit</Link> : undefined} />
-      {pinned.length ? (
-        <ul className="grid grid-cols-1 gap-0.5 px-2 pb-3">
+      <ul className="grid grid-cols-1 gap-0.5 px-2 pb-3">
           {pinned.map((l) => (
             <li key={l.id}>
               <a href={safeHref(l.url)} target="_blank" rel="noreferrer noopener" className="flex items-center gap-2 rounded-md px-2 py-1.5 text-[13px] hover:bg-bg-subtle">
@@ -110,9 +111,6 @@ function QuickLinks() {
             </li>
           ))}
         </ul>
-      ) : (
-        <p className="px-4 pb-4 text-[12.5px] text-faint">No tool links yet.</p>
-      )}
     </Card>
   );
 }
@@ -133,12 +131,12 @@ function RecentActivity() {
         .slice(0, 12);
     },
   });
-  if (!providers.length) return null;
+  // No placeholder card: it appears once a tab has something to show.
+  if (!providers.length || !q.data?.length) return null;
   return (
     <Card>
       <CardHeader icon={<Activity className="size-4" />} title="Recent activity" />
-      {q.data?.length ? (
-        <ul className="divide-y divide-border px-1 pb-2">
+      <ul className="divide-y divide-border px-1 pb-2">
           {q.data.map((a) => (
             <li key={a.id}>
               <Link to={a.href} className="flex items-baseline gap-2 rounded-md px-3 py-2 text-[13px] hover:bg-bg-subtle">
@@ -155,9 +153,6 @@ function RecentActivity() {
             </li>
           ))}
         </ul>
-      ) : (
-        <p className="px-4 pb-4 text-[12.5px] text-faint">Nothing yet: activity from your tabs shows up here.</p>
-      )}
     </Card>
   );
 }

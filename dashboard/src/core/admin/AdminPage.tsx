@@ -53,6 +53,7 @@ import { agentPrompt } from '@teamhub/sdk/agent-prompt';
 import { TEAMHUB_CREDIT, TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
 import { UpdateNotice } from './UpdateNotice';
 import { WhoCanJoin } from './WhoCanJoin';
+import { openTour } from '../shell/tourState';
 import { ProfileFieldsAdmin } from './ProfileFieldsAdmin';
 
 const SECTIONS = [
@@ -654,6 +655,13 @@ function Help() {
       </Card>
       <Card className="space-y-2 p-4">
         <p className="font-semibold">Change right here, no wizard needed</p>
+        <p className="text-muted">
+          New to TeamHub?{' '}
+          <button type="button" className="font-medium text-accent hover:underline" onClick={openTour}>
+            Take the welcome tour
+          </button>{' '}
+          (everyone can, from the menu under their name).
+        </p>
         <ul className="list-disc space-y-1 pl-5 text-muted">
           <li>Approving new members: People &gt; Requests.</li>
           <li>Someone's name, teams, role and profile answers: open them in People &gt; Edit. Positions: People &gt; Positions.</li>

@@ -9,10 +9,12 @@ import { NotificationsButton } from './Notifications';
 import { ModuleRoute } from './ModuleRoute';
 import { ErrorBoundary } from './ErrorBoundary';
 import { Home } from '../home/Home';
+import { markTourSeen, onOpenTour, tourSeen } from './tourState';
 
 const People = lazy(() => import('../people/PeoplePage'));
 const Admin = lazy(() => import('../admin/AdminPage'));
 const MyProfile = lazy(() => import('../people/MyProfile'));
+const Tour = lazy(() => import('./Tour'));
 
 export function Shell() {
   const [cmdOpen, setCmdOpen] = useState(false);
@@ -21,6 +23,14 @@ export function Shell() {
   const loc = useLocation();
   const lastG = useRef(0);
   const modules = runtime().modules;
+  const { me } = useSession();
+  // First visit on this browser: the welcome tour (also from the account menu and Admin > Help).
+  const [tour, setTour] = useState(() => !!me && !tourSeen(me.id));
+  useEffect(() => onOpenTour(() => setTour(true)), []);
+  const closeTour = () => {
+    if (me) markTourSeen(me.id);
+    setTour(false);
+  };
 
   useEffect(() => {
     const fn = (e: KeyboardEvent) => {
@@ -80,6 +90,11 @@ export function Shell() {
         </ErrorBoundary>
       </AppShell>
       <CommandMenu open={cmdOpen} onOpenChange={setCmdOpen} />
+      {tour && (
+        <Suspense fallback={null}>
+          <Tour onClose={closeTour} />
+        </Suspense>
+      )}
       <Dialog open={helpOpen} onOpenChange={setHelpOpen} title="Keyboard shortcuts" size="sm">
         <ul className="space-y-2 text-[13.5px]">
           {SHORTCUTS.map(([k, d]) => (

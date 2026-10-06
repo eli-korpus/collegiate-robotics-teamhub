@@ -13,6 +13,20 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Added
+
+- A welcome tour of your dashboard: on someone's first visit it walks through the tabs your team chose (grouped like
+  the sidebar, with what each one is for), then People, your profile and everyday shortcuts. It can be taken again
+  any time from the menu under your name, or from Admin > Help.
+
+### Changed
+
+- Home only shows cards with something real in them. "Attendance today" (was "Practice today") appears when there's
+  attendance to take or continue today, not as a standing "Start taking attendance" button; Up next, recent notebook
+  entries, Team tools and Recent activity hide when empty instead of saying "Nothing yet", and the "Today & this
+  week" heading hides when none of its cards have anything. Empty Skills, Tasks and Outreach sections on profiles
+  hide too.
+
 ### Fixed
 
 - Updating TeamHub stopped right after the backup for copies whose `package-lock.json` had been changed (for example

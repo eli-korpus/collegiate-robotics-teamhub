@@ -69,7 +69,8 @@ export function Profile() {
             .map((s) => {
               const C = s.component;
               return (
-                <Card key={`${m.manifest.id}:${s.id}`}>
+                // A section with nothing to show (no skills yet, no tasks…) hides its whole card.
+                <Card key={`${m.manifest.id}:${s.id}`} className="[&:has(>div:empty)]:hidden">
                   <CardHeader title={s.title} subtitle={m.manifest.name} />
                   <div className="px-4 pb-4">
                     <Suspense fallback={<Spinner />}>

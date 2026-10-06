@@ -71,7 +71,8 @@ export function Home() {
       </header>
 
       {today.length > 0 && (
-        <section aria-label="Today" className="mb-6">
+        // The heading hides too when every card in it has nothing to show today.
+        <section aria-label="Today" className="mb-6 [&:not(:has(>div>div:not(:empty)))]:hidden">
           <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-faint">Today &amp; this week</h2>
           {/* Cards stretch to fill their row, so one card never leaves empty space beside it. */}
           <div className="flex flex-wrap gap-3 [&>div:empty]:hidden [&>div]:min-w-[min(100%,300px)] [&>div]:flex-1">

@@ -13,6 +13,7 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+## [1.0.6] - 2026-10-06
 ### Added
 
 - Link previews: sharing your site's link in Discord, iMessage, Slack, WhatsApp, Teams or social media shows your

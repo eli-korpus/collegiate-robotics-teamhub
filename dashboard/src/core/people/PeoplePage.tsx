@@ -7,6 +7,7 @@ import { Requests } from './Requests';
 import { Positions } from './Positions';
 import { RequestInfo } from './RequestInfo';
 import { Profile } from './Profile';
+import { splitChoices } from '../home/coreWidgets';
 
 export default function PeoplePage() {
   return (
@@ -67,7 +68,7 @@ function Directory() {
           (showInactive ? p.status === 'inactive' : p.status === 'active') &&
           (!q || matches(`${p.name} ${p.positions.join(' ')}`, q)) &&
           (!pos || p.positionIds.includes(pos)) &&
-          (!sub || p.details.subteam === sub || p.details.subteam === subteams.find((s) => s.id === sub)?.name),
+          (!sub || splitChoices(p.details.subteam).some((x) => x === sub || x === subteams.find((s) => s.id === sub)?.name)),
       ),
     [people.data, q, pos, sub, showInactive, subteams],
   );

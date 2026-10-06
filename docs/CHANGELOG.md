@@ -13,6 +13,13 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Added
+
+- People can be on several subteams: Subteam is a multi-choice field (existing single answers keep working), and the
+  People filter finds someone in any of their subteams.
+- An **Edit** button on someone's profile (admins, and people who manage that team) opens one window for their name,
+  teams and roles, and profile fields such as subteams and shirt size.
+
 ### Fixed
 
 - Home left empty gaps between cards of different heights. Cards now fill the shortest column first (no holes),

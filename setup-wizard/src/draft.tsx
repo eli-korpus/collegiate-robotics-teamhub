@@ -4,7 +4,7 @@ import { api, type Catalog, type Draft, type ServerState } from './api';
 
 export const SUGGESTED_FIELDS = [
   { id: 'grade', label: 'Grade', type: 'select' as const, options: ['9', '10', '11', '12'], private: false },
-  { id: 'subteam', label: 'Subteam', type: 'select' as const, options: [] as string[], private: false },
+  { id: 'subteam', label: 'Subteam', type: 'multiselect' as const, options: [] as string[], private: false },
   { id: 'shirt_size', label: 'Shirt size', type: 'select' as const, options: ['XS', 'S', 'M', 'L', 'XL', 'XXL'], private: false },
   { id: 'dietary', label: 'Dietary needs', type: 'text' as const, options: [], private: false },
   { id: 'emergency_contact', label: 'Emergency contact', type: 'text' as const, options: [], private: true },

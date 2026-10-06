@@ -23,7 +23,8 @@ import { TeamLogo } from '../auth/AuthLayout';
 export interface ProfileFieldDef {
   id: string;
   label: string;
-  type: 'text' | 'select';
+  /** `multiselect` keeps several choices as "A, B" (Subteam always allows several). */
+  type: 'text' | 'select' | 'multiselect';
   options: string[];
   private: boolean;
 }
@@ -75,7 +76,38 @@ export async function saveProfileFields(
   }
 }
 
+/** "Build, CAD" → ["Build", "CAD"]: how multi-choice profile answers are stored. */
+export const splitChoices = (v: string | null | undefined): string[] =>
+  String(v ?? '')
+    .split(',')
+    .map((x) => x.trim())
+    .filter(Boolean);
+
+/** People can be on several subteams, so Subteam is multi-choice even in older configs that say "select". */
+export const isMultiChoice = (f: Pick<ProfileFieldDef, 'id' | 'type'>) => f.type === 'multiselect' || f.id === 'subteam';
+
 export function ProfileFieldInput({ field, value, onChange }: { field: ProfileFieldDef; value: string; onChange: (v: string) => void }) {
+  if (isMultiChoice(field) && field.options.length) {
+    const picked = splitChoices(value);
+    return (
+      <div role="group" aria-label={field.label} className="flex flex-wrap gap-1.5">
+        {field.options.map((o) => {
+          const on = picked.includes(o);
+          return (
+            <button
+              key={o}
+              type="button"
+              aria-pressed={on}
+              onClick={() => onChange((on ? picked.filter((x) => x !== o) : [...picked, o]).join(', '))}
+              className={on ? 'h-8 rounded-full border border-accent bg-accent-soft px-3 text-[13px] font-medium' : 'h-8 rounded-full border border-border px-3 text-[13px] text-muted hover:bg-bg-subtle'}
+            >
+              {o}
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
   return field.type === 'select' ? (
     <Select value={value} onChange={(e) => onChange(e.target.value)} aria-label={field.label}>
       <option value="">Choose…</option>
@@ -152,11 +184,11 @@ function RequestInfoCards() {
         }}
       >
         {missing.map((f) => (
-          <label key={f.id} className="block space-y-1">
-            <span className="text-[12.5px] font-medium">{f.label}</span>
+          <div key={f.id} role="group" aria-label={f.label} className="space-y-1">
+            <p className="text-[12.5px] font-medium">{f.label}</p>
             <ProfileFieldInput field={f} value={values[f.id] ?? ''} onChange={(v) => setValues({ ...values, [f.id]: v })} />
             <VisibilityNote locked={f.private}>{f.private ? 'Private: only you and mentors can see this' : 'Saved to your profile, visible to your team'}</VisibilityNote>
-          </label>
+          </div>
         ))}
         <p className="text-[12px] text-muted">
           Requested by <PersonName id={open[0].created_by} />

@@ -132,10 +132,10 @@ function ApproveDialog({ p, m, onClose }: { p: PersonInfo; m: Membership; onClos
           <div className="space-y-2">
             <p className="text-[13px] font-medium">Profile details <OptionalTag /></p>
             {fields.map((f) => (
-              <label key={f.id} className="grid grid-cols-[120px_1fr] items-center gap-2 text-[13px]">
+              <div key={f.id} role="group" aria-label={f.label} className="grid grid-cols-[120px_1fr] items-center gap-2 text-[13px]">
                 <span className="text-muted">{f.label}</span>
                 <ProfileFieldInput field={f} value={details[f.id] ?? ''} onChange={(v) => setDetails({ ...details, [f.id]: v })} />
-              </label>
+              </div>
             ))}
             <VisibilityNote>These fields are visible to {runtime().config.program.name}.</VisibilityNote>
           </div>

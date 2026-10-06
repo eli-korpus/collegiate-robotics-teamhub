@@ -78,11 +78,11 @@ export default function MyProfile() {
             <CardHeader title="Profile details" />
             <div className="grid gap-3 px-4 pb-4 sm:grid-cols-2">
               {fields.map((f) => (
-                <label key={f.id} className="block space-y-1.5">
-                  <span className="text-[13px] font-medium">{f.label}</span>
+                <div key={f.id} role="group" aria-label={f.label} className="space-y-1.5">
+                  <p className="text-[13px] font-medium">{f.label}</p>
                   <ProfileFieldInput field={f} value={values[f.id] ?? ''} onChange={(v) => setValues({ ...values, [f.id]: v })} />
                   <VisibilityNote locked={f.private}>{f.private ? 'Only you and mentors' : 'Visible to your program'}</VisibilityNote>
-                </label>
+                </div>
               ))}
             </div>
           </Card>

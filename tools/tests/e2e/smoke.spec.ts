@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { loadGenerated, mockSupabase, watchErrors } from './mock';
+import { ME, loadGenerated, mockSupabase, watchErrors } from './mock';
 
 const { schema } = loadGenerated();
 const modules = Object.keys(schema.modules);
@@ -181,6 +181,50 @@ test.describe('competitions on the calendar', () => {
     await dialog.getByRole('button', { name: 'Add to calendar' }).click();
     await expect(dialog.getByText('Please fill this in.')).toBeVisible();
     expect(inserts).toBe(0);
+    expect(errors).toEqual([]);
+  });
+});
+
+test.describe('admins edit people', () => {
+  test("Edit on someone's profile changes their name, teams and several subteams in one place", async ({ page }) => {
+    const errors = watchErrors(page);
+    const { config } = loadGenerated();
+    const team = config.teams[0].id;
+    const ALEX = '00000000-0000-4000-8000-0000000000a1';
+    const now = new Date().toISOString();
+    let saved: Record<string, unknown> | null = null;
+    await mockSupabase(page, {
+      tables: {
+        profiles: [
+          { id: ME, display_name: 'Sam Rivera', avatar_path: null, is_admin: true, status: 'active', details: {}, home_prefs: null, created_at: now },
+          { id: ALEX, display_name: 'Alex Kim', avatar_path: null, is_admin: false, status: 'active', details: { subteam: 'Build' }, home_prefs: null, created_at: now },
+        ],
+        memberships: [
+          { user_id: ME, team_id: team, type: 'mentor', status: 'active', requested_type: null, note: null, created_at: now },
+          { user_id: ALEX, team_id: team, type: 'member', status: 'active', requested_type: null, note: null, created_at: now },
+        ],
+      },
+    });
+    await page.route('**/rest/v1/profiles*', async (route) => {
+      if (route.request().method() === 'PATCH') {
+        saved = route.request().postDataJSON();
+        return route.fulfill({ status: 204, body: '' });
+      }
+      return route.fallback();
+    });
+    await page.goto(`/people/${ALEX}`);
+    await page.getByRole('button', { name: 'Edit', exact: true }).first().click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByLabel('Name')).toHaveValue('Alex Kim');
+    await expect(dialog.getByText(/Teams and roles|Role/).first()).toBeVisible();
+    const subteams = dialog.getByRole('group', { name: 'Subteam' });
+    await expect(subteams.getByRole('button', { name: 'Build' })).toHaveAttribute('aria-pressed', 'true');
+    await subteams.getByRole('button', { name: 'CAD' }).click();
+    await dialog.getByText('Subteam', { exact: true }).click(); // clicking the label must not toggle anything
+    await expect(subteams.getByRole('button', { name: 'Build' })).toHaveAttribute('aria-pressed', 'true');
+    await dialog.getByRole('button', { name: 'Save' }).click();
+    await expect.poll(() => saved).not.toBeNull();
+    expect((saved as unknown as { details: { subteam: string } }).details.subteam).toBe('Build, CAD');
     expect(errors).toEqual([]);
   });
 });

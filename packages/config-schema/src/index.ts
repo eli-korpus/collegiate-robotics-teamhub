@@ -43,7 +43,7 @@ export type SubteamConfig = z.infer<typeof SubteamSchema>;
 export const ProfileFieldSchema = z.object({
   id: z.string().regex(/^[a-z][a-z0-9_]*$/),
   label: z.string().min(1).max(60),
-  type: z.enum(['text', 'select']),
+  type: z.enum(['text', 'select', 'multiselect']),
   options: z.array(z.string()).default([]),
   private: z.boolean().default(false),
 });

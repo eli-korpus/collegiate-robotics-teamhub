@@ -15,6 +15,10 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ### Fixed
 
+- Home left empty gaps between cards of different heights. Cards now fill the shortest column first (no holes),
+  and the Today cards stretch to fill their row.
+- Team-specific tool links no longer repeat the team (for example "Portfolio (12345) (A)") when the link's name
+  already says which team it is.
 - Checkbox lists ran together on one line: People > Request info ("Which fields?"), Skills ("Learn these first"),
   and the setup wizard's New Season and Update screens now show one item per line.
 

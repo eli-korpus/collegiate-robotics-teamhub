@@ -1,10 +1,11 @@
 import { Suspense, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowDown, ArrowUp, LayoutGrid } from 'lucide-react';
-import { Button, Checkbox, Dialog, IconButton, formatDate, greeting, toast, cn } from '@teamhub/ui';
+import { Button, Checkbox, Dialog, IconButton, formatDate, greeting, toast } from '@teamhub/ui';
 import { canWith, friendlyError, runtime, useMe, useSeason, useSupabase, useTeamScope, type WidgetDef } from '@teamhub/sdk';
 import { ProgramLogo } from '../auth/AuthLayout';
 import { CORE_WIDGETS } from './coreWidgets';
+import { Masonry } from './Masonry';
 
 interface HomeWidget extends WidgetDef {
   key: string; // module:id
@@ -71,7 +72,8 @@ export function Home() {
       {today.length > 0 && (
         <section aria-label="Today" className="mb-6">
           <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-faint">Today &amp; this week</h2>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 [&>div:empty]:hidden">
+          {/* Cards stretch to fill their row, so one card never leaves empty space beside it. */}
+          <div className="flex flex-wrap gap-3 [&>div:empty]:hidden [&>div]:min-w-[min(100%,300px)] [&>div]:flex-1">
             {today.map((w) => (
               <WidgetSlot key={w.key} w={w} teamId={teamId} />
             ))}
@@ -79,11 +81,7 @@ export function Home() {
         </section>
       )}
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3 [&>div:empty]:hidden">
-        {grid.map((w) => (
-          <WidgetSlot key={w.key} w={w} teamId={teamId} />
-        ))}
-      </div>
+      <Masonry items={grid.map((w) => ({ key: w.key, node: <WidgetSlot w={w} teamId={teamId} /> }))} />
 
       <CustomizeDialog open={editing} onOpenChange={setEditing} all={all} order={visible.map((w) => w.key).concat(all.filter((w) => hidden.has(w.key)).map((w) => w.key))} hidden={hidden} />
     </div>
@@ -93,7 +91,7 @@ export function Home() {
 function WidgetSlot({ w, teamId }: { w: HomeWidget; teamId: string | null }) {
   const C = w.component;
   return (
-    <div className={cn(w.size === 'lg' && 'md:col-span-2')}>
+    <div>
       <Suspense fallback={<div className="h-28 animate-pulse rounded-lg bg-bg-subtle" />}>
         <C teamId={teamId} />
       </Suspense>

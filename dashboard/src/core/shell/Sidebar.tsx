@@ -168,6 +168,7 @@ function UserMenu() {
         { label: 'System', icon: pref === 'system' ? <Check /> : <Monitor />, onSelect: () => setPref('system') },
         { label: 'Sign out', icon: <LogOut />, onSelect: signOut, separatorBefore: true },
       ]}
+      footer={`TeamHub ${runtime().config.version}`}
     />
   );
 }

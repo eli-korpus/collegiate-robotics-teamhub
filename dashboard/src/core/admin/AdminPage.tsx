@@ -72,7 +72,7 @@ const SECTIONS = [
 export default function AdminPage() {
   return (
     <AdminOnly fallback={<NoAccess what="Admin" />}>
-      <PageHeader title="Admin" icon={<Shield />} subtitle="Storage, tabs, admins and program settings">
+      <PageHeader title="Admin" icon={<Shield />} subtitle={`Storage, tabs, admins and program settings · TeamHub ${runtime().config.version}`}>
         <nav className="-mb-1 flex gap-1 relative overflow-x-auto" aria-label="Admin sections">
           {SECTIONS.map((s) => (
             <NavLink

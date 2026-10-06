@@ -18,6 +18,8 @@ How to update your dashboard: [docs/updating.md](updating.md).
 - A welcome tour of your dashboard: on someone's first visit it walks through the tabs your team chose (grouped like
   the sidebar, with what each one is for), then People, your profile and everyday shortcuts. It can be taken again
   any time from the menu under your name, or from Admin > Help.
+- The TeamHub version your site runs now shows at the bottom of the menu under your name and in the Admin page
+  header.
 
 ### Changed
 

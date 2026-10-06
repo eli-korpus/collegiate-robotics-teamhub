@@ -15,11 +15,12 @@ export default function UpNext({ teamId }: { teamId: string | null }) {
   ]
     .sort((a, b) => a.start.getTime() - b.start.getTime())
     .slice(0, 3);
+  // Nothing coming up: no card (the Calendar tab is one click away).
+  if (!items.length) return null;
   return (
     <Card>
       <CardHeader icon={<CalendarDays className="size-4" />} title="Up next" action={<Link to="/calendar" className="text-[12px] font-medium text-accent">Calendar</Link>} />
-      {items.length ? (
-        <ul className="space-y-1 px-2 pb-3">
+      <ul className="space-y-1 px-2 pb-3">
           {items.map((i) => (
             <li key={i.key}>
               <Link to={i.href} className="flex items-center gap-3 rounded-md px-2 py-1.5 hover:bg-bg-subtle">
@@ -36,9 +37,6 @@ export default function UpNext({ teamId }: { teamId: string | null }) {
             </li>
           ))}
         </ul>
-      ) : (
-        <p className="px-4 pb-4 text-[12.5px] text-faint">{data.isLoading ? 'Loading…' : 'Nothing in the next 30 days.'}</p>
-      )}
     </Card>
   );
 }

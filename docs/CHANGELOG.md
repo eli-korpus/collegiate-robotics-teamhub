@@ -13,6 +13,56 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+## [1.0.6] - 2026-10-06
+### Added
+
+- Link previews: sharing your site's link in Discord, iMessage, Slack, WhatsApp, Teams or social media shows your
+  logo, program name and a short description. The setup wizard makes the preview picture from your logo, next to the
+  browser-tab icon. Sites without a logo show a TeamHub picture. If your site already has a logo, its icon is used
+  until you upload the logo again in the wizard (Edit > Your program), which makes the full-size picture.
+- Setup wizard > Email now connects your email provider (SMTP) itself: pick Brevo, Gmail, Resend or your school's
+  server and fill in the details. The password goes straight to Supabase and is never saved in your files. New guide:
+  [docs/email.md](email.md).
+
+### Changed
+
+- The GitHub workflows the setup wizard installs (GitHub Pages deploy, keep-awake and update check) use the current
+  GitHub Actions versions, which run on Node.js 24. GitHub is retiring the Node.js 20 versions they used.
+- The setup wizard only turns email on once an email provider is saved. Before, turning it on without one stopped new
+  members from joining (their confirmation email couldn't be sent).
+
+### Fixed
+
+- With email turned on, the Join page showed nothing after someone signed up. It now says to check their email (and
+  tells them if the address already has an account), and the confirmation link brings them back to your site.
+- Signing in before confirming your email now explains what to do and offers to send the link again.
+- The "Set a new password" page no longer says the link must come from a mentor when it came by email.
+
+## [1.0.5] - 2026-10-06
+### Added
+
+- A welcome tour of your dashboard: on someone's first visit it walks through the tabs your team chose (grouped like
+  the sidebar, with what each one is for), then People, your profile and everyday shortcuts. It can be taken again
+  any time from the menu under your name, or from Admin > Help.
+- The TeamHub version your site runs now shows at the bottom of the menu under your name and in the Admin page
+  header.
+
+### Changed
+
+- Home only shows cards with something real in them. "Attendance today" (was "Practice today") appears when there's
+  attendance to take or continue today, not as a standing "Start taking attendance" button; Up next, recent notebook
+  entries, Team tools and Recent activity hide when empty instead of saying "Nothing yet", and the "Today & this
+  week" heading hides when none of its cards have anything. Empty Skills, Tasks and Outreach sections on profiles
+  hide too.
+
+### Fixed
+
+- Updating TeamHub stopped right after the backup for copies whose `package-lock.json` had been changed (for example
+  by committing it after an install): git reported a conflict in that file. The update now takes the new release's
+  copy, since npm writes that file and installing the update rewrites it anyway.
+- The setup wizard's page no longer reloads by itself when an update replaces the wizard's own files, so update
+  progress and any error message stay on screen.
+
 ## [1.0.4] - 2026-10-06
 ### Security
 

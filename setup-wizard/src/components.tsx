@@ -280,6 +280,7 @@ export interface ProcessedLogo {
   ext: 'webp' | 'svg';
   favicon: string; // png 64
   apple: string; // png 180
+  social: string; // jpeg 1200×630, the picture in link previews (Discord, iMessage, Slack, social media…)
   suggestedColor: string | null;
   preview: string;
 }
@@ -325,6 +326,23 @@ function render(img: HTMLImageElement, size: number, type: string, padBg?: strin
   return c.toDataURL(type, 0.85);
 }
 
+/** The link-preview picture: the logo centered on white at 1200×630, the size every platform shows full width. */
+function renderSocial(img: HTMLImageElement): string {
+  const c = document.createElement('canvas');
+  c.width = 1200;
+  c.height = 630;
+  const ctx = c.getContext('2d')!;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(0, 0, 1200, 630);
+  // Platforms crop the sides on phones (down to a square), so the logo stays inside the middle.
+  const w = img.naturalWidth || 630;
+  const h = img.naturalHeight || 630;
+  const s = Math.min(560 / w, 420 / h);
+  ctx.drawImage(img, (1200 - w * s) / 2, (630 - h * s) / 2, w * s, h * s);
+  // JPEG: a fraction of a PNG's size at this size, and the background is solid anyway.
+  return c.toDataURL('image/jpeg', 0.9);
+}
+
 export async function processLogo(file: File): Promise<ProcessedLogo> {
   if (file.size > 8 * 1024 * 1024) throw new Error('That image is over 8 MB. Try a smaller one.');
   const dataUrl = await new Promise<string>((res) => {
@@ -349,6 +367,7 @@ export async function processLogo(file: File): Promise<ProcessedLogo> {
     ext: isSvg ? 'svg' : 'webp',
     favicon: render(img, 64, 'image/png', '#FFFFFF', true, solid),
     apple: render(img, 180, 'image/png', '#FFFFFF'),
+    social: renderSocial(img),
     suggestedColor,
     preview: dataUrl,
   };

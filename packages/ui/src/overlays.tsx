@@ -131,7 +131,7 @@ export interface MenuItem {
   separatorBefore?: boolean;
 }
 
-export function Menu({ trigger, items, align = 'end', label }: { trigger: ReactNode; items: (MenuItem | null | false)[]; align?: 'start' | 'end'; label?: ReactNode }) {
+export function Menu({ trigger, items, align = 'end', label, footer }: { trigger: ReactNode; items: (MenuItem | null | false)[]; align?: 'start' | 'end'; label?: ReactNode; footer?: ReactNode }) {
   const list = items.filter(Boolean) as MenuItem[];
   return (
     <RMenu.Root>
@@ -158,6 +158,12 @@ export function Menu({ trigger, items, align = 'end', label }: { trigger: ReactN
               </RMenu.Item>
             </div>
           ))}
+          {footer && (
+            <>
+              <RMenu.Separator className="my-1 h-px bg-border" />
+              <div className="px-2.5 py-1 text-[11.5px] text-faint">{footer}</div>
+            </>
+          )}
         </RMenu.Content>
       </RMenu.Portal>
     </RMenu.Root>

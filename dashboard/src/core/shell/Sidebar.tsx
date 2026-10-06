@@ -1,5 +1,5 @@
 import { NavLink, useLocation, useNavigate } from 'react-router';
-import { Check, ChevronsUpDown, ExternalLink, Home as HomeIcon, LogOut, MessagesSquare, Monitor, Moon, Search, Settings, Shield, Sun, User, Users } from 'lucide-react';
+import { Check, ChevronsUpDown, Compass, ExternalLink, Home as HomeIcon, LogOut, MessagesSquare, Monitor, Moon, Search, Settings, Shield, Sun, User, Users } from 'lucide-react';
 import { Avatar, Kbd, Menu, ModKey, SidebarItem, SidebarSection, TeamDot, cn, useMediaQuery, safeHref } from '@teamhub/ui';
 import { canWith, isMultiTeam, runtime, setTeamScope, useCan, useToolLink, useMe, usePeople, useSession, useTeamScope, type LoadedModule } from '@teamhub/sdk';
 import { nav } from '../../generated/nav';
@@ -7,6 +7,7 @@ import { useAvailableUpdate } from './updates';
 import { ProgramLogo, TeamLogo } from '../auth/AuthLayout';
 import { NotificationsButton } from './Notifications';
 import { useTheme } from './theme';
+import { openTour } from './tourState';
 
 const CATEGORY_LABEL: Record<string, string> = { team: 'Team', engineering: 'Engineering', competition: 'Competition', outreach: 'Outreach & Business' };
 
@@ -161,11 +162,13 @@ function UserMenu() {
       }
       items={[
         { label: 'My profile', icon: <User />, onSelect: () => nav('/me') },
+        { label: 'Take the tour', icon: <Compass />, onSelect: openTour },
         { label: 'Light', icon: pref === 'light' ? <Check /> : <Sun />, onSelect: () => setPref('light'), separatorBefore: true },
         { label: 'Dark', icon: pref === 'dark' ? <Check /> : <Moon />, onSelect: () => setPref('dark') },
         { label: 'System', icon: pref === 'system' ? <Check /> : <Monitor />, onSelect: () => setPref('system') },
         { label: 'Sign out', icon: <LogOut />, onSelect: signOut, separatorBefore: true },
       ]}
+      footer={`TeamHub ${runtime().config.version}`}
     />
   );
 }

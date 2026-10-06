@@ -36,7 +36,7 @@ export default defineModule({
   buckets: [],
   toolLinkSlots: [],
   widgets: [
-    { id: 'take-today', title: 'Practice today', defaultFor: ['captain', 'mentor'] },
+    { id: 'take-today', title: 'Attendance today', defaultFor: ['captain', 'mentor'] },
     { id: 'my-attendance', title: 'Your attendance', defaultFor: ['member', 'captain'] },
   ],
   exportTables: ['att_sessions', 'att_presence'],

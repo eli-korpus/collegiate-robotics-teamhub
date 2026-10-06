@@ -1,3 +1,6 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { parseConfig } from '@teamhub/config-schema';
 import { compileFunctions, describePlan, diffConfigs, generateDashboardFiles, loadCatalog, planSql, resolveConfig, themeCss } from './index';
@@ -44,6 +47,26 @@ describe('generator', async () => {
     const css = themeCss(r);
     expect(css.css).toContain('--team-a:');
     expect(css.css).toContain('--team-b:');
+  });
+
+  it('always gives the site a link preview: the logo picture, the app icon, or the TeamHub picture', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'teamhub-preview-'));
+    const before = process.env.TEAMHUB_TEAM_DIR;
+    process.env.TEAMHUB_TEAM_DIR = dir;
+    const html = () => JSON.parse(generateDashboardFiles(resolveConfig(cfg({ hosting: { provider: 'netlify', url: 'https://robots.example.org', basePath: '/' } }), catalog)).find((f) => f.path.endsWith('html.json'))!.content);
+    try {
+      expect(html()).toMatchObject({ socialImage: 'teamhub-preview.png', socialImageWide: true, siteUrl: 'https://robots.example.org' });
+      expect(html().description).toBe('Team dashboard for Gen Test (FTC teams 1 and 2). Members sign in here, and new members can ask to join.');
+      mkdirSync(join(dir, 'branding'));
+      writeFileSync(join(dir, 'branding', 'apple-touch-icon.png'), 'icon');
+      expect(html()).toMatchObject({ socialImage: expect.stringMatching(/^branding\/apple-touch-icon\.png\?v=/), socialImageWide: false });
+      writeFileSync(join(dir, 'branding', 'social.jpg'), 'wide');
+      expect(html()).toMatchObject({ socialImage: expect.stringMatching(/^branding\/social\.jpg\?v=/), socialImageWide: true });
+    } finally {
+      if (before === undefined) delete process.env.TEAMHUB_TEAM_DIR;
+      else process.env.TEAMHUB_TEAM_DIR = before;
+      rmSync(dir, { recursive: true, force: true });
+    }
   });
 
   it('diffs configs in human terms', () => {

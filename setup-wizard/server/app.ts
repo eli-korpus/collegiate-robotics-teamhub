@@ -25,7 +25,7 @@ import { checkForUpdate, installDependencies, mergeRelease, readState, revertUpd
 import { checkSite, existingHostPaths, hostFiles, keepaliveFile, updatesWorkflowFile, writeHostFiles } from './hosting';
 import { BACKUP_ROOT, exportData, importData } from './backup';
 import { respondWithProgress, withStatus, type Progress } from './progress';
-import { applyConfig, computePlan, configureAuth, createAdmin, dataApiStatus, exposePublicSchema, newSeason, readDbState, removeEverything } from './provision';
+import { applyConfig, computePlan, configureAuth, createAdmin, dataApiStatus, exposePublicSchema, newSeason, readDbState, readSmtp, removeEverything, saveSmtp } from './provision';
 
 /** Hostnames the wizard answers to. Anything else is a DNS-rebinding attempt (a website pointing its own domain at 127.0.0.1). */
 export const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]']);
@@ -269,10 +269,25 @@ export function createApp(deps: AppDeps = {}) {
     return c.json({ ok: true });
   });
 
+  app.get('/email', async (c) => {
+    const config = readConfig();
+    if (!config) throw new MgmtError('No config yet.', 400);
+    return c.json({ on: config.features.email, smtp: await readSmtp(mgmt(), projectRef(config)) });
+  });
+
+  app.post('/email/smtp', async (c) => {
+    const config = readConfig();
+    if (!config) throw new MgmtError('No config yet.', 400);
+    const body = await c.req.json<{ host: string; port: number; user: string; pass?: string; senderEmail: string; senderName: string }>();
+    return c.json({ smtp: await saveSmtp(mgmt(), projectRef(config), body) });
+  });
+
   app.post('/email', async (c) => {
     const { on } = await c.req.json<{ on: boolean }>();
     const config = readConfig();
     if (!config) throw new MgmtError('No config yet.', 400);
+    // Supabase's built-in email only reaches the project's own team, so confirmations to anyone else would fail.
+    if (on && !(await readSmtp(mgmt(), projectRef(config)))) throw new MgmtError('Add your email provider first (step 1), or new people won’t get their confirmation email and can’t join.', 400);
     const next = { ...config, features: { ...config.features, email: on } };
     return respondWithProgress(c, async (p) => {
       p.plan([

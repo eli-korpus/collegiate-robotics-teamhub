@@ -13,6 +13,8 @@ export function Login() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
+  const [unconfirmed, setUnconfirmed] = useState(false);
+  const [resent, setResent] = useState(false);
   const emailEnabled = runtime().config.features.email;
   const next = params.get('next');
 
@@ -26,12 +28,37 @@ export function Login() {
           e.preventDefault();
           setBusy(true);
           setError(null);
+          setUnconfirmed(false);
+          setResent(false);
           const { error } = await sb.auth.signInWithPassword({ email: email.trim(), password });
           setBusy(false);
-          if (error) setError(/invalid/i.test(error.message) ? 'Wrong email or password.' : friendlyError(error));
+          if (error && /not confirmed/i.test(error.message)) setUnconfirmed(true);
+          else if (error) setError(/invalid/i.test(error.message) ? 'Wrong email or password.' : friendlyError(error));
         }}
       >
         {error && <Banner tone="danger">{error}</Banner>}
+        {unconfirmed && (
+          <Banner
+            tone="warning"
+            title="Confirm your email first"
+            action={
+              !resent && (
+                <Button
+                  size="sm"
+                  onClick={async () => {
+                    const { error } = await sb.auth.resend({ type: 'signup', email: email.trim(), options: { emailRedirectTo: `${location.origin}${import.meta.env.BASE_URL}` } });
+                    if (error) setError(friendlyError(error));
+                    else setResent(true);
+                  }}
+                >
+                  Send it again
+                </Button>
+              )
+            }
+          >
+            {resent ? 'We sent a new link. Check your email (and your spam folder).' : 'Open the link we emailed you when you joined, then sign in.'}
+          </Banner>
+        )}
         <Field label="Email" required>{(id) => <Input id={id} type="email" autoComplete="email" required value={email} onChange={(e) => setEmail(e.target.value)} />}</Field>
         <Field label="Password" required>
           {(id) => <Input id={id} type="password" autoComplete="current-password" required value={password} onChange={(e) => setPassword(e.target.value)} />}

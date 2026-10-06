@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { Archive, CalendarRange, DatabaseZap, Download, Mail, Pencil, ShieldAlert, Upload, KeyRound } from 'lucide-react';
-import { Banner, Button, Card, Checkbox, Dialog, Input, Switch, toast } from '@teamhub/ui';
+import { Archive, CalendarRange, CheckCircle2, DatabaseZap, Download, ExternalLink, Mail, Pencil, ShieldAlert, Upload, KeyRound } from 'lucide-react';
+import { TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
+import { Banner, Button, Card, Checkbox, Dialog, Field, Input, Select, Spinner, Switch, toast } from '@teamhub/ui';
 import { api, type Catalog, type ServerState } from '../api';
 import { ModuleIcon } from '../components';
 import { UpdateDialog } from './Update';
@@ -67,7 +68,7 @@ export function ExistingHome({ server, catalog, onEdit, refresh }: { server: Ser
         <Tile icon={<Download />} title="Backup & Export" body="Download all data and files as a zip." onClick={() => setDialog('backup')} />
         <Tile icon={<Upload />} title="Import" body="Restore a backup (e.g. into a new Supabase project)." onClick={() => setDialog('import')} />
         <Tile icon={<CalendarRange />} title="New Season" body="Set the new season label and roll over tabs." onClick={() => setDialog('season')} />
-        <Tile icon={<Mail />} title="Email" body={c.features.email ? 'Self-serve password reset is on.' : 'Turn on email confirmations after adding SMTP.'} onClick={() => setDialog('email')} />
+        <Tile icon={<Mail />} title="Email" body={c.features.email ? 'Email confirmation and “Forgot your password?” are on.' : 'Connect an email provider for confirmations and “Forgot your password?”.'} onClick={() => setDialog('email')} />
         <Tile icon={<ShieldAlert />} title="Danger zone" body="Remove TeamHub from the database." onClick={() => setDialog('danger')} danger />
       </div>
       {dialog === 'connect' && <ConnectDialog onClose={() => setDialog(null)} refresh={refresh} />}
@@ -205,17 +206,155 @@ function SeasonDialog({ server, catalog, onClose, refresh }: { server: ServerSta
   );
 }
 
+interface Smtp {
+  host: string;
+  port: number;
+  user: string;
+  senderEmail: string;
+  senderName: string;
+}
+
+/** Common free providers. Each needs its own account; docs/email.md walks through them. */
+const SMTP_PRESETS: { id: string; label: string; host: string; port: number; user: string; userHint: string; passHint: string }[] = [
+  { id: 'brevo', label: 'Brevo (free, no domain needed)', host: 'smtp-relay.brevo.com', port: 587, user: '', userHint: 'The SMTP login from Brevo > SMTP & API (it ends in @smtp-brevo.com).', passHint: 'An SMTP key from Brevo > SMTP & API.' },
+  { id: 'gmail', label: 'Gmail or Google Workspace', host: 'smtp.gmail.com', port: 465, user: '', userHint: 'The full Gmail address.', passHint: 'A 16-letter app password (Google Account > Security > App passwords), not the normal password.' },
+  { id: 'resend', label: 'Resend (needs your own domain)', host: 'smtp.resend.com', port: 465, user: 'resend', userHint: 'Always "resend".', passHint: 'A Resend API key (starts with re_).' },
+  { id: 'other', label: 'Other (school or another provider)', host: '', port: 587, user: '', userHint: 'From your provider or school IT.', passHint: 'From your provider or school IT.' },
+];
+
 function EmailDialog({ server, onClose, refresh }: { server: ServerState; onClose: () => void; refresh: () => Promise<void> }) {
-  const [on, setOn] = useState(server.config!.features.email);
+  const c = server.config!;
+  const [on, setOn] = useState(c.features.email);
   const action = useAction<{ ok: boolean }>();
+  const [smtp, setSmtp] = useState<Smtp | null | undefined>(undefined);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [preset, setPreset] = useState(SMTP_PRESETS[0]);
+  const [form, setForm] = useState<Smtp & { pass: string }>({ host: SMTP_PRESETS[0].host, port: SMTP_PRESETS[0].port, user: '', pass: '', senderEmail: '', senderName: c.program.name });
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  useEffect(() => {
+    api<{ smtp: Smtp | null }>('/email')
+      .then((r) => setSmtp(r.smtp))
+      .catch((e) => setLoadError((e as Error).message));
+  }, []);
+  const set = (patch: Partial<typeof form>) => setForm((f) => ({ ...f, ...patch }));
+  const startEdit = () => {
+    const match = SMTP_PRESETS.find((p) => p.host && p.host === smtp?.host) ?? SMTP_PRESETS[SMTP_PRESETS.length - 1];
+    setPreset(match);
+    if (smtp) setForm({ ...smtp, pass: '', senderName: smtp.senderName || c.program.name });
+    setEditing(true);
+  };
+  const showForm = smtp === null || editing;
   return (
-    <Dialog open onOpenChange={(v) => !v && onClose()} title="Email" description="Supabase's built-in email only reaches your own Supabase team members, so TeamHub works without email by default.">
-      <div className="space-y-4 text-[13.5px]">
-        <ol className="list-decimal space-y-1 pl-5 text-muted">
-          <li>In the Supabase dashboard &gt; Authentication &gt; Emails &gt; SMTP Settings, add an email provider (e.g. Resend, SendGrid, your school's SMTP).</li>
-          <li>Turn this on. New signups then confirm their email, and the login page offers “Forgot your password?”.</li>
-        </ol>
-        <Switch checked={on} onChange={setOn} label="Email confirmation & self-serve password reset" />
+    <Dialog
+      open
+      onOpenChange={(v) => !v && onClose()}
+      title="Email"
+      description="Lets TeamHub email people: a link to confirm their address when they join, and “Forgot your password?” on the sign-in page. Without it, mentors give out reset links from People."
+    >
+      <div className="space-y-5 text-[13.5px]">
+        <section className="space-y-3">
+          <h3 className="font-semibold">1. Email provider</h3>
+          <p className="text-muted">
+            Supabase’s built-in email only reaches your own Supabase account, so TeamHub sends through a free email service instead.{' '}
+            <a href={`https://github.com/${TEAMHUB_UPSTREAM_REPO}/blob/main/docs/email.md`} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 font-medium text-accent hover:underline">
+              Step-by-step guide <ExternalLink className="size-3.5" />
+            </a>
+          </p>
+          {loadError && <Banner tone="danger" title="Couldn’t read your email settings">{loadError}</Banner>}
+          {smtp === undefined && !loadError && <Spinner />}
+          {smtp && !editing && (
+            <div className="flex items-start gap-3 rounded-md border border-border p-3">
+              <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-success" />
+              <div className="min-w-0 flex-1">
+                <p className="font-medium">
+                  Sending as {smtp.senderName || 'TeamHub'} &lt;{smtp.senderEmail}&gt;
+                </p>
+                <p className="truncate text-[12.5px] text-muted">
+                  through {smtp.host}:{smtp.port}
+                </p>
+              </div>
+              <Button size="sm" onClick={startEdit}>
+                Change
+              </Button>
+            </div>
+          )}
+          {showForm && smtp !== undefined && (
+            <div className="space-y-3">
+              <Field label="Provider">
+                {(id) => (
+                  <Select
+                    id={id}
+                    value={preset.id}
+                    onChange={(e) => {
+                      const p = SMTP_PRESETS.find((x) => x.id === e.target.value)!;
+                      setPreset(p);
+                      set({ host: p.host, port: p.port, user: p.user });
+                    }}
+                  >
+                    {SMTP_PRESETS.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.label}
+                      </option>
+                    ))}
+                  </Select>
+                )}
+              </Field>
+              <div className="grid gap-3 sm:grid-cols-[1fr_7rem]">
+                <Field label="Server (host)" required>
+                  {(id) => <Input id={id} value={form.host} placeholder="smtp.example.org" onChange={(e) => set({ host: e.target.value })} />}
+                </Field>
+                <Field label="Port" required>
+                  {(id) => <Input id={id} type="number" value={form.port || ''} onChange={(e) => set({ port: Number(e.target.value) })} />}
+                </Field>
+              </div>
+              <Field label="Username" required hint={preset.userHint}>
+                {(id) => <Input id={id} value={form.user} autoComplete="off" onChange={(e) => set({ user: e.target.value })} />}
+              </Field>
+              <Field label="Password or key" required={!smtp} hint={`${preset.passHint} It goes straight to Supabase and isn’t saved on this computer or in your repository.${smtp ? ' Leave blank to keep the saved one.' : ''}`}>
+                {(id) => <Input id={id} type="password" value={form.pass} autoComplete="new-password" onChange={(e) => set({ pass: e.target.value })} />}
+              </Field>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <Field label="Send from (email)" required hint="Must be allowed by your provider (a verified sender).">
+                  {(id) => <Input id={id} type="email" value={form.senderEmail} placeholder="robotics@yourschool.org" onChange={(e) => set({ senderEmail: e.target.value })} />}
+                </Field>
+                <Field label="Sender name" hint="What people see in their inbox.">
+                  {(id) => <Input id={id} value={form.senderName} onChange={(e) => set({ senderName: e.target.value })} />}
+                </Field>
+              </div>
+              {saveError && <Banner tone="danger" title="Not saved">{saveError}</Banner>}
+              <div className="flex gap-2">
+                <Button
+                  variant="primary"
+                  loading={saving}
+                  onClick={async () => {
+                    setSaving(true);
+                    setSaveError(null);
+                    try {
+                      const r = await api<{ smtp: Smtp | null }>('/email/smtp', form);
+                      setSmtp(r.smtp);
+                      setEditing(false);
+                      set({ pass: '' });
+                      toast.success('Email provider saved in Supabase');
+                    } catch (e) {
+                      setSaveError((e as Error).message);
+                    } finally {
+                      setSaving(false);
+                    }
+                  }}
+                >
+                  Save provider
+                </Button>
+                {editing && <Button onClick={() => setEditing(false)}>Cancel</Button>}
+              </div>
+            </div>
+          )}
+        </section>
+        <section className="space-y-3 border-t border-border pt-4">
+          <h3 className="font-semibold">2. Turn it on</h3>
+          <p className="text-muted">New people then confirm their email before they can sign in, and the sign-in page offers “Forgot your password?”.</p>
+          <Switch checked={on} onChange={setOn} disabled={!smtp && !on} label="Email confirmation & self-serve password reset" description={!smtp && !on ? 'Save an email provider first.' : undefined} />
         <ActionButton
           state={action.state}
           label="Save"
@@ -232,6 +371,7 @@ function EmailDialog({ server, onClose, refresh }: { server: ServerState; onClos
             <PublishButton message={on ? 'Turn on email confirmation' : 'Turn off email confirmation'} label="Publish to your website" doneLabel="Published" next="nothing else. Your login page updates in a minute or two." />
           </>
         )}
+        </section>
       </div>
     </Dialog>
   );

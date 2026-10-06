@@ -29,9 +29,9 @@ The file is validated by `packages/config-schema` (zod) every time the app is ge
 | `nav` | object | `order`: optional explicit sidebar order of tab ids. |
 | `toolLinks` | array | **Not stored in this file** (it's public on GitHub, and links like a team chat invite or a shared folder may be private). The setup wizard puts them straight into the database on first setup; after that they're edited in the dashboard (Admin > Tool links). A hand-written config may still list them: `{ slot, teamId, label, url, section, description }`, used only when the database has no links yet. |
 | `join.allowedEmailDomains` | string[] | Optional. Only emails at these domains (or their subdomains) can sign up, e.g. `["example.edu"]`. Empty lets anyone with the join link sign up. Enforced by the database. Admins can change it, and allow specific addresses, in Admin > Who can join; the wizard only writes it when you change it in the wizard. |
-| `hosting` | object | `provider` (`cloudflare`/`vercel`/`netlify`/`github-pages`), `url`, `basePath` (`/` unless GitHub project pages). |
+| `hosting` | object | `provider` (`cloudflare`/`vercel`/`netlify`/`github-pages`), `url`, `basePath` (`/` unless GitHub project pages). `url` also gives link previews their full picture address. |
 | `supabase` | object | `url`, `anonKey` (the publishable key), `projectRef`. |
-| `features` | object | `email`: turn on only after configuring custom SMTP in Supabase (enables email confirmation and self-serve password reset). |
+| `features` | object | `email`: email confirmation and self-serve password reset. Turn it on with the setup wizard > Email, which first saves your email provider (SMTP) in Supabase. See [email.md](email.md). |
 
 ## Module states
 

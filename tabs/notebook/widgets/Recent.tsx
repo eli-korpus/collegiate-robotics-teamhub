@@ -8,6 +8,8 @@ export default function RecentEntries({ teamId }: { teamId: string | null }) {
   const entries = useEntries();
   const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10);
   const list = (entries.data ?? []).filter((e) => e.date >= weekAgo && (!teamId || !e.team_id || e.team_id === teamId));
+  // Nothing written this week: no card (the Notebook tab is one click away).
+  if (!list.length) return null;
   return (
     <Card>
       <CardHeader icon={<NotebookPen className="size-4" />} title="Notebook this week" subtitle={`${list.length} entr${list.length === 1 ? 'y' : 'ies'}`} action={<Link to="/notebook?new=1" className="text-[12px] font-medium text-accent">Write</Link>} />
@@ -20,7 +22,6 @@ export default function RecentEntries({ teamId }: { teamId: string | null }) {
             </Link>
           </li>
         ))}
-        {!list.length && <li className="px-2 py-1 text-[12.5px] text-faint">No entries yet this week.</li>}
       </ul>
     </Card>
   );

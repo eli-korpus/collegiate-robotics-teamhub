@@ -11,13 +11,13 @@ jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Only in the upstream repository
         id: gate
         run: echo "upstream=$([ -f team/teamhub.config.json ] && echo false || echo true)" >> "$GITHUB_OUTPUT"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         if: steps.gate.outputs.upstream == 'true'
         with:
           node-version: 24

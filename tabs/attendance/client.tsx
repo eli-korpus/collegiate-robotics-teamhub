@@ -6,7 +6,7 @@ export default defineClient('teamhub-module:attendance', {
   icon: UserCheck,
   Routes: lazy(() => import('./ui/Routes')),
   widgets: [
-    { id: 'take-today', title: 'Practice today', priority: 'today', perm: 'attendance.take', component: lazy(() => import('./widgets/TakeToday')) },
+    { id: 'take-today', title: 'Attendance today', priority: 'today', perm: 'attendance.take', component: lazy(() => import('./widgets/TakeToday')) },
     { id: 'my-attendance', title: 'Your attendance', component: lazy(() => import('./widgets/MyAttendance')) },
   ],
   quickActions: [

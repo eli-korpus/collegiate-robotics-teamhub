@@ -18,7 +18,7 @@ export function loadGenerated() {
   return { config, schema };
 }
 
-export async function mockSupabase(page: Page, opts: { tables?: Record<string, unknown[]>; rpc?: Record<string, unknown>; role?: 'mentor' | 'member'; admin?: boolean; realFtcScout?: boolean; latestRelease?: { tag_name: string; name: string } } = {}) {
+export async function mockSupabase(page: Page, opts: { tables?: Record<string, unknown[]>; rpc?: Record<string, unknown>; role?: 'mentor' | 'member'; admin?: boolean; realFtcScout?: boolean; latestRelease?: { tag_name: string; name: string }; tour?: boolean } = {}) {
   const { config, schema } = loadGenerated();
   const base = config.supabase.url as string;
   const ref = new URL(base).hostname.split('.')[0];
@@ -46,10 +46,12 @@ export async function mockSupabase(page: Page, opts: { tables?: Record<string, u
   };
 
   await page.addInitScript(
-    ([key, value]) => {
+    ([key, value, tourKey]) => {
       localStorage.setItem(key, value);
+      // The welcome tour opens on a first visit; tests see it only when they ask for it.
+      if (tourKey) localStorage.setItem(tourKey, '1');
     },
-    [`sb-${ref}-auth-token`, JSON.stringify(session)],
+    [`sb-${ref}-auth-token`, JSON.stringify(session), opts.tour ? '' : `teamhub-tour-seen:${ME}`],
   );
   await page.routeWebSocket(/realtime/, () => {});
   await page.route(`${base}/**`, async (route) => {

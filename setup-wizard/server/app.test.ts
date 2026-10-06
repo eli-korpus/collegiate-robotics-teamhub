@@ -18,6 +18,8 @@ let db: TestDb;
 const calls: { method: string; path: string; body?: unknown }[] = [];
 let postgrestSchemas = 'public, graphql_public';
 let databaseDown = false;
+// Supabase's auth settings (the Management API never returns the SMTP password; neither does this fake).
+const authConfig: Record<string, unknown> = { rate_limit_email_sent: 2 };
 
 async function fakeFetch(input: string | URL | Request, init?: RequestInit): Promise<Response> {
   const url = new URL(typeof input === 'string' ? input : input instanceof URL ? input.href : input.url);
@@ -46,7 +48,10 @@ async function fakeFetch(input: string | URL | Request, init?: RequestInit): Pro
   }
   if (p.startsWith(`/projects/${REF}/functions/deploy`)) return json({ id: 'fn' }, 201);
   if (p === `/projects/${REF}/secrets`) return json(null, 201);
-  if (p === `/projects/${REF}/config/auth`) return json({});
+  if (p === `/projects/${REF}/config/auth`) {
+    if (method === 'PATCH') Object.assign(authConfig, body);
+    return json(authConfig);
+  }
   if (p === `/projects/${REF}/postgrest`) {
     if (method === 'PATCH') postgrestSchemas = body.db_schema;
     return json({ db_schema: postgrestSchemas, max_rows: 1000 });
@@ -184,10 +189,32 @@ describe('wizard API', () => {
     expect(r.body.backup.path).toContain(tmp);
   });
 
-  it('turns email confirmation on when the team adds SMTP', async () => {
+  it('turns email confirmation on only after an email provider (SMTP) is saved in Supabase', async () => {
+    expect((await call('GET', '/email')).body).toEqual({ on: false, smtp: null });
+    const refused = await call('POST', '/email', { on: true });
+    expect(refused.status).toBe(400);
+    expect(refused.body.error).toMatch(/email provider first/);
+
+    const provider = { host: 'smtp-relay.brevo.com', port: 587, user: 'abc@smtp-brevo.com', senderEmail: 'robotics@example.org', senderName: 'Example Robotics' };
+    expect((await call('POST', '/email/smtp', { ...provider, host: 'https://smtp.example.org' })).status).toBe(400);
+    expect((await call('POST', '/email/smtp', provider)).body.error).toMatch(/password/);
+    const saved = await call('POST', '/email/smtp', { ...provider, pass: 'xsmtpsib-secret' });
+    expect(saved.body.smtp).toEqual(provider);
+    expect(authConfig).toMatchObject({ smtp_host: provider.host, smtp_port: '587', smtp_pass: 'xsmtpsib-secret', smtp_admin_email: provider.senderEmail, rate_limit_email_sent: 30 });
+    // The password goes to Supabase only: never back to the page, never into the team's files.
+    expect(JSON.stringify((await call('GET', '/email')).body)).not.toContain('xsmtpsib-secret');
+    expect(readFileSync(join(tmp, 'team', 'teamhub.config.json'), 'utf8')).not.toContain('xsmtpsib-secret');
+
+    // Changing the sender keeps the saved password when it's left blank.
+    await call('POST', '/email/smtp', { ...provider, senderName: 'Robots' });
+    const patch = calls.filter((c) => c.method === 'PATCH' && c.path.endsWith('/config/auth')).at(-1);
+    expect(patch?.body).not.toHaveProperty('smtp_pass');
+    expect(authConfig.smtp_sender_name).toBe('Robots');
+
     await call('POST', '/email', { on: true });
-    const last = calls.filter((c) => c.path.endsWith('/config/auth')).at(-1);
+    const last = calls.filter((c) => c.path.endsWith('/config/auth') && c.method === 'PATCH').at(-1);
     expect(last?.body).toMatchObject({ mailer_autoconfirm: false });
+    expect((await call('GET', '/email')).body.on).toBe(true);
   });
 
   it('detects a Data API that does not serve "public", fixes it, and checks the live API after applying', async () => {

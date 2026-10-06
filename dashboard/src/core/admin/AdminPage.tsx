@@ -53,6 +53,7 @@ import { agentPrompt } from '@teamhub/sdk/agent-prompt';
 import { TEAMHUB_CREDIT, TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
 import { UpdateNotice } from './UpdateNotice';
 import { WhoCanJoin } from './WhoCanJoin';
+import { openTour } from '../shell/tourState';
 import { ProfileFieldsAdmin } from './ProfileFieldsAdmin';
 
 const SECTIONS = [
@@ -71,7 +72,7 @@ const SECTIONS = [
 export default function AdminPage() {
   return (
     <AdminOnly fallback={<NoAccess what="Admin" />}>
-      <PageHeader title="Admin" icon={<Shield />} subtitle="Storage, tabs, admins and program settings">
+      <PageHeader title="Admin" icon={<Shield />} subtitle={`Storage, tabs, admins and program settings · TeamHub ${runtime().config.version}`}>
         <nav className="-mb-1 flex gap-1 relative overflow-x-auto" aria-label="Admin sections">
           {SECTIONS.map((s) => (
             <NavLink
@@ -654,6 +655,13 @@ function Help() {
       </Card>
       <Card className="space-y-2 p-4">
         <p className="font-semibold">Change right here, no wizard needed</p>
+        <p className="text-muted">
+          New to TeamHub?{' '}
+          <button type="button" className="font-medium text-accent hover:underline" onClick={openTour}>
+            Take the welcome tour
+          </button>{' '}
+          (everyone can, from the menu under their name).
+        </p>
         <ul className="list-disc space-y-1 pl-5 text-muted">
           <li>Approving new members: People &gt; Requests.</li>
           <li>Someone's name, teams, role and profile answers: open them in People &gt; Edit. Positions: People &gt; Positions.</li>
@@ -669,7 +677,7 @@ function Help() {
           <li>Tabs and their options, teams, colors and logos, subteams, permissions, and who can see each setup profile field: wizard &gt; Edit. These are built into the site, so it rebuilds.</li>
           <li>Data backups and restore: wizard &gt; Backup &amp; Export.</li>
           <li>New season rollover: wizard &gt; New Season.</li>
-          <li>Email (self-serve password reset): add SMTP in Supabase, then wizard &gt; Enable email.</li>
+          <li>Email (confirm new accounts, self-serve password reset): wizard &gt; Email. Add an email provider there, then turn it on.</li>
         </ul>
       </Card>
       <p className="text-muted">

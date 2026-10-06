@@ -17,7 +17,16 @@ const PORT = Number(process.env.TEAMHUB_WIZARD_PORT ?? 4747);
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 async function main() {
-  const vite = await createVite({ root, configFile: join(root, 'vite.config.ts'), server: { middlewareMode: true }, appType: 'spa', logLevel: 'warn' });
+  // No live reload: an update rewrites the wizard's own files mid-way, and a reload would hide its progress and any
+  // error. (TEAMHUB_WIZARD_DEV=1 turns it back on for people working on the wizard itself.)
+  const dev = process.env.TEAMHUB_WIZARD_DEV === '1';
+  const vite = await createVite({
+    root,
+    configFile: join(root, 'vite.config.ts'),
+    server: { middlewareMode: true, ...(dev ? {} : { hmr: false, watch: null }) },
+    appType: 'spa',
+    logLevel: 'warn',
+  });
   const api = getRequestListener(createApp({ onRestart: () => restart() }).fetch);
   const server = createHttpServer((req, res) => {
     // Refuse DNS-rebinding requests for every path (API, logos and the UI itself).

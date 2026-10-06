@@ -13,6 +13,7 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+## [1.0.4] - 2026-10-06
 ### Security
 
 - Links people save (tool links, vendor pages, sponsor websites, notebook and manufacturing links…) are checked before

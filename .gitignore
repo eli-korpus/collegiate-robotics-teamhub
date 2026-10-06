@@ -6,6 +6,7 @@ dist/
 !.env.example
 dashboard/src/generated/
 team/.wizard-draft.json
+team/.wizard-branding-originals/
 *.log
 .vscode/
 .idea/

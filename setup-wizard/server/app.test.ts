@@ -2,7 +2,7 @@
  * Wizard API tests with a fake Supabase: Management API calls are answered by an in-process PGlite database,
  * so "Connect Supabase → apply → create admin → edit → update" runs end to end without network.
  */
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
@@ -162,6 +162,19 @@ describe('wizard API', () => {
     expect(events.at(-1).message).toBeTruthy();
     const steps = events.filter((e) => e.type === 'steps').at(-1).steps;
     expect(steps.find((s: { id: string }) => s.id === 'connect').status).toBe('failed');
+  });
+
+  it('discarding an edit puts back the logo files it replaced', async () => {
+    const png = (byte: number) => `data:image/png;base64,${Buffer.from([0x89, 0x50, 0x4e, 0x47, byte]).toString('base64')}`;
+    const dir = join(tmp, 'team', 'branding');
+    await call('POST', '/branding', { name: 'favicon.png', dataUrl: png(1) });
+    await call('POST', '/apply', { config: config() }); // applied: this logo is now the saved one
+    await call('POST', '/branding', { name: 'favicon.png', dataUrl: png(2) });
+    await call('POST', '/branding', { name: 'team-x.png', dataUrl: png(3) });
+    expect(readFileSync(join(dir, 'favicon.png'))[4]).toBe(2);
+    await call('DELETE', '/draft');
+    expect(readFileSync(join(dir, 'favicon.png'))[4]).toBe(1);
+    expect(existsSync(join(dir, 'team-x.png'))).toBe(false);
   });
 
   it('runs a new-season rollover and records the label', async () => {

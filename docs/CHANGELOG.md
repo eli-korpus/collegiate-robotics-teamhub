@@ -13,6 +13,11 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Fixed
+
+- Setup wizard: discarding an edit where you uploaded a logo now puts the old logo and browser-tab icon back, so the
+  discarded logo is never published by mistake.
+
 ### Security
 
 - Links people save (tool links, vendor pages, sponsor websites, notebook and manufacturing links…) are checked before

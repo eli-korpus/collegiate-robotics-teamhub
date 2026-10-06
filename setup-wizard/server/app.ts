@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { Hono, type MiddlewareHandler } from 'hono';
 import { z } from 'zod';
@@ -46,6 +46,25 @@ const localOnly: MiddlewareHandler = async (c, next) => {
 };
 
 const DRAFT = () => join(teamDir(), '.wizard-draft.json');
+/** Logo files an unapplied edit replaced (a ".new" marker means the file didn't exist before). */
+const BRANDING_ORIGINALS = () => join(teamDir(), '.wizard-branding-originals');
+function keepBrandingOriginal(name: string) {
+  const dir = BRANDING_ORIGINALS();
+  if (existsSync(join(dir, name)) || existsSync(join(dir, `${name}.new`))) return;
+  mkdirSync(dir, { recursive: true });
+  const file = join(teamDir(), 'branding', name);
+  if (existsSync(file)) copyFileSync(file, join(dir, name));
+  else writeFileSync(join(dir, `${name}.new`), '');
+}
+function restoreBranding() {
+  const dir = BRANDING_ORIGINALS();
+  if (!existsSync(dir)) return;
+  for (const f of readdirSync(dir)) {
+    if (f.endsWith('.new')) rmSync(join(teamDir(), 'branding', f.slice(0, -4)), { force: true });
+    else copyFileSync(join(dir, f), join(teamDir(), 'branding', f));
+  }
+  rmSync(dir, { recursive: true, force: true });
+}
 
 export interface AppDeps {
   fetch?: FetchLike;
@@ -152,6 +171,8 @@ export function createApp(deps: AppDeps = {}) {
   });
   app.delete('/draft', (c) => {
     rmSync(DRAFT(), { force: true });
+    // Discarding an edit also puts back any logo files it replaced, so a discarded logo is never published.
+    restoreBranding();
     return c.json({ ok: true });
   });
 
@@ -221,6 +242,8 @@ export function createApp(deps: AppDeps = {}) {
       const result = await applyConfig(m, ref, keys, await catalogP, config, { backupModules, siteUrl, skipFunctions }, p);
       p.plan([{ id: 'save', label: 'Save your settings on this computer' }]);
       await p.step('save', async () => writeConfig(config), () => 'team/teamhub.config.json');
+      // The new logos are now part of the saved settings: no going back to the old files on Discard.
+      rmSync(BRANDING_ORIGINALS(), { recursive: true, force: true });
       return result;
     });
   });
@@ -343,6 +366,7 @@ export function createApp(deps: AppDeps = {}) {
     const buf = Buffer.from(m[3], 'base64');
     if (buf.length > 600 * 1024) throw new MgmtError('Logo is too large after optimizing (max 600 KB)', 400);
     mkdirSync(join(teamDir(), 'branding'), { recursive: true });
+    keepBrandingOriginal(name);
     writeFileSync(join(teamDir(), 'branding', name), buf);
     return c.json({ path: `branding/${name}` });
   });

@@ -164,7 +164,7 @@ function Layout() {
             icon={<RotateCcw className="size-3.5" />}
             onClick={async () => {
               const editing = draft.flow === 'edit';
-              if (!(await confirm({ title: editing ? 'Discard these edits?' : 'Start setup over?', body: editing ? 'Nothing has been applied unless you clicked Apply.' : 'Your answers are cleared. Nothing in Supabase or GitHub is undone.', danger: true, confirmLabel: editing ? 'Discard' : 'Start over' }))) return;
+              if (!(await confirm({ title: editing ? 'Discard these edits?' : 'Start setup over?', body: editing ? 'Nothing has been applied unless you clicked Apply. Logos you uploaded in this edit are put back too.' : 'Your answers are cleared. Nothing in Supabase or GitHub is undone.', danger: true, confirmLabel: editing ? 'Discard' : 'Start over' }))) return;
               await api('/draft', undefined, 'DELETE');
               if (editing) reset(null);
               else location.reload();

@@ -6,7 +6,7 @@ import { api } from '../api';
 import { Section, StepShell } from '../components';
 import { useDraft } from '../draft';
 import { ApplyLog } from './connect';
-import { PublishButton } from './publish';
+import { PublishButton, WaitingToPublish } from './publish';
 import type { StepProps } from './basics';
 
 interface DiffLine {
@@ -67,6 +67,7 @@ export function Review({ onBack }: StepProps) {
 
   return (
     <StepShell title="Review & apply" subtitle="Here's everything that will change. Removing a tab always exports its data first." onBack={onBack}>
+      {!lines?.length && <WaitingToPublish recheck={draft.done.published} />}
       {!lines ? (
         <Spinner />
       ) : !lines.length ? (
@@ -131,7 +132,7 @@ export function Review({ onBack }: StepProps) {
               'The build failed. Your live site is untouched. Details:'
             )}
           </p>
-          {!buildLog.ok && <pre className="max-h-60 overflow-auto text-[11px]">{buildLog.log}</pre>}
+          {!buildLog.ok && <pre className="max-h-60 relative overflow-auto text-[11px]">{buildLog.log}</pre>}
         </div>
       )}
       {buildLog?.ok && <PublishButton message="Update TeamHub configuration" label="3. Commit & push (your host redeploys)" onDone={() => setDraft((d) => ({ ...d, done: { ...d.done, published: true } }))} />}

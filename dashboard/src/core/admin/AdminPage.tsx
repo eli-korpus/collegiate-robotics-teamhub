@@ -72,7 +72,7 @@ export default function AdminPage() {
   return (
     <AdminOnly fallback={<NoAccess what="Admin" />}>
       <PageHeader title="Admin" icon={<Shield />} subtitle="Storage, tabs, admins and program settings">
-        <nav className="-mb-1 flex gap-1 overflow-x-auto" aria-label="Admin sections">
+        <nav className="-mb-1 flex gap-1 relative overflow-x-auto" aria-label="Admin sections">
           {SECTIONS.map((s) => (
             <NavLink
               key={s.path}
@@ -235,7 +235,6 @@ function Storage() {
               <IconButton
                 label="Delete file"
                 size="sm"
-                className="text-danger"
                 onClick={async () => {
                   if (!(await confirm({ title: 'Delete this file?', body: 'Anything that showed it will show “file removed”.', danger: true, confirmLabel: 'Delete' }))) return;
                   const { error } = await sb.storage.from(f.bucket).remove([f.name]);

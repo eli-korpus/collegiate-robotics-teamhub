@@ -280,7 +280,7 @@ function EventPage() {
           <EventNotes season={s} code={e.code} teamNumber={teamNumber} />
           <Card>
             <CardHeader title="Rankings" />
-            <ol className="max-h-96 overflow-y-auto px-4 pb-4 text-[13px]">
+            <ol className="max-h-96 relative overflow-y-auto px-4 pb-4 text-[13px]">
               {ranked.map((t) => (
                 <li key={t.teamNumber} className={cn('flex items-center gap-2 rounded px-1 py-0.5', t.teamNumber === teamNumber && 'bg-accent-soft font-medium')}>
                   <span className="tabular w-6 text-right text-muted">{t.stats!.rank}</span>

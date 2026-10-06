@@ -140,7 +140,7 @@ export default function AnnouncementsRoutes() {
                     <span className={`mt-1.5 size-2 shrink-0 rounded-full ${unread ? 'bg-accent' : 'bg-transparent'}`} aria-label={unread ? 'Unread' : undefined} />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-1.5">
-                        {p.pinned && <Pin className="size-3.5 shrink-0 text-muted" />}
+                        {p.pinned && <Pin className="size-3.5 shrink-0" />}
                         <p className={`truncate text-[13.5px] ${unread ? 'font-semibold' : 'font-medium'}`}>{p.title}</p>
                       </div>
                       <p className="line-clamp-2 text-[12.5px] text-muted">{markdownExcerpt(p.body, 160)}</p>

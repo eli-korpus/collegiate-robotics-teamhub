@@ -111,7 +111,7 @@ export function PickList({ ctx, stats, onTeam }: { ctx: EventContext; stats: Ret
             )
           }
         />
-        <ul className="max-h-[60vh] space-y-0.5 overflow-y-auto px-2 pb-3 text-[13px]">
+        <ul className="max-h-[60vh] space-y-0.5 relative overflow-y-auto px-2 pb-3 text-[13px]">
           {suggestions.map((s) => (
             <li key={s.n} className="flex items-center gap-2 rounded px-2 py-1 hover:bg-bg-subtle">
               <button className="flex-1 text-left" onClick={() => onTeam(s.n)}>

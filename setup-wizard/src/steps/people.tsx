@@ -261,7 +261,7 @@ export function Permissions({ onNext, onBack }: StepProps) {
       />
       {[...groups.entries()].map(([mod, keys]) => (
         <Section key={mod} title={names.get(mod) ?? mod}>
-          <div className="overflow-x-auto">
+          <div className="relative overflow-x-auto">
             <table className="w-full text-[13px]">
               <thead>
                 <tr className="text-left text-[12px] text-muted">

@@ -408,9 +408,18 @@ export function createApp(deps: AppDeps = {}) {
     setTimeout(deps.onRestart, 300);
     return c.json({ ok: true });
   });
+  const publishPaths = () => ['team', ...existingHostPaths()].filter((p) => existsSync(join(REPO_ROOT, p)));
+  // What Publish would upload that isn't on GitHub yet: saved files (logos, settings, host files) and waiting commits.
+  app.get('/git/waiting', async (c) => {
+    const g = await gitStatus();
+    if (!g.isRepo) return c.json({ files: [], commits: 0 });
+    const paths = publishPaths();
+    const files = g.dirty.filter((f: string) => paths.some((p) => f === p || f.startsWith(`${p}/`)));
+    return c.json({ files, commits: g.unpushed ?? 0 });
+  });
   app.post('/git/publish', async (c) => {
     const { message } = await c.req.json<{ message?: string }>();
-    const paths = ['team', ...existingHostPaths()].filter((p) => existsSync(join(REPO_ROOT, p)));
+    const paths = publishPaths();
     const login = await sh('gh', ['api', 'user', '--jq', '.login']);
     const repo = await sh('gh', ['repo', 'view', '--json', 'nameWithOwner', '--jq', '.nameWithOwner']);
     return c.json(await publish(message ?? 'Update TeamHub config', paths, undefined, { login: login.ok ? login.stdout.trim() : null, repo: repo.ok ? repo.stdout.trim() : null }));

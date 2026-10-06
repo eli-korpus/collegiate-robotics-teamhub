@@ -81,6 +81,8 @@ export function diffConfigs(before: TeamhubConfig, after: TeamhubConfig, catalog
   if (before.theme.corners !== after.theme.corners || before.theme.defaultMode !== after.theme.defaultMode)
     out.push({ kind: '~', text: 'Look & feel updated' });
   if (before.program.name !== after.program.name) out.push({ kind: '~', text: `Program name: ${before.program.name} to ${after.program.name}` });
+  if (before.program.logo !== after.program.logo)
+    out.push({ kind: '~', text: after.program.logo ? 'Program logo and browser-tab icon updated' : 'Program logo removed' });
   const ids = (xs: { id: string }[]) => xs.map((x) => x.id).join(',');
   if (ids(before.positions) !== ids(after.positions) || JSON.stringify(before.positions) !== JSON.stringify(after.positions))
     out.push({ kind: '~', text: 'Positions updated' });

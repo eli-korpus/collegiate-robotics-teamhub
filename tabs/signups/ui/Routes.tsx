@@ -228,7 +228,7 @@ function SheetDialog({ sheet: s, slots, claims, onClose }: { sheet: Sheet; slots
                           <Avatar name={p?.name ?? '?'} src={p?.avatarUrl} size={20} />
                           {p?.name ?? 'Former member'}
                           {manage && c.user_id !== me.id && (
-                            <button aria-label={`Remove ${p?.name ?? 'person'}`} className="text-faint hover:text-danger" onClick={() => unclaim(sl.id, c.user_id)}>
+                            <button aria-label={`Remove ${p?.name ?? 'person'}`} className="text-muted hover:text-fg" onClick={() => unclaim(sl.id, c.user_id)}>
                               <X className="size-3" />
                             </button>
                           )}
@@ -318,7 +318,7 @@ function SheetEditor({ sheet, slots = [], eventRef, title, onClose }: { sheet: S
         {v.event_ref && (
           <p className="flex items-center gap-2 text-[13px] text-muted">
             For: <EntityLink refStr={v.event_ref} />
-            <button className="text-faint hover:text-fg" aria-label="Unlink event" onClick={() => setV({ ...v, event_ref: null })}>
+            <button className="text-muted hover:text-fg" aria-label="Unlink event" onClick={() => setV({ ...v, event_ref: null })}>
               <X className="size-3.5" />
             </button>
           </p>

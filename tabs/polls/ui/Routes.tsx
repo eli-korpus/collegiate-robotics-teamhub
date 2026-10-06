@@ -405,7 +405,7 @@ function PollDialog({ poll: p, myVote, onClose }: { poll: Poll; myVote: VoteRow 
           </ul>
         )}
         {p.kind === 'availability' && (
-          <div className="overflow-x-auto">
+          <div className="relative overflow-x-auto">
             <table className="text-[12.5px]">
               <thead>
                 <tr>

@@ -59,7 +59,7 @@ export function CommentThread({ refStr, visibility }: { refStr: string; visibili
                   <RelativeTime date={c.created_at} className="text-faint" />
                   {(c.author === me.id || me.isAdmin) && (
                     <button
-                      className="ml-auto text-faint hover:text-danger pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:focus:opacity-100"
+                      className="ml-auto text-muted hover:text-fg pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:focus:opacity-100"
                       aria-label="Delete comment"
                       onClick={async () => {
                         if (!(await confirm({ title: 'Delete this comment?', danger: true, confirmLabel: 'Delete' }))) return;

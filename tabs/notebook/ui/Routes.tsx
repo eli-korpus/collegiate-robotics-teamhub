@@ -265,7 +265,7 @@ function SubsystemsView({ entries, onOpen }: { entries: Entry[]; onOpen: (e: Ent
   const subsystems = useSubsystems();
   const cols = [...(subsystems.data ?? []), { id: '', name: 'No subsystem', team_id: null, sort: 999 }];
   return (
-    <div className="flex h-full gap-3 overflow-x-auto p-4 sm:px-6">
+    <div className="flex h-full gap-3 relative overflow-x-auto p-4 sm:px-6">
       {cols.map((s) => {
         const its = entries.filter((e) => (e.subsystem_id ?? '') === s.id).sort((a, b) => a.date.localeCompare(b.date));
         if (!its.length && !s.id) return null;
@@ -274,7 +274,7 @@ function SubsystemsView({ entries, onOpen }: { entries: Entry[]; onOpen: (e: Ent
             <h3 className="px-3 pb-1 pt-2.5 text-[13px] font-semibold">
               {s.name} <span className="font-normal text-faint">{its.length}</span>
             </h3>
-            <ol className="space-y-2 overflow-y-auto px-2 pb-2">
+            <ol className="space-y-2 relative overflow-y-auto px-2 pb-2">
               {its.map((e, i) => (
                 <li key={e.id} className="relative pl-4">
                   <span className={cn('absolute left-1 top-3 size-2 rounded-full', e.kind === 'iteration' ? 'bg-accent' : 'bg-border-strong')} />
@@ -370,7 +370,7 @@ function EntryDetail({ entry: e, onEdit, onDeleted }: { entry: Entry; onEdit: ()
         </a>
       )}
       {m && m.options.length > 0 && (
-        <div className="overflow-x-auto rounded-md border border-border">
+        <div className="relative overflow-x-auto rounded-md border border-border">
           <table className="w-full text-[12.5px]">
             <thead className="bg-bg-subtle/60">
               <tr>

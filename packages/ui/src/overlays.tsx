@@ -52,7 +52,7 @@ export function Dialog({
               </IconButton>
             </RDialog.Close>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto px-5 py-3">{children}</div>
+          <div className="min-h-0 flex-1 relative overflow-y-auto px-5 py-3">{children}</div>
           {footer && (
             <div
               className="flex flex-wrap items-center justify-end gap-2 border-t border-border px-5 py-3"
@@ -113,7 +113,7 @@ export function Sheet({
               </IconButton>
             </RDialog.Close>
           </div>
-          <div className="min-h-0 flex-1 overflow-y-auto">{children}</div>
+          <div className="min-h-0 flex-1 relative overflow-y-auto">{children}</div>
           {footer && <div className="border-t border-border px-4 py-3">{footer}</div>}
         </RDialog.Content>
       </RDialog.Portal>
@@ -150,7 +150,7 @@ export function Menu({ trigger, items, align = 'end', label }: { trigger: ReactN
                   it.danger && 'text-danger',
                 )}
               >
-                {it.icon && <span className="mt-0.5 shrink-0 text-muted [&>svg]:size-4">{it.icon}</span>}
+                {it.icon && <span className="mt-0.5 shrink-0 [&>svg]:size-4">{it.icon}</span>}
                 <span className="min-w-0">
                   <span className="block">{it.label}</span>
                   {it.hint && <span className="block text-[12px] text-muted">{it.hint}</span>}
@@ -286,7 +286,7 @@ export function Toaster() {
                 {t.action.label}
               </button>
             )}
-            <button aria-label="Dismiss" onClick={() => dismiss(t.id)} className="text-faint hover:text-fg">
+            <button aria-label="Dismiss" onClick={() => dismiss(t.id)} className="text-muted hover:text-fg">
               <X className="size-3.5" />
             </button>
           </div>

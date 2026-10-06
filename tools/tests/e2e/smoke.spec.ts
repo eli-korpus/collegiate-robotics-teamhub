@@ -7,6 +7,12 @@ const modules = Object.keys(schema.modules);
 /** Home's greeting changes by time and date ("Good morning, Sam", "Happy Friday, Sam", "3 days to the qualifier, Sam"). */
 const HOME_GREETING = /^[A-Z0-9][A-Za-z0-9 -]+, Sam$/;
 
+/** The app scrolls inside its own panes; the page itself never scrolls (that showed empty space past the end). */
+async function expectNoPageScroll(page: import('@playwright/test').Page) {
+  const d = await page.evaluate(() => ({ h: document.scrollingElement!.scrollHeight - innerHeight, w: document.scrollingElement!.scrollWidth - innerWidth }));
+  expect(d, 'page scrolls past the app').toEqual({ h: 0, w: 0 });
+}
+
 test.describe('dashboard smoke', () => {
   test('home renders with greeting and sidebar @phone', async ({ page }) => {
     const errors = watchErrors(page);
@@ -24,6 +30,7 @@ test.describe('dashboard smoke', () => {
       await expect(page.locator('main h1').first()).toBeVisible();
       await page.waitForTimeout(300);
       expect(errors).toEqual([]);
+      await expectNoPageScroll(page);
     });
   }
 
@@ -34,6 +41,7 @@ test.describe('dashboard smoke', () => {
       await page.goto(path);
       await expect(page.locator('main h1').first()).toBeVisible();
       expect(errors).toEqual([]);
+      await expectNoPageScroll(page);
     });
   }
 

@@ -58,7 +58,7 @@ export function Sidebar({ onNavigate, onSearch }: { onNavigate: () => void; onSe
           </Kbd>
         </button>
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto pb-3">
+      <div className="min-h-0 flex-1 relative overflow-y-auto pb-3">
         <SidebarSection collapsible={false}>
           <SidebarItem as={NavLink} to="/" end icon={<HomeIcon />} label="Home" active={loc.pathname === '/'} onClick={onNavigate} />
         </SidebarSection>
@@ -84,9 +84,9 @@ export function Sidebar({ onNavigate, onSearch }: { onNavigate: () => void; onSe
             className="flex h-8 items-center gap-2.5 rounded-md px-2.5 text-[13px] text-fg/85 hover:bg-bg-subtle"
             title="Discussion happens in your team's chat: TeamHub has no chat by design."
           >
-            <MessagesSquare className="size-[17px] text-muted" />
+            <MessagesSquare className="size-[17px]" />
             <span className="flex-1 truncate">{chat.label}</span>
-            <ExternalLink className="size-3 text-faint" aria-hidden />
+            <ExternalLink className="size-3" aria-hidden />
           </a>
         )}
         <div className="flex items-center gap-1">
@@ -122,7 +122,7 @@ function TeamSwitcher() {
       trigger={
         <button type="button" className="flex h-11 w-full items-center justify-between gap-2 rounded-md px-1 hover:bg-bg-subtle" aria-label="Switch team">
           {header}
-          <ChevronsUpDown className="size-4 shrink-0 text-faint" />
+          <ChevronsUpDown className="size-4 shrink-0 text-muted" />
         </button>
       }
       items={[
@@ -156,7 +156,7 @@ function UserMenu() {
         <button type="button" className="flex h-9 min-w-0 flex-1 items-center gap-2 rounded-md px-1.5 hover:bg-bg-subtle" aria-label="Account menu">
           <Avatar name={me.profile.display_name} src={avatar} size={26} />
           <span className="min-w-0 flex-1 truncate text-left text-[13px] font-medium">{me.profile.display_name}</span>
-          <Settings className="size-4 shrink-0 text-faint" />
+          <Settings className="size-4 shrink-0 text-muted" />
         </button>
       }
       items={[

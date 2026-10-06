@@ -91,7 +91,7 @@ export default function TasksRoutes() {
           <Switch checked={archived} onChange={setArchived} label={<span className="text-[12.5px] font-normal">Show done &gt; 60 days</span>} />
         </Toolbar>
       )}
-      <div className="min-h-0 flex-1 overflow-auto">
+      <div className="min-h-0 flex-1 relative overflow-auto">
         {tasks.isLoading ? (
           <Spinner className="m-8" />
         ) : tasks.error ? (

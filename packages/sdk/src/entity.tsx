@@ -42,7 +42,7 @@ export function EntityLink({ refStr, className }: { refStr: string | null | unde
   const Icon = def.icon ?? getModule(ref!.module)?.client.icon;
   return (
     <Link to={q.data!.href} className={cn('inline-flex max-w-full items-center gap-1.5 rounded-md border border-border bg-surface px-1.5 py-0.5 text-[12.5px] font-medium hover:bg-bg-subtle', className)}>
-      {Icon && <Icon className="size-3.5 shrink-0 text-muted" />}
+      {Icon && <Icon className="size-3.5 shrink-0" />}
       <span className="truncate">{q.data!.title}</span>
     </Link>
   );

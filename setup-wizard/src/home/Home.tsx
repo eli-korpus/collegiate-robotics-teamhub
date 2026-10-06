@@ -4,6 +4,7 @@ import { Banner, Button, Card, Checkbox, Dialog, Input, Switch, toast } from '@t
 import { api, type Catalog, type ServerState } from '../api';
 import { ModuleIcon } from '../components';
 import { UpdateDialog } from './Update';
+import { WaitingToPublish } from '../steps/publish';
 
 /** Existing install: Edit, Update, Backup & Export, Import, New Season, Email, Danger zone (spec §5.1). */
 export function ExistingHome({ server, catalog, onEdit, refresh }: { server: ServerState; catalog: Catalog; onEdit: () => void; refresh: () => Promise<void> }) {
@@ -52,6 +53,7 @@ export function ExistingHome({ server, catalog, onEdit, refresh }: { server: Ser
           Editing, updating and backups need your Supabase access token for this session.
         </Banner>
       )}
+      <WaitingToPublish className="mt-6" recheck={dialog} />
       <div className="mt-6 grid gap-3 sm:grid-cols-2">
         <Tile icon={<Pencil />} title="Edit" body="Add or remove tabs, rebrand, change positions or permissions." onClick={onEdit} primary />
         <Tile
@@ -262,7 +264,7 @@ function EmailDialog({ server, onClose, refresh }: { server: ServerState; onClos
             try {
               await api('/email', { on });
               await refresh();
-              toast.success('Saved. Push your config (Edit > Review) so the login page updates.');
+              toast.success('Saved. Publish it from the home screen so the login page updates.');
               onClose();
             } catch (e) {
               toast.error((e as Error).message);

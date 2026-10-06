@@ -126,7 +126,7 @@ export default function PurchasesRoutes() {
           />
         )}
       </ModuleHeader>
-      <div className="min-h-0 flex-1 overflow-y-auto">
+      <div className="min-h-0 flex-1 relative overflow-y-auto">
         {list.isLoading ? (
           <Spinner className="m-8" />
         ) : (

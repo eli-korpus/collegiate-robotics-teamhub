@@ -216,7 +216,7 @@ function Matrix({ skills, signoffs, onSign }: { skills: Skill[]; signoffs: Signo
           CSV
         </Button>
       </div>
-      <div className="overflow-x-auto rounded-lg border border-border bg-surface">
+      <div className="relative overflow-x-auto rounded-lg border border-border bg-surface">
         <table className="w-full text-[13px]">
           <thead className="bg-bg-subtle/60">
             <tr>
@@ -273,7 +273,7 @@ function SignOffDialog({ skill, signoffs, onClose }: { skill: Skill; signoffs: S
   return (
     <Dialog open onOpenChange={(o) => !o && onClose()} title={`Sign off: ${skill.name}`} description="Check people who have shown they can do this safely and correctly." size="md">
       <Input placeholder="Find a person…" value={q} onChange={(e) => setQ(e.target.value)} className="mb-3" />
-      <ul className="max-h-[50vh] space-y-1 overflow-y-auto">
+      <ul className="max-h-[50vh] space-y-1 relative overflow-y-auto">
         {people
           .filter((p) => p.name.toLowerCase().includes(q.toLowerCase()))
           .map((p) => {

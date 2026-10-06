@@ -142,7 +142,7 @@ export function Calendar({
       </div>
 
       {view === 'agenda' ? (
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 relative overflow-y-auto">
           {[...byDay.entries()]
             .map(([k, list]) => [new Date(k), list] as const)
             .sort((a, b) => a[0].getTime() - b[0].getTime())
@@ -161,7 +161,7 @@ export function Calendar({
                           <span className={cn('block truncate text-[13.5px] font-medium', it.cancelled && 'line-through')}>{it.title}</span>
                           {it.meta && <span className="block truncate text-[12px] text-muted">{it.meta}</span>}
                         </span>
-                        {it.icon && <span className="text-faint [&>svg]:size-4">{it.icon}</span>}
+                        {it.icon && <span className="[&>svg]:size-4">{it.icon}</span>}
                       </button>
                     </li>
                   ))}
@@ -171,7 +171,7 @@ export function Calendar({
           {!byDay.size && <p className="p-10 text-center text-[13.5px] text-faint">Nothing scheduled in the next 60 days.</p>}
         </div>
       ) : (
-        <div className="flex min-h-0 flex-1 flex-col overflow-auto">
+        <div className="flex min-h-0 flex-1 flex-col relative overflow-auto">
           <div className="grid grid-cols-7 border-b border-border bg-surface text-center text-[11.5px] font-medium text-faint">
             {Array.from({ length: 7 }, (_, i) => (
               <div key={i} className="py-1.5">

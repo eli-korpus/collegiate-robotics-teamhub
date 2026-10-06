@@ -145,13 +145,24 @@ export function generateDashboardFiles(r: Resolved, outDir = 'dashboard/src/gene
     const file = join(brandingDir, name);
     return existsSync(file) ? `branding/${name}?v=${createHash('sha1').update(readFileSync(file)).digest('hex').slice(0, 8)}` : null;
   };
+  // Link previews (Open Graph): the wide picture the wizard makes from the logo; sites set up before it existed use
+  // the app icon as a small square preview; with no logo at all, the dashboard's built-in TeamHub picture.
+  const socialWide = versioned('social.jpg');
+  const socialSquare = socialWide ? null : versioned('apple-touch-icon.png');
+  const numbers = c.teams.map((t) => t.number).filter((n): n is number => !!n);
+  const numberList = numbers.length > 1 ? `${numbers.slice(0, -1).join(', ')} and ${numbers.at(-1)}` : String(numbers[0] ?? '');
+  const description = `Team dashboard for ${c.program.name}${numbers.length ? ` (FTC ${numbers.length > 1 ? 'teams' : 'team'} ${numberList})` : ''}. Members sign in here, and new members can ask to join.`;
   files.push({
     path: `${outDir}/html.json`,
     content: json({
       title: c.program.name,
+      description,
       base: c.hosting.basePath || '/',
+      siteUrl: c.hosting.url,
       favicon: versioned('favicon.png'),
       appleTouchIcon: versioned('apple-touch-icon.png'),
+      socialImage: socialWide ?? socialSquare ?? 'teamhub-preview.png',
+      socialImageWide: !socialSquare,
       logo: firstLogo,
       themeColor: c.theme.accent,
       defaultMode: c.theme.defaultMode,

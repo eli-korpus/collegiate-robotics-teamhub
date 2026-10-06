@@ -22,7 +22,8 @@ There are two programs in this repository:
 Run `npm run setup` and choose **Edit** for any of these. Don't hand-edit code for them:
 
 - adding or removing tabs, and each tab's options
-- program name, teams, colors, logos, light/dark default
+- program name, teams, colors, logos (also the browser-tab icon and link preview), light/dark default
+- email: the email provider (SMTP), email confirmation and "Forgot your password?" (`docs/email.md`)
 - subteams, positions, permissions (who can do what)
 - profile fields, who fills each one in and who can see it (extra fields can also be added in the dashboard: Admin > Profile fields)
 - tool links (also editable in the dashboard: Admin > Tool links)

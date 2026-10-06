@@ -10,7 +10,7 @@ import type { TeamhubConfig } from '@teamhub/config-schema';
 import { LAYOUT, lit, planSql, planToSql, resolveConfig, type Catalog, type DbState, type Plan } from '@teamhub/generator';
 import { CORE_FUNCTIONS, PUBLIC_FUNCTIONS } from '@teamhub/sdk/define';
 import { deleteBuckets, exportData, type ExportResult } from './backup';
-import { projectUrl, type Mgmt } from './mgmt';
+import { MgmtError, projectUrl, type Mgmt } from './mgmt';
 import { createProgress, type Progress } from './progress';
 
 export interface StepLog {
@@ -212,6 +212,51 @@ export async function configureAuth(m: Mgmt, ref: string, config: TeamhubConfig,
     ...(siteUrl ? { site_url: siteUrl } : {}),
     uri_allow_list: [...urls].join(','),
   });
+}
+
+/** An email provider (SMTP) as the wizard shows it. The password is never read back from Supabase. */
+export interface SmtpSettings {
+  host: string;
+  port: number;
+  user: string;
+  senderEmail: string;
+  senderName: string;
+}
+
+/** The project's own email provider, or null when it still uses Supabase's built-in email (only reaches its own team). */
+export async function readSmtp(m: Mgmt, ref: string): Promise<SmtpSettings | null> {
+  const a = await m.getAuthConfig(ref);
+  const host = typeof a.smtp_host === 'string' ? a.smtp_host.trim() : '';
+  if (!host) return null;
+  return { host, port: Number(a.smtp_port) || 0, user: String(a.smtp_user ?? ''), senderEmail: String(a.smtp_admin_email ?? ''), senderName: String(a.smtp_sender_name ?? '') };
+}
+
+/**
+ * Saves the email provider in Supabase (Authentication > Emails > SMTP Settings). The password goes straight to
+ * Supabase and is never written to this computer or the repository. Leave it blank to keep the saved one.
+ */
+export async function saveSmtp(m: Mgmt, ref: string, s: SmtpSettings & { pass?: string }) {
+  const host = s.host.trim();
+  const port = Number(s.port);
+  const senderEmail = s.senderEmail.trim();
+  if (!host || /\s|:\/\//.test(host)) throw new MgmtError('Enter the server name only, like smtp-relay.brevo.com (no https:// or spaces).', 400);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) throw new MgmtError('The port is a number, usually 465 or 587.', 400);
+  if (!s.user.trim()) throw new MgmtError('Enter the username (login) from your email provider.', 400);
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(senderEmail)) throw new MgmtError('Enter the email address messages come from, like robotics@yourschool.org.', 400);
+  const current = await m.getAuthConfig(ref);
+  const pass = s.pass?.trim();
+  if (!pass && !(typeof current.smtp_host === 'string' && current.smtp_host)) throw new MgmtError('Enter the password (or API key) from your email provider.', 400);
+  await m.updateAuthConfig(ref, {
+    smtp_host: host,
+    smtp_port: String(port),
+    smtp_user: s.user.trim(),
+    ...(pass ? { smtp_pass: pass } : {}),
+    smtp_admin_email: senderEmail,
+    smtp_sender_name: s.senderName.trim() || 'TeamHub',
+    // Supabase allows only a couple of emails an hour until a provider is added; 30 lets a team join at a meeting.
+    ...(Number(current.rate_limit_email_sent ?? 0) < 30 ? { rate_limit_email_sent: 30 } : {}),
+  });
+  return readSmtp(m, ref);
 }
 
 /** First admin account (spec §5.2 step 11). The secret key is used here, locally, and never stored. */

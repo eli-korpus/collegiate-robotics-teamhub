@@ -70,6 +70,7 @@ export function Program({ onNext, onBack }: StepProps) {
                 const res = await api<{ path: string }>('/branding', { name: `program.${p.ext}`, dataUrl: p.main });
                 await api('/branding', { name: 'favicon.png', dataUrl: p.favicon });
                 await api('/branding', { name: 'apple-touch-icon.png', dataUrl: p.apple });
+                await api('/branding', { name: 'social.jpg', dataUrl: p.social });
                 update((x) => {
                   x.program.logo = `${res.path}?v=${Date.now().toString(36)}`;
                   if (p.suggestedColor && x.theme.accent === '#2563EB') x.theme.accent = p.suggestedColor.toUpperCase();
@@ -243,6 +244,7 @@ export function Teams({ onNext, onBack }: StepProps) {
                     if (!c.program.logo && i === 0) {
                       await api('/branding', { name: 'favicon.png', dataUrl: p.favicon });
                       await api('/branding', { name: 'apple-touch-icon.png', dataUrl: p.apple });
+                      await api('/branding', { name: 'social.jpg', dataUrl: p.social });
                     }
                     update((x) => {
                       x.teams[i].logo = `${res.path}?v=${Date.now().toString(36)}`;

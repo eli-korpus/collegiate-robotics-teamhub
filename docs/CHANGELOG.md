@@ -13,10 +13,29 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Added
+
+- Link previews: sharing your site's link in Discord, iMessage, Slack, WhatsApp, Teams or social media shows your
+  logo, program name and a short description. The setup wizard makes the preview picture from your logo, next to the
+  browser-tab icon. Sites without a logo show a TeamHub picture. If your site already has a logo, its icon is used
+  until you upload the logo again in the wizard (Edit > Your program), which makes the full-size picture.
+- Setup wizard > Email now connects your email provider (SMTP) itself: pick Brevo, Gmail, Resend or your school's
+  server and fill in the details. The password goes straight to Supabase and is never saved in your files. New guide:
+  [docs/email.md](email.md).
+
 ### Changed
 
 - The GitHub workflows the setup wizard installs (GitHub Pages deploy, keep-awake and update check) use the current
   GitHub Actions versions, which run on Node.js 24. GitHub is retiring the Node.js 20 versions they used.
+- The setup wizard only turns email on once an email provider is saved. Before, turning it on without one stopped new
+  members from joining (their confirmation email couldn't be sent).
+
+### Fixed
+
+- With email turned on, the Join page showed nothing after someone signed up. It now says to check their email (and
+  tells them if the address already has an account), and the confirmation link brings them back to your site.
+- Signing in before confirming your email now explains what to do and offers to send the link again.
+- The "Set a new password" page no longer says the link must come from a mentor when it came by email.
 
 ## [1.0.5] - 2026-10-06
 ### Added

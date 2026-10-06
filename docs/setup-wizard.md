@@ -72,6 +72,10 @@ What you'll need: a GitHub account, a free Supabase account, and about 30 minute
 Name your program, then add each team. Type an FTC team number and the wizard fills in the team's name from
 FTCScout. Each team gets a short code (A, B, …) and a color that marks its items everywhere in the dashboard.
 
+The program logo (or, without one, the first team's logo) also becomes the browser-tab icon, the phone home-screen
+icon and the **link preview**: the picture, name and description that Discord, iMessage, Slack, WhatsApp and social
+media show when someone shares your site's link. Without any logo, link previews show a TeamHub picture.
+
 ![Teams step](screenshots/wizard-teams.png)
 
 ## 4. Look & feel
@@ -153,4 +157,6 @@ Run `npm run setup` any time. Because your settings already exist, the wizard op
 - **Edit**: change tabs, branding or permissions. It shows a summary of the changes and backs up any tab you remove
   before touching the database.
 - **Update**: apply database updates after you sync your copy with the latest TeamHub.
+- **Email**: connect an email provider (SMTP) and turn on email confirmation and "Forgot your password?". See
+  [email.md](email.md).
 - **Backup & Export**, **New Season**, and a **Danger zone** for removing TeamHub entirely.

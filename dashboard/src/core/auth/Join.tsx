@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, Navigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { emailDomainAllowed } from '@teamhub/config-schema/util';
-import { Check } from 'lucide-react';
+import { Check, MailCheck } from 'lucide-react';
 import { Banner, Button, Field, Input, Segmented, Textarea, VisibilityNote, cn } from '@teamhub/ui';
 import { friendlyError, isMultiTeam, runtime, useSession, useSupabase } from '@teamhub/sdk';
 import { AuthLayout, TeamLogo } from './AuthLayout';
@@ -23,6 +23,7 @@ export function Join() {
   const [note, setNote] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [sentTo, setSentTo] = useState<string | null>(null);
   // Optional rule from Admin > Who can join. The database enforces it; this is only for clear messages.
   const rules = useQuery({
     queryKey: ['core', 'join-rules'],
@@ -37,6 +38,31 @@ export function Join() {
 
   if (session) return <Navigate to="/" replace />;
 
+  if (sentTo) {
+    return (
+      <AuthLayout title="Check your email" subtitle="One more step to join">
+        <div className="space-y-4 text-[13.5px]">
+          <div className="flex items-start gap-3 rounded-md border border-border bg-bg-subtle p-3">
+            <MailCheck className="mt-0.5 size-5 shrink-0 text-accent" aria-hidden />
+            <p>
+              We sent a link to <span className="font-medium">{sentTo}</span>. Open it to confirm your email. Then a captain or mentor will approve your account.
+            </p>
+          </div>
+          <p className="text-muted">No email after a few minutes? Check your spam folder, or make sure you typed your address right.</p>
+          <Button variant="secondary" className="w-full" onClick={() => setSentTo(null)}>
+            Use a different email
+          </Button>
+        </div>
+        <div className="mt-5 border-t border-border pt-4 text-center text-[13px]">
+          Already confirmed?{' '}
+          <Link to="/login" className="font-medium text-accent hover:underline">
+            Sign in
+          </Link>
+        </div>
+      </AuthLayout>
+    );
+  }
+
   return (
     <AuthLayout title="Join the team" subtitle="Create your account. A captain or mentor will approve it." wide>
       <form
@@ -47,13 +73,23 @@ export function Join() {
           if (password.length < 8) return setError('Use at least 8 characters for your password.');
           setBusy(true);
           setError(null);
-          const { error } = await sb.auth.signUp({
+          const { data, error } = await sb.auth.signUp({
             email: email.trim(),
             password,
-            options: { data: { name: name.trim(), teams: picked, requested_type: type, note: note.trim() || null } },
+            options: {
+              data: { name: name.trim(), teams: picked, requested_type: type, note: note.trim() || null },
+              // With email confirmation on (setup wizard > Email), the link in the email comes back to this site.
+              emailRedirectTo: `${location.origin}${import.meta.env.BASE_URL}`,
+            },
           });
           setBusy(false);
-          if (!error) return;
+          if (!error) {
+            // Email confirmation on: Supabase answers an existing address with a user that has no identities.
+            if (data.user && data.user.identities?.length === 0) return setError('That email already has an account. Try signing in.');
+            // No session means Supabase emailed a confirmation link; with confirmation off, the session signs them in.
+            if (!data.session) setSentTo(email.trim());
+            return;
+          }
           if (/registered/i.test(error.message)) return setError('That email already has an account. Try signing in.');
           if (/TEAMHUB_EMAIL_NOT_ALLOWED/.test(error.message) || (!emailDomainAllowed(email, domains) && /saving new user/i.test(error.message))) {
             return setError(

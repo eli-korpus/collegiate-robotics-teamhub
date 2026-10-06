@@ -11,9 +11,13 @@ const htmlPath = resolve(here, 'src/generated/html.json');
 
 interface HtmlMeta {
   title: string;
+  description?: string;
   base: string;
+  siteUrl?: string | null;
   favicon: string | null;
   appleTouchIcon: string | null;
+  socialImage?: string;
+  socialImageWide?: boolean;
   themeColor: string;
   spaFallback404: boolean;
   defaultMode?: string;
@@ -26,7 +30,42 @@ function readMeta(): HtmlMeta {
   return JSON.parse(readFileSync(htmlPath, 'utf8'));
 }
 
-/** Injects title/icons from the generated config; writes 404.html for GitHub Pages (spec §6.1). */
+const attr = (s: string) => s.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+/**
+ * Open Graph and Twitter tags: the title, description and picture that Discord, iMessage, Slack, WhatsApp, Teams and
+ * social media show when someone shares the site's link. Most of them need the picture's full address, so it uses
+ * the site address from the setup wizard when there is one.
+ */
+function linkPreview(meta: HtmlMeta, base: string): string {
+  const site = meta.siteUrl?.replace(/\/+$/, '');
+  const image = `${site ?? base.replace(/\/$/, '')}/${meta.socialImage ?? 'teamhub-preview.png'}`;
+  const wide = meta.socialImageWide !== false;
+  const description = meta.description ?? `${meta.title}'s team dashboard.`;
+  const tags: [string, string, string][] = [
+    ['name', 'description', description],
+    ['property', 'og:type', 'website'],
+    ['property', 'og:site_name', meta.title],
+    ['property', 'og:title', meta.title],
+    ['property', 'og:description', description],
+    ...(site ? ([['property', 'og:url', `${site}/`]] as [string, string, string][]) : []),
+    ['property', 'og:image', image],
+    ...(wide
+      ? ([
+          ['property', 'og:image:width', '1200'],
+          ['property', 'og:image:height', '630'],
+        ] as [string, string, string][])
+      : []),
+    ['property', 'og:image:alt', meta.socialImage && meta.socialImage !== 'teamhub-preview.png' ? `${meta.title} logo` : 'TeamHub'],
+    ['name', 'twitter:card', wide ? 'summary_large_image' : 'summary'],
+    ['name', 'twitter:title', meta.title],
+    ['name', 'twitter:description', description],
+    ['name', 'twitter:image', image],
+  ];
+  return tags.map(([k, n, v]) => `<meta ${k}="${n}" content="${attr(v)}" />`).join('\n    ');
+}
+
+/** Injects title/icons/link preview from the generated config; writes 404.html for GitHub Pages (spec §6.1). */
 function teamhubHtml(meta: HtmlMeta): Plugin {
   let outDir = '';
   return {
@@ -43,7 +82,7 @@ function teamhubHtml(meta: HtmlMeta): Plugin {
         .replaceAll('%TEAMHUB_TITLE%', meta.title.replace(/</g, '&lt;'))
         .replaceAll('%TEAMHUB_THEME_COLOR%', meta.themeColor)
         .replaceAll('%TEAMHUB_DEFAULT_MODE%', meta.defaultMode ?? 'system')
-        .replace('%TEAMHUB_ICONS%', icons);
+        .replace('%TEAMHUB_ICONS%', `${icons}\n    ${linkPreview(meta, base)}`);
     },
     closeBundle() {
       if (meta.spaFallback404 && existsSync(resolve(outDir, 'index.html'))) copyFileSync(resolve(outDir, 'index.html'), resolve(outDir, '404.html'));

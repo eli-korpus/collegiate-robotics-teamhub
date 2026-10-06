@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { Banner, Button, Field, Input } from '@teamhub/ui';
-import { friendlyError, useSession, useSupabase } from '@teamhub/sdk';
+import { friendlyError, runtime, useSession, useSupabase } from '@teamhub/sdk';
 import { AuthLayout } from './AuthLayout';
 
-/** Landing page for admin-generated reset links (spec §7.5): set a new password. */
+/** Landing page for reset links (admin-generated, or emailed when email is on; spec §7.5): set a new password. */
 export function ResetPassword() {
   const sb = useSupabase();
   const nav = useNavigate();
@@ -19,16 +19,18 @@ export function ResetPassword() {
     return () => clearTimeout(t);
   }, []);
   const hashError = new URLSearchParams(location.hash.slice(1)).get('error_description');
+  // With email on (setup wizard > Email), links also come from "Forgot your password?" on the sign-in page.
+  const newLink = runtime().config.features.email ? 'Request a new one with "Forgot your password?" on the sign-in page, or ask a mentor or admin' : 'Ask a mentor or admin for a new one';
 
   return (
     <AuthLayout title="Set a new password">
       {hashError ? (
         <Banner tone="danger" title="This reset link didn't work">
-          {hashError}. Reset links expire quickly. Ask a mentor or admin for a new one.
+          {hashError}. Reset links expire quickly. {newLink}.
         </Banner>
       ) : !session && !loading && waited ? (
         <Banner tone="warning" title="Open your reset link first">
-          This page works from the reset link a mentor or admin gave you. Ask them for a new one if it expired.
+          This page works from a password reset link. {newLink} if yours expired.
         </Banner>
       ) : (
         <form

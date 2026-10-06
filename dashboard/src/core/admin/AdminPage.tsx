@@ -677,7 +677,7 @@ function Help() {
           <li>Tabs and their options, teams, colors and logos, subteams, permissions, and who can see each setup profile field: wizard &gt; Edit. These are built into the site, so it rebuilds.</li>
           <li>Data backups and restore: wizard &gt; Backup &amp; Export.</li>
           <li>New season rollover: wizard &gt; New Season.</li>
-          <li>Email (self-serve password reset): add SMTP in Supabase, then wizard &gt; Enable email.</li>
+          <li>Email (confirm new accounts, self-serve password reset): wizard &gt; Email. Add an email provider there, then turn it on.</li>
         </ul>
       </Card>
       <p className="text-muted">

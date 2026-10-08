@@ -69,7 +69,8 @@ describe('security review', () => {
 
   it('scouts cannot reassign their entries to someone else', async () => {
     const [{ id }] = await db.as(memberA, `insert into sct_entries (event_code, team_number, scout) values ('USX', 1, $1) returning id`, [memberA]);
-    expect(await db.denied(memberA, 'update sct_entries set scout = $1 where id = $2 returning id', [captainA, id])).toBe(true);
+    await db.as(memberA, 'update sct_entries set scout = $1 where id = $2', [captainA, id]).catch(() => undefined);
+    expect((await db.admin('select scout from sct_entries where id = $1', [id]))[0].scout).toBe(memberA);
   });
 
   it('using parts on a repair needs a positive quantity of the same team’s part', async () => {

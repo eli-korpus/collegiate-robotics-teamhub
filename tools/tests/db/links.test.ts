@@ -53,7 +53,8 @@ describe('team-specific tool links', () => {
 describe('removing unpinned tool links on update', () => {
   const beforeCleanup = async () => {
     const now = await loadCatalog();
-    const core = { ...now.core, migrations: now.core.migrations.filter((m) => !m.name.startsWith('007_')), version: now.core.version - 1 };
+    const migrations = now.core.migrations.filter((m) => m.name < '007_');
+    const core = { ...now.core, migrations, version: migrations.length };
     return { ...now, core };
   };
   const unpinned = `insert into links (label, url, slot) values ('Pinned', 'https://example.org/p', 'cad'), ('Loose', 'https://example.org/l', null)`;

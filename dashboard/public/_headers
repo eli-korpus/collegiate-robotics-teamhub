@@ -1,0 +1,11 @@
+# Security headers, read by Cloudflare and Netlify (Vercel gets the same from vercel.json; GitHub Pages can't set
+# headers, so the page also refuses to run inside a frame on its own). Written by TeamHub: don't remove.
+/*
+  X-Frame-Options: DENY
+  Content-Security-Policy: frame-ancestors 'none'
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+
+# Logos: nothing inside an SVG may run or load anything.
+/branding/*
+  Content-Security-Policy: default-src 'none'; img-src data:; style-src 'unsafe-inline'; frame-ancestors 'none'

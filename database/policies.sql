@@ -41,10 +41,10 @@ create policy core_profiles_read on profiles for select to authenticated using (
 create policy core_profiles_update_self on profiles for update to authenticated
   using (id = (select auth.uid())) with check (id = (select auth.uid()));
 create policy core_profiles_update_approver on profiles for update to authenticated
-  using (teamhub_is_admin() or exists (
-    select 1 from memberships m where m.user_id = profiles.id and teamhub_can('people.assign_positions', m.team_id)))
-  with check (teamhub_is_admin() or exists (
-    select 1 from memberships m where m.user_id = profiles.id and teamhub_can('people.assign_positions', m.team_id)));
+  using (teamhub_is_admin() or (not is_admin and exists (
+    select 1 from memberships m where m.user_id = profiles.id and teamhub_can('people.assign_positions', m.team_id))))
+  with check (teamhub_is_admin() or (not is_admin and exists (
+    select 1 from memberships m where m.user_id = profiles.id and teamhub_can('people.assign_positions', m.team_id))));
 
 create policy core_private_read on profiles_private for select to authenticated using (
   user_id = (select auth.uid())
@@ -90,7 +90,7 @@ create policy core_positions_insert on positions for insert to authenticated wit
 );
 create policy core_positions_update on positions for update to authenticated
   using (source = 'app' and teamhub_can('people.assign_positions', team_id))
-  with check (source = 'app' and not grants_permissions);
+  with check (source = 'app' and not grants_permissions and teamhub_can('people.assign_positions', team_id));
 create policy core_positions_delete on positions for delete to authenticated
   using (source = 'app' and teamhub_can('people.assign_positions', team_id));
 
@@ -157,8 +157,29 @@ grant execute on all functions in schema public to authenticated, service_role;
 -- Internal helpers stay locked (re-applied because the grant above covers every function).
 revoke execute on function teamhub_drop_policies(text), teamhub_make_dormant(text), teamhub_drop_prefix(text),
   teamhub_trash(text, text[]), teamhub_notify(uuid[], text, text), teamhub_realtime_add(text),
-  teamhub_email_allowed(text), teamhub_place_profile_field(text, text)
+  teamhub_email_allowed(text), teamhub_place_profile_field(text, text), info_request_status(uuid)
   from public, anon, authenticated;
+
+-- Authors can't be changed from the website (008_keep_authors). Runs after every tab's tables exist, so it covers
+-- each table with an author column, including tabs added later.
+do $$
+declare
+  t record;
+begin
+  if to_regprocedure('public.teamhub_keep_author()') is null then return; end if;
+  for t in
+    select c.table_name, array_agg(c.column_name::text order by c.column_name) cols
+    from information_schema.columns c
+    join information_schema.tables x on x.table_schema = c.table_schema and x.table_name = c.table_name and x.table_type = 'BASE TABLE'
+    where c.table_schema = 'public'
+      and c.column_name in ('created_by', 'requested_by', 'reported_by', 'uploaded_by', 'started_by', 'author', 'scout')
+    group by c.table_name
+  loop
+    execute format('drop trigger if exists teamhub_keep_author on public.%I', t.table_name);
+    execute format('create trigger teamhub_keep_author before update on public.%I for each row execute function teamhub_keep_author(%s)',
+      t.table_name, (select string_agg(quote_literal(x), ', ') from unnest(t.cols) x));
+  end loop;
+end $$;
 
 -- Defense in depth: TRUNCATE bypasses RLS, so client roles never get it (PostgREST doesn't expose it, but direct
 -- connections might). Re-applied every plan so new module tables are covered.

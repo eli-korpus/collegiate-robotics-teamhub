@@ -13,6 +13,31 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Security
+
+From a full security check of the dashboard, database, server functions, setup wizard and GitHub workflows. Update
+with `npm run setup` > **Update** so your database gets the fixes.
+
+- The author of a post, request, notebook entry, scouting entry and so on can no longer be changed from the website.
+  Before, someone could make their own post look like another person wrote it (or hand them edit rights to it).
+- Only admins can edit an admin's profile. Before, a mentor on the same team could rename an admin.
+- Links, purchase requests, print jobs, repairs, albums, outreach events, social posts and driver practice runs can
+  only be moved to a team where you're allowed to post them. Before, being on the other team was enough. Badges can
+  only be moved to a team where you manage positions.
+- The dashboard refuses to run inside another website's frame, so it can't be used for clickjacking. Cloudflare,
+  Netlify and Vercel also send headers for this (`dashboard/public/_headers`; new Vercel setups get them in
+  `vercel.json`).
+- SVG logos are cleaned when they're uploaded and every time the site is built: scripts, event handlers and outside
+  links are removed, and logos are served with a policy that lets nothing in them run.
+- Attendance check-in codes use a secure random generator, and a code lasts at most 5 minutes.
+- Asking to delete your account notifies mentors at most once a day.
+- The storage cleanup function compares its secret in constant time.
+- The leftover Request info status check is closed.
+
+### Fixed
+
+- The browser test for editing someone's profile uses the First name and Last name boxes.
+
 ## [1.0.8] - 2026-10-08
 ### Added
 

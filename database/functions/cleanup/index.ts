@@ -2,9 +2,18 @@
 // paths into teamhub_storage_trash and this function removes them. Called by pg_cron + pg_net with a shared secret.
 import { createClient } from 'npm:@supabase/supabase-js@2';
 
+/** Compares in constant time, so the response time doesn't reveal how much of a guess was right. */
+function sameSecret(a: string, b: string): boolean {
+  const x = new TextEncoder().encode(a);
+  const y = new TextEncoder().encode(b);
+  let diff = x.length ^ y.length;
+  for (let i = 0; i < Math.max(x.length, y.length); i++) diff |= (x[i] ?? 0) ^ (y[i] ?? 0);
+  return diff === 0;
+}
+
 Deno.serve(async (req) => {
   const secret = Deno.env.get('TEAMHUB_CLEANUP_SECRET');
-  if (!secret || req.headers.get('x-teamhub-secret') !== secret) return new Response('Forbidden', { status: 403 });
+  if (!secret || !sameSecret(req.headers.get('x-teamhub-secret') ?? '', secret)) return new Response('Forbidden', { status: 403 });
 
   const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!, { auth: { persistSession: false } });
   let removed = 0;

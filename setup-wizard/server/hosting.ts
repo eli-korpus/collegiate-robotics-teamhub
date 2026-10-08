@@ -36,7 +36,28 @@ export function hostFiles(provider: HostProvider, programName: string, branch = 
         {
           path: 'vercel.json',
           content: `${JSON.stringify(
-            { buildCommand: 'npm run build', outputDirectory: 'dashboard/dist', framework: null, rewrites: [{ source: '/(.*)', destination: '/index.html' }] },
+            {
+              buildCommand: 'npm run build',
+              outputDirectory: 'dashboard/dist',
+              framework: null,
+              rewrites: [{ source: '/(.*)', destination: '/index.html' }],
+              // Same security headers as dashboard/public/_headers (Vercel doesn't read that file).
+              headers: [
+                {
+                  source: '/(.*)',
+                  headers: [
+                    { key: 'X-Frame-Options', value: 'DENY' },
+                    { key: 'Content-Security-Policy', value: "frame-ancestors 'none'" },
+                    { key: 'X-Content-Type-Options', value: 'nosniff' },
+                    { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+                  ],
+                },
+                {
+                  source: '/branding/(.*)',
+                  headers: [{ key: 'Content-Security-Policy', value: "default-src 'none'; img-src data:; style-src 'unsafe-inline'; frame-ancestors 'none'" }],
+                },
+              ],
+            },
             null,
             2,
           )}\n`,

@@ -90,7 +90,8 @@ export function Profile() {
 function usePersonEditing(p: PersonInfo) {
   const me = useMe();
   // People who assign positions edit profiles; team-only and mentors-only fields only appear to those who can see them.
-  const canEdit = p.id !== me.id && (me.isAdmin || p.memberships.some((m) => canWith(me, 'people.assign_positions', m.team_id)));
+  // Only admins edit an admin's profile (same rule as the database).
+  const canEdit = p.id !== me.id && (me.isAdmin || (!p.isAdmin && p.memberships.some((m) => canWith(me, 'people.assign_positions', m.team_id))));
   const fields = useProfileFields().filter((f) => canSeeLevel(me, f.level, p));
   const hidden = useHiddenValues(p.id);
   return { fields, canEdit, hidden: hidden.data ?? { leaders: {}, mentors: {} } };

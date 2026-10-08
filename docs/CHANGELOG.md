@@ -13,6 +13,7 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+## [1.0.8] - 2026-10-08
 ### Added
 
 - **Setup assistant** on everyone's Home: "You're 60% finished setting up your profile", counting your first and last

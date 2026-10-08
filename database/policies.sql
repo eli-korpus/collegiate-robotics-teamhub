@@ -118,12 +118,7 @@ create policy core_links_update on links for update to authenticated
   using (teamhub_can('core.edit_links', team_id)) with check (teamhub_can('core.edit_links', team_id));
 create policy core_links_delete on links for delete to authenticated using (teamhub_can('core.edit_links', team_id));
 
--- Request info
-create policy core_info_read on info_requests for select to authenticated using (teamhub_in_team(team_id));
-create policy core_info_insert on info_requests for insert to authenticated
-  with check (teamhub_can('people.request_info', team_id) and created_by = (select auth.uid()));
-create policy core_info_delete on info_requests for delete to authenticated
-  using (created_by = (select auth.uid()) or teamhub_is_admin());
+-- info_requests: left over from "Request info" (replaced by the Setup assistant on Home). No client policies.
 
 -- Notifications: own only. Inserts come from definer functions.
 create policy core_notifications_read on notifications for select to authenticated using (user_id = (select auth.uid()));

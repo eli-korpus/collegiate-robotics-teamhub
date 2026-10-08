@@ -35,6 +35,15 @@ describe('calendar RLS', () => {
     expect(r.length).toBe(1);
   });
 
+  it('a cancelled date can be un-cancelled by whoever can edit the event, not by members', async () => {
+    const [{ id }] = await db.as(mentorA, `insert into cal_events (team_id, title, starts_at, recurrence, created_by) values ($1, 'Weekly build', now(), 'FREQ=WEEKLY', $2) returning id`, [TEAM_A, mentorA]);
+    await db.as(mentorA, `insert into cal_exceptions (event_id, occurrence_date, cancelled) values ($1, current_date, true)`, [id]);
+    const restore = `update cal_exceptions set cancelled = false where event_id = $1 returning cancelled`;
+    expect(await db.denied(memberA, restore, [id])).toBe(true);
+    expect(await db.denied(captainA, restore, [id])).toBe(true);
+    expect(await db.as(mentorA, restore, [id])).toEqual([{ cancelled: false }]);
+  });
+
   it('feeds are admin-only and produce an iCal document', async () => {
     expect(await db.denied(mentorA, `insert into cal_feeds (team_id) values (null) returning id`)).toBe(true);
     const [f] = await db.as(admin, `insert into cal_feeds (team_id) values ($1) returning token`, [TEAM_B]);

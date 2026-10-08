@@ -7,6 +7,6 @@
 - Home reminds people what they still owe. A row is stored only when something is turned in.
 - **No uploads anywhere**: documents stay on paper or in the school's/FIRST's system.
 
-**Not for:** uploading or collecting documents (Drive or the official system), asking questions (People > Request info).
+**Not for:** uploading or collecting documents (Drive or the official system), asking questions (Polls).
 
 **Permissions:** manage forms (Mentors), check people off (Mentors; add Captains in the wizard), see everyone's status (Mentors).

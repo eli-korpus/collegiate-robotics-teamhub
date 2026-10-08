@@ -17,7 +17,6 @@ import {
   type WidgetDef,
 } from '@teamhub/sdk';
 import { TeamLogo } from '../auth/AuthLayout';
-import type { InfoRequest } from '../people/profileFields';
 
 // ── Pending approvals (approvers) ──────────────────────────────────────────
 function Approvals() {
@@ -38,25 +37,12 @@ function Approvals() {
   );
 }
 
-// ── Request info cards (spec §12.2) ────────────────────────────────────────
-const RequestInfoForm = lazy(() => import('../people/profileFields').then((m) => ({ default: m.RequestInfoForm })));
-function RequestInfoCards() {
-  const sb = useSupabase();
-  const me = useMe();
-  const reqs = useQuery({
-    queryKey: ['core', 'info-requests'],
-    queryFn: async () => {
-      const { data, error } = await sb.from('info_requests').select('*').order('created_at', { ascending: false });
-      if (error) throw error;
-      return data as InfoRequest[];
-    },
-  });
-  const myTeams = new Set(me.memberships.filter((m) => m.status === 'active').map((m) => m.team_id));
-  const open = (reqs.data ?? []).filter((r) => (!r.closes_at || new Date(r.closes_at) > new Date()) && (!r.team_id || myTeams.has(r.team_id)));
-  if (!open.length) return null;
+// ── Setup assistant: how much of your profile is filled in ─────────────────
+const ProfileSetup = lazy(() => import('../people/profileFields').then((m) => ({ default: m.ProfileSetup })));
+function ProfileSetupCard() {
   return (
     <Suspense fallback={null}>
-      <RequestInfoForm requests={open} />
+      <ProfileSetup />
     </Suspense>
   );
 }
@@ -159,7 +145,7 @@ function RecentActivity() {
 
 export const CORE_WIDGETS: (WidgetDef & { module: 'core' })[] = [
   { id: 'approvals', title: 'Join requests', priority: 'today', component: Approvals, perm: 'people.approve_members', module: 'core' },
-  { id: 'request-info', title: 'Info requested from you', priority: 'today', component: RequestInfoCards, module: 'core' },
+  { id: 'profile-setup', title: 'Setup assistant', priority: 'today', component: ProfileSetupCard, module: 'core' },
   { id: 'team', title: 'Team info', component: TeamInfo, module: 'core' },
   { id: 'links', title: 'Team tools', component: QuickLinks, module: 'core' },
   { id: 'activity', title: 'Recent activity', size: 'lg', component: RecentActivity, module: 'core' },

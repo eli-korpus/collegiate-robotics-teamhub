@@ -45,7 +45,8 @@ describe('every table is protected (all tabs on)', () => {
     // Tables only definer functions touch may have no rules at all (RLS on = closed to everyone else).
     expect(tables.filter((t) => !t.rls).map((t) => t.name)).toEqual([]);
     const ruleless = tables.filter((t) => t.policies === 0).map((t) => t.name);
-    const definerOnly = ['teamhub_storage_trash', 'att_codes', 'att_attempts'];
+    // info_requests: left over from the removed Request info, closed to everyone.
+    const definerOnly = ['teamhub_storage_trash', 'att_codes', 'att_attempts', 'info_requests'];
     expect(ruleless.filter((n) => !definerOnly.includes(n)), 'tables with RLS on but no rules: add rules or list them as definer-only').toEqual([]);
     for (const t of tables) await expect(db.as(null, `select 1 from public.${t.name} limit 1`), t.name).rejects.toThrow();
   }, 180_000);

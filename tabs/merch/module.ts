@@ -16,7 +16,7 @@ export default defineModule({
   summary: 'Collect team shirt and hoodie orders: sizes come from profiles.',
   purpose: 'Collect team merch orders.',
   notFor: [
-    { text: 'Collecting sizes for other reasons', goTo: 'core:request-info' },
+    { text: 'Collecting sizes for other reasons', goTo: 'core:profile-fields' },
     { text: 'Taking payments (collect money outside TeamHub)', goTo: 'link:budget' },
   ],
   footprint: 'Tiny',

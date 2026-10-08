@@ -16,4 +16,5 @@ export const TOOL_SLOT_LABELS: Record<string, string> = {
   printer_dashboard: 'Printer dashboard',
   outreach_doc: 'Outreach log doc',
   sdk_docs: 'SDK / library docs',
+  other: 'Other',
 };

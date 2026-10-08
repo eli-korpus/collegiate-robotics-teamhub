@@ -16,7 +16,7 @@ export default defineModule({
   summary: 'Quick team decisions and “when can everyone meet?” grids.',
   purpose: 'Make a group decision or find a time that works.',
   notFor: [
-    { text: 'Collecting personal info (sizes, allergies, contacts)', goTo: 'core:request-info' },
+    { text: 'Collecting personal info (sizes, allergies, contacts)', goTo: 'core:profile-fields' },
     { text: 'Claiming limited slots', goTo: 'signups' },
     { text: 'Required paperwork', goTo: 'paperwork' },
     { text: 'Announcements', goTo: 'announcements' },

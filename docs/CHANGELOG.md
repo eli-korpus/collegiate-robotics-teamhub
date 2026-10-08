@@ -13,6 +13,28 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+### Added
+
+- **Setup assistant** on everyone's Home: "You're 60% finished setting up your profile", counting your first and last
+  name and the profile fields you're asked for, with a button to My profile. It hides once everything is filled in.
+- Tool links have a new kind, **Other**, for links that don't fit the others. Add as many as you like in Admin > Tool
+  links; they show in Team tools on Home.
+- Calendar: **Un-cancel this date** brings back a cancelled date of a repeating event. Whoever can edit the event can
+  do it.
+
+### Changed
+
+- Names are two boxes everywhere, **First name** and **Last name** (Join, My profile, editing someone in People, and
+  the wizard's admin account). They're still saved as one name, so nothing needs updating.
+
+### Removed
+
+- **People > Request info** and its "Info requested from you" Home card, replaced by the Setup assistant. To collect
+  something like shirt sizes, add a profile field (Admin > Profile fields). The "Request info from members"
+  permission is gone too. Old requests are cleared when you update.
+- The "Not pinned" choice for tool links: those links showed up nowhere. Updating removes any you have, unless you
+  have (or had) the Bulletin Board tab, where links without a kind are the board's own links.
+
 ## [1.0.7] - 2026-10-06
 ### Security
 

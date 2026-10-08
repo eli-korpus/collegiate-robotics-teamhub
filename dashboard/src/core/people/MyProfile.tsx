@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Download, Trash2, UserPlus } from 'lucide-react';
-import { Avatar, Button, Card, CardHeader, Field, Input, PageHeader, Select, Textarea, VisibilityNote, downloadText, toast, useConfirm, validateRequired } from '@teamhub/ui';
+import { Avatar, Button, Card, CardHeader, NameFields, PageHeader, Select, Textarea, VisibilityNote, downloadText, joinName, splitName, toast, useConfirm, validateRequired } from '@teamhub/ui';
 import { friendlyError, isMultiTeam, runtime, useMe, usePeople, useSupabase, Upload, uploadFile } from '@teamhub/sdk';
 import { LEVEL_NOTE, ProfileFieldInput, askedFields, fieldValue, saveProfileFields, useMyPrivate, useProfileFields } from './profileFields';
 
@@ -15,7 +15,7 @@ export default function MyProfile() {
   // Fields you're asked for, plus any you've already answered (mentors aren't asked for shirt sizes, for example).
   const fields = useMemo(() => allFields.filter((f) => askedFields([f], me).length || fieldValue(f, me.profile.details, priv.data)), [allFields, me, priv.data]);
   const people = usePeople();
-  const [name, setName] = useState(me.profile.display_name);
+  const [name, setName] = useState(() => splitName(me.profile.display_name));
   const [values, setValues] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [joinTeam, setJoinTeam] = useState('');
@@ -36,9 +36,9 @@ export default function MyProfile() {
         <Card className="md:col-span-2">
           <CardHeader title="Name & photo" />
           <div className="flex flex-wrap items-start gap-5 px-4 pb-4">
-            <Avatar name={name} src={people.data?.get(me.id)?.avatarUrl} size={72} />
+            <Avatar name={joinName(name) || me.profile.display_name} src={people.data?.get(me.id)?.avatarUrl} size={72} />
             <div className="min-w-60 flex-1 space-y-3">
-              <Field label="Display name" required>{(id) => <Input id={id} value={name} maxLength={80} onChange={(e) => setName(e.target.value)} />}</Field>
+              <NameFields value={name} onChange={setName} autoComplete />
               <Upload
                 kind="avatar"
                 label="Drop a photo or"
@@ -96,8 +96,9 @@ export default function MyProfile() {
             onClick={async () => {
               setBusy(true);
               try {
-                if (name.trim() && name.trim() !== me.profile.display_name) {
-                  const { error } = await sb.from('profiles').update({ display_name: name.trim() }).eq('id', me.id);
+                if (!name.first.trim() || !name.last.trim()) return void toast.error('Enter your first and last name');
+                if (joinName(name) !== me.profile.display_name) {
+                  const { error } = await sb.from('profiles').update({ display_name: joinName(name).slice(0, 80) }).eq('id', me.id);
                   if (error) throw error;
                 }
                 await saveProfileFields(sb, me.id, fields, values, { details: me.profile.details ?? {}, hidden: priv.data ?? { leaders: {}, mentors: {} } });

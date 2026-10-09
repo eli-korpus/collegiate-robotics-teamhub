@@ -1,6 +1,6 @@
 {
   "name": "teamhub-ftc",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "private": true,
   "description": "Open-source, bring-your-own-services team dashboard for FIRST Tech Challenge teams.",
   "license": "MIT",

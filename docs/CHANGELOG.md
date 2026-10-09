@@ -13,6 +13,7 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+## [1.0.9] - 2026-10-09
 ### Security
 
 From a full security check of the dashboard, database, server functions, setup wizard and GitHub workflows. Update

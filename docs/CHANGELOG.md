@@ -12,6 +12,8 @@ Releases with a **Security** section fix a vulnerability. Update as soon as you 
 How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
+
+## [1.1.0] - 2026-10-09
 ### Changed
 
 - Calendar: a multi-day event's end date is now its last day. An event from Oct 21 to Oct 30 shows through the 30th

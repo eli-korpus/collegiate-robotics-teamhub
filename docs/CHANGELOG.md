@@ -13,20 +13,6 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
-## [1.1.0] - 2026-10-09
-### Changed
-
-- Calendar: a multi-day event's end date is now its last day. An event from Oct 21 to Oct 30 shows through the 30th
-  (before, you had to enter the 31st). The box is now called **Last day**. Update with `npm run setup` > **Update**:
-  it moves the end dates of existing multi-day events back one day, so they keep showing the same days.
-  Competitions with an event code are left as they are, because their dates came from FTCScout and were already right.
-- Events that end today stay in Up next on Home until the day is over.
-
-### Fixed
-
-- Team tools on Home shows every tool link. Before, it stopped at 10, so **Other** links often didn't show anywhere.
-- Tool link cards (Admin > Tool links, Bulletin Board) wrap their badges onto a second line instead of cutting them off.
-
 ## [1.0.9] - 2026-10-09
 ### Security
 

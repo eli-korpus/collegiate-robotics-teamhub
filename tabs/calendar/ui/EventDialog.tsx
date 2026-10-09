@@ -152,7 +152,7 @@ export function EventDialog({ open, onClose, event, draft, onSaved }: { open: bo
         <div className="grid gap-3 sm:grid-cols-3">
           <Field label={allDay ? 'Start date' : 'Date'} required>{(id) => <Input id={id} type="date" required value={date} onChange={(e) => setDate(e.target.value)} />}</Field>
           {allDay ? (
-            <Field label="Last day" optional hint="For events that last more than one day. Leave empty for one day.">
+            <Field label="End date" optional>
               {(id) => <Input id={id} type="date" min={date} value={endDate} onChange={(e) => setEndDate(e.target.value)} />}
             </Field>
           ) : (

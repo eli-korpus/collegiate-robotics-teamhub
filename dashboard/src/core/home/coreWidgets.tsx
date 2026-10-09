@@ -79,7 +79,8 @@ function TeamInfo() {
 
 // ── Quick links ────────────────────────────────────────────────────────────
 function QuickLinks() {
-  const pinned = useSlotLinks(Object.keys(TOOL_SLOT_LABELS)).slice(0, 10);
+  // Every tool link, "Other" ones included (they come last, so a cap would hide them).
+  const pinned = useSlotLinks(Object.keys(TOOL_SLOT_LABELS));
   const canEdit = useCan('core.edit_links');
   // No placeholder card without links (admins add them in Admin > Tool links).
   if (!pinned.length) return null;

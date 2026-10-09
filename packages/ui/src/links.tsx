@@ -35,8 +35,9 @@ export function LinkCard({ label, url, description, actions, badge }: { label: s
         <Favicon url={url} size={16} />
       </span>
       <a href={safeHref(url)} target="_blank" rel="noreferrer noopener" className="min-w-0 flex-1">
-        <p className="flex items-center gap-1.5 truncate text-[13.5px] font-medium">
-          {label}
+        {/* Wraps so the badges (kind, team) move to the next line instead of being cut off. */}
+        <p className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-[13.5px] font-medium">
+          <span className="min-w-0 break-words">{label}</span>
           <ExternalLink className="size-3 shrink-0 text-faint opacity-0 transition-opacity group-hover:opacity-100" />
           {badge}
         </p>

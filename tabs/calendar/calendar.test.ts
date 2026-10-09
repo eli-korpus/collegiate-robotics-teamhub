@@ -1,4 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
+import { loadCatalog } from '@teamhub/generator';
 import { createTestDb, TEAM_A, TEAM_B, withModules, type TestDb } from '../../tools/tests/db/harness';
 
 describe('calendar RLS', () => {
@@ -64,4 +65,31 @@ describe('calendar RLS', () => {
     await db.as(admin, `insert into cal_events (team_id, title, kind, event_code, starts_at, created_by) values ($1, 'Qualifier', 'competition', 'USNYQ1', now(), $2)`, [TEAM_B, admin]);
     expect((await db.admin(`select count(*)::int n from cal_events where upper(event_code) = 'USNYQ1'`))[0].n).toBe(2);
   });
+});
+
+/** 003: a multi-day event's end date is now its last day, so updating moves end dates people entered as "the day after" back one day. */
+describe('inclusive last day on update', () => {
+  it('moves multi-day end dates back one day, but not FTCScout competitions or timed events', async () => {
+    const now = await loadCatalog();
+    const cal = now.modules.get('calendar')!;
+    const migrations = cal.migrations.filter((m) => m.name < '003_');
+    const before = { ...now, modules: new Map(now.modules).set('calendar', { ...cal, migrations, version: migrations.length }) };
+    const db = await createTestDb();
+    await db.applyConfig(withModules(['calendar']), true, before);
+    await db.admin(`insert into cal_events (title, kind, all_day, starts_at, ends_at, event_code) values
+      ('Camp', 'outreach', true, '2026-10-21T12:00:00Z', '2026-10-31T12:00:00Z', null),
+      ('Two days', 'social', true, '2026-11-02T12:00:00Z', '2026-11-03T12:00:00Z', null),
+      ('One day', 'social', true, '2026-11-05T12:00:00Z', null, null),
+      ('Championship', 'competition', true, '2026-12-05T12:00:00Z', '2026-12-06T12:00:00Z', 'USNYCMP'),
+      ('Practice', 'practice', false, '2026-11-10T19:00:00Z', '2026-11-10T22:00:00Z', null)`);
+    await db.applyConfig(withModules(['calendar']));
+    const rows = await db.admin(`select title, to_char(ends_at at time zone 'UTC', 'YYYY-MM-DD HH24:MI') ends from cal_events order by starts_at`);
+    expect(rows).toEqual([
+      { title: 'Camp', ends: '2026-10-30 12:00' },
+      { title: 'Two days', ends: null },
+      { title: 'One day', ends: null },
+      { title: 'Practice', ends: '2026-11-10 22:00' },
+      { title: 'Championship', ends: '2026-12-06 12:00' },
+    ]);
+  }, 120_000);
 });

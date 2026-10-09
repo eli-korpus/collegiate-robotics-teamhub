@@ -17,7 +17,7 @@ export default defineModule({
   purpose: 'Track who has turned in required paperwork.',
   notFor: [
     { text: 'Uploading or collecting the documents themselves', goTo: 'link:drive' },
-    { text: 'Asking questions', goTo: 'core:request-info' },
+    { text: 'Asking questions', goTo: 'polls' },
   ],
   footprint: 'Tiny (a row only when something is turned in)',
   stores: 'The list of required forms and who has turned each in. Never the documents.',

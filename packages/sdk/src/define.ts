@@ -30,7 +30,7 @@ export function definePermissions<const K extends string>(
 
 export interface NotForEntry {
   text: string;
-  /** Module id, `link:<slot>` (tool link) or `core:<page>` (e.g. core:request-info). */
+  /** Module id, `link:<slot>` (tool link) or `core:<page>` (e.g. core:profile-fields). */
   goTo: string;
 }
 
@@ -120,7 +120,6 @@ export const corePermissions = definePermissions('people', {
   view_private: { label: 'See private profile fields (emergency contacts)', default: ['mentor'] },
   reset_password: { label: 'Generate password reset links', default: ['mentor'] },
   deactivate: { label: 'Deactivate or remove people', default: ['mentor'] },
-  request_info: { label: 'Request info from members (Request info)', default: ['mentor'] },
 });
 export const coreLinkPermissions = definePermissions('core', {
   edit_links: { label: 'Edit team tool links', default: ['mentor'], simple: true },

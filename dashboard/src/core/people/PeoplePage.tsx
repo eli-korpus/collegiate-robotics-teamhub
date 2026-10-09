@@ -5,7 +5,6 @@ import { Avatar, Checkbox, EmptyState, PageHeader, PositionBadge, SearchInput, S
 import { isMultiTeam, runtime, useCan, usePeople, usePositions, useTeamScope, type PersonInfo } from '@teamhub/sdk';
 import { Requests } from './Requests';
 import { Positions } from './Positions';
-import { RequestInfo } from './RequestInfo';
 import { Profile } from './Profile';
 import { splitChoices } from './profileFields';
 
@@ -18,12 +17,11 @@ export default function PeoplePage() {
   );
 }
 
-type Tab = 'directory' | 'requests' | 'positions' | 'request-info';
+type Tab = 'directory' | 'requests' | 'positions';
 
 function PeopleHome() {
   const [params, setParams] = useSearchParams();
   const canApprove = useCan('people.approve_members');
-  const canRequestInfo = useCan('people.request_info');
   const people = usePeople();
   const pending = [...(people.data?.values() ?? [])].filter((p) => p.memberships.some((m) => m.status === 'pending')).length;
   const tab = (params.get('tab') as Tab) || 'directory';
@@ -31,7 +29,6 @@ function PeopleHome() {
     { value: 'directory' as Tab, label: 'Directory' },
     ...(canApprove ? [{ value: 'requests' as Tab, label: pending ? `Requests (${pending})` : 'Requests' }] : []),
     { value: 'positions' as Tab, label: 'Positions' },
-    ...(canRequestInfo ? [{ value: 'request-info' as Tab, label: 'Request info' }] : []),
   ];
   return (
     <div>
@@ -41,7 +38,6 @@ function PeopleHome() {
       {tab === 'directory' && <Directory />}
       {tab === 'requests' && canApprove && <Requests />}
       {tab === 'positions' && <Positions />}
-      {tab === 'request-info' && canRequestInfo && <RequestInfo />}
     </div>
   );
 }

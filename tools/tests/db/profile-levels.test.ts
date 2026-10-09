@@ -43,11 +43,9 @@ describe('who can see profile fields', () => {
     expect(await db.denied(captainB, `insert into profiles_leaders (user_id, data) values ($1, '{}')`, [otherA])).toBe(true);
   });
 
-  it('Request info counts an answer wherever it is stored', async () => {
-    const [{ id }] = await db.as(mentorA, `insert into info_requests (fields, team_id, created_by) values ('{shirt_size}', $1, $2) returning id`, [TEAM_A, mentorA]);
-    const rows = await db.as(mentorA, 'select user_id, missing from info_request_status($1)', [id]);
-    expect(rows.find((r) => r.user_id === memberA)?.missing).toEqual([]);
-    expect(rows.find((r) => r.user_id === otherA)?.missing).toEqual(['shirt_size']);
+  it('the old Request info table is closed (the Setup assistant on Home replaced it)', async () => {
+    expect(await db.denied(mentorA, `insert into info_requests (fields, team_id, created_by) values ('{shirt_size}', $1, $2)`, [TEAM_A, mentorA])).toBe(true);
+    expect(await db.denied(admin, `insert into info_requests (fields, team_id, created_by) values ('{shirt_size}', $1, $2)`, [TEAM_A, admin])).toBe(true);
   });
 
   it('changing a field\'s level moves the answers (and only the database update can do it)', async () => {

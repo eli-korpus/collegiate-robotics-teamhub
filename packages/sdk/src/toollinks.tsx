@@ -74,7 +74,8 @@ export function LinkEditor({
         e.preventDefault();
         setBusy(true);
         try {
-          await onSave({ ...v, description: v.description || null, section: v.section || null, slot: v.slot || null });
+          // Tool links always have a kind ("Other" when none fits); Bulletin Board links never do.
+          await onSave({ ...v, description: v.description || null, section: v.section || null, slot: showSlot ? v.slot || 'other' : null });
         } finally {
           setBusy(false);
         }
@@ -109,9 +110,8 @@ export function LinkEditor({
       )}
       {showSlot && (
         <label className="block space-y-1.5">
-          <span className="block text-[13px] font-medium">Pin as tool link</span>
-          <Select value={v.slot} onChange={(e) => setV({ ...v, slot: e.target.value })}>
-            <option value="">Not pinned</option>
+          <span className="block text-[13px] font-medium">Kind of link</span>
+          <Select value={v.slot || 'other'} onChange={(e) => setV({ ...v, slot: e.target.value })}>
             {Object.entries(TOOL_SLOT_LABELS).map(([k, l]) => (
               <option key={k} value={k}>
                 {l}

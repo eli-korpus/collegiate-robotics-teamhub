@@ -27,6 +27,12 @@ describe('which tool link to show', () => {
   it("never shows another team's link", () => {
     expect(resolveSlotLinks([link('portfolio', B, 'Folio')], ['portfolio'], A)).toEqual([]);
   });
+
+  it('shows every "Other" link: the program\'s plus the viewed team\'s own', () => {
+    const others = [link('other', null, 'Fundraiser'), link('other', null, 'Robot shop'), link('other', A, 'Sign-in sheet'), link('other', B, 'Carpool')];
+    expect(resolveSlotLinks(others, ['other'], A).map((l) => l.label)).toEqual(['Fundraiser', 'Robot shop', 'Sign-in sheet']);
+    expect(resolveSlotLinks(others, ['other'], null).map((l) => l.label)).toEqual(['Fundraiser', 'Robot shop', 'Sign-in sheet (A)', 'Carpool (B)']);
+  });
 });
 
 describe('team labels on links', () => {

@@ -7,6 +7,6 @@ create policy drv_runs_read on drv_runs for select to authenticated using (teamh
 create policy drv_runs_insert on drv_runs for insert to authenticated
   with check (teamhub_can('driver-practice.log', team_id) and created_by = (select auth.uid()));
 create policy drv_runs_change on drv_runs for update to authenticated
-  using (created_by = (select auth.uid()) or teamhub_can('driver-practice.manage_fields', team_id)) with check (teamhub_in_team(team_id));
+  using (created_by = (select auth.uid()) or teamhub_can('driver-practice.manage_fields', team_id)) with check (teamhub_can('driver-practice.log', team_id) or teamhub_can('driver-practice.manage_fields', team_id));
 create policy drv_runs_delete on drv_runs for delete to authenticated
   using (created_by = (select auth.uid()) or teamhub_can('driver-practice.manage_fields', team_id));

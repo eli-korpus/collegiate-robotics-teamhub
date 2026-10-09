@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { CalendarDays, Clock, Copy, MapPin, Pencil, Repeat, RotateCw, Rss, Trash2, XCircle } from 'lucide-react';
+import { CalendarDays, Clock, Copy, MapPin, Pencil, Repeat, RotateCw, Rss, Trash2, Undo2, XCircle } from 'lucide-react';
 import {
   Badge,
   Button,
@@ -202,6 +202,14 @@ function EventDetail({ occ, onClose, onChanged }: { occ: Occurrence; onClose: ()
     onChanged();
     onClose();
   };
+  // Brings a cancelled date of a series back (any changed time or title for that date stays).
+  const restore = async () => {
+    const { error } = await sb.from('cal_exceptions').update({ cancelled: false }).eq('event_id', e.id).eq('occurrence_date', occ.date);
+    if (error) return toast.error(friendlyError(error));
+    toast.success('This date is back on');
+    onChanged();
+    onClose();
+  };
 
   if (editing) return <EventDialog open event={e} onClose={() => setEditing(false)} onSaved={onChanged} />;
 
@@ -219,7 +227,11 @@ function EventDetail({ occ, onClose, onChanged }: { occ: Occurrence; onClose: ()
           <>
             {occ.recurring ? (
               <>
-                {!occ.cancelled && (
+                {occ.cancelled ? (
+                  <Button variant="ghost" icon={<Undo2 className="size-4" />} onClick={restore}>
+                    Un-cancel this date
+                  </Button>
+                ) : (
                   <Button
                     variant="ghost"
                     icon={<XCircle className="size-4" />}

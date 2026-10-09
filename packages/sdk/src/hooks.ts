@@ -241,6 +241,11 @@ export function resolveSlotLinks(links: LinkRow[], slots: string[], scope: strin
   const out: LinkRow[] = [];
   for (const slot of slots) {
     const all = links.filter((l) => l.slot === slot);
+    // "Other" holds any number of links: the program's plus the viewed team's own (every team's when viewing all).
+    if (slot === 'other') {
+      out.push(...all.filter((l) => !scope || !l.team_id || l.team_id === scope).map((l) => (!scope && l.team_id ? { ...l, label: withTeam(l.label, l.team_id) } : l)));
+      continue;
+    }
     const own = scope ? all.find((l) => l.team_id === scope) : undefined;
     const program = all.find((l) => !l.team_id);
     if (own ?? program) out.push((own ?? program)!);

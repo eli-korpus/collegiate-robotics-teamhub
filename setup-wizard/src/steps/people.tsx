@@ -166,7 +166,7 @@ export function People({ onNext, onBack }: StepProps) {
 
       <Section
         title="Profile fields"
-        description="Optional extra info on each profile. Tick a field to use it, then choose who can see the answers and who is asked to fill it in. People always see their own answers, and admins see everything. Mentors can ask for missing values with People > Request info: the safe way to collect personal info."
+        description="Optional extra info on each profile. Tick a field to use it, then choose who can see the answers and who is asked to fill it in. People always see their own answers, and admins see everything. The Setup assistant on Home reminds people to fill them in: the safe way to collect personal info."
       >
         <div className="space-y-2">
           {SUGGESTED_FIELDS.map((f) => {

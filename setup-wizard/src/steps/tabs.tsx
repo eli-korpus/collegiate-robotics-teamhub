@@ -19,7 +19,7 @@ const COMPETITIVE = [...STARTER, 'events', 'competition-day', 'scouting', 'check
 
 const CORE_WIDGETS = [
   { key: 'core:approvals', title: 'Join requests (approvers)' },
-  { key: 'core:request-info', title: 'Info requested from you' },
+  { key: 'core:profile-setup', title: 'Setup assistant (profile progress)' },
   { key: 'core:team', title: 'Team info' },
   { key: 'core:links', title: 'Team tools' },
   { key: 'core:activity', title: 'Recent activity' },
@@ -126,7 +126,7 @@ export function ChooseTabs({ onNext, onBack }: StepProps) {
       )}
       <Why title="Why not just pick everything?">
         <p>Each tab adds screens to learn and a little to your database. Teams that start small and add tabs when they need them tend to actually use them.</p>
-        <p>Every tab has one clear job (e.g. Polls are not for collecting shirt sizes; People &gt; Request info is). The details show what each tab is and is not for.</p>
+        <p>Every tab has one clear job (e.g. Polls are not for collecting shirt sizes; profile fields are). The details show what each tab is and is not for.</p>
       </Why>
       <Dialog open={!!info} onOpenChange={(v) => !v && setInfo(null)} title={info?.name} description={info?.summary} size="lg">
         {info && (
@@ -159,7 +159,7 @@ export function recomputeHomeDefaults(c: { modules: Record<string, unknown>; hom
   for (const type of ['member', 'captain', 'mentor'] as const) {
     const keys = [
       ...(type === 'member' ? [] : ['core:approvals']),
-      'core:request-info',
+      'core:profile-setup',
       ...modules.filter((m) => m.id in c.modules).flatMap((m) => m.widgets.filter((w) => w.defaultFor.includes(type)).map((w) => `${m.id}:${w.id}`)),
       'core:team',
       'core:links',

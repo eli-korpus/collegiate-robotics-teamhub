@@ -6,7 +6,7 @@ create policy mfg_jobs_insert on mfg_jobs for insert to authenticated
   with check (teamhub_can('manufacture.submit', team_id) and requested_by = (select auth.uid()) and status = 'submitted');
 create policy mfg_jobs_update on mfg_jobs for update to authenticated
   using (mfg_can_manage(method, team_id) or (requested_by = (select auth.uid()) and status = 'submitted'))
-  with check (teamhub_in_team(team_id));
+  with check (teamhub_can('manufacture.submit', team_id) or mfg_can_manage(method, team_id));
 create policy mfg_jobs_delete on mfg_jobs for delete to authenticated
   using (mfg_can_manage(method, team_id) or (requested_by = (select auth.uid()) and status = 'submitted'));
 

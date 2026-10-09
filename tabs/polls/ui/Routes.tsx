@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Link } from 'react-router';
 import { ArrowRight, BarChart3, CalendarRange, Check, Eye, EyeOff, Lock, MessageSquareText, Pencil, Plus, Trash2, Vote, X } from 'lucide-react';
 import {
   Avatar,
@@ -235,10 +236,13 @@ function CreatePoll({ eventRef, onClose }: { eventRef: string | null; onClose: (
           <Field label="Question" required>{(id) => <Input id={id} autoFocus maxLength={300} value={question} onChange={(e) => setQuestion(e.target.value)} placeholder={kind === 'availability' ? 'When can everyone come to the build session?' : 'What should we…'} />}</Field>
           {personal && (
             <Banner tone="warning" title="This looks like personal info">
-              Collect it with <strong>People &gt; Request info</strong> instead: answers save privately to each profile and you'll see who's missing.{' '}
-              <a href="/people?tab=request-info" className="font-medium text-accent hover:underline">
-                Use Request info <ArrowRight className="inline size-3.5" aria-hidden />
-              </a>
+              Make it a <strong>profile field</strong> instead (an admin adds it in Admin &gt; Profile fields): everyone is asked to fill it in by the Setup assistant on Home, and
+              each answer keeps the field’s privacy.{' '}
+              {me.isAdmin && (
+                <Link to="/admin/fields" className="font-medium text-accent hover:underline">
+                  Add a profile field <ArrowRight className="inline size-3.5" aria-hidden />
+                </Link>
+              )}
             </Banner>
           )}
           {kind === 'choice' && (

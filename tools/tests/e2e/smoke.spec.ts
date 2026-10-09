@@ -200,7 +200,7 @@ test.describe('admins edit people', () => {
     const team = config.teams[0].id;
     const ALEX = '00000000-0000-4000-8000-0000000000a1';
     const now = new Date().toISOString();
-    let saved: Record<string, unknown> | null = null;
+    const saved: Record<string, unknown>[] = [];
     await mockSupabase(page, {
       tables: {
         profiles: [
@@ -215,7 +215,7 @@ test.describe('admins edit people', () => {
     });
     await page.route('**/rest/v1/profiles*', async (route) => {
       if (route.request().method() === 'PATCH') {
-        saved = route.request().postDataJSON();
+        saved.push(route.request().postDataJSON());
         return route.fulfill({ status: 204, body: '' });
       }
       return route.fallback();
@@ -223,7 +223,9 @@ test.describe('admins edit people', () => {
     await page.goto(`/people/${ALEX}`);
     await page.getByRole('button', { name: 'Edit', exact: true }).first().click();
     const dialog = page.getByRole('dialog');
-    await expect(dialog.getByLabel('Name')).toHaveValue('Alex Kim');
+    await expect(dialog.getByLabel('First name')).toHaveValue('Alex');
+    await expect(dialog.getByLabel('Last name')).toHaveValue('Kim');
+    await dialog.getByLabel('Last name').fill('Kimura');
     await expect(dialog.getByText(/Teams and roles|Role/).first()).toBeVisible();
     const subteams = dialog.getByRole('group', { name: 'Subteam' });
     await expect(subteams.getByRole('button', { name: 'Build' })).toHaveAttribute('aria-pressed', 'true');
@@ -231,8 +233,9 @@ test.describe('admins edit people', () => {
     await dialog.getByText('Subteam', { exact: true }).click(); // clicking the label must not toggle anything
     await expect(subteams.getByRole('button', { name: 'Build' })).toHaveAttribute('aria-pressed', 'true');
     await dialog.getByRole('button', { name: 'Save' }).click();
-    await expect.poll(() => saved).not.toBeNull();
-    expect((saved as unknown as { details: { subteam: string } }).details.subteam).toBe('Build, CAD');
+    await expect.poll(() => saved.length).toBe(2);
+    expect(saved[0].display_name).toBe('Alex Kimura');
+    expect((saved[1] as { details: { subteam: string } }).details.subteam).toBe('Build, CAD');
     expect(errors).toEqual([]);
   });
 

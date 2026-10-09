@@ -1,6 +1,37 @@
 import { Check } from 'lucide-react';
 import { cn } from './cn';
 import { readableOn } from './color';
+import { Field, Input } from './primitives';
+
+/** A person's name as two boxes. Saved as one display name ("First Last"). */
+export interface NameParts {
+  first: string;
+  last: string;
+}
+
+/** Splits a saved display name into first and last name (everything after the first word is the last name). */
+export function splitName(name: string): NameParts {
+  const t = name.trim().replace(/\s+/g, ' ');
+  const i = t.indexOf(' ');
+  return i < 0 ? { first: t, last: '' } : { first: t.slice(0, i), last: t.slice(i + 1) };
+}
+
+/** "First Last", trimmed: the display name that's saved. */
+export const joinName = (n: NameParts) => `${n.first.trim()} ${n.last.trim()}`.trim().replace(/\s+/g, ' ');
+
+/** First name and Last name boxes side by side (both required). */
+export function NameFields({ value, onChange, autoComplete, className }: { value: NameParts; onChange: (v: NameParts) => void; autoComplete?: boolean; className?: string }) {
+  return (
+    <div className={cn('grid gap-3 sm:grid-cols-2', className)}>
+      <Field label="First name" required>
+        {(id) => <Input id={id} required maxLength={40} autoComplete={autoComplete ? 'given-name' : 'off'} value={value.first} onChange={(e) => onChange({ ...value, first: e.target.value })} />}
+      </Field>
+      <Field label="Last name" required>
+        {(id) => <Input id={id} required maxLength={40} autoComplete={autoComplete ? 'family-name' : 'off'} value={value.last} onChange={(e) => onChange({ ...value, last: e.target.value })} />}
+      </Field>
+    </div>
+  );
+}
 
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);

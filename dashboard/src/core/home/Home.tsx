@@ -45,7 +45,9 @@ export function Home() {
   const all = useAllWidgets();
   const [editing, setEditing] = useState(false);
   const prefs = me.profile.home_prefs;
-  const order = prefs?.order?.length ? prefs.order : defaultOrder(me);
+  // The Setup assistant took the place of "Info requested from you" (core:request-info) in saved layouts.
+  const renamed = (k: string) => (k === 'core:request-info' ? 'core:profile-setup' : k);
+  const order = (prefs?.order?.length ? prefs.order : defaultOrder(me)).map(renamed);
   const hidden = new Set(prefs?.hidden ?? []);
   const rank = (k: string) => (order.includes(k) ? order.indexOf(k) : 1000 + all.findIndex((w) => w.key === k));
   const visible = all.filter((w) => !hidden.has(w.key)).sort((a, b) => rank(a.key) - rank(b.key));

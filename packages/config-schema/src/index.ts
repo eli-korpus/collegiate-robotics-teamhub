@@ -86,6 +86,7 @@ export const TOOL_LINK_SLOTS = [
   'printer_dashboard',
   'outreach_doc',
   'sdk_docs',
+  'other',
 ] as const;
 export type ToolLinkSlot = (typeof TOOL_LINK_SLOTS)[number];
 

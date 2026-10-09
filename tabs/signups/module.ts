@@ -17,7 +17,7 @@ export default defineModule({
   purpose: 'Claim one of a limited number of slots.',
   notFor: [
     { text: 'Opinions or availability', goTo: 'polls' },
-    { text: 'Collecting info', goTo: 'core:request-info' },
+    { text: 'Collecting info', goTo: 'core:profile-fields' },
     { text: 'Assigning work', goTo: 'tasks' },
   ],
   footprint: 'Tiny',

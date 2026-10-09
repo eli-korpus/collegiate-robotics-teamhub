@@ -17,7 +17,7 @@ describe('core schema + RLS', () => {
 
   it('records versions and seeds config rows', async () => {
     const mods = await db.admin('select id, version from teamhub_modules');
-    expect(mods).toEqual([{ id: 'core', version: 6 }]);
+    expect(mods).toEqual([{ id: 'core', version: 8 }]);
     expect((await db.admin('select count(*)::int n from teams'))[0].n).toBe(2);
     expect((await db.admin(`select season_label from teamhub_settings`))[0].season_label).toBe('2026–27');
   });

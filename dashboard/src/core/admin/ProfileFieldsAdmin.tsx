@@ -47,7 +47,7 @@ export function ProfileFieldsAdmin() {
   return (
     <div className="max-w-2xl space-y-4 text-[13.5px]">
       <p className="text-muted">
-        Extra info on each person’s profile. People fill these in on My profile; mentors can ask for missing answers with People &gt; Request info. Keep personal data to what you
+        Extra info on each person’s profile. People fill these in on My profile; the Setup assistant on Home reminds them until their profile is complete. Keep personal data to what you
         really need (FIRST Youth Protection).
       </p>
 
@@ -215,7 +215,7 @@ function FieldDialog({ initial, isNew, taken, onClose, onSave }: { initial: Extr
               />
             ))}
           </div>
-          <p className="text-[12px] text-muted">Only these people are asked for it on My profile and by Request info.</p>
+          <p className="text-[12px] text-muted">Only these people are asked for it on My profile and by the Setup assistant on Home.</p>
         </div>
         {isNew ? (
           <Field label="Who can see the answers" hint="People always see their own answers, and admins see everything. This can't be changed later, so pick carefully.">

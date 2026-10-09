@@ -6,7 +6,7 @@ import { canWith, useSession } from './session';
 import { resolveSlotLinks, useLinks, useTeamScope } from './hooks';
 
 const CORE_PAGES: Record<string, { label: string; href: string }> = {
-  'request-info': { label: 'Request info', href: '/people?tab=request-info' },
+  'profile-fields': { label: 'Profile fields', href: '/admin/fields' },
   people: { label: 'People', href: '/people' },
   positions: { label: 'Positions', href: '/people?tab=positions' },
 };

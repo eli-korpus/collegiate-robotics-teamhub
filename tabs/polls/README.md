@@ -7,9 +7,9 @@
   see which one applies, with a lock icon for non-public polls. The database enforces it.
 - Question types: pick one, pick several, **availability grid** (days × time slots, best times highlighted) and short
   answer (never public).
-- **Personal-info guard:** questions about sizes, allergies, contacts etc. show a hint to use People > Request info instead.
+- **Personal-info guard:** questions about sizes, allergies, contacts etc. show a hint to make it a profile field instead (Admin > Profile fields).
 - No comments (discussion goes to Team chat). Individual answers are deleted 30 days after closing; totals are kept.
 
-**Not for:** personal info (Request info), limited slots (Sign-ups), paperwork (Paperwork Tracker), announcements.
+**Not for:** personal info (profile fields), limited slots (Sign-ups), paperwork (Paperwork Tracker), announcements.
 
 **Permissions:** create (Captains, Mentors), answer (everyone), see who answered on non-public polls (Mentors + the creator).

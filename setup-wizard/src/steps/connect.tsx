@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle2, Database, ExternalLink, KeyRound } from 'lucide-react';
 import type { TeamhubConfig } from '@teamhub/config-schema';
-import { Banner, Button, Checkbox, Field, Input, Segmented, Select, Spinner, toast, validateRequired } from '@teamhub/ui';
+import { Banner, Button, Checkbox, Field, Input, NameFields, joinName, Segmented, Select, Spinner, toast, validateRequired } from '@teamhub/ui';
 import { TOOL_SLOT_LABELS } from '@teamhub/sdk';
 import { api } from '../api';
 import { Section, StepShell, TokenSteps, Why } from '../components';
@@ -393,7 +393,7 @@ export function ConnectSupabase({ onNext, onBack }: StepProps) {
 export function AdminAccount({ onNext, onBack }: StepProps) {
   const { draft, setDraft } = useDraft();
   const c: TeamhubConfig = draft.config;
-  const [name, setName] = useState('');
+  const [name, setName] = useState({ first: '', last: '' });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [types, setTypes] = useState<Record<string, 'member' | 'captain' | 'mentor'>>(Object.fromEntries(c.teams.map((t) => [t.id, 'mentor'])));
@@ -413,7 +413,7 @@ export function AdminAccount({ onNext, onBack }: StepProps) {
         ) : undefined
       }
     >
-      <Field label="Your name" required>{(id) => <Input id={id} value={name} onChange={(e) => setName(e.target.value)} autoComplete="name" />}</Field>
+      <NameFields value={name} onChange={setName} autoComplete />
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="Email" required error={email && !/\S+@\S+\.\S+/.test(email) ? 'That doesn’t look like an email address.' : undefined}>{(id) => <Input id={id} type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />}</Field>
         <Field label="Password" required hint="At least 8 characters" error={password && password.length < 8 ? 'Use at least 8 characters.' : undefined}>
@@ -439,7 +439,7 @@ export function AdminAccount({ onNext, onBack }: StepProps) {
           if (!validateRequired() || !/\S+@\S+\.\S+/.test(email) || password.length < 8) return;
           setBusy(true);
           try {
-            await api('/admin', { name: name.trim(), email: email.trim(), password, types });
+            await api('/admin', { name: joinName(name), email: email.trim(), password, types });
             setDraft((d) => ({ ...d, done: { ...d.done, admin: true } }));
             toast.success('Admin account created. You can sign in with it once your site is live.');
           } catch (e) {

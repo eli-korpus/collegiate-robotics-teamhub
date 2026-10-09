@@ -496,14 +496,14 @@ export function ToolLinksAdmin() {
   const confirm = useConfirm();
   const [editing, setEditing] = useState<Partial<LinkRow> | null>(null);
   const pinned = (links.data ?? []).filter((l) => l.slot);
-  // Multi-team programs can add a separate link per team, so every kind of link stays available.
-  const free = Object.keys(TOOL_SLOT_LABELS).filter((s) => isMultiTeam() || !pinned.some((l) => l.slot === s));
+  // Multi-team programs can add a separate link per team, so every kind of link stays available. "Other" can hold any number.
+  const free = Object.keys(TOOL_SLOT_LABELS).filter((s) => s === 'other' || isMultiTeam() || !pinned.some((l) => l.slot === s));
   const refresh = () => qc.invalidateQueries({ queryKey: ['core', 'links'] });
   return (
     <div className="space-y-4">
       <p className="text-[13px] text-muted">
-        Tool links appear as quick-link chips in the tabs where they’re useful (e.g. Onshape in the Notebook, the manual in Rules). The <strong>Team chat</strong> link is where
-        discussion happens: TeamHub has no chat by design.
+        Tool links appear as quick-link chips in the tabs where they’re useful (e.g. Onshape in the Notebook, the manual in Rules), and all of them show in Team tools on Home.
+        Use <strong>Other</strong> for anything that doesn’t fit a kind. The <strong>Team chat</strong> link is where discussion happens: TeamHub has no chat by design.
       </p>
       <div className="grid gap-2 md:grid-cols-2">
         {pinned.map((l) => (
@@ -545,7 +545,7 @@ export function ToolLinksAdmin() {
           <p className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-faint">Add a tool link</p>
           <div className="flex flex-wrap gap-1.5">
             {free.map((s) => (
-              <Button key={s} size="sm" icon={<Plus className="size-3.5" />} onClick={() => setEditing({ slot: s, label: TOOL_SLOT_LABELS[s] })}>
+              <Button key={s} size="sm" icon={<Plus className="size-3.5" />} onClick={() => setEditing({ slot: s, label: s === 'other' ? '' : TOOL_SLOT_LABELS[s] })}>
                 {TOOL_SLOT_LABELS[s]}
               </Button>
             ))}

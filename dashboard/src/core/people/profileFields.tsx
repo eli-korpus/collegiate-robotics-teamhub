@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { ClipboardList } from 'lucide-react';
+import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { Link } from 'react-router';
+import { UserCheck } from 'lucide-react';
 import { asksRoles, fieldLevel, type FieldLevel } from '@teamhub/config-schema/util';
-import { Button, Card, CardHeader, Input, Select, VisibilityNote, toast } from '@teamhub/ui';
-import { canWith, friendlyError, PersonName, runtime, useMe, useSettingsRow, useSupabase } from '@teamhub/sdk';
+import { Card, CardHeader, Input, ProgressRing, Select, buttonClass, splitName } from '@teamhub/ui';
+import { canWith, runtime, useMe, useSettingsRow, useSupabase } from '@teamhub/sdk';
 
 export interface ProfileFieldDef {
   id: string;
@@ -152,66 +153,36 @@ export function ProfileFieldInput({ field, value, onChange }: { field: ProfileFi
   );
 }
 
-// ── Request info cards (spec §12.2): Home loads this only when a request is open ──
-export interface InfoRequest {
-  id: string;
-  fields: string[];
-  team_id: string | null;
-  message: string | null;
-  created_by: string;
-  closes_at: string | null;
-}
-export function RequestInfoForm({ requests }: { requests: InfoRequest[] }) {
-  const sb = useSupabase();
+// ── Setup assistant (Home): how much of My profile is filled in. Hidden once it's all done ──
+export function ProfileSetup() {
   const me = useMe();
-  const qc = useQueryClient();
   const fields = useProfileFields();
   const priv = useMyPrivate();
-  const [values, setValues] = useState<Record<string, string>>({});
-  const [busy, setBusy] = useState(false);
-  const has = (id: string) => {
-    const f = fields.find((x) => x.id === id);
-    return !!(f ? fieldValue(f, me.profile.details, priv.data) : me.profile.details?.[id]);
-  };
+  if (priv.isLoading) return null;
+  const name = splitName(me.profile.display_name);
   // Only fields this person is asked for (mentors aren't asked for shirt sizes, for example).
-  const asked = new Set(askedFields(fields, me).map((f) => f.id));
-  const open = requests.filter((r) => r.fields.some((f) => asked.has(f) && !has(f)));
-  if (!open.length || priv.isLoading) return null;
-  const missing = [...new Set(open.flatMap((r) => r.fields.filter((f) => asked.has(f) && !has(f))))].map((id) => fields.find((f) => f.id === id)).filter(Boolean) as ProfileFieldDef[];
+  const items = [
+    { label: 'First name', done: !!name.first },
+    { label: 'Last name', done: !!name.last },
+    ...askedFields(fields, me).map((f) => ({ label: f.label, done: !!fieldValue(f, me.profile.details, priv.data) })),
+  ];
+  const missing = items.filter((i) => !i.done);
   if (!missing.length) return null;
+  const share = (items.length - missing.length) / items.length;
+  const pct = Math.round(share * 100);
   return (
-    <Card className="border-warning/40">
-      <CardHeader icon={<ClipboardList className="size-4" />} title={`Please add your ${missing.map((f) => f.label.toLowerCase()).join(', ')}`} subtitle={open[0].message ? `“${open[0].message}” · ` : undefined} />
-      <form
-        className="space-y-2.5 px-4 pb-4"
-        onSubmit={async (e) => {
-          e.preventDefault();
-          setBusy(true);
-          try {
-            await saveProfileFields(sb, me.id, fields, values, { details: me.profile.details ?? {}, hidden: priv.data ?? { leaders: {}, mentors: {} } });
-            toast.success('Saved to your profile');
-            qc.invalidateQueries({ queryKey: ['core'] });
-          } catch (err) {
-            toast.error(friendlyError(err));
-          } finally {
-            setBusy(false);
-          }
-        }}
-      >
-        {missing.map((f) => (
-          <div key={f.id} role="group" aria-label={f.label} className="space-y-1">
-            <p className="text-[12.5px] font-medium">{f.label}</p>
-            <ProfileFieldInput field={f} value={values[f.id] ?? ''} onChange={(v) => setValues({ ...values, [f.id]: v })} />
-            <VisibilityNote locked={f.private}>{LEVEL_NOTE[f.level]}</VisibilityNote>
-          </div>
-        ))}
-        <p className="text-[12px] text-muted">
-          Requested by <PersonName id={open[0].created_by} />
-        </p>
-        <Button type="submit" size="sm" variant="primary" loading={busy}>
-          Save to my profile
-        </Button>
-      </form>
+    <Card>
+      <CardHeader icon={<UserCheck className="size-4" />} title="Setup assistant" />
+      <div className="flex items-center gap-4 px-4 pb-4">
+        <ProgressRing value={share} label={`Profile ${pct}% set up`} />
+        <div className="min-w-0 flex-1">
+          <p className="text-[13.5px] font-medium">You’re {pct}% finished setting up your profile</p>
+          <p className="mt-0.5 text-[12.5px] text-muted">Still to fill in: {missing.map((i) => i.label).join(', ')}</p>
+          <Link to="/me" className={buttonClass('primary', 'sm', 'mt-2')}>
+            Finish my profile
+          </Link>
+        </div>
+      </div>
     </Card>
   );
 }

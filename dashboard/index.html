@@ -7,6 +7,12 @@
     <title>%TEAMHUB_TITLE%</title>
     %TEAMHUB_ICONS%
     <script>
+      // Never run inside another website's frame, where it could trick someone into clicking (clickjacking). Hosts
+      // that support it also send headers for this (public/_headers); GitHub Pages can't, so this covers it there.
+      if (window.top !== window.self) {
+        document.documentElement.style.display = 'none';
+        try { window.top.location = window.self.location.href; } catch (e) {}
+      }
       // Apply the theme before first paint (per-device preference, spec §9.2).
       (function () {
         var pref = 'system';

@@ -5,6 +5,7 @@ import { deriveAccent } from '@teamhub/ui/color';
 import { MODULE_CATEGORIES } from '@teamhub/config-schema';
 import type { Resolved } from './resolve';
 import { LAYOUT } from './catalog';
+import { cleanSvg } from './svg';
 
 const json = (v: unknown) => JSON.stringify(v, null, 2);
 const ident = (id: string) => id.replace(/[^a-zA-Z0-9]/g, '_');
@@ -195,7 +196,9 @@ export function copyBranding(root: string): number {
   for (const f of readdirSync(from)) {
     const src = join(from, f);
     if (statSync(src).isFile() && !f.startsWith('.')) {
-      copyFileSync(src, join(to, f));
+      // SVG logos added before the wizard cleaned them are cleaned here, so nothing in one can run on the site.
+      if (/\.svg$/i.test(f)) writeFileSync(join(to, f), cleanSvg(readFileSync(src, 'utf8')));
+      else copyFileSync(src, join(to, f));
       n++;
     }
   }

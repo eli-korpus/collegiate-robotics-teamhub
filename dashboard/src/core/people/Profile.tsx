@@ -3,7 +3,7 @@ import type { PersonInfo } from '@teamhub/sdk';
 import { useNavigate, useParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Copy, KeyRound, Lock, MoreHorizontal, Pencil, Shield, Trash2, UserCheck, UserX } from 'lucide-react';
-import { Avatar, Button, Card, CardHeader, Dialog, EmptyState, Field, IconButton, Input, Menu, PositionBadge, Select, Spinner, TYPE_LABEL, toast, useConfirm } from '@teamhub/ui';
+import { Avatar, Button, Card, CardHeader, Dialog, EmptyState, IconButton, Input, Menu, NameFields, PositionBadge, Select, Spinner, TYPE_LABEL, joinName, splitName, toast, useConfirm } from '@teamhub/ui';
 import { canWith, friendlyError, isMultiTeam, runtime, useMe, usePeople, useSupabase, TeamBadge } from '@teamhub/sdk';
 import { canSeeLevel, fieldValue, ProfileFieldInput, saveProfileFields, useHiddenValues, useProfileFields, type HiddenValues } from './profileFields';
 import { TeamLogo } from '../auth/AuthLayout';
@@ -90,7 +90,8 @@ export function Profile() {
 function usePersonEditing(p: PersonInfo) {
   const me = useMe();
   // People who assign positions edit profiles; team-only and mentors-only fields only appear to those who can see them.
-  const canEdit = p.id !== me.id && (me.isAdmin || p.memberships.some((m) => canWith(me, 'people.assign_positions', m.team_id)));
+  // Only admins edit an admin's profile (same rule as the database).
+  const canEdit = p.id !== me.id && (me.isAdmin || (!p.isAdmin && p.memberships.some((m) => canWith(me, 'people.assign_positions', m.team_id))));
   const fields = useProfileFields().filter((f) => canSeeLevel(me, f.level, p));
   const hidden = useHiddenValues(p.id);
   return { fields, canEdit, hidden: hidden.data ?? { leaders: {}, mentors: {} } };
@@ -383,16 +384,16 @@ function TeamsDialog({ p, onClose, embedded = false }: { p: PersonInfo; onClose:
 function EditPersonDialog({ p, canProfile, canTeams, fields, hidden, onClose }: { p: PersonInfo; canProfile: boolean; canTeams: boolean; fields: ReturnType<typeof useProfileFields>; hidden: HiddenValues; onClose: () => void }) {
   const sb = useSupabase();
   const qc = useQueryClient();
-  const [n, setN] = useState(p.name);
+  const [n, setN] = useState(() => splitName(p.name));
   const [values, setValues] = useState<Record<string, string>>(Object.fromEntries(fields.map((f) => [f.id, fieldValue(f, p.details, hidden)])));
   const [busy, setBusy] = useState(false);
   const save = async () => {
     if (!canProfile) return onClose();
-    if (!n.trim()) return toast.error('Enter a name');
+    if (!n.first.trim() || !n.last.trim()) return toast.error('Enter a first and last name');
     setBusy(true);
     try {
-      if (n.trim() !== p.name) {
-        const { error } = await sb.from('profiles').update({ display_name: n.trim().slice(0, 80) }).eq('id', p.id);
+      if (joinName(n) !== p.name) {
+        const { error } = await sb.from('profiles').update({ display_name: joinName(n).slice(0, 80) }).eq('id', p.id);
         if (error) throw error;
       }
       await saveProfileFields(sb, p.id, fields, values, { details: p.details, hidden });
@@ -420,9 +421,7 @@ function EditPersonDialog({ p, canProfile, canTeams, fields, hidden, onClose }: 
     >
       <div className="space-y-5">
         {canProfile && (
-          <Field label="Name" required>
-            {(id) => <Input id={id} value={n} maxLength={80} onChange={(e) => setN(e.target.value)} />}
-          </Field>
+          <NameFields value={n} onChange={setN} />
         )}
         {canTeams && (
           <section className="space-y-2">

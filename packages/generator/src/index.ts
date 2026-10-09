@@ -10,6 +10,7 @@ export * from './resolve';
 export * from './sql';
 export * from './codegen';
 export * from './diff';
+export * from './svg';
 
 export class ConfigError extends Error {}
 

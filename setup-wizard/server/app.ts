@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { parseConfig, type TeamhubConfig } from '@teamhub/config-schema';
 import { isValidRepoName } from '@teamhub/config-schema/util';
 import {
+  cleanSvg,
   configPath,
   describePlan,
   diffConfigs,
@@ -13,6 +14,7 @@ import {
   planToSql,
   REPO_ROOT,
   resolveConfig,
+  svgLooksActive,
   teamDir,
   themeCss,
   type Catalog,
@@ -383,7 +385,12 @@ export function createApp(deps: AppDeps = {}) {
     if (!/^[a-z0-9][a-z0-9._-]{0,60}$/.test(name)) throw new MgmtError('Bad file name', 400);
     const m = /^data:(image\/(png|webp|svg\+xml|jpeg));base64,(.+)$/.exec(dataUrl);
     if (!m) throw new MgmtError('Logos must be PNG, WebP, JPEG or SVG', 400);
-    const buf = Buffer.from(m[3], 'base64');
+    let buf = Buffer.from(m[3], 'base64');
+    if (m[1] === 'image/svg+xml') {
+      const svg = cleanSvg(buf.toString('utf8'));
+      if (svgLooksActive(svg)) throw new MgmtError('This SVG has scripts or links in it that can’t be removed safely. Use a PNG instead.', 400);
+      buf = Buffer.from(svg, 'utf8');
+    }
     if (buf.length > 600 * 1024) throw new MgmtError('Logo is too large after optimizing (max 600 KB)', 400);
     mkdirSync(join(teamDir(), 'branding'), { recursive: true });
     keepBrandingOriginal(name);

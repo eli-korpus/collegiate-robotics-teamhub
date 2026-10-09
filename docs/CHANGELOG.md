@@ -13,6 +13,55 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+## [1.0.9] - 2026-10-09
+### Security
+
+From a full security check of the dashboard, database, server functions, setup wizard and GitHub workflows. Update
+with `npm run setup` > **Update** so your database gets the fixes.
+
+- The author of a post, request, notebook entry, scouting entry and so on can no longer be changed from the website.
+  Before, someone could make their own post look like another person wrote it (or hand them edit rights to it).
+- Only admins can edit an admin's profile. Before, a mentor on the same team could rename an admin.
+- Links, purchase requests, print jobs, repairs, albums, outreach events, social posts and driver practice runs can
+  only be moved to a team where you're allowed to post them. Before, being on the other team was enough. Badges can
+  only be moved to a team where you manage positions.
+- The dashboard refuses to run inside another website's frame, so it can't be used for clickjacking. Cloudflare,
+  Netlify and Vercel also send headers for this (`dashboard/public/_headers`; new Vercel setups get them in
+  `vercel.json`).
+- SVG logos are cleaned when they're uploaded and every time the site is built: scripts, event handlers and outside
+  links are removed, and logos are served with a policy that lets nothing in them run.
+- Attendance check-in codes use a secure random generator, and a code lasts at most 5 minutes.
+- Asking to delete your account notifies mentors at most once a day.
+- The storage cleanup function compares its secret in constant time.
+- The leftover Request info status check is closed.
+
+### Fixed
+
+- The browser test for editing someone's profile uses the First name and Last name boxes.
+
+## [1.0.8] - 2026-10-08
+### Added
+
+- **Setup assistant** on everyone's Home: "You're 60% finished setting up your profile", counting your first and last
+  name and the profile fields you're asked for, with a button to My profile. It hides once everything is filled in.
+- Tool links have a new kind, **Other**, for links that don't fit the others. Add as many as you like in Admin > Tool
+  links; they show in Team tools on Home.
+- Calendar: **Un-cancel this date** brings back a cancelled date of a repeating event. Whoever can edit the event can
+  do it.
+
+### Changed
+
+- Names are two boxes everywhere, **First name** and **Last name** (Join, My profile, editing someone in People, and
+  the wizard's admin account). They're still saved as one name, so nothing needs updating.
+
+### Removed
+
+- **People > Request info** and its "Info requested from you" Home card, replaced by the Setup assistant. To collect
+  something like shirt sizes, add a profile field (Admin > Profile fields). The "Request info from members"
+  permission is gone too. Old requests are cleared when you update.
+- The "Not pinned" choice for tool links: those links showed up nowhere. Updating removes any you have, unless you
+  have (or had) the Bulletin Board tab, where links without a kind are the board's own links.
+
 ## [1.0.7] - 2026-10-06
 ### Security
 

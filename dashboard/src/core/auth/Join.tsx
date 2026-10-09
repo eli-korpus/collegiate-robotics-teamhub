@@ -3,7 +3,7 @@ import { Link, Navigate } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { emailDomainAllowed } from '@teamhub/config-schema/util';
 import { Check, MailCheck } from 'lucide-react';
-import { Banner, Button, Field, Input, Segmented, Textarea, VisibilityNote, cn } from '@teamhub/ui';
+import { Banner, Button, Field, Input, NameFields, Segmented, Textarea, VisibilityNote, cn, joinName } from '@teamhub/ui';
 import { friendlyError, isMultiTeam, runtime, useSession, useSupabase } from '@teamhub/sdk';
 import { AuthLayout, TeamLogo } from './AuthLayout';
 
@@ -15,7 +15,7 @@ export function Join() {
   const { session } = useSession();
   const teams = runtime().config.teams;
   const multi = isMultiTeam();
-  const [name, setName] = useState('');
+  const [name, setName] = useState({ first: '', last: '' });
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [picked, setPicked] = useState<string[]>(multi ? [] : [teams[0].id]);
@@ -77,7 +77,7 @@ export function Join() {
             email: email.trim(),
             password,
             options: {
-              data: { name: name.trim(), teams: picked, requested_type: type, note: note.trim() || null },
+              data: { name: joinName(name), teams: picked, requested_type: type, note: note.trim() || null },
               // With email confirmation on (setup wizard > Email), the link in the email comes back to this site.
               emailRedirectTo: `${location.origin}${import.meta.env.BASE_URL}`,
             },
@@ -100,9 +100,7 @@ export function Join() {
         }}
       >
         {error && <Banner tone="danger">{error}</Banner>}
-        <Field label="Your name" required hint="First and last name, as your team knows you.">
-          {(id) => <Input id={id} required maxLength={80} autoComplete="name" value={name} onChange={(e) => setName(e.target.value)} />}
-        </Field>
+        <NameFields value={name} onChange={setName} autoComplete />
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="Email" required hint={domains.length ? `Use your ${domainList} email` : undefined}>
             {(id) => <Input id={id} type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />}

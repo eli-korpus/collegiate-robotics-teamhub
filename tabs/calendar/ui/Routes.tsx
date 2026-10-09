@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { CalendarDays, Clock, Copy, MapPin, Pencil, Repeat, RotateCw, Rss, Trash2, Undo2, XCircle } from 'lucide-react';
 import {
+  addDays,
   Badge,
   Button,
   Calendar,
@@ -188,8 +189,9 @@ function EventDetail({ occ, onClose, onChanged }: { occ: Occurrence; onClose: ()
   const e = occ.event;
   const K = KINDS[e.kind];
   const canEdit = (e.created_by === me.id && canWith(me, 'calendar.create', e.team_id)) || canWith(me, 'calendar.edit_any', e.team_id);
+  const lastDay = e.all_day && occ.end ? addDays(occ.end, -1) : null;
   const when = e.all_day
-    ? formatDate(occ.start, { weekday: 'long', month: 'long', day: 'numeric' }) + (occ.end && occ.end > occ.start ? ` – ${formatDate(occ.end, { month: 'long', day: 'numeric' })}` : '')
+    ? formatDate(occ.start, { weekday: 'long', month: 'long', day: 'numeric' }) + (lastDay && lastDay > occ.start ? ` – ${formatDate(lastDay, { month: 'long', day: 'numeric' })}` : '')
     : `${formatDate(occ.start, { weekday: 'long', month: 'long', day: 'numeric' })} · ${formatTime(occ.start)}${occ.end ? ` – ${formatTime(occ.end)}` : ''}`;
 
   const remove = async (scope: 'one' | 'all') => {

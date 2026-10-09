@@ -32,7 +32,7 @@ export interface Occurrence {
   event: CalEvent;
   date: string; // local YYYY-MM-DD of this occurrence
   start: Date;
-  end: Date | null;
+  end: Date | null; // all-day: midnight after the last day
   title: string;
   location: string | null;
   cancelled: boolean;
@@ -72,13 +72,15 @@ export function expandOccurrences(events: CalEvent[], exceptions: CalException[]
   const out: Occurrence[] = [];
   for (const e of events) {
     const start = e.all_day ? allDayToDate(e.starts_at) : new Date(e.starts_at);
-    const end = e.ends_at ? (e.all_day ? allDayToDate(e.ends_at) : new Date(e.ends_at)) : null;
+    // An all-day event's ends_at is its last day (inclusive); the occurrence ends at midnight after it.
+    const end = e.all_day ? addDays(e.ends_at ? allDayToDate(e.ends_at) : start, 1) : e.ends_at ? new Date(e.ends_at) : null;
     const duration = end ? end.getTime() - start.getTime() : 0;
     const rule = parseRule(e.recurrence);
     const starts = rule ? expand(start, rule, addDays(from, -1), to) : [start];
     for (const s of starts) {
-      const occEnd = end ? new Date(s.getTime() + duration) : null;
-      if ((occEnd ?? s) < from || s >= to) continue;
+      // Whole days for all-day events, so a daylight-saving change can't shift the end.
+      const occEnd = !end ? null : e.all_day ? addDays(s, Math.round(duration / 86_400_000)) : new Date(s.getTime() + duration);
+      if ((occEnd ? occEnd <= from : s < from) || s >= to) continue;
       const date = dateKey(s);
       const ex = rule ? exMap.get(`${e.id}:${date}`) : undefined;
       const o = ex?.override;

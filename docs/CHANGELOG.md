@@ -12,6 +12,23 @@ Releases with a **Security** section fix a vulnerability. Update as soon as you 
 How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
+### Changed
+
+- **Links** is a new page for every program, under **Program** in the sidebar next to People and Admin. It replaces
+  both Admin > Tool links and the Bulletin Board tab, which edited the same links list in two places with different
+  permissions. Everyone can see every link there, grouped into **Team tools** and your own sections, with search
+  (links are also in the ⌘K search now).
+  - A link can be a **team tool** (Team chat, Onshape, Other…): those also show in Team tools on Home, and most kinds
+    as quick links in the tabs that use them. Other links show only on the Links page.
+  - New permissions: **Add links** (Captains and Mentors: add links and edit or remove their own) and **Manage all
+    links** (Mentors: edit any link, including team tools). Change them in `npm run setup` > Edit > Permissions.
+  - Update with `npm run setup` > **Update**. Nothing is lost: Bulletin Board links stay, and whoever could add or
+    manage Bulletin Board links gets the matching new permission. Old `/bulletin` and `/admin/links` addresses open
+    the Links page.
+
+### Fixed
+
+- The **Edit** button on Home's Team tools sent Mentors who aren't admins to a "No access" page.
 
 ## [1.1.0] - 2026-10-09
 ### Changed

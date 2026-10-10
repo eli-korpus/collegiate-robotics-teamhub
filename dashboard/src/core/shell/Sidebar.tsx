@@ -1,5 +1,5 @@
 import { NavLink, useLocation, useNavigate } from 'react-router';
-import { Check, ChevronsUpDown, Compass, ExternalLink, Home as HomeIcon, LogOut, MessagesSquare, Monitor, Moon, Search, Settings, Shield, Sun, User, Users } from 'lucide-react';
+import { Check, ChevronsUpDown, Compass, ExternalLink, Home as HomeIcon, Link2, LogOut, MessagesSquare, Monitor, Moon, Search, Settings, Shield, Sun, User, Users } from 'lucide-react';
 import { Avatar, Kbd, Menu, ModKey, SidebarItem, SidebarSection, TeamDot, cn, useMediaQuery, safeHref } from '@teamhub/ui';
 import { canWith, isMultiTeam, runtime, setTeamScope, useCan, useToolLink, useMe, usePeople, useSession, useTeamScope, type LoadedModule } from '@teamhub/sdk';
 import { nav } from '../../generated/nav';
@@ -73,6 +73,7 @@ export function Sidebar({ onNavigate, onSearch }: { onNavigate: () => void; onSe
         ))}
         <SidebarSection title="Program" collapsible={false}>
           <SidebarItem as={NavLink} to="/people" icon={<Users />} label="People" count={pendingCount || undefined} active={loc.pathname.startsWith('/people')} onClick={onNavigate} />
+          <SidebarItem as={NavLink} to="/links" icon={<Link2 />} label="Links" active={loc.pathname.startsWith('/links')} onClick={onNavigate} />
           {me?.isAdmin && <SidebarItem as={NavLink} to="/admin" icon={<Shield />} label="Admin" dot={!!update} title={update ? `TeamHub ${update.version} is available` : undefined} active={loc.pathname.startsWith('/admin')} onClick={onNavigate} />}
         </SidebarSection>
       </div>

@@ -14,7 +14,7 @@ const CATEGORIES = [
   { id: 'outreach', label: 'Outreach & Business' },
 ] as const;
 
-const STARTER = ['calendar', 'attendance', 'announcements', 'bulletin', 'tasks'];
+const STARTER = ['calendar', 'attendance', 'announcements', 'tasks'];
 const COMPETITIVE = [...STARTER, 'events', 'competition-day', 'scouting', 'checklists', 'batteries', 'notebook', 'judging'];
 
 const CORE_WIDGETS = [

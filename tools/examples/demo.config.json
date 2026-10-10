@@ -36,10 +36,6 @@
         "trackHours": true
       }
     },
-    "bulletin": {
-      "state": "active",
-      "settings": {}
-    },
     "announcements": {
       "state": "active",
       "settings": {}

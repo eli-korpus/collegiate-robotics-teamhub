@@ -1,5 +1,5 @@
 import { lazy, Suspense, useEffect, useRef, useState } from 'react';
-import { Route, Routes, useLocation, useNavigate } from 'react-router';
+import { Navigate, Route, Routes, useLocation, useNavigate } from 'react-router';
 import { AlertTriangle, Search } from 'lucide-react';
 import { AppShell, Banner, Dialog, ErrorState, IconButton, Kbd, ModKey, Spinner } from '@teamhub/ui';
 import { runtime, SHORTCUTS, useSchemaStatus, useSession, useSettingsRow, useShortcut } from '@teamhub/sdk';
@@ -13,6 +13,7 @@ import { markTourSeen, onOpenTour, tourSeen } from './tourState';
 
 const People = lazy(() => import('../people/PeoplePage'));
 const Admin = lazy(() => import('../admin/AdminPage'));
+const Links = lazy(() => import('../links/LinksPage'));
 const MyProfile = lazy(() => import('../people/MyProfile'));
 const Tour = lazy(() => import('./Tour'));
 
@@ -80,6 +81,10 @@ export function Shell() {
               <Route path="/" element={<Home />} />
               <Route path="/people/*" element={<People />} />
               <Route path="/me" element={<MyProfile />} />
+              <Route path="/links" element={<Links />} />
+              {/* Old addresses: Admin > Tool links and the Bulletin Board tab became the Links page (1.2.0). */}
+              <Route path="/admin/links" element={<Navigate to="/links" replace />} />
+              <Route path="/bulletin/*" element={<Navigate to="/links" replace />} />
               <Route path="/admin/*" element={<Admin />} />
               {modules.map((m) => (
                 <Route key={m.manifest.id} path={`/${m.manifest.id}/*`} element={<ModuleRoute module={m} />} />

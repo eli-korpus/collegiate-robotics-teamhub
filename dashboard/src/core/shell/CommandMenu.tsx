@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
-import { FileText, Home, Shield, User, Users, Zap } from 'lucide-react';
+import { FileText, Home, Link2, Shield, User, Users, Zap } from 'lucide-react';
 import { Avatar, CommandBar, matches, type CommandSection } from '@teamhub/ui';
 import { allQuickActions, canWith, runtime, useActivePeople, useSession, useSupabase, type SearchResult } from '@teamhub/sdk';
 
@@ -19,7 +19,7 @@ export function CommandMenu({ open, onOpenChange }: { open: boolean; onOpenChang
     if (!open) setQ('');
   }, [open]);
 
-  // Debounced search across module providers (5 results each, no index tables).
+  // Debounced search across the links list and module providers (5 results each, no index tables).
   useEffect(() => {
     if (!open || q.trim().length < 2) {
       setResults([]);
@@ -28,8 +28,14 @@ export function CommandMenu({ open, onOpenChange }: { open: boolean; onOpenChang
     let cancelled = false;
     setLoading(true);
     const t = setTimeout(async () => {
-      const out = await Promise.all(
-        modules
+      const term = q.trim().replace(/[%,()]/g, ' ');
+      const linkSearch = async (): Promise<{ module: string; items: SearchResult[] }> => {
+        const { data } = await sb.from('links').select('id, label, url').or(`label.ilike.%${term}%,description.ilike.%${term}%,section.ilike.%${term}%`).limit(5);
+        return { module: 'Links', items: (data ?? []).map((l) => ({ id: l.id, title: l.label, subtitle: l.url, href: '/links' })) };
+      };
+      const out = await Promise.all([
+        linkSearch().catch(() => ({ module: 'Links', items: [] })),
+        ...modules
           .filter((m) => m.client.search)
           .map(async (m) => {
             try {
@@ -38,7 +44,7 @@ export function CommandMenu({ open, onOpenChange }: { open: boolean; onOpenChang
               return { module: m.manifest.name, items: [] };
             }
           }),
-      );
+      ]);
       if (!cancelled) {
         setResults(out.filter((r) => r.items.length));
         setLoading(false);
@@ -55,6 +61,7 @@ export function CommandMenu({ open, onOpenChange }: { open: boolean; onOpenChang
     const gotoAll: { id: string; label: string; keywords?: string; hint?: string; icon: ReactNode; onSelect: () => void }[] = [
       { id: 'home', label: 'Home', icon: <Home />, onSelect: go('/') },
       { id: 'people', label: 'People', icon: <Users />, onSelect: go('/people') },
+      { id: 'links', label: 'Links', keywords: 'Links tools resources bookmarks', icon: <Link2 />, onSelect: go('/links') },
       { id: 'me', label: 'My profile', icon: <User />, onSelect: go('/me') },
       ...(me?.isAdmin ? [{ id: 'admin', label: 'Admin', icon: <Shield />, onSelect: go('/admin') }] : []),
       ...modules.map((m) => {
@@ -63,8 +70,9 @@ export function CommandMenu({ open, onOpenChange }: { open: boolean; onOpenChang
       }),
     ];
     const goto = gotoAll.filter((i) => !q || matches(i.keywords ?? String(i.label), q));
-    const actions = allQuickActions()
-      .filter((a) => !a.perm || canWith(me, a.perm))
+    const canAddLink = canWith(me, 'core.add_links') || canWith(me, 'core.edit_links');
+    const coreActions = canAddLink ? [{ module: 'core', id: 'add-link', label: 'Add a link', keywords: 'resource url bookmark tool', icon: Link2, href: '/links?new=1', hint: undefined as string | undefined }] : [];
+    const actions = [...coreActions, ...allQuickActions().filter((a) => !a.perm || canWith(me, a.perm))]
       .filter((a) => !q || matches(`${a.label} ${a.keywords ?? ''}`, q))
       .map((a) => ({ id: `a-${a.module}-${a.id}`, label: a.label, hint: a.hint, icon: a.icon ? <a.icon /> : <Zap />, onSelect: go(a.href) }));
     const ppl = q

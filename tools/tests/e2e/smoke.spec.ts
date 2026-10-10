@@ -34,7 +34,7 @@ test.describe('dashboard smoke', () => {
     });
   }
 
-  for (const path of ['/people', '/people?tab=positions', '/admin', '/admin/modules', '/admin/links', '/me']) {
+  for (const path of ['/people', '/people?tab=positions', '/admin', '/admin/modules', '/links', '/me']) {
     test(`core page ${path}`, async ({ page }) => {
       const errors = watchErrors(page);
       await mockSupabase(page);

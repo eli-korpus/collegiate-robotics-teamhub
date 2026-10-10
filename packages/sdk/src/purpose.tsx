@@ -8,6 +8,7 @@ import { resolveSlotLinks, useLinks, useTeamScope } from './hooks';
 const CORE_PAGES: Record<string, { label: string; href: string }> = {
   'profile-fields': { label: 'Profile fields', href: '/admin/fields' },
   people: { label: 'People', href: '/people' },
+  links: { label: 'Links', href: '/links' },
   positions: { label: 'Positions', href: '/people?tab=positions' },
 };
 /** Resolves a manifest `notFor` target to a link, or null when that tab/tool isn't available. */

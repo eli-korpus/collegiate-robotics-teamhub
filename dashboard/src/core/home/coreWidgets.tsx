@@ -82,11 +82,11 @@ function QuickLinks() {
   // Every tool link, "Other" ones included (they come last, so a cap would hide them).
   const pinned = useSlotLinks(Object.keys(TOOL_SLOT_LABELS));
   const canEdit = useCan('core.edit_links');
-  // No placeholder card without links (admins add them in Admin > Tool links).
+  // No placeholder card without links (they're added on the Links page).
   if (!pinned.length) return null;
   return (
     <Card>
-      <CardHeader icon={<Link2 className="size-4" />} title="Team tools" action={canEdit ? <Link to="/admin/links" className="text-[12px] font-medium text-accent">Edit</Link> : undefined} />
+      <CardHeader icon={<Link2 className="size-4" />} title="Team tools" action={canEdit ? <Link to="/links" className="text-[12px] font-medium text-accent">Edit</Link> : undefined} />
       <ul className="grid grid-cols-1 gap-0.5 px-2 pb-3">
           {pinned.map((l) => (
             <li key={l.id}>

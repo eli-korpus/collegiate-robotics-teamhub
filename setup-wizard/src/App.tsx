@@ -28,7 +28,7 @@ const SETUP: StepDef[] = [
   { id: 'options', label: 'Tab options', C: TabOptions },
   { id: 'people', label: 'People & positions', C: People },
   { id: 'permissions', label: 'Permissions', C: Permissions },
-  { id: 'links', label: 'Tool links', C: ToolLinksStep },
+  { id: 'links', label: 'Team tools', C: ToolLinksStep },
   { id: 'supabase', label: 'Connect Supabase', C: ConnectSupabase, doneKey: 'applied' },
   { id: 'admin', label: 'Admin account', C: AdminAccount, doneKey: 'admin' },
   { id: 'publish', label: 'Publish', C: Publish, doneKey: 'published' },
@@ -45,7 +45,7 @@ const EDIT: StepDef[] = [
   { id: 'options', label: 'Tab options', C: TabOptions },
   { id: 'people', label: 'People & positions', C: People },
   { id: 'permissions', label: 'Permissions', C: Permissions },
-  // No Tool links step: after setup they live only in the database and are edited in the dashboard (Admin > Tool links).
+  // No Tool links step: after setup they live only in the database and are edited in the dashboard (the Links page).
   { id: 'review', label: 'Review & apply', C: Review, doneKey: 'applied' },
 ];
 

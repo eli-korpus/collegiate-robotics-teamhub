@@ -19,7 +19,7 @@ export default defineModule({
     { text: 'Discussion (there are no replies)', goTo: 'link:team_chat' },
     { text: 'Questions that need answers', goTo: 'polls' },
     { text: 'Collecting personal info', goTo: 'core:profile-fields' },
-    { text: 'A library of links', goTo: 'bulletin' },
+    { text: 'A library of links', goTo: 'core:links' },
   ],
   footprint: 'Tiny text; one optional compressed image per post',
   usesFiles: true,

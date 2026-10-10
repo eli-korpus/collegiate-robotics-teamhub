@@ -27,10 +27,10 @@ own** free static host, so there are no accounts with us, no fees and no data le
 
 | Team | Engineering | Competition | Outreach & Business |
 |---|---|---|---|
-| Calendar, Attendance, Announcements, Bulletin Board, Tasks, Polls & Availability, Sign-up Sheets, Skills & Training, Paperwork Tracker | Engineering Notebook, To Manufacture, Parts Inventory, Purchase Requests, Battery Tracker, Repair & Issue Log, Driver Practice, Code Hub | Events & Results, Competition Day, Scouting, Checklists, Judging Prep, Rules Reference | Outreach Log, Sponsors CRM, Media Gallery, Social Media Planner, Merch & Orders |
+| Calendar, Attendance, Announcements, Tasks, Polls & Availability, Sign-up Sheets, Skills & Training, Paperwork Tracker | Engineering Notebook, To Manufacture, Parts Inventory, Purchase Requests, Battery Tracker, Repair & Issue Log, Driver Practice, Code Hub | Events & Results, Competition Day, Scouting, Checklists, Judging Prep, Rules Reference | Outreach Log, Sponsors CRM, Media Gallery, Social Media Planner, Merch & Orders |
 
 Plus the core every dashboard has: **Home** (your day at a glance, and a Setup assistant that shows how complete your
-profile is), **People** (join requests and approval, positions) and **Admin** (storage meters, tool links, keep-alive).
+profile is), **People** (join requests and approval, positions), **Links** (the team's tools and resources) and **Admin** (storage meters, keep-alive).
 
 Highlights:
 

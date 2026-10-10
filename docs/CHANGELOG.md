@@ -12,6 +12,8 @@ Releases with a **Security** section fix a vulnerability. Update as soon as you 
 How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
+
+## [1.1.2] - 2026-10-10
 ### Fixed
 
 - Home's **Attendance today** buttons and the checklist shortcuts in Competition Day and Judging Prep shorten long

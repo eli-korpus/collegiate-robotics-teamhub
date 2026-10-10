@@ -26,9 +26,16 @@ How to update your dashboard: [docs/updating.md](updating.md).
     manage Bulletin Board links gets the matching new permission. Old `/bulletin` and `/admin/links` addresses open
     the Links page.
 
+- Buttons that are hard to undo now ask first:
+  - **Setup wizard:** Undo this update, Update to a new version, Update the database, Import a backup, and starting a new season.
+  - **Dashboard:** Make admin, Generate password reset link, changing someone's role on a team, and removing an allowed email domain or address in Who can join.
+  - **Tabs:** deleting a driver practice run, a judging question or criterion, a notebook subsystem or photo, removing
+    someone from a sign-up slot, and saving a sign-up sheet that removes slots people signed up for.
+
 ### Fixed
 
 - The **Edit** button on Home's Team tools sent Mentors who aren't admins to a "No access" page.
+- **Undo this update** in the setup wizard reverted and published your site as soon as it was clicked.
 
 ## [1.1.0] - 2026-10-09
 ### Changed

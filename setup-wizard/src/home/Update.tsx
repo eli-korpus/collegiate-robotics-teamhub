@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AlertTriangle, ArrowRight, Check, CheckCircle2, Database, House, RotateCcw } from 'lucide-react';
 import { TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
-import { Banner, Button, Checkbox, CopyBlock, Dialog, Markdown, Spinner, toast } from '@teamhub/ui';
+import { Banner, Button, Checkbox, CopyBlock, Dialog, Markdown, Spinner, toast, useConfirm } from '@teamhub/ui';
 import { api, apiProgress, type ProgressStep, type ServerState, type StepStatus } from '../api';
 import { ActionButton, Checklist, NextStep, useAction } from '../progress';
 import { PublishButton } from '../steps/publish';
@@ -66,6 +66,7 @@ export function useUpdateCheck() {
 
 export function UpdateDialog({ server, onClose, resume }: { server: ServerState; onClose: () => void; resume?: boolean }) {
   const { check, loading, recheck } = useUpdateCheck();
+  const confirm = useConfirm();
   const [phase, setPhase] = useState<'idle' | 'running' | 'done' | 'failed'>('idle');
   const [startSteps, setStartSteps] = useState<ProgressStep[]>([]);
   const [restart, setRestart] = useState<StepStatus | null>(null);
@@ -105,6 +106,12 @@ export function UpdateDialog({ server, onClose, resume }: { server: ServerState;
 
   const start = async () => {
     if (!check?.latest) return;
+    const ok = await confirm({
+      title: `Update to TeamHub ${check.latest}?`,
+      body: 'The new version is added to your TeamHub folder, your database is updated, and then your website is published. You can undo it afterwards (database changes stay; they only add things).',
+      confirmLabel: 'Update',
+    });
+    if (!ok) return;
     setFailed(null);
     setPublishProblem(false);
     setStartSteps([]);
@@ -131,6 +138,13 @@ export function UpdateDialog({ server, onClose, resume }: { server: ServerState;
   };
 
   const undo = async () => {
+    const ok = await confirm({
+      title: `Undo the update to ${check?.last?.to ?? 'the new version'}?`,
+      body: `Your website goes back to ${check?.last?.from ?? 'the version before'} and is published right away. Your data stays, and so do the database changes from the update.`,
+      confirmLabel: 'Undo the update',
+      danger: true,
+    });
+    if (!ok) return;
     setRolling(true);
     try {
       const r = await api<{ ok: boolean; message: string }>('/update/rollback', {});
@@ -329,6 +343,7 @@ When you're done I'll run "npm run setup" and choose Update to finish (database 
 function DatabaseOnly({ server }: { server: ServerState }) {
   const [plan, setPlan] = useState<{ summary: { migrations: { id: string; from: number; to: number }[] } } | null>(null);
   const action = useAction<{ log: LogLine[] }>();
+  const confirm = useConfirm();
   return (
     <details className="rounded-md border border-border p-3">
       <summary className="cursor-pointer font-medium">Already updated the code another way?</summary>
@@ -359,7 +374,10 @@ function DatabaseOnly({ server }: { server: ServerState }) {
                   </li>
                 ))}
               </ul>
-              <ActionButton state={action.state} label="Update the database" doneLabel="Database updated" icon={<Database className="size-4" />} onClick={() => action.run('/apply', { config: server.config }, (r) => r.log.every((l) => l.ok))} />
+              <ActionButton state={action.state} label="Update the database" doneLabel="Database updated" icon={<Database className="size-4" />} onClick={async () => {
+                  if (!(await confirm({ title: 'Update the database?', body: 'This changes your live Supabase database to match the code in this folder. Make sure the code is the version you want first.', confirmLabel: 'Update the database' }))) return;
+                  await action.run('/apply', { config: server.config }, (r) => r.log.every((l) => l.ok));
+                }} />
             </>
           ) : (
             <p className="flex items-center gap-1.5 text-success">

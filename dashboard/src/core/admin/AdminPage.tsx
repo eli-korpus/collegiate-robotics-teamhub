@@ -429,6 +429,8 @@ function Admins() {
           variant="primary"
           disabled={!pick.length}
           onClick={async () => {
+            const name = people.data?.get(pick[0])?.name ?? 'this person';
+            if (!(await confirm({ title: `Make ${name} an admin?`, body: 'Admins can do everything: change every setting, see private profile fields, and make or remove other admins.', confirmLabel: 'Make admin' }))) return;
             const { error } = await sb.rpc('people_set_admin', { p_user: pick[0], p_on: true });
             if (error) return toast.error(friendlyError(error));
             setPick([]);

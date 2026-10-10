@@ -171,6 +171,7 @@ function PersonActions({ userId }: { userId: string }) {
             label: 'Generate password reset link',
             icon: <KeyRound />,
             onSelect: async () => {
+              if (!(await confirm({ title: `Make a password reset link for ${p.name}?`, body: 'Anyone with the link can set a new password and sign in as them. Give it only to them, privately.', confirmLabel: 'Make link' }))) return;
               const { data, error } = await sb.functions.invoke('admin-reset-link', { body: { user_id: userId, redirect_to: `${location.origin}${import.meta.env.BASE_URL}reset-password` } });
               if (error || !data?.link) return toast.error(friendlyError(error ?? new Error('Could not create a link')));
               setResetLink(data.link);
@@ -323,7 +324,11 @@ function TeamsDialog({ p, onClose, embedded = false }: { p: PersonInfo; onClose:
                     className="h-8 w-28 text-[13px]"
                     value={m.type}
                     disabled={!canAdd || busy !== null}
-                    onChange={(e) => run(t.id, () => sb.rpc('people_set_type', { p_user: p.id, p_team: t.id, p_type: e.target.value }), `Role on ${t.name} updated`)}
+                    onChange={async (e) => {
+                      const to = e.target.value;
+                      if (!(await confirm({ title: `Make ${p.name} a ${TYPE_LABEL[to as keyof typeof TYPE_LABEL] ?? to} on ${t.name}?`, body: 'Their role decides what they can see and change.', confirmLabel: 'Change role' }))) return;
+                      await run(t.id, () => sb.rpc('people_set_type', { p_user: p.id, p_team: t.id, p_type: to }), `Role on ${t.name} updated`);
+                    }}
                   >
                     <option value="member">Member</option>
                     {(canLeaders || m.type !== 'member') && <option value="captain">Captain</option>}

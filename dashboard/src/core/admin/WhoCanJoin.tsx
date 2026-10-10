@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Plus, Trash2 } from 'lucide-react';
 import { normalizeEmailDomain } from '@teamhub/config-schema/util';
-import { Banner, Button, Card, IconButton, Input, PendingAddHint, RemovableTag, Spinner, submitOnBlur, toast } from '@teamhub/ui';
+import { Banner, Button, Card, IconButton, Input, PendingAddHint, RemovableTag, Spinner, submitOnBlur, toast, useConfirm } from '@teamhub/ui';
 import { friendlyError, useSettingsRow, useSupabase } from '@teamhub/sdk';
 
 interface AllowedEmail {
@@ -14,6 +14,7 @@ interface AllowedEmail {
 export function WhoCanJoin() {
   const sb = useSupabase();
   const qc = useQueryClient();
+  const confirm = useConfirm();
   const settings = useSettingsRow();
   const emails = useQuery({
     queryKey: ['core', 'allowed-emails'],
@@ -48,7 +49,11 @@ export function WhoCanJoin() {
         ) : (
           <div className="flex flex-wrap gap-2">
             {domains.map((d) => (
-              <RemovableTag key={d} label={`@${d}`} removeLabel={`Remove ${d}`} onRemove={() => saveDomains(domains.filter((x) => x !== d))} />
+              <RemovableTag key={d} label={`@${d}`} removeLabel={`Remove ${d}`} onRemove={async () => {
+                  const last = domains.length === 1;
+                  if (!(await confirm({ title: `Remove @${d}?`, body: last ? 'This was the only domain, so anyone with the join link can sign up again (a captain or mentor still approves every request).' : `People with @${d} addresses can no longer sign up.`, confirmLabel: 'Remove', danger: true }))) return;
+                  await saveDomains(domains.filter((x) => x !== d));
+                }} />
             ))}
           </div>
         )}
@@ -91,6 +96,7 @@ export function WhoCanJoin() {
                   label={`Remove ${a.email}`}
                   size="sm"
                   onClick={async () => {
+                    if (!(await confirm({ title: `Remove ${a.email}?`, body: 'They can no longer sign up unless their email domain is allowed.', confirmLabel: 'Remove', danger: true }))) return;
                     const { error } = await sb.from('teamhub_allowed_emails').delete().eq('email', a.email);
                     if (error) return toast.error(friendlyError(error));
                     refreshEmails();

@@ -21,8 +21,8 @@ function Shortcuts() {
   return (
     <>
       {(q.data ?? []).map((l) => (
-        <Link key={l.id} to={`/checklists/${l.id}`} className={buttonClass(l.done ? 'soft' : 'secondary', 'sm')}>
-          <ListChecks className="size-4" /> {l.name}
+        <Link key={l.id} to={`/checklists/${l.id}`} className={buttonClass(l.done ? 'soft' : 'secondary', 'sm', 'max-w-full')}>
+          <ListChecks className="size-4" /> <span className="min-w-0 truncate">{l.name}</span>
           {l.progress && <span className="tabular text-[11.5px] opacity-80">{l.progress}</span>}
         </Link>
       ))}

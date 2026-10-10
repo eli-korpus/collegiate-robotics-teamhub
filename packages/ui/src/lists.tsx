@@ -236,8 +236,8 @@ export function DataTable<T>({
       <table className="w-full text-[13px]">
         <thead>
           <tr className="border-b border-border bg-bg-subtle/60 text-left">
-            {columns.map((c) => (
-              <th key={c.id} scope="col" className={cn('px-3 py-2 font-medium text-muted whitespace-nowrap', c.align === 'right' && 'text-right', c.align === 'center' && 'text-center', c.className)}>
+            {columns.map((c, i) => (
+              <th key={c.id} scope="col" className={cn('px-3 py-2 font-medium text-muted whitespace-nowrap', c.align === 'right' && 'text-right', c.align === 'center' && 'text-center', phoneMin(i, c.align), c.className)}>
                 {c.sort ? (
                   <button
                     type="button"
@@ -257,8 +257,8 @@ export function DataTable<T>({
         <tbody className="divide-y divide-border">
           {sorted.map((r) => (
             <tr key={keyOf(r)} className="hover:bg-bg-subtle/50">
-              {columns.map((c) => (
-                <td key={c.id} className={cn('px-3 py-2 align-middle', c.align === 'right' && 'text-right tabular', c.align === 'center' && 'text-center', c.className)}>
+              {columns.map((c, i) => (
+                <td key={c.id} className={cn('px-3 py-2 align-middle', c.align === 'right' && 'text-right tabular', c.align === 'center' && 'text-center', phoneMin(i, c.align), c.className)}>
                   {c.cell(r)}
                 </td>
               ))}
@@ -269,3 +269,6 @@ export function DataTable<T>({
     </div>
   );
 }
+
+/** Phones: text columns keep a readable width and the table scrolls sideways in its card instead of squeezing them. */
+const phoneMin = (i: number, align?: 'right' | 'center') => (i === 0 ? 'max-sm:min-w-40' : !align && 'max-sm:min-w-28');

@@ -40,12 +40,13 @@ export function Kanban<T>({
   };
 
   return (
-    <div className="flex h-full gap-3 relative overflow-x-auto p-4 sm:px-6">
+    // Phones: one column fills the screen (with the next one peeking in) and swiping snaps to the next column.
+    <div className="flex h-full gap-3 relative overflow-x-auto p-4 sm:px-6 max-sm:snap-x max-sm:snap-mandatory max-sm:scroll-px-4">
       {columns.map((col) => (
         <section
           key={col.id}
           aria-label={typeof col.title === 'string' ? col.title : col.id}
-          className={cn('flex w-[290px] shrink-0 flex-col rounded-lg bg-bg-subtle/70', over?.col === col.id && 'ring-2 ring-accent-soft')}
+          className={cn('flex w-[290px] shrink-0 flex-col rounded-lg bg-bg-subtle/70 max-sm:w-[calc(100%-2rem)] max-sm:snap-start', over?.col === col.id && 'ring-2 ring-accent-soft')}
           onDragOver={(e) => {
             if (!drag) return;
             e.preventDefault();

@@ -25,7 +25,7 @@ export function Profile() {
       </button>
       <div className="flex flex-wrap items-start gap-4">
         <Avatar name={p.name} src={p.avatarUrl} size={72} />
-        <div className="min-w-0 flex-1">
+        <div className="min-w-0 flex-1 max-sm:min-w-[min(100%,10rem)]">
           <h1 className="text-[22px] font-semibold tracking-tight">{p.name}</h1>
           <p className="text-[13px] text-muted">
             {p.status !== 'active' ? (p.status === 'pending' ? 'Waiting for approval' : 'Inactive') : p.isAdmin ? 'Admin' : ''}
@@ -46,7 +46,7 @@ export function Profile() {
         )}
       </div>
 
-      <div className="mt-6 grid gap-4 md:grid-cols-2">
+      <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card>
           <CardHeader title={isMultiTeam() ? 'Teams' : 'Team'} action={canManageTeams && isMultiTeam() && <TeamsButton p={p} />} />
           <ul className="space-y-2 px-4 pb-4">
@@ -118,7 +118,7 @@ function ProfileFieldsCard({ p, canTeams }: { p: PersonInfo; canTeams: boolean }
   return (
     <Card>
       <CardHeader title="Profile" action={canEdit && <EditPersonButton p={p} canTeams={canTeams} />} />
-      <dl className="grid grid-cols-[max-content_1fr] gap-x-4 gap-y-2 px-4 pb-4 text-[13.5px]">
+      <dl className="grid grid-cols-[max-content_1fr] gap-x-4 max-lg:grid-cols-[max-content_minmax(0,1fr)] gap-y-2 px-4 pb-4 text-[13.5px]">
         {fields.map((f) => (
             <div key={f.id} className="contents">
               <dt className="flex items-center gap-1 text-muted">

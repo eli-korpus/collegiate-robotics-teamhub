@@ -440,7 +440,7 @@ function DriveEditor({ drive, onClose }: { drive: Drive | null; onClose: () => v
             Add item
           </Button>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="Orders close" optional>{(id) => <Input id={id} type="datetime-local" value={v.closes_at} onChange={(e) => setV({ ...v, closes_at: e.target.value })} />}</Field>
           {drive && (
             <Field label="Status">

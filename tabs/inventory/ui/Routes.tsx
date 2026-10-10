@@ -267,7 +267,7 @@ function PartDialog({ part, categories, perTeam, onClose }: { part: Part | null;
         </>
       }
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Field label="Name" required className="sm:col-span-2">{(id) => <Input id={id} autoFocus maxLength={160} value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} />}</Field>
         <Field label="SKU / part number" optional>{(id) => <Input id={id} value={v.sku} onChange={(e) => setV({ ...v, sku: e.target.value })} />}</Field>
         <Field label="Vendor" optional>{(id) => <Input id={id} value={v.vendor} onChange={(e) => setV({ ...v, vendor: e.target.value })} placeholder="goBILDA, REV…" />}</Field>

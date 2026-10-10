@@ -41,7 +41,7 @@ export function CommentThread({ refStr, visibility }: { refStr: string; visibili
   };
   return (
     <section aria-label="Comments on this item" className="space-y-3">
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 max-sm:flex-wrap max-sm:gap-y-1">
         <h3 className="flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-wider text-faint">
           <MessageSquare className="size-3.5" /> Comments on this item
         </h3>

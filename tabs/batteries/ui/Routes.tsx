@@ -56,7 +56,7 @@ export default function BatteriesRoutes() {
         ) : !rows.length ? (
           <EmptyState icon={<BatteryCharging />} title="No batteries yet" body={<ModulePurpose moduleId="batteries" compact className="mt-2 text-left" />} action={canManage && <Button onClick={() => setAdding(true)}>Add your batteries</Button>} />
         ) : (
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {rows.map(({ b, st }) => (
               <BatteryCard key={b.id} b={b} st={st} logs={(logs.data ?? []).filter((l) => l.battery_id === b.id)} onEdit={() => setEditing(b)} />
             ))}
@@ -227,7 +227,7 @@ function BatteryDialog({ battery, onClose }: { battery: Battery | null; onClose:
       }
     >
       <div className="space-y-3">
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="Label" required>{(id) => <Input id={id} autoFocus maxLength={40} value={v.label} onChange={(e) => setV({ ...v, label: e.target.value })} placeholder="B3" />}</Field>
           <Field label="Type" optional>{(id) => <Input id={id} maxLength={60} value={v.type} onChange={(e) => setV({ ...v, type: e.target.value })} placeholder="12V NiMH 3000mAh" />}</Field>
         </div>

@@ -10,8 +10,8 @@ function Shortcuts() {
   return (
     <>
       {(q.data ?? []).map((l) => (
-        <Link key={l.id} to={`/checklists/${l.id}`} className={buttonClass('ghost', 'sm')}>
-          <ListChecks className="size-4" /> {l.name}
+        <Link key={l.id} to={`/checklists/${l.id}`} className={buttonClass('ghost', 'sm', 'max-w-full')}>
+          <ListChecks className="size-4" /> <span className="min-w-0 truncate">{l.name}</span>
         </Link>
       ))}
     </>

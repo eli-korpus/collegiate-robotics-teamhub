@@ -123,9 +123,9 @@ function Practice() {
       ) : (
         <ul className="divide-y divide-border rounded-lg border border-border bg-surface">
           {list.map((q) => (
-            <li key={q.id} className="flex items-start gap-3 px-4 py-2.5 text-[13.5px]">
-              <span className="flex-1">{q.question}</span>
-              {q.owner && <Person id={q.owner} size="sm" />}
+            <li key={q.id} className="flex items-start gap-3 px-4 py-2.5 text-[13.5px] max-sm:flex-wrap max-sm:items-center">
+              <span className="flex-1 max-sm:basis-full">{q.question}</span>
+              {q.owner && <span className="flex max-sm:mr-auto"><Person id={q.owner} size="sm" /></span>}
               {canManage && (
                 <IconButton
                   label="Edit question"

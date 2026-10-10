@@ -179,7 +179,7 @@ function IssueDialog({ issue, onClose, draftTitle = '' }: { issue?: Issue; onClo
         {!issue && <ModulePurpose moduleId="repairs" compact />}
         <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="repairs.report" label="Robot of" />
         <Field label="What broke?" required>{(id) => <Input id={id} autoFocus maxLength={160} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="Intake belt snapped" />}</Field>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Field label="Subsystem" optional>
             {(id) => (
               <>

@@ -75,7 +75,7 @@ export default function CodeHubRoutes() {
   return (
     <div>
       <ModuleHeader moduleId="code-hub" actions={canEdit && <Button variant="primary" icon={<Plus className="size-4" />} onClick={() => setEditing('new')}>Add OpMode</Button>} />
-      <div className="mx-auto grid max-w-6xl gap-4 px-4 py-5 sm:px-6 lg:grid-cols-[3fr_2fr]">
+      <div className="mx-auto grid grid-cols-1 max-w-6xl gap-4 px-4 py-5 sm:px-6 lg:grid-cols-[3fr_2fr]">
         <div className="space-y-4">
           <Card>
             <CardHeader icon={<Code2 className="size-4" />} title="OpModes" />
@@ -87,10 +87,10 @@ export default function CodeHubRoutes() {
               <ul className="divide-y divide-border">
                 {list.map((o) => (
                   <li key={o.id}>
-                    <button type="button" onClick={() => setSelected(o.id)} className={`flex w-full items-start gap-3 px-4 py-2.5 text-left hover:bg-bg-subtle ${current?.id === o.id ? 'bg-accent-soft/50' : ''}`}>
+                    <button type="button" onClick={() => setSelected(o.id)} className={`flex w-full items-start gap-3 px-4 py-2.5 text-left hover:bg-bg-subtle max-sm:flex-wrap max-sm:gap-y-1.5 ${current?.id === o.id ? 'bg-accent-soft/50' : ''}`}>
                       <Badge>{o.kind === 'auto' ? 'Auto' : o.kind === 'teleop' ? 'TeleOp' : 'Test'}</Badge>
-                      <span className="min-w-0 flex-1">
-                        <span className="block font-medium">{o.name}</span>
+                      <span className="min-w-0 flex-1 max-sm:basis-[calc(100%-5rem)]">
+                        <span className="block font-medium max-lg:break-words">{o.name}</span>
                         {o.description && <span className="block truncate text-[12.5px] text-muted">{o.description}</span>}
                       </span>
                       <TeamBadge teamId={o.team_id} />
@@ -223,7 +223,7 @@ function OpModeDialog({ op, onClose }: { op: OpMode | null; onClose: () => void 
       }
     >
       <div className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Field label="Name" required className="sm:col-span-3">{(id) => <Input id={id} autoFocus value={v.name} onChange={(e) => setV({ ...v, name: e.target.value })} placeholder="MainTeleOp" />}</Field>
           <Field label="Type">
             {(id) => (
@@ -253,7 +253,7 @@ function OpModeDialog({ op, onClose }: { op: OpMode | null; onClose: () => void 
         {v.kind !== 'auto' && (
           <div className="space-y-2">
             <Segmented size="sm" value={pad} onChange={setPad} options={[{ value: 'gamepad1', label: 'Gamepad 1' }, { value: 'gamepad2', label: 'Gamepad 2' }]} />
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {CONTROLS.map((c) => (
                 <label key={c} className="flex items-center gap-2 text-[12.5px]">
                   <span className="w-32 shrink-0 text-muted">{CONTROL_LABEL[c]}</span>

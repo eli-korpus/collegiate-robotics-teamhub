@@ -199,7 +199,7 @@ function RequestDialog({ onClose, draft, existing }: { onClose: () => void; draf
         <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="purchases.request" label="For" />
         <Field label="Item" required>{(id) => <Input id={id} autoFocus maxLength={200} value={v.item} onChange={(e) => setV({ ...v, item: e.target.value })} placeholder="e.g. goBILDA 5203 motor 312 RPM" />}</Field>
         <Field label="Link" optional>{(id) => <Input id={id} type="url" placeholder="https://" value={v.url} onChange={(e) => setV({ ...v, url: e.target.value })} />}</Field>
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Field label="Quantity" required>{(id) => <Input id={id} type="number" min={1} value={v.qty} onChange={(e) => setV({ ...v, qty: Number(e.target.value) || 1 })} />}</Field>
           <Field label="Est. price each" optional>{(id) => <Input id={id} type="number" min={0} step="0.01" value={v.est_price} onChange={(e) => setV({ ...v, est_price: e.target.value })} />}</Field>
           <Field label="How soon">
@@ -253,7 +253,7 @@ function RequestSheet({ r, onClose }: { r: PRequest; onClose: () => void }) {
           </a>
         )}
         {r.reason && <p className="text-[13.5px]">{r.reason}</p>}
-        <dl className="grid grid-cols-[110px_1fr] gap-y-2 text-[13px]">
+        <dl className="grid grid-cols-[110px_1fr] gap-y-2 max-lg:grid-cols-[110px_minmax(0,1fr)] text-[13px]">
           <dt className="text-muted">Requested by</dt>
           <dd className="flex items-center gap-2">
             <Person id={r.requested_by} size="sm" /> <RelativeTime date={r.created_at} className="text-faint" />

@@ -101,7 +101,7 @@ export function Join() {
       >
         {error && <Banner tone="danger">{error}</Banner>}
         <NameFields value={name} onChange={setName} autoComplete />
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Field label="Email" required hint={domains.length ? `Use your ${domainList} email` : undefined}>
             {(id) => <Input id={id} type="email" required autoComplete="email" value={email} onChange={(e) => setEmail(e.target.value)} />}
           </Field>
@@ -113,7 +113,7 @@ export function Join() {
         {multi && (
           <fieldset className="space-y-2">
             <legend className="text-[13px] font-medium">Which team(s)?</legend>
-            <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {teams.map((t) => {
                 const on = picked.includes(t.id);
                 return (
@@ -142,6 +142,7 @@ export function Join() {
           <Segmented<ReqType>
             value={type}
             onChange={setType}
+            className="max-sm:flex-wrap"
             options={[
               { value: 'member', label: 'Team member' },
               { value: 'captain', label: 'Captain' },

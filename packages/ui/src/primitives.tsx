@@ -416,7 +416,8 @@ export function Segmented<T extends string>({
   size?: 'sm' | 'md';
 }) {
   return (
-    <div role="radiogroup" className={cn('inline-flex rounded-md border border-border bg-bg-subtle p-0.5', className)}>
+    // Below desktop width, choices that don't fit scroll sideways instead of squeezing their labels onto several lines.
+    <div role="radiogroup" className={cn('inline-flex rounded-md border border-border bg-bg-subtle p-0.5 relative max-lg:max-w-full max-lg:overflow-x-auto max-lg:[scrollbar-width:none]', className)}>
       {options.map((o) => (
         <button
           key={o.value}
@@ -425,7 +426,7 @@ export function Segmented<T extends string>({
           aria-checked={value === o.value}
           onClick={() => onChange(o.value)}
           className={cn(
-            'inline-flex items-center gap-1.5 rounded-[calc(var(--th-radius-md)-2px)] font-medium text-muted transition-colors hover:text-fg',
+            'inline-flex items-center gap-1.5 rounded-[calc(var(--th-radius-md)-2px)] font-medium text-muted transition-colors hover:text-fg max-lg:shrink-0 max-lg:whitespace-nowrap',
             size === 'sm' ? 'h-7 px-2 text-[12.5px]' : 'h-8 px-3 text-[13px]',
             value === o.value && 'bg-accent-soft text-fg shadow-sm ring-1 ring-accent/60',
           )}

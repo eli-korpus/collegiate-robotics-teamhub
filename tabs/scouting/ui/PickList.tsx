@@ -47,7 +47,7 @@ export function PickList({ ctx, stats, onTeam }: { ctx: EventContext; stats: Ret
     .map((x) => ({ n: x.number, s: stats.composite.get(x.number) ?? null, opr: x.stats?.opr?.totalPointsNp ?? null }))
     .sort((a, b) => (b.s ?? -99) - (a.s ?? -99) || (b.opr ?? -1) - (a.opr ?? -1));
   return (
-    <div className="grid gap-4 md:grid-cols-[3fr_2fr]">
+    <div className="grid grid-cols-1 gap-4 md:grid-cols-[3fr_2fr]">
       <Card>
         <CardHeader title={`Pick list: ${ours.name}`} subtitle={canEdit ? 'Drag to reorder · notes save automatically' : undefined} />
         <ol className="space-y-1 px-2 pb-3">

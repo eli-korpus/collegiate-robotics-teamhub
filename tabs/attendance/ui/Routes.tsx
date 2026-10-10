@@ -171,7 +171,7 @@ function Mine() {
   const past = (sessions.data ?? []).filter((s) => s.date <= today);
   return (
     <div className="space-y-5">
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         <Card className="flex items-center gap-4 p-4">
           <ProgressRing value={st.pct ?? 0} size={64} label="Your attendance this season">
             {st.pct == null ? '–' : `${Math.round(st.pct * 100)}%`}

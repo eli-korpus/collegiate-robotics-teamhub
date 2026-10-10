@@ -34,6 +34,25 @@ test.describe('dashboard smoke', () => {
     });
   }
 
+  // Phones: nothing pushes the page sideways (wide tables and tab strips scroll inside their own box instead).
+  test('no page scrolls sideways on a small phone @phone', async ({ page }) => {
+    test.setTimeout(120_000);
+    await page.setViewportSize({ width: 320, height: 640 });
+    await mockSupabase(page);
+    const wide: string[] = [];
+    for (const path of ['/', '/people', '/links', '/me', '/admin', ...modules.map((m) => `/${m}`)]) {
+      await page.goto(path);
+      await expect(page.locator('main h1').first()).toBeVisible();
+      await page.waitForTimeout(200);
+      const extra = await page.evaluate(() => {
+        const main = document.querySelector('main')!;
+        return Math.max(main.scrollWidth - main.clientWidth, document.scrollingElement!.scrollWidth - innerWidth);
+      });
+      if (extra > 0) wide.push(`${path} (+${extra}px)`);
+    }
+    expect(wide).toEqual([]);
+  });
+
   for (const path of ['/people', '/people?tab=positions', '/admin', '/admin/modules', '/links', '/me']) {
     test(`core page ${path}`, async ({ page }) => {
       const errors = watchErrors(page);

@@ -115,13 +115,13 @@ export default function LinksPage() {
               <Pin className="size-3.5" /> Team tools
             </h2>
             <p className="mb-2 text-[12.5px] text-muted">Also shown on Home and as quick links in the tabs that use them.</p>
-            <div className="grid gap-2 md:grid-cols-2">{tools.map(card)}</div>
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">{tools.map(card)}</div>
           </section>
         )}
         {sections.map(([name, ls]) => (
           <section key={name}>
             <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-faint">{name}</h2>
-            <div className="grid gap-2 md:grid-cols-2">{ls.map(card)}</div>
+            <div className="grid grid-cols-1 gap-2 md:grid-cols-2">{ls.map(card)}</div>
           </section>
         ))}
         {!list.length && !links.isLoading && (

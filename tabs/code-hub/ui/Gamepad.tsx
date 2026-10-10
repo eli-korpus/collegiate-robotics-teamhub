@@ -44,7 +44,7 @@ export function Gamepad({ map, title }: { map: Partial<Record<Control, string>>;
   return (
     <figure className="rounded-lg border border-border bg-surface p-4" aria-label={`${title} mapping`}>
       <figcaption className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-faint">{title}</figcaption>
-      <div className="grid gap-x-6 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-x-6 sm:grid-cols-2">
         <ul className="divide-y divide-border">{side(LEFT)}</ul>
         <ul className="divide-y divide-border">{side(RIGHT)}</ul>
       </div>

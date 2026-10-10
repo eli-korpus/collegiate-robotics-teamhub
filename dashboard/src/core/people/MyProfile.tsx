@@ -32,7 +32,7 @@ export default function MyProfile() {
   return (
     <div>
       <PageHeader title="My profile" subtitle="How you appear across TeamHub" />
-      <div className="mx-auto grid max-w-4xl gap-4 px-4 py-5 sm:px-6 md:grid-cols-2">
+      <div className="mx-auto grid grid-cols-1 max-w-4xl gap-4 px-4 py-5 sm:px-6 md:grid-cols-2">
         <Card className="md:col-span-2">
           <CardHeader title="Name & photo" />
           <div className="flex flex-wrap items-start gap-5 px-4 pb-4">
@@ -78,7 +78,7 @@ export default function MyProfile() {
         {fields.length > 0 && (
           <Card className="md:col-span-2">
             <CardHeader title="Profile details" />
-            <div className="grid gap-3 px-4 pb-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 px-4 pb-4 sm:grid-cols-2">
               {fields.map((f) => (
                 <div key={f.id} role="group" aria-label={f.label} className="space-y-1.5">
                   <p className="text-[13px] font-medium">{f.label}</p>

@@ -50,7 +50,7 @@ export function TeamChecklist({ ctx, stats, onScout, onTeam }: { ctx: EventConte
       {!list.length ? (
         <p className="py-8 text-center text-[13.5px] text-muted">{filter === 'todo' ? <><CircleCheckBig className="mx-auto mb-2 size-6 text-success" aria-hidden />Every team is done!</> : 'No teams here.'}</p>
       ) : (
-        <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
           {list.map((t) => {
             const d = done(t.number);
             const p = pit(t.number)[0];

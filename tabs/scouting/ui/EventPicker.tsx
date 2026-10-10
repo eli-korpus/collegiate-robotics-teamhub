@@ -154,7 +154,7 @@ export function EventPicker({ value, name, onChange }: { value: string; name?: s
             }}
           >
             <Field label="Event name" required>{(id) => <Input id={id} autoFocus value={m.name} onChange={(e) => setM({ ...m, name: e.target.value })} placeholder="Fall scrimmage at Lincoln HS" />}</Field>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <Field label="Short code" optional hint="Letters and digits">{(id) => <Input id={id} value={m.code} onChange={(e) => setM({ ...m, code: e.target.value })} />}</Field>
               <Field label="Date" optional>{(id) => <Input id={id} type="date" value={m.date} onChange={(e) => setM({ ...m, date: e.target.value })} />}</Field>
             </div>

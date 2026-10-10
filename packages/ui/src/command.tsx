@@ -111,7 +111,7 @@ export function CommandBar({
                       >
                         {it.icon && <span className={cn('shrink-0 [&>svg]:size-4', i === active && 'text-accent')}>{it.icon}</span>}
                         <span className="min-w-0 flex-1 truncate">{it.label}</span>
-                        {it.hint && <span className="shrink-0 truncate text-[12px] text-faint">{it.hint}</span>}
+                        {it.hint && <span className="shrink-0 truncate text-[12px] text-faint max-lg:max-w-[50%]">{it.hint}</span>}
                         {i === active && <CornerDownLeft className="size-3.5 shrink-0 text-faint" />}
                       </button>
                     );
@@ -121,7 +121,8 @@ export function CommandBar({
             )}
             {!flat.length && !loading && <p className="px-3 py-8 text-center text-[13px] text-faint">No results{query ? ` for “${query}”` : ''}</p>}
           </div>
-          <div className="flex items-center gap-3 border-t border-border px-3 py-2 text-[11.5px] text-faint">
+          {/* Keyboard hints mean nothing on a phone or tablet without a keyboard. */}
+          <div className={cn('flex items-center gap-3 border-t border-border px-3 py-2 text-[11.5px] text-faint', !footer && 'max-lg:pointer-coarse:hidden')}>
             <span className="inline-flex items-center gap-1">
               <Kbd><ArrowUp className="size-3" aria-label="Up" /></Kbd>
               <Kbd><ArrowDown className="size-3" aria-label="Down" /></Kbd> navigate

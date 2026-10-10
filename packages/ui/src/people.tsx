@@ -22,7 +22,7 @@ export const joinName = (n: NameParts) => `${n.first.trim()} ${n.last.trim()}`.t
 /** First name and Last name boxes side by side (both required). */
 export function NameFields({ value, onChange, autoComplete, className }: { value: NameParts; onChange: (v: NameParts) => void; autoComplete?: boolean; className?: string }) {
   return (
-    <div className={cn('grid gap-3 sm:grid-cols-2', className)}>
+    <div className={cn('grid grid-cols-1 gap-3 sm:grid-cols-2', className)}>
       <Field label="First name" required>
         {(id) => <Input id={id} required maxLength={40} autoComplete={autoComplete ? 'given-name' : 'off'} value={value.first} onChange={(e) => onChange({ ...value, first: e.target.value })} />}
       </Field>

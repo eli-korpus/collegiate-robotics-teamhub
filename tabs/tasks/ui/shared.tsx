@@ -153,7 +153,7 @@ export function TaskDialog({ task, onClose, draft }: { task?: Task | null; onClo
         <Field label="Details" optional>
           {(id) => <Textarea id={id} rows={4} maxLength={5000} value={v.description} onChange={(e) => setV({ ...v, description: e.target.value })} />}
         </Field>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="Assigned to" optional>
             {() =>
               canAssign ? (
@@ -266,7 +266,7 @@ export function TaskSheet({ task, onClose }: { task: Task; onClose: () => void }
           )}
         </div>
         {task.description && <Markdown source={task.description} />}
-        <dl className="grid grid-cols-[110px_1fr] gap-y-2 text-[13px]">
+        <dl className="grid grid-cols-[110px_1fr] gap-y-2 max-lg:grid-cols-[110px_minmax(0,1fr)] text-[13px]">
           <dt className="text-muted">Assigned to</dt>
           <dd className="flex flex-wrap gap-2">{task.assignee.length ? task.assignee.map((id) => <Person key={id} id={id} size="sm" />) : <span className="text-faint">Nobody</span>}</dd>
           {task.subteam_id && (

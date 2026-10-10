@@ -41,7 +41,7 @@ export function Requests() {
           return (
             <li key={p.id + m.team_id} className="flex flex-wrap items-start gap-3 p-4">
               <Avatar name={p.name} size={40} />
-              <div className="min-w-0 flex-1">
+              <div className="min-w-0 flex-1 max-sm:min-w-[min(100%,12rem)]">
                 <p className="font-semibold">{p.name}</p>
                 <p className="text-[12.5px] text-muted">
                   Wants to join as <strong className="font-medium text-fg">{TYPE_LABEL[req]}</strong> <TeamBadge teamId={m.team_id} /> {m.created_at && <> · <RelativeTime date={m.created_at} /></>}
@@ -123,7 +123,7 @@ function ApproveDialog({ p, m, onClose }: { p: PersonInfo; m: Membership; onClos
         {assignable.length > 0 && (
           <div className="space-y-1.5">
             <p className="text-[13px] font-medium">Positions <OptionalTag /></p>
-            <div className="grid gap-1.5 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">
               {assignable.map((x) => (
                 <Checkbox key={x.id} checked={pos.includes(x.id)} onChange={(v) => setPos(v ? [...pos, x.id] : pos.filter((y) => y !== x.id))} label={x.name} />
               ))}
@@ -134,7 +134,7 @@ function ApproveDialog({ p, m, onClose }: { p: PersonInfo; m: Membership; onClos
           <div className="space-y-2">
             <p className="text-[13px] font-medium">Profile details <OptionalTag /></p>
             {fields.map((f) => (
-              <div key={f.id} role="group" aria-label={f.label} className="grid grid-cols-[120px_1fr] items-center gap-2 text-[13px]">
+              <div key={f.id} role="group" aria-label={f.label} className="grid grid-cols-[120px_1fr] items-center gap-2 max-lg:grid-cols-[120px_minmax(0,1fr)] text-[13px]">
                 <span className="text-muted">{f.label}</span>
                 <ProfileFieldInput field={f} value={details[f.id] ?? ''} onChange={(v) => setDetails({ ...details, [f.id]: v })} />
               </div>

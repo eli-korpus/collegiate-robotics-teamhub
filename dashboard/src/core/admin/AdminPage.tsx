@@ -262,7 +262,7 @@ function Storage() {
           </Button>
         }
       >
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="Database (MB)" required>{(id) => <Input id={id} type="number" min={100} value={limits.db_mb} onChange={(e) => setLimits({ ...limits, db_mb: Number(e.target.value) })} />}</Field>
           <Field label="File storage (MB)" required>{(id) => <Input id={id} type="number" min={100} value={limits.files_mb} onChange={(e) => setLimits({ ...limits, files_mb: Number(e.target.value) })} />}</Field>
         </div>

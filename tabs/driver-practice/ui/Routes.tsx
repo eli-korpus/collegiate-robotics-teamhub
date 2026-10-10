@@ -174,8 +174,8 @@ export default function DriverPracticeRoutes() {
               <ul className="divide-y divide-border px-4 pb-2 text-[13px]">
                 {[...list].reverse().slice(0, 15).map((r) => (
                   <li key={r.id} className="flex items-center gap-3 py-2">
-                    <span className="w-20 text-muted">{formatDate(r.date)}</span>
-                    <span className="flex-1">
+                    <span className="w-20 text-muted max-lg:shrink-0 max-sm:w-12">{formatDate(r.date)}</span>
+                    <span className="flex-1 max-lg:min-w-0">
                       {name(r.driver)} + {name(r.operator)} · {KINDS.find((k) => k.v === r.kind)?.l ?? r.kind}
                       {r.notes && <span className="block truncate text-[12px] text-muted">{r.notes}</span>}
                     </span>
@@ -259,7 +259,7 @@ function LogDialog({ fields, onClose, run }: { fields: FieldDef[]; onClose: () =
     >
       <div className="space-y-4">
         <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="driver-practice.log" label="Team" />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="Driver" optional>{() => <PersonPicker value={v.driver} onChange={(driver) => setV({ ...v, driver })} />}</Field>
           <Field label="Operator" optional>{() => <PersonPicker value={v.operator} onChange={(operator) => setV({ ...v, operator })} />}</Field>
           <Field label="Date" required>{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>

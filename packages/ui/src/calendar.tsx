@@ -108,7 +108,7 @@ export function Calendar({
       title={`${it.title}${it.allDay ? '' : ` · ${formatTime(it.start)}`}${it.meta ? ` · ${it.meta}` : ''}`}
     >
       <span className="size-1.5 shrink-0 rounded-full" style={{ background: it.color ?? 'var(--accent)', outline: it.overlay ? '1px dashed currentColor' : undefined }} />
-      {!it.allDay && <span className="tabular shrink-0 text-muted">{formatTime(it.start).replace(':00', '')}</span>}
+      {!it.allDay && <span className="tabular shrink-0 text-muted max-sm:hidden">{formatTime(it.start).replace(':00', '')}</span>}
       <span className="truncate font-medium">{it.title}</span>
     </button>
   );
@@ -127,7 +127,7 @@ export function Calendar({
             Today
           </Button>
         </div>
-        <h2 className="min-w-0 flex-1 truncate text-[15px] font-semibold">{title}</h2>
+        <h2 className="min-w-0 flex-1 truncate text-[15px] font-semibold max-sm:min-w-[min(100%,9rem)]">{title}</h2>
         {toolbarExtra}
         <Segmented
           size="sm"

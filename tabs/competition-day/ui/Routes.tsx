@@ -231,7 +231,7 @@ function Live({ active, teamNumber }: { active: Active; teamNumber: number }) {
           {ours.length ? 'Watch for alliance selection and elimination matches. They appear here automatically.' : 'It appears here as soon as the event publishes it.'}
         </Banner>
       )}
-      <div className="grid gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile label="Our rank" value={us?.stats?.rank ?? '–'} hint={`of ${e.teams.length}`} />
         <StatTile label="Record" value={us?.stats ? `${us.stats.wins}-${us.stats.losses}-${us.stats.ties}` : '–'} />
         <StatTile label="Ranking points" value={us?.stats?.rp?.toFixed(2) ?? '–'} />
@@ -246,7 +246,7 @@ function Live({ active, teamNumber }: { active: Active; teamNumber: number }) {
           ))}
         </div>
       )}
-      <div className="grid gap-4 lg:grid-cols-[3fr_2fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr]">
         <Card>
           <CardHeader title="Our matches" />
           <ul className="divide-y divide-border px-4 pb-2 text-[13px]">

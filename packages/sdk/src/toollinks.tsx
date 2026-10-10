@@ -84,7 +84,7 @@ export function LinkEditor({
         }
       }}
     >
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <label className="space-y-1.5">
           <span className="block text-[13px] font-medium">Label</span>
           <Input required maxLength={80} value={v.label} onChange={(e) => setV({ ...v, label: e.target.value })} />

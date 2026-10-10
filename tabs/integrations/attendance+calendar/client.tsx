@@ -31,9 +31,11 @@ function TodayPractices() {
   return (
     <div className="flex flex-wrap gap-2">
       {list.map((o) => (
-        <Button key={`${o.event.id}:${o.date}`} size="sm" variant="primary" icon={<UserCheck className="size-4" />} onClick={() => take(o.event, o.date, o.start)}>
-          Take attendance: {o.title}
-          {o.allDay ? '' : ` · ${formatTime(o.start)}`}
+        <Button key={`${o.event.id}:${o.date}`} size="sm" variant="primary" className="max-w-full" icon={<UserCheck className="size-4" />} onClick={() => take(o.event, o.date, o.start)}>
+          <span className="min-w-0 truncate">
+            Take attendance: {o.title}
+            {o.allDay ? '' : ` · ${formatTime(o.start)}`}
+          </span>
         </Button>
       ))}
     </div>
@@ -56,13 +58,15 @@ function TodayCard({ open }: { open: { id: string; title: string }[] }) {
       <div className="space-y-2 px-4 pb-4">
         {open.map((s) => (
           <Link key={s.id} to={`/attendance/session/${s.id}`} className={buttonClass('primary', 'sm', 'w-full')}>
-            Continue: {s.title}
+            <span className="min-w-0 truncate">Continue: {s.title}</span>
           </Link>
         ))}
         {list.map((o) => (
           <Button key={`${o.event.id}:${o.date}`} size="sm" variant="primary" className="w-full" icon={<UserCheck className="size-4" />} onClick={() => take(o.event, o.date, o.start)}>
-            Take attendance: {o.title}
-            {o.allDay ? '' : ` · ${formatTime(o.start)}`}
+            <span className="min-w-0 truncate">
+              Take attendance: {o.title}
+              {o.allDay ? '' : ` · ${formatTime(o.start)}`}
+            </span>
           </Button>
         ))}
       </div>

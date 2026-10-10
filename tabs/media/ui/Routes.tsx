@@ -206,7 +206,7 @@ function AlbumPage() {
           </a>
         )}
         {canUpload && (
-          <div className="grid gap-3 md:grid-cols-[2fr_1fr]">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-[2fr_1fr]">
             {left > 0 ? (
               <Upload kind="photo" maxFiles={Math.min(20, left)} onFiles={upload} busy={busy} label={`Add photos (${left} left in this album: compressed to ≤ 400 KB)`} />
             ) : (

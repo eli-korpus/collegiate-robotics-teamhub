@@ -158,7 +158,7 @@ function MySkills({ skills, signoffs, userId, onEdit, onSign }: { skills: Skill[
         <section>
           <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-faint">Skills you can learn next</h2>
           <p className="mb-2 text-[12.5px] text-muted">Learn it, then ask someone who can sign off (a mentor, captain or safety captain) to check you off.</p>
-          <ul className="grid gap-2 md:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
             {next.map((s) => (
               <SkillCard key={s.id} s={s} onEdit={onEdit} onSign={onSign} />
             ))}
@@ -180,7 +180,7 @@ function MySkills({ skills, signoffs, userId, onEdit, onSign }: { skills: Skill[
       {mine.size > 0 && (
         <section>
           <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-faint">Details</h2>
-          <ul className="grid gap-2 md:grid-cols-2">
+          <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
             {skills.filter((s) => mine.has(s.id)).map((s) => (
               <SkillCard key={s.id} s={s} done={mine.get(s.id)} onEdit={onEdit} onSign={onSign} />
             ))}

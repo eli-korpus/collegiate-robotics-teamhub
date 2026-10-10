@@ -29,7 +29,7 @@ export function Insights({ ctx, stats, onTeam, compare, setCompare }: { ctx: Eve
   const cov = coverage(ctx.teams.map((t) => t.number), stats.scoutedCounts, ctx.matches, ctx.ours[0]);
   return (
     <div className="space-y-4">
-      <div className="grid gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile label="Teams" value={ctx.teams.length} />
         <StatTile label="Matches played" value={`${ctx.matches.filter((m) => m.hasBeenPlayed).length}/${ctx.matches.length || '–'}`} />
         <StatTile label="Scouting entries" value={stats.entries.length} />
@@ -167,7 +167,7 @@ export function TeamProfile({ n, ctx, stats, templates, onClose }: { n: number; 
   return (
     <Dialog open onOpenChange={(v) => !v && onClose()} title={`${n} ${t?.name ?? ''}`} description={[t?.city, t?.season?.tot && `Season OPR ${t.season.tot.value.toFixed(1)} · ${ordinal(t.season.tot.rank)} worldwide`].filter(Boolean).join(' · ')} size="xl">
       <div className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatTile label="Rank" value={t?.stats?.rank ?? '–'} hint={t?.stats ? `${t.stats.rp?.toFixed(2) ?? '–'} RP` : undefined} />
           <StatTile label="Record" value={t?.stats ? `${t.stats.wins}-${t.stats.losses}-${t.stats.ties}` : '–'} />
           <StatTile label="OPR (no penalties)" value={t?.stats?.opr?.totalPointsNp.toFixed(1) ?? '–'} />
@@ -203,7 +203,7 @@ export function TeamProfile({ n, ctx, stats, templates, onClose }: { n: number; 
           </p>
         )}
         {(hl.strengths.length > 0 || hl.weaknesses.length > 0) && (
-          <div className="grid gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Card className="p-3 text-[13px]">
               <p className="mb-1 font-semibold text-success">Strengths</p>
               {hl.strengths.length ? hl.strengths.map((h) => <p key={h.fieldId}>{h.label}: {h.team.toFixed(1)} vs event {h.event.toFixed(1)} (+{Math.round((h.ratio - 1) * 100)}%)</p>) : <p className="text-faint">None stand out yet.</p>}
@@ -217,7 +217,7 @@ export function TeamProfile({ n, ctx, stats, templates, onClose }: { n: number; 
         {stats.fields.length > 0 && Object.keys(stats.teamAvg.get(n) ?? {}).length > 0 && (
           <Card>
             <CardHeader title="Scouting vs event average" />
-            <div className="grid gap-4 px-4 pb-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid grid-cols-1 gap-4 px-4 pb-4 sm:grid-cols-2 lg:grid-cols-3">
               {stats.fields
                 .filter((f) => stats.teamAvg.get(n)?.[f.id] != null)
                 .map((f) => (
@@ -267,7 +267,7 @@ export function TeamProfile({ n, ctx, stats, templates, onClose }: { n: number; 
                     </IconButton>
                   )}
                 </div>
-                <dl className="grid grid-cols-[max-content_1fr] gap-x-3 gap-y-0.5">
+                <dl className="grid grid-cols-[max-content_1fr] gap-x-3 max-lg:grid-cols-[max-content_minmax(0,1fr)] gap-y-0.5">
                   {tf.map((f) => (
                     <div key={f.id} className="contents">
                       <dt className="text-muted">{f.label}</dt>

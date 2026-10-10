@@ -269,7 +269,7 @@ function SubmitDialog({ onClose, draftTitle }: { onClose: () => void; draftTitle
       <div className="space-y-4">
         <ModulePurpose moduleId="manufacture" compact />
         <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="manufacture.submit" />
-        <div className="grid gap-3 sm:grid-cols-[1fr_200px]">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_200px]">
           <Field label="Part name" required>{(id) => <Input id={id} autoFocus maxLength={140} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />}</Field>
           <Field label="Method">
             {(id) => (
@@ -294,13 +294,13 @@ function SubmitDialog({ onClose, draftTitle }: { onClose: () => void; draftTitle
             )}
           </p>
         )}
-        <div className="grid gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-4">
           <Field label="Quantity" required>{(id) => <Input id={id} type="number" min={1} max={999} value={v.qty} onChange={(e) => setV({ ...v, qty: Number(e.target.value) || 1 })} />}</Field>
           <Field label="Material" optional>{(id) => <Input id={id} placeholder="PLA, PETG…" value={v.material} onChange={(e) => setV({ ...v, material: e.target.value })} />}</Field>
           <Field label="Color" optional>{(id) => <Input id={id} value={v.color} onChange={(e) => setV({ ...v, color: e.target.value })} />}</Field>
           <Field label="Needed by" optional>{(id) => <Input id={id} type="date" value={v.needed_by} onChange={(e) => setV({ ...v, needed_by: e.target.value })} />}</Field>
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="Settings" optional hint="Infill, layer height, supports…">{(id) => <Input id={id} maxLength={500} value={v.params} onChange={(e) => setV({ ...v, params: e.target.value })} />}</Field>
           <Field label="Priority">
             {(id) => (
@@ -405,7 +405,7 @@ function JobSheet({ job: j, files, onClose }: { job: Job; files: MfgFile[]; onCl
             Cancel my request
           </Button>
         )}
-        <dl className="grid grid-cols-[120px_1fr] gap-y-2 text-[13px]">
+        <dl className="grid grid-cols-[120px_1fr] gap-y-2 max-lg:grid-cols-[120px_minmax(0,1fr)] text-[13px]">
           <dt className="text-muted">Requested by</dt>
           <dd>
             <Person id={j.requested_by} size="sm" />

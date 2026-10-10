@@ -155,7 +155,7 @@ function Overview() {
           kinds.map((k) => (
             <section key={k}>
               <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-faint">{KIND_LABEL[k]}</h2>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {shown
                   .filter((l) => l.kind === k)
                   .map((l) => {
@@ -399,7 +399,7 @@ function ListEditor({ list, onClose, onDelete }: { list?: List; onClose: () => v
             ))}
           </div>
         )}
-        <div className="grid gap-3 sm:grid-cols-[1fr_220px]">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_220px]">
           <Field label="Name" required>{(id) => <Input id={id} value={name} maxLength={80} onChange={(e) => setName(e.target.value)} />}</Field>
           <Field label="Kind">
             {(id) => (

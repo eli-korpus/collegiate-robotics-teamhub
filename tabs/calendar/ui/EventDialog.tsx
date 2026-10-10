@@ -134,7 +134,7 @@ export function EventDialog({ open, onClose, event, draft, onSaved }: { open: bo
         ) : (
           <TeamScopePicker value={teamId} onChange={setTeamId} perm="calendar.create" />
         )}
-        <div className="grid gap-3 sm:grid-cols-[1fr_180px]">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_180px]">
           <Field label="Title" required>{(id) => <Input id={id} autoFocus value={title} maxLength={120} onChange={(e) => setTitle(e.target.value)} placeholder="e.g. Build practice" />}</Field>
           <Field label="Kind">
             {(id) => (
@@ -149,7 +149,7 @@ export function EventDialog({ open, onClose, event, draft, onSaved }: { open: bo
           </Field>
         </div>
         <Switch checked={allDay} onChange={setAllDay} label="All day" />
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <Field label={allDay ? 'Start date' : 'Date'} required>{(id) => <Input id={id} type="date" required value={date} onChange={(e) => setDate(e.target.value)} />}</Field>
           {allDay ? (
             <Field label="Last day" optional hint="For events that last more than one day. Leave empty for one day.">
@@ -162,7 +162,7 @@ export function EventDialog({ open, onClose, event, draft, onSaved }: { open: bo
             </>
           )}
         </div>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="Repeats">
             {(id) => (
               <Select id={id} value={repeat} onChange={(e) => setRepeat(e.target.value as Repeat)}>

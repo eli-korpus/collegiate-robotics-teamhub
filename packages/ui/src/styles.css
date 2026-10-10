@@ -119,6 +119,21 @@
   }
 }
 
+/*
+ * Phones and tablets (touch screens below desktop width). Outside any layer so it wins over text-size utilities:
+ * iOS zooms the whole page into any text box under 16px when it's tapped, and doesn't zoom back out.
+ */
+@media (max-width: 1023.98px) and (pointer: coarse) {
+  input:not([type='checkbox'], [type='radio'], [type='range'], [type='color'], [type='file'], [readonly]),
+  select,
+  textarea:not([readonly]) {
+    font-size: 16px;
+  }
+  html {
+    -webkit-tap-highlight-color: transparent;
+  }
+}
+
 @utility tabular {
   font-variant-numeric: tabular-nums;
 }

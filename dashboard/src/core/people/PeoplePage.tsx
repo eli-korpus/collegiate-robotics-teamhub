@@ -121,7 +121,7 @@ function Directory() {
                       <span className="font-normal text-faint">{g.members.length}</span>
                     </h2>
                   )}
-                  <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                  <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {g.members.map((p) => (
                       <PersonCard key={p.id} p={p} teamId={g.team.id} onClick={() => nav(`/people/${p.id}`)} />
                     ))}
@@ -132,7 +132,7 @@ function Directory() {
           {noTeam.length > 0 && (
             <section>
               <h2 className="mb-2 text-[13px] font-semibold text-muted">No team</h2>
-              <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
                 {noTeam.map((p) => (
                   <PersonCard key={p.id} p={p} onClick={() => nav(`/people/${p.id}`)} />
                 ))}

@@ -25,7 +25,7 @@ export function Popover({
           align={align}
           sideOffset={6}
           collisionPadding={8}
-          className={cn('th-anim-pop z-50 rounded-lg border border-border bg-raised p-2 shadow-md focus:outline-none', className)}
+          className={cn('th-anim-pop z-50 rounded-lg border border-border bg-raised p-2 shadow-md focus:outline-none max-lg:max-w-[calc(100vw-1rem)]', className)}
         >
           {children}
         </RPopover.Content>

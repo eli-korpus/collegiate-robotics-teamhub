@@ -129,7 +129,7 @@ function SeasonTimeline({ teamNumber, season }: { teamNumber: number; season: nu
   const awards = list.flatMap((e) => e.awards);
   return (
     <>
-      <div className="grid gap-3 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
         <StatTile label="Events" value={list.length} />
         <StatTile label="Best rank" value={best ?? '–'} />
         <StatTile label="Qual record" value={`${wins}–${losses}`} />
@@ -253,7 +253,7 @@ function EventPage() {
       {!us ? (
         <Banner tone="info">Team #{teamNumber} isn't registered for this event.</Banner>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           <StatTile label="Rank" value={us.stats?.rank ?? '–'} hint={`of ${e.teams.length}`} />
           <StatTile label="Record" value={us.stats ? `${us.stats.wins}-${us.stats.losses}-${us.stats.ties}` : '–'} />
           <StatTile label="OPR (no penalties)" value={us.stats?.opr?.totalPointsNp.toFixed(1) ?? '–'} />
@@ -271,7 +271,7 @@ function EventPage() {
             ))}
         </div>
       )}
-      <div className="grid gap-4 lg:grid-cols-[3fr_2fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr]">
         <Card>
           <CardHeader title="Our matches" />
           <div className="px-4 pb-4">{matches.length ? <MatchTable matches={matches} us={teamNumber} /> : <p className="text-[13px] text-faint">No matches published yet.</p>}</div>

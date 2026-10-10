@@ -143,7 +143,7 @@ function TotalsView({ events, hours, season }: { events: OutEvent[]; hours: Hour
     downloadText(toCsv(rows), `outreach-${season}.csv`, 'text/csv');
   };
   return (
-    <div className="grid gap-5 lg:grid-cols-2">
+    <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
       <section className="rounded-lg border border-border bg-surface p-4">
         <h2 className="mb-3 text-[13px] font-semibold">Hours by kind</h2>
         {kinds.length ? <MiniBarChart data={kinds.map(([k, v]) => ({ label: k, value: round(v.hours) }))} format={(n) => `${n} h`} /> : <p className="text-[13px] text-faint">Nothing yet.</p>}
@@ -347,7 +347,7 @@ function EventEditor({ event, draftTitle, onClose }: { event: OutEvent | null; d
     <Dialog open onOpenChange={(o) => !o && onClose()} title={event ? 'Edit outreach event' : 'Add outreach event'} size="md" footer={<Button variant="primary" onClick={save}>Save</Button>}>
       <div className="space-y-4">
         <Field label="What" required>{(id) => <Input id={id} autoFocus maxLength={120} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} placeholder="Library robot demo" />}</Field>
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="Date" required>{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
           <Field label="Kind">
             {(id) => (

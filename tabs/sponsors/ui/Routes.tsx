@@ -253,7 +253,7 @@ function SponsorDialog({ sponsor, canManage, onClose }: { sponsor: Sponsor | nul
       }
     >
       <fieldset disabled={!editable} className="space-y-4">
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="Sponsor" required>{(id) => <Input id={id} autoFocus={!sponsor} maxLength={120} value={v.name} onChange={set('name')} />}</Field>
           <Field label="Status">
             {(id) => (
@@ -274,7 +274,7 @@ function SponsorDialog({ sponsor, canManage, onClose }: { sponsor: Sponsor | nul
           <p className="mb-2 flex items-center gap-1.5 text-[12.5px] font-medium text-muted">
             <Lock className="size-3.5" /> Contact: visible to captains and mentors only
           </p>
-          <div className="grid gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
             <Field label="Contact name" optional>{(id) => <Input id={id} maxLength={120} value={v.contact_name} onChange={set('contact_name')} />}</Field>
             <Field label="Email" optional>
               {(id) => (
@@ -302,7 +302,7 @@ function SponsorDialog({ sponsor, canManage, onClose }: { sponsor: Sponsor | nul
             </Field>
           </div>
         </div>
-        <div className="grid gap-3 sm:grid-cols-[1fr_11rem]">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_11rem]">
           <Field label="Next step" optional>{(id) => <Input id={id} maxLength={300} value={v.next_step} onChange={set('next_step')} placeholder="Send the season recap" />}</Field>
           <Field label="By" optional>{(id) => <Input id={id} type="date" value={v.next_step_date} onChange={set('next_step_date')} />}</Field>
         </div>

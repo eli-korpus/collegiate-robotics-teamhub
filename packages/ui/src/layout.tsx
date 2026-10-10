@@ -34,7 +34,8 @@ export function AppShell({
       )}
       <div className="flex min-w-0 flex-1 flex-col">
         {!wide && (
-          <header className="flex h-13 shrink-0 items-center gap-2 border-b border-border bg-surface px-2">
+          // Phones: stay clear of the notch and rounded corners (the page uses viewport-fit=cover).
+          <header className="flex h-[calc(3.25rem+env(safe-area-inset-top))] shrink-0 items-center gap-2 border-b border-border bg-surface pt-[env(safe-area-inset-top)] pr-[max(0.5rem,env(safe-area-inset-right))] pl-[max(0.5rem,env(safe-area-inset-left))]">
             <IconButton label="Open menu" onClick={() => setOpen(true)}>
               <MenuIcon className="size-5" />
             </IconButton>
@@ -43,7 +44,7 @@ export function AppShell({
           </header>
         )}
         {banner}
-        <main id="main" className="min-h-0 flex-1 relative overflow-y-auto">
+        <main id="main" className="min-h-0 flex-1 relative overflow-y-auto max-lg:break-words max-lg:pr-[env(safe-area-inset-right)] max-lg:pb-[env(safe-area-inset-bottom)] max-lg:pl-[env(safe-area-inset-left)]">
           {children}
         </main>
       </div>
@@ -126,9 +127,10 @@ export function PageHeader({
     <div className={cn('border-b border-border bg-surface/70 px-4 py-3.5 sm:px-6', className)}>
       <div className="flex flex-wrap items-center gap-3">
         {icon && <span className="grid size-8 place-items-center rounded-md bg-accent-soft text-accent [&>svg]:size-[18px]">{icon}</span>}
-        <div className="min-w-0 flex-1">
+        {/* Below desktop width the title keeps room to be read; actions wrap onto their own line instead. */}
+        <div className="min-w-0 flex-1 max-lg:min-w-[min(100%,11rem)]">
           <h1 className="truncate text-[17px] font-semibold tracking-tight">{title}</h1>
-          {subtitle && <p className="truncate text-[12.5px] text-muted">{subtitle}</p>}
+          {subtitle && <p className="truncate text-[12.5px] text-muted max-lg:line-clamp-2 max-lg:whitespace-normal">{subtitle}</p>}
         </div>
         {actions && <div className="flex flex-wrap items-center gap-2">{actions}</div>}
       </div>

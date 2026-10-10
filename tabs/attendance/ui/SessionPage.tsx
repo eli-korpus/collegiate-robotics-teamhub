@@ -132,9 +132,17 @@ export function SessionPage() {
             <li key={p.id} className={cn('flex min-h-14 items-center gap-3 px-4 py-2', pr && 'bg-success-soft/40')}>
               <Checkbox size="lg" checked={!!pr} disabled={!editable} onChange={(v) => toggle(p.id, v)} label={<span className="sr-only">{p.name} present</span>} />
               <Avatar name={p.name} src={p.avatarUrl} size={32} />
-              <span className="min-w-0 flex-1 truncate text-[14.5px] font-medium">{p.name}</span>
+              <span className="min-w-0 flex-1">
+                <span className="block truncate text-[14.5px] font-medium">{p.name}</span>
+                {/* Phones: the times go under the name so the name stays readable. */}
+                {settings.trackHours && pr && (
+                  <span className="tabular block text-[12.5px] text-muted sm:hidden">
+                    {pr.check_in ? formatTime(pr.check_in) : '–'} – {pr.check_out ? formatTime(pr.check_out) : '…'}
+                  </span>
+                )}
+              </span>
               {settings.trackHours && pr && (
-                <span className="tabular text-[12.5px] text-muted">
+                <span className="tabular text-[12.5px] text-muted max-sm:hidden">
                   {pr.check_in ? formatTime(pr.check_in) : '–'} – {pr.check_out ? formatTime(pr.check_out) : '…'}
                 </span>
               )}

@@ -43,7 +43,7 @@ export function Positions() {
       {!positions.data?.length ? (
         <EmptyState icon={<BadgeCheck />} title="No positions yet" body="Positions are defined in setup (with permissions) or here (badges only)." />
       ) : (
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
           {positions.data.map((pos) => {
             const hs = holders(pos.id);
             const perTeam = !!pos.per_team && isMultiTeam();

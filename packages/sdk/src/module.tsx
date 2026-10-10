@@ -50,7 +50,8 @@ export function ModuleHeader({
       }
     >
       {(m.manifest.toolLinkSlots.length > 0 || children) && (
-        <div className="flex flex-wrap items-center gap-2">
+        // Below desktop width a tab's own toolbar row may shrink to the screen so its controls wrap.
+        <div className="flex flex-wrap items-center gap-2 max-lg:[&>*]:min-w-0">
           <ToolLinks slots={m.manifest.toolLinkSlots} />
           {children}
         </div>

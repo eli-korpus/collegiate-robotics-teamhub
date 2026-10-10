@@ -66,7 +66,7 @@ export function FieldEditor({
     <div className="space-y-2">
       {fields.map((f, i) => (
         <div key={f.id} className="rounded-md border border-border bg-surface p-3">
-          <div className="grid gap-2 sm:grid-cols-[1fr_170px_140px_auto]">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-[1fr_170px_140px_auto]">
             <Input value={f.label} placeholder="Field label" aria-label="Field label" onChange={(e) => update(i, { label: e.target.value })} />
             <Select value={f.type} aria-label="Field type" onChange={(e) => update(i, { type: e.target.value as FieldType })}>
               {types.map((t) => (

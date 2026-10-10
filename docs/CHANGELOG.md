@@ -13,6 +13,25 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-10-10
+### Fixed
+
+- Home's **Attendance today** buttons and the checklist shortcuts in Competition Day and Judging Prep shorten long
+  event and checklist names with "…" instead of cutting the text off at both edges.
+- **Phones and tablets**: no page scrolls sideways any more.
+  - Page headers keep the title readable and move buttons to their own line. Long descriptions wrap to two lines.
+  - Boards (Social Media, Sponsors, To Manufacture, Tasks) show one column at a time and snap to the next as you swipe.
+  - Wide tables (Inventory, reports) scroll inside their card with readable columns, instead of squeezing every word
+    onto its own line.
+  - View switchers scroll sideways instead of breaking their labels over several lines. Choices in forms (Join,
+    notebook entry type) wrap instead.
+  - Fixed squeezed or overlapping layouts: People > Requests, profiles, Code Hub OpModes, Judging questions, the
+    attendance roster, Driver Practice runs, detail panels, comments, the availability grid and ⌘K search (tab
+    names were hidden).
+  - Stat tiles show two per row. Calendar month and week views have more room for event names.
+  - iPhone: tapping a text box no longer zooms the page in, and the header, menus and panels stay clear of the notch
+    and home bar.
+
 ## [1.1.1] - 2026-10-10
 ### Changed
 

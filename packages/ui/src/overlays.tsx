@@ -32,7 +32,7 @@ export function Dialog({
         <RDialog.Overlay className="th-anim-fade fixed inset-0 z-50 bg-black/40 backdrop-blur-[1px]" />
         <RDialog.Content
           className={cn(
-            'th-anim-pop fixed z-50 flex max-h-[min(90dvh,900px)] w-[calc(100vw-1.5rem)] flex-col rounded-lg border border-border bg-raised shadow-md focus:outline-none',
+            'th-anim-pop fixed z-50 flex max-h-[min(90dvh,900px)] w-[calc(100vw-1.5rem)] flex-col rounded-lg border border-border bg-raised shadow-md focus:outline-none max-lg:break-words',
             'left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2',
             widths[size],
           )}
@@ -95,15 +95,15 @@ export function Sheet({
 }) {
   const pos =
     side === 'right'
-      ? cn('right-0 top-0 h-dvh th-anim-slide border-l', width)
+      ? cn('right-0 top-0 h-dvh th-anim-slide border-l pt-[env(safe-area-inset-top)] pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)]', width)
       : side === 'left'
-        ? cn('left-0 top-0 h-dvh th-anim-fade border-r', width)
-        : 'bottom-0 left-0 right-0 max-h-[85dvh] rounded-t-lg th-anim-sheet border-t';
+        ? cn('left-0 top-0 h-dvh th-anim-fade border-r pt-[env(safe-area-inset-top)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]', width)
+        : 'bottom-0 left-0 right-0 max-h-[85dvh] rounded-t-lg th-anim-sheet border-t pr-[env(safe-area-inset-right)] pb-[env(safe-area-inset-bottom)] pl-[env(safe-area-inset-left)]';
   return (
     <RDialog.Root open={open} onOpenChange={onOpenChange}>
       <RDialog.Portal>
         <RDialog.Overlay className="th-anim-fade fixed inset-0 z-50 bg-black/30" />
-        <RDialog.Content className={cn('fixed z-50 flex flex-col border-border bg-raised shadow-md focus:outline-none', pos)}>
+        <RDialog.Content className={cn('fixed z-50 flex flex-col border-border bg-raised shadow-md focus:outline-none max-lg:break-words', pos)}>
           <div className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-border px-4">
             <RDialog.Title className="truncate text-[15px] font-semibold">{title}</RDialog.Title>
             <RDialog.Description className="sr-only">{typeof title === 'string' ? title : 'Panel'}</RDialog.Description>
@@ -137,7 +137,7 @@ export function Menu({ trigger, items, align = 'end', label, footer }: { trigger
     <RMenu.Root>
       <RMenu.Trigger asChild>{trigger}</RMenu.Trigger>
       <RMenu.Portal>
-        <RMenu.Content align={align} sideOffset={6} collisionPadding={8} className="th-anim-pop z-50 min-w-48 rounded-lg border border-border bg-raised p-1 shadow-md">
+        <RMenu.Content align={align} sideOffset={6} collisionPadding={8} className="th-anim-pop z-50 min-w-48 max-lg:max-w-[calc(100vw-1rem)] rounded-lg border border-border bg-raised p-1 shadow-md">
           {label && <RMenu.Label className="px-2.5 py-1.5 text-[11.5px] font-medium uppercase tracking-wide text-faint">{label}</RMenu.Label>}
           {list.map((it, i) => (
             <div key={i}>
@@ -274,7 +274,7 @@ export function Toaster() {
   const icons = { success: CheckCircle2, error: XCircle, info: Info, warning: AlertTriangle };
   const tones = { success: 'text-success', error: 'text-danger', info: 'text-info', warning: 'text-warning' };
   return (
-    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-4 z-[60] flex flex-col items-center gap-2 px-3 sm:items-end sm:pr-5">
+    <div aria-live="polite" className="pointer-events-none fixed inset-x-0 bottom-4 z-[60] max-lg:bottom-[calc(1rem+env(safe-area-inset-bottom))] flex flex-col items-center gap-2 px-3 sm:items-end sm:pr-5">
       {items.map((t) => {
         const Icon = icons[t.tone];
         return (

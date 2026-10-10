@@ -109,17 +109,18 @@ export function EntryEditor({ entry, draft, onClose, imageCount = 0 }: { entry?:
         <Segmented
           value={kind}
           onChange={setKind}
+          className="max-sm:flex-wrap"
           options={[
             { value: 'log', label: 'Log entry: what we did & learned' },
             { value: 'iteration', label: 'Design iteration: a new version' },
           ]}
         />
-        <div className="grid gap-3 sm:grid-cols-[1fr_160px]">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-[1fr_160px]">
           <Field label="Title" required>{(id) => <Input id={id} autoFocus maxLength={160} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />}</Field>
           <Field label="Date" required>{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
         </div>
         <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="notebook.write" label="Team" />
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="Subsystem" optional>
             {(id) => (
               <Select id={id} value={v.subsystem_id} onChange={(e) => setV({ ...v, subsystem_id: e.target.value })}>
@@ -135,7 +136,7 @@ export function EntryEditor({ entry, draft, onClose, imageCount = 0 }: { entry?:
           <Field label="Authors" optional>{() => <PersonPicker multiple max={8} value={v.authors} onChange={(authors) => setV({ ...v, authors })} />}</Field>
         </div>
         {kind === 'iteration' && (
-          <div className="grid gap-3 sm:grid-cols-[140px_1fr]">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-[140px_1fr]">
             <Field label="Version" optional>{(id) => <Input id={id} placeholder="v2" maxLength={20} value={v.version_label} onChange={(e) => setV({ ...v, version_label: e.target.value })} />}</Field>
             <Field label="Onshape link" optional>{(id) => <Input id={id} type="url" placeholder="https://cad.onshape.com/…" value={v.onshape_url} onChange={(e) => setV({ ...v, onshape_url: e.target.value })} />}</Field>
           </div>

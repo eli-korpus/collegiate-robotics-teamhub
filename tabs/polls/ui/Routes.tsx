@@ -424,7 +424,7 @@ function PollDialog({ poll: p, myVote, onClose }: { poll: Poll; myVote: VoteRow 
               <tbody>
                 {avail.slots.map((s, si) => (
                   <tr key={s}>
-                    <td className="pr-2 text-muted">{s}</td>
+                    <td className="pr-2 text-muted max-sm:sticky max-sm:left-0 max-sm:z-[1] max-sm:bg-raised">{s}</td>
                     {avail.dates.map((d, di) => {
                       const idx = di * avail.slots.length + si;
                       const on = bits[idx] === '1';
@@ -438,7 +438,7 @@ function PollDialog({ poll: p, myVote, onClose }: { poll: Poll; myVote: VoteRow 
                             aria-pressed={on}
                             aria-label={`${s} on ${d}`}
                             onClick={() => setBits(bits.slice(0, idx) + (on ? '0' : '1') + bits.slice(idx + 1))}
-                            className={cn('h-10 w-24 rounded-md border text-[12px]', on ? 'border-success bg-success-soft font-semibold text-success' : 'border-border bg-surface', best && 'ring-2 ring-accent')}
+                            className={cn('h-10 w-24 rounded-md border text-[12px] max-sm:w-16', on ? 'border-success bg-success-soft font-semibold text-success' : 'border-border bg-surface', best && 'ring-2 ring-accent')}
                           >
                             {on && 'I can'} {t && <span className="tabular text-muted">{on ? '· ' : ''}{n}</span>}
                           </button>

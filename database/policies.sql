@@ -159,8 +159,8 @@ grant execute on all functions in schema public to authenticated, service_role;
 -- after every tab's rules.
 -- Internal helpers stay locked (re-applied because the grant above covers every function).
 revoke execute on function teamhub_drop_policies(text), teamhub_make_dormant(text), teamhub_drop_prefix(text),
-  teamhub_trash(text, text[]), teamhub_notify(uuid[], text, text), teamhub_realtime_add(text),
-  teamhub_email_allowed(text), teamhub_place_profile_field(text, text), info_request_status(uuid)
+  teamhub_trash(text, text[]), teamhub_notify(uuid[], text, text), teamhub_notify(uuid[], text, text, uuid),
+  teamhub_realtime_add(text), teamhub_email_allowed(text), teamhub_place_profile_field(text, text), info_request_status(uuid)
   from public, anon, authenticated;
 
 -- Authors can't be changed from the website (008_keep_authors). Runs after every tab's tables exist, so it covers

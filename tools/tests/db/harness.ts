@@ -167,3 +167,15 @@ export function testConfig(overrides: Partial<TeamhubConfigInput> = {}): Teamhub
 export function withModules(ids: string[], overrides: Partial<TeamhubConfigInput> = {}): TeamhubConfig {
   return testConfig({ modules: Object.fromEntries(ids.map((id) => [id, { state: 'active', settings: {} }])), ...overrides });
 }
+
+/**
+ * Today's catalog with core migrations only up to (not including) the one starting with `prefix` (e.g. '007_'), to
+ * test what updating an older database does. Rules for functions added by later migrations are left out too.
+ */
+export async function catalogBefore(prefix: string): Promise<Catalog> {
+  const now = await loadCatalog();
+  const migrations = now.core.migrations.filter((m) => m.name < prefix);
+  let policies = now.core.policies;
+  if (prefix <= '010_') policies = policies.replace(', teamhub_notify(uuid[], text, text, uuid)', '');
+  return { ...now, core: { ...now.core, migrations, policies, version: migrations.length } };
+}

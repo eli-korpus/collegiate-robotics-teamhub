@@ -1,6 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import { loadCatalog } from '@teamhub/generator';
-import { createTestDb, TEAM_A, TEAM_B, testConfig, type TestDb } from './harness';
+import { catalogBefore, createTestDb, TEAM_A, TEAM_B, testConfig, type TestDb } from './harness';
 
 /** Tool links can be one for the whole program or one per team. */
 describe('team-specific tool links', () => {
@@ -51,12 +50,7 @@ describe('team-specific tool links', () => {
 
 /** 007: "Not pinned" tool links (no kind) showed up nowhere, so updating removes them, but never Bulletin Board links. */
 describe('removing unpinned tool links on update', () => {
-  const beforeCleanup = async () => {
-    const now = await loadCatalog();
-    const migrations = now.core.migrations.filter((m) => m.name < '007_');
-    const core = { ...now.core, migrations, version: migrations.length };
-    return { ...now, core };
-  };
+  const beforeCleanup = () => catalogBefore('007_');
   const unpinned = `insert into links (label, url, slot) values ('Pinned', 'https://example.org/p', 'cad'), ('Loose', 'https://example.org/l', null)`;
 
   it('removes links without a kind when Bulletin Board was never installed', async () => {

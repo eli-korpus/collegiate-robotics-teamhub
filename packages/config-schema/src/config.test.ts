@@ -26,7 +26,7 @@ describe('config schema', () => {
     const r = parseConfig({ ...base, permissions: { 'x.y': { types: ['mentor'], positions: ['pos_nope'] } } });
     expect(r.ok).toBe(false);
   });
-  it('turns an old Bulletin Board tab into Links permissions (1.2.0)', () => {
+  it('turns an old Bulletin Board tab into Links permissions (1.1.1)', () => {
     const r = parseConfig({
       ...base,
       modules: { bulletin: { state: 'active', settings: {} }, tasks: { state: 'active', settings: {} } },

@@ -36,6 +36,9 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 - The **Edit** button on Home's Team tools sent Mentors who aren't admins to a "No access" page.
 - **Undo this update** in the setup wizard reverted and published your site as soon as it was clicked.
+- Join request notifications said **"TeamHub asked to join the team"** instead of the person's name, because the
+  request is made while they're still signing up. They now show who asked, and updating fills in the name on the ones
+  already sent. Changes made with nobody signed in (like restoring a backup) no longer send nameless notifications.
 
 ## [1.1.0] - 2026-10-09
 ### Changed

@@ -168,7 +168,7 @@ export interface ConfigIssue {
 }
 
 /**
- * Older configs may list tabs that became part of the core. Bulletin Board (1.2.0) is now the Links page: drop the tab
+ * Older configs may list tabs that became part of the core. Bulletin Board (1.1.1) is now the Links page: drop the tab
  * and carry over who could add and manage its links (core.add_links / core.edit_links), so nobody loses access.
  */
 export function upgradeConfig(raw: unknown): unknown {

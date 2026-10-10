@@ -82,7 +82,7 @@ export function Shell() {
               <Route path="/people/*" element={<People />} />
               <Route path="/me" element={<MyProfile />} />
               <Route path="/links" element={<Links />} />
-              {/* Old addresses: Admin > Tool links and the Bulletin Board tab became the Links page (1.2.0). */}
+              {/* Old addresses: Admin > Tool links and the Bulletin Board tab became the Links page (1.1.1). */}
               <Route path="/admin/links" element={<Navigate to="/links" replace />} />
               <Route path="/bulletin/*" element={<Navigate to="/links" replace />} />
               <Route path="/admin/*" element={<Admin />} />

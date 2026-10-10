@@ -12,6 +12,8 @@ Releases with a **Security** section fix a vulnerability. Update as soon as you 
 How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
+
+## [1.1.1] - 2026-10-10
 ### Changed
 
 - **Links** is a new page for every program, under **Program** in the sidebar next to People and Admin. It replaces

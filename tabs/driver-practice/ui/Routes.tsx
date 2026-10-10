@@ -25,6 +25,7 @@ import {
   toast,
   type FieldDef,
   type FormValues,
+  useConfirm,
 } from '@teamhub/ui';
 import {
   canWith,
@@ -75,6 +76,7 @@ function useFields() {
 }
 
 export default function DriverPracticeRoutes() {
+  const confirm = useConfirm();
   const season = useSeason();
   const runs = useRows<DrvRun>(['driver-practice', 'runs', season], (sb) => sb.from('drv_runs').select('*').eq('season', season).order('date'));
   const fields = useFields();
@@ -189,6 +191,7 @@ export default function DriverPracticeRoutes() {
                         label="Delete run"
                         size="sm"
                         onClick={async () => {
+                          if (!(await confirm({ title: 'Delete this run?', body: 'Its times and notes are removed from the charts for good.', danger: true, confirmLabel: 'Delete' }))) return;
                           const { error } = await sb.from('drv_runs').delete().eq('id', r.id);
                           if (error) toast.error(friendlyError(error));
                           qc.invalidateQueries({ queryKey: ['driver-practice'] });

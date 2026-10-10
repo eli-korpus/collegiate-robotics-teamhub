@@ -249,11 +249,15 @@ function BackupDialog({ server, onClose }: { server: ServerState; onClose: () =>
 function ImportDialog({ onClose }: { onClose: () => void }) {
   const [path, setPath] = useState('');
   const action = useAction<{ restored: Record<string, number>; files: number }>();
+  const confirm = useConfirm();
   return (
     <Dialog open onOpenChange={(v) => !v && action.state !== 'running' && onClose()} title="Import a backup" description="Restores rows and files into the connected project. Existing rows are kept (duplicates are skipped). Apply your config first so all tables exist.">
       <div className="space-y-3">
         <Input placeholder="/Users/you/TeamHub Backups/2026-10-01/teamhub-backup-….zip" value={path} onChange={(e) => setPath(e.target.value)} aria-label="Backup file path" />
-        <ActionButton state={action.state} label="Import" doneLabel="Backup restored" icon={<Upload className="size-4" />} disabled={!path.endsWith('.zip')} onClick={() => action.run('/import', { path })} />
+        <ActionButton state={action.state} label="Import" doneLabel="Backup restored" icon={<Upload className="size-4" />} disabled={!path.endsWith('.zip')} onClick={async () => {
+            if (!(await confirm({ title: 'Import this backup?', body: 'Its rows and files are added to your live Supabase project. Rows that already exist are kept, and the import can’t be undone from here.', confirmLabel: 'Import' }))) return;
+            await action.run('/import', { path });
+          }} />
         <Checklist steps={action.steps} />
         {action.error && <Banner tone="danger" title="Not restored">{action.error}</Banner>}
         {action.result && <NextStep>open your dashboard to check everything is back. People sign up again and are re-approved.</NextStep>}
@@ -269,6 +273,7 @@ function SeasonDialog({ server, catalog, onClose, refresh }: { server: ServerSta
   const options = catalog.modules.filter((m) => m.id in c.modules);
   const [picked, setPicked] = useState<string[]>(options.map((m) => m.id));
   const action = useAction<{ backup: { path: string } }>();
+  const confirm = useConfirm();
   return (
     <Dialog open onOpenChange={(v) => !v && action.state !== 'running' && onClose()} title="New season" description="Exports everything first, then sets the new label and runs each tab's rollover (e.g. archive scouting, reset checklists, close polls)." size="lg">
       {(
@@ -288,6 +293,14 @@ function SeasonDialog({ server, catalog, onClose, refresh }: { server: ServerSta
             icon={<CalendarRange className="size-4" />}
             disabled={!/^\d{4}[–-]\d{2}$/.test(label.trim())}
             onClick={async () => {
+              const names = options.filter((m) => picked.includes(m.id)).map((m) => m.name);
+              const ok = await confirm({
+                title: `Start the ${label} season?`,
+                body: `Everything is exported to a backup first. Then the season label changes${names.length ? ` and these tabs roll over: ${names.join(', ')}` : ''}. Rolling over can't be undone (the backup keeps a copy).`,
+                confirmLabel: `Start ${label}`,
+                danger: true,
+              });
+              if (!ok) return;
               if (await action.run('/season', { label, modules: picked })) await refresh();
             }}
           />

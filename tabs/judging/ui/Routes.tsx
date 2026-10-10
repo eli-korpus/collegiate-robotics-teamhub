@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { Award, Link2, Pause, Pencil, Play, Plus, Shuffle, Trash2, X } from 'lucide-react';
-import { Badge, Button, Card, CardHeader, Dialog, EmptyState, Field, IconButton, Input, Markdown, ProgressRing, Segmented, Spinner, Textarea, toast, validateRequired } from '@teamhub/ui';
+import { Badge, Button, Card, CardHeader, Dialog, EmptyState, Field, IconButton, Input, Markdown, ProgressRing, Segmented, Spinner, Textarea, toast, useConfirm, validateRequired } from '@teamhub/ui';
 import { EntityLink, friendlyError, ModuleHeader, ModulePurpose, Person, PersonPicker, Slot, useCan, useRows, useSeason, useSupabase, useTeamScope } from '@teamhub/sdk';
 
 interface Question {
@@ -49,6 +49,7 @@ export default function JudgingRoutes() {
 }
 
 function Practice() {
+  const confirm = useConfirm();
   const qs = useRows<Question>(['judging', 'questions'], (sb) => sb.from('jdg_questions').select('*').order('question'));
   const scope = useTeamScope();
   const canManage = useCan('judging.manage');
@@ -143,6 +144,7 @@ function Practice() {
                   label="Delete question"
                   size="sm"
                   onClick={async () => {
+                    if (!(await confirm({ title: 'Delete this question?', body: 'It is removed from practice for everyone.', danger: true, confirmLabel: 'Delete' }))) return;
                     const { error } = await sb.from('jdg_questions').delete().eq('id', q.id);
                     if (error) toast.error(friendlyError(error));
                     qc.invalidateQueries({ queryKey: ['judging'] });
@@ -188,6 +190,7 @@ function Practice() {
 }
 
 function Evidence() {
+  const confirm = useConfirm();
   const season = useSeason();
   const cr = useRows<Criterion>(['judging', 'criteria', season], (sb) => sb.from('jdg_criteria').select('*').eq('season', season).order('award').order('sort'));
   const scope = useTeamScope();
@@ -250,7 +253,9 @@ function Evidence() {
                         label="Delete criterion"
                         size="sm"
                         onClick={async () => {
-                          await sb.from('jdg_criteria').delete().eq('id', c.id);
+                          if (!(await confirm({ title: 'Delete this criterion?', body: c.evidence.length ? 'The evidence linked to it is removed too.' : undefined, danger: true, confirmLabel: 'Delete' }))) return;
+                          const { error } = await sb.from('jdg_criteria').delete().eq('id', c.id);
+                          if (error) toast.error(friendlyError(error));
                           refresh();
                         }}
                       >

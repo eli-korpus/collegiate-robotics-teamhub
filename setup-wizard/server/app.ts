@@ -366,7 +366,7 @@ export function createApp(deps: AppDeps = {}) {
   // ── Files: config, branding, host files ─────────────────────────────────
   // The config file is committed to the team's (public) GitHub copy. Tool links can be private (team chat invites,
   // shared folders, portfolios), so they never go in it: the wizard puts them straight into the team's database when
-  // it builds it, and they're edited in Admin > Tool links after that.
+  // it builds it, and they're edited on the dashboard's Links page after that.
   const writeConfig = (config: TeamhubConfig) => {
     mkdirSync(teamDir(), { recursive: true });
     const { toolLinks: _private, ...publicConfig } = config;

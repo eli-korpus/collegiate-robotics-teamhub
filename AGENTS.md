@@ -26,10 +26,9 @@ Run `npm run setup` and choose **Edit** for any of these. Don't hand-edit code f
 - email: the email provider (SMTP), email confirmation and "Forgot your password?" (`docs/email.md`)
 - subteams, positions, permissions (who can do what)
 - profile fields, who fills each one in and who can see it (extra fields can also be added in the dashboard: Admin > Profile fields)
-- tool links (also editable in the dashboard: Admin > Tool links)
 - who can join (email domains; also editable in the dashboard: Admin > Who can join)
 
-Day-to-day data (people, teams people are on, events, tasks…) is edited in the dashboard itself.
+Day-to-day data (people, teams people are on, links and team tools, events, tasks…) is edited in the dashboard itself.
 
 ## Repository map
 
@@ -37,7 +36,7 @@ Day-to-day data (people, teams people are on, events, tasks…) is edited in the
 |---|---|
 | `team/teamhub.config.json` | This team's settings. Written by the wizard. Format: `docs/configuration.md`. |
 | `team/branding/` | Logos. |
-| `dashboard/src/core/` | Home, People, Admin, sign-in and the app shell. |
+| `dashboard/src/core/` | Home, People, Links, Admin, sign-in and the app shell. |
 | `dashboard/src/generated/` | **Generated. Never edit.** Rebuilt from the config by `npm run generate`. |
 | `tabs/<id>/` | One folder per tab (`tabs/tasks`, `tabs/scouting`, …). |
 | `tabs/integrations/<a>+<b>/` | Small features that exist only when both tabs are enabled (e.g. tasks on the calendar). |
@@ -87,7 +86,7 @@ then enable it with the wizard. Details: `.github/CONTRIBUTING.md`.
 **Connect two tabs:** create an integration in `tabs/integrations/<a>+<b>/` instead of importing one tab from another
 (tabs must never import each other; `npm run lint` checks this).
 
-**Change Home, People or Admin:** `dashboard/src/core/`. Keep these changes small: they're the files most likely to
+**Change Home, People, Links or Admin:** `dashboard/src/core/`. Keep these changes small: they're the files most likely to
 conflict when you update to new TeamHub releases.
 
 ## Rules that keep the dashboard safe and working

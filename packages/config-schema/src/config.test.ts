@@ -26,6 +26,24 @@ describe('config schema', () => {
     const r = parseConfig({ ...base, permissions: { 'x.y': { types: ['mentor'], positions: ['pos_nope'] } } });
     expect(r.ok).toBe(false);
   });
+  it('turns an old Bulletin Board tab into Links permissions (1.1.1)', () => {
+    const r = parseConfig({
+      ...base,
+      modules: { bulletin: { state: 'active', settings: {} }, tasks: { state: 'active', settings: {} } },
+      nav: { order: ['bulletin', 'tasks'] },
+      permissions: { 'bulletin.post': { types: ['member', 'captain', 'mentor'], positions: [] }, 'bulletin.view': { types: ['member'], positions: [] } },
+    });
+    expect(r.ok).toBe(true);
+    if (!r.ok) return;
+    expect(Object.keys(r.config.modules)).toEqual(['tasks']);
+    expect(r.config.nav.order).toEqual(['tasks']);
+    expect(r.config.permissions['core.add_links'].types).toEqual(['member', 'captain', 'mentor']);
+    expect(r.config.permissions['core.edit_links'].types).toEqual(['mentor']);
+    expect(Object.keys(r.config.permissions).filter((k) => k.startsWith('bulletin.'))).toEqual([]);
+    // Configs without the old tab are left alone.
+    const plain = parseConfig(base);
+    expect(plain.ok && plain.config.permissions).toEqual({});
+  });
   it('derives FTCScout seasons from labels', () => {
     expect(seasonYear('2026–27')).toBe(2026);
     expect(defaultSeasonLabel(new Date(2026, 9, 1))).toBe('2026–27');

@@ -122,7 +122,7 @@ export default function CodeHubRoutes() {
           <CardHeader icon={<GitCommitHorizontal className="size-4" />} title="Repository" subtitle={gh.data?.repo ?? undefined} />
           <div className="px-4 pb-4 text-[13px]">
             {!repoUrl ? (
-              <p className="text-muted">Add your GitHub repository as the “Code repository” tool link (Admin &gt; Tool links) to see recent commits here.</p>
+              <p className="text-muted">Add your GitHub repository as the “Code repository” team tool on the Links page to see recent commits here.</p>
             ) : !gh.data && gh.isLoading ? (
               <Spinner />
             ) : gh.error ? (

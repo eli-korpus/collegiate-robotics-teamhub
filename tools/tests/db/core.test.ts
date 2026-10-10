@@ -17,7 +17,7 @@ describe('core schema + RLS', () => {
 
   it('records versions and seeds config rows', async () => {
     const mods = await db.admin('select id, version from teamhub_modules');
-    expect(mods).toEqual([{ id: 'core', version: 8 }]);
+    expect(mods).toEqual([{ id: 'core', version: 10 }]);
     expect((await db.admin('select count(*)::int n from teams'))[0].n).toBe(2);
     expect((await db.admin(`select season_label from teamhub_settings`))[0].season_label).toBe('2026–27');
   });
@@ -34,8 +34,10 @@ describe('core schema + RLS', () => {
   it('approvers are notified and tiered approval works', async () => {
     const pendingMember = await db.signUp('m@x.dev', { name: 'Pending Member', teams: [TEAM_A], requested_type: 'member' });
     const pendingMentor = await db.signUp('me@x.dev', { name: 'Pending Mentor', teams: [TEAM_A], requested_type: 'mentor' });
-    const notes = await db.as(captainA, `select ref from notifications where type = 'people.request'`);
+    const notes = await db.as(captainA, `select ref, actor from notifications where type = 'people.request'`);
     expect(notes.map((n) => n.ref)).toContain(`core:person:${pendingMember}`);
+    // Named after the person asking (not shown as "TeamHub"), even though they weren't signed in yet.
+    expect(notes.find((n) => n.ref === `core:person:${pendingMember}`)?.actor).toBe(pendingMember);
     expect(notes.map((n) => n.ref)).not.toContain(`core:person:${pendingMentor}`);
 
     // Captain can see + approve the member request, but not the mentor one.

@@ -262,7 +262,7 @@ export function Permissions({ onNext, onBack }: StepProps) {
   const grant = (k: string): PermissionGrant =>
     c.permissions[k] ?? { types: [...defs[k].default], positions: (defs[k].positions ?? []).filter((p) => positionIds.has(p)) };
   const set = (k: string, g: PermissionGrant) => update((x) => void (x.permissions[k] = g));
-  const names = new Map([['people', 'People'], ['core', 'Tool links'], ...catalog.modules.map((m) => [m.id, m.name] as [string, string])]);
+  const names = new Map([['people', 'People'], ['core', 'Links'], ...catalog.modules.map((m) => [m.id, m.name] as [string, string])]);
   const groups = new Map<string, string[]>();
   for (const [k, d] of Object.entries(defs)) {
     if (view === 'simple' && !d.simple) continue;

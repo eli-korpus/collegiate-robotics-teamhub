@@ -228,7 +228,14 @@ function SheetDialog({ sheet: s, slots, claims, onClose }: { sheet: Sheet; slots
                           <Avatar name={p?.name ?? '?'} src={p?.avatarUrl} size={20} />
                           {p?.name ?? 'Former member'}
                           {manage && c.user_id !== me.id && (
-                            <button aria-label={`Remove ${p?.name ?? 'person'}`} className="text-muted hover:text-fg" onClick={() => unclaim(sl.id, c.user_id)}>
+                            <button
+                              aria-label={`Remove ${p?.name ?? 'person'}`}
+                              className="text-muted hover:text-fg"
+                              onClick={async () => {
+                                if (!(await confirm({ title: `Remove ${p?.name ?? 'this person'} from ${sl.label}?`, body: 'They lose their spot, and someone else can take it.', danger: true, confirmLabel: 'Remove' }))) return;
+                                await unclaim(sl.id, c.user_id);
+                              }}
+                            >
                               <X className="size-3" />
                             </button>
                           )}
@@ -278,11 +285,18 @@ function SheetEditor({ sheet, slots = [], eventRef, title, onClose }: { sheet: S
     slots.length ? slots.map((s) => ({ id: s.id, label: s.label, starts_at: s.starts_at ? toDateTimeInput(new Date(s.starts_at)) : '', capacity: s.capacity })) : [{ label: '', starts_at: '', capacity: 1 }],
   );
   const [busy, setBusy] = useState(false);
+  const confirm = useConfirm();
   const save = async () => {
     if (!validateRequired()) return;
     const clean = rows.filter((r) => r.label.trim());
     if (!v.title.trim()) return toast.error('Give the sheet a title');
     if (!clean.length) return toast.error('Add at least one slot');
+    // Removing a slot also removes everyone signed up for it.
+    const dropping = slots.filter((s) => !clean.some((r) => r.id === s.id)).map((s) => s.id);
+    if (dropping.length) {
+      const { count } = await sb.from('sign_claims').select('slot_id', { count: 'exact', head: true }).in('slot_id', dropping);
+      if (count && !(await confirm({ title: `Remove ${dropping.length === 1 ? 'a slot' : `${dropping.length} slots`} people signed up for?`, body: `${count} sign-up${count === 1 ? '' : 's'} will be removed, and those people lose their spot.`, danger: true, confirmLabel: 'Remove and save' }))) return;
+    }
     setBusy(true);
     try {
       const body = { title: v.title.trim(), description: v.description.trim() || null, team_id: v.team_id, closes_at: v.closes_at ? new Date(v.closes_at).toISOString() : null, event_ref: v.event_ref };

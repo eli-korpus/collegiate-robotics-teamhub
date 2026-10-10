@@ -7,6 +7,6 @@
 - Unread dots are tracked on each device: no extra database rows.
 - **No replies or comments.** Every post shows a link to your Team chat for questions.
 
-**Not for:** discussion (Team chat), questions that need answers (Polls), a links library (Bulletin Board).
+**Not for:** discussion (Team chat), questions that need answers (Polls), a links library (the Links page).
 
 **Permissions:** post (Captains, Mentors), see read receipts (Captains, Mentors), edit/delete anyone's posts (Mentors).

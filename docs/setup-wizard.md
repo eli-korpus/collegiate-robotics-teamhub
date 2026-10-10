@@ -107,10 +107,10 @@ always do everything.
 
 ![Permissions step](screenshots/wizard-permissions.png)
 
-## 9. Tool links
+## 9. Team tools
 
 Your team chat, Drive folder, CAD, code repository and other links. Tabs use them to point people to the right place
-(for example "Discuss in Discord" under a poll).
+(for example "Discuss in Discord" under a poll). After setup, they're edited on the dashboard's **Links** page.
 
 ## 10. Connect Supabase
 

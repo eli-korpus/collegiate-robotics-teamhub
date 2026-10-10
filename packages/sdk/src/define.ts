@@ -122,7 +122,8 @@ export const corePermissions = definePermissions('people', {
   deactivate: { label: 'Deactivate or remove people', default: ['mentor'] },
 });
 export const coreLinkPermissions = definePermissions('core', {
-  edit_links: { label: 'Edit team tool links', default: ['mentor'], simple: true },
+  add_links: { label: 'Add links (and edit or remove their own)', default: ['captain', 'mentor'], simple: true },
+  edit_links: { label: "Manage all links, including the team tools shown on Home and in tabs", default: ['mentor'], simple: true },
 });
 export const allCorePermissions: PermissionDefs = { ...corePermissions, ...coreLinkPermissions };
 

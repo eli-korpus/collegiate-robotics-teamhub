@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router';
-import { ArrowLeft, ArrowRight, Bell, IdCard, LayoutGrid, MessagesSquare, Search, Shield, UserPlus, Users } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Bell, IdCard, LayoutGrid, Link2, MessagesSquare, Search, Shield, UserPlus, Users } from 'lucide-react';
 import { Button, Dialog, Kbd, ModKey, cn } from '@teamhub/ui';
 import { canWith, runtime, useCan, useMe, useToolLink, type LoadedModule } from '@teamhub/sdk';
 import { nav } from '../../generated/nav';
@@ -63,8 +63,9 @@ export default function Tour({ onClose }: { onClose: () => void }) {
         <ul className="space-y-1">
           <Row icon={<IdCard />} title="My profile" text="Your name, photo and details. Each detail says who can see it. Find it in the menu under your name, bottom left." />
           <Row icon={<Users />} title="People" text="Everyone on the team, their roles and positions (like Lead Programmer)." />
+          <Row icon={<Link2 />} title="Links" text="The team's tools and resources (chat, Drive, CAD, code) in one place. The main ones also show on Home." />
           {canApprove && <Row icon={<UserPlus />} title="Join requests" text="New members ask to join with the join link. You approve them in People > Requests." />}
-          {me.isAdmin && <Row icon={<Shield />} title="Admin" text="Storage, admins, who can join, profile fields, the season and tool links." />}
+          {me.isAdmin && <Row icon={<Shield />} title="Admin" text="Storage, admins, who can join, profile fields and the season." />}
           {chat && <Row icon={<MessagesSquare />} title={chat.label} text="Your team chat, linked at the bottom of the sidebar. TeamHub has no chat of its own." />}
         </ul>
       ),

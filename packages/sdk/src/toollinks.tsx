@@ -42,20 +42,23 @@ export function TeamChatLink({ prefix = 'Questions? Ask in', className }: { pref
   );
 }
 
-// ── Link editor used by tool links / bulletin ──────────────────────────────
+// ── Link editor (the Links page) ───────────────────────────────────────────
+/**
+ * Add or edit a link. A kind (Team chat, Onshape, Other…) makes it a team tool: it shows on Home, and as a quick link
+ * in the tabs that use that kind. Without one it shows only on the Links page. Only people who can manage all links
+ * (core.edit_links) choose a kind.
+ */
 export function LinkEditor({
   initial,
   onSave,
   onCancel,
-  showSection,
-  showSlot,
+  canSetKind,
   sections = [],
 }: {
   initial?: Partial<LinkRow>;
   onSave: (v: Pick<LinkRow, 'label' | 'url' | 'description' | 'section' | 'slot' | 'team_id'>) => Promise<void> | void;
   onCancel: () => void;
-  showSection?: boolean;
-  showSlot?: boolean;
+  canSetKind?: boolean;
   sections?: string[];
 }) {
   const [v, setV] = useState({
@@ -74,8 +77,8 @@ export function LinkEditor({
         e.preventDefault();
         setBusy(true);
         try {
-          // Tool links always have a kind ("Other" when none fits); Bulletin Board links never do.
-          await onSave({ ...v, description: v.description || null, section: v.section || null, slot: showSlot ? v.slot || 'other' : null });
+          // Without core.edit_links the kind can't change (the database also refuses one).
+          await onSave({ ...v, description: v.description || null, section: v.section.trim() || null, slot: canSetKind ? v.slot || null : (initial?.slot ?? null) });
         } finally {
           setBusy(false);
         }
@@ -97,30 +100,32 @@ export function LinkEditor({
         </span>
         <Input maxLength={300} value={v.description} onChange={(e) => setV({ ...v, description: e.target.value })} />
       </label>
-      {showSection && (
+      <label className="block space-y-1.5">
+        <span className="block text-[13px] font-medium">
+          Section <OptionalTag />
+        </span>
+        <Input list="th-link-sections" maxLength={60} value={v.section} placeholder="e.g. Programming" onChange={(e) => setV({ ...v, section: e.target.value })} />
+        <datalist id="th-link-sections">
+          {sections.map((s) => (
+            <option key={s} value={s} />
+          ))}
+        </datalist>
+      </label>
+      {canSetKind && (
         <label className="block space-y-1.5">
-          <span className="block text-[13px] font-medium">Section</span>
-          <Input list="th-link-sections" value={v.section} placeholder="e.g. Programming" onChange={(e) => setV({ ...v, section: e.target.value })} />
-          <datalist id="th-link-sections">
-            {sections.map((s) => (
-              <option key={s} value={s} />
-            ))}
-          </datalist>
-        </label>
-      )}
-      {showSlot && (
-        <label className="block space-y-1.5">
-          <span className="block text-[13px] font-medium">Kind of link</span>
-          <Select value={v.slot || 'other'} onChange={(e) => setV({ ...v, slot: e.target.value })}>
+          <span className="block text-[13px] font-medium">Team tool</span>
+          <Select value={v.slot} onChange={(e) => setV({ ...v, slot: e.target.value })}>
+            <option value="">Not a team tool (only on the Links page)</option>
             {Object.entries(TOOL_SLOT_LABELS).map(([k, l]) => (
               <option key={k} value={k}>
-                {l}
+                {k === 'other' ? 'Other team tool (on Home, not in tabs)' : l}
               </option>
             ))}
           </Select>
+          <span className="block text-[12px] text-muted">Team tools show in Team tools on Home. Most kinds also show as quick links in the tabs that use them, like Onshape in the Notebook.</span>
         </label>
       )}
-      <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="core.edit_links" />
+      <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm={canSetKind ? 'core.edit_links' : 'core.add_links'} />
       <div className="flex justify-end gap-2">
         <Button onClick={onCancel}>Cancel</Button>
         <Button type="submit" variant="primary" loading={busy}>

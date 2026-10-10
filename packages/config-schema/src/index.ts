@@ -167,8 +167,31 @@ export interface ConfigIssue {
   message: string;
 }
 
+/**
+ * Older configs may list tabs that became part of the core. Bulletin Board (1.1.1) is now the Links page: drop the tab
+ * and carry over who could add and manage its links (core.add_links / core.edit_links), so nobody loses access.
+ */
+export function upgradeConfig(raw: unknown): unknown {
+  if (!raw || typeof raw !== 'object') return raw;
+  const c = raw as { modules?: Record<string, unknown>; permissions?: Record<string, { types?: string[]; positions?: string[] }>; nav?: { order?: unknown } };
+  if (!c.modules || !('bulletin' in c.modules)) return raw;
+  const { bulletin: _retired, ...modules } = c.modules;
+  const perms = { ...(c.permissions ?? {}) };
+  const union = (a: { types?: string[]; positions?: string[] }, b: { types?: string[]; positions?: string[] }) => ({
+    types: [...new Set([...(a.types ?? []), ...(b.types ?? [])])],
+    positions: [...new Set([...(a.positions ?? []), ...(b.positions ?? [])])],
+  });
+  const post = perms['bulletin.post'] ?? { types: ['captain', 'mentor'], positions: [] };
+  const manage = perms['bulletin.manage'] ?? { types: ['mentor'], positions: [] };
+  perms['core.add_links'] = perms['core.add_links'] ? union(perms['core.add_links'], post) : union(post, {});
+  perms['core.edit_links'] = union(perms['core.edit_links'] ?? { types: ['mentor'], positions: [] }, manage);
+  for (const k of ['bulletin.view', 'bulletin.post', 'bulletin.manage']) delete perms[k];
+  const order = Array.isArray(c.nav?.order) ? (c.nav.order as unknown[]).filter((id) => id !== 'bulletin') : undefined;
+  return { ...c, modules, permissions: perms, ...(order ? { nav: { ...c.nav, order } } : {}) };
+}
+
 export function parseConfig(raw: unknown): { ok: true; config: TeamhubConfig } | { ok: false; issues: ConfigIssue[] } {
-  const result = ConfigSchema.safeParse(raw);
+  const result = ConfigSchema.safeParse(upgradeConfig(raw));
   if (result.success) {
     const extra = crossValidate(result.data);
     if (extra.length) return { ok: false, issues: extra };

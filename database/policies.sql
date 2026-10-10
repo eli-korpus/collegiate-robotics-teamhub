@@ -110,13 +110,16 @@ create policy core_holders_delete on position_holders for delete to authenticate
 
 create policy core_subteams_read on subteams for select to authenticated using (teamhub_is_active());
 
--- Links (tool links + Bulletin Board). Bulletin adds its own policies when enabled.
+-- Links (the Links page). core.edit_links manages every link. core.add_links adds links without a kind (shown only on
+-- the Links page) and edits or removes its own; links with a kind show on Home and in tabs, so only managers set those.
 create policy core_links_read on links for select to authenticated using (teamhub_in_team(team_id));
 create policy core_links_insert on links for insert to authenticated
-  with check (teamhub_can('core.edit_links', team_id) and created_by = (select auth.uid()));
+  with check (created_by = (select auth.uid()) and (teamhub_can('core.edit_links', team_id) or (teamhub_can('core.add_links', team_id) and slot is null)));
 create policy core_links_update on links for update to authenticated
-  using (teamhub_can('core.edit_links', team_id)) with check (teamhub_can('core.edit_links', team_id));
-create policy core_links_delete on links for delete to authenticated using (teamhub_can('core.edit_links', team_id));
+  using (teamhub_can('core.edit_links', team_id) or (created_by = (select auth.uid()) and teamhub_can('core.add_links', team_id) and slot is null))
+  with check (teamhub_can('core.edit_links', team_id) or (created_by = (select auth.uid()) and teamhub_can('core.add_links', team_id) and slot is null));
+create policy core_links_delete on links for delete to authenticated
+  using (teamhub_can('core.edit_links', team_id) or (created_by = (select auth.uid()) and teamhub_can('core.add_links', team_id) and slot is null));
 
 -- info_requests: left over from "Request info" (replaced by the Setup assistant on Home). No client policies.
 
@@ -156,8 +159,8 @@ grant execute on all functions in schema public to authenticated, service_role;
 -- after every tab's rules.
 -- Internal helpers stay locked (re-applied because the grant above covers every function).
 revoke execute on function teamhub_drop_policies(text), teamhub_make_dormant(text), teamhub_drop_prefix(text),
-  teamhub_trash(text, text[]), teamhub_notify(uuid[], text, text), teamhub_realtime_add(text),
-  teamhub_email_allowed(text), teamhub_place_profile_field(text, text), info_request_status(uuid)
+  teamhub_trash(text, text[]), teamhub_notify(uuid[], text, text), teamhub_notify(uuid[], text, text, uuid),
+  teamhub_realtime_add(text), teamhub_email_allowed(text), teamhub_place_profile_field(text, text), info_request_status(uuid)
   from public, anon, authenticated;
 
 -- Authors can't be changed from the website (008_keep_authors). Runs after every tab's tables exist, so it covers

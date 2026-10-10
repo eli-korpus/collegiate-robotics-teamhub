@@ -199,6 +199,7 @@ export default function NotebookRoutes() {
 }
 
 function ManageSubsystemsButton({ open, setOpen }: { open: boolean; setOpen: (v: boolean) => void }) {
+  const confirm = useConfirm();
   const can = useCan('notebook.manage_subsystems');
   const subsystems = useSubsystems();
   const sb = useSupabase();
@@ -232,6 +233,7 @@ function ManageSubsystemsButton({ open, setOpen }: { open: boolean; setOpen: (v:
                 label={`Delete ${s.name}`}
                 size="sm"
                 onClick={async () => {
+                  if (!(await confirm({ title: `Delete ${s.name}?`, body: 'Entries tagged with it are kept, without a subsystem.', danger: true, confirmLabel: 'Delete' }))) return;
                   const { error } = await sb.from('nb_subsystems').delete().eq('id', s.id);
                   if (error) toast.error(friendlyError(error));
                   qc.invalidateQueries({ queryKey: ['notebook'] });
@@ -416,6 +418,7 @@ function EntryDetail({ entry: e, onEdit, onDeleted }: { entry: Entry; onEdit: ()
                   variant="secondary"
                   className="absolute right-1 top-1 pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100 pointer-fine:focus-visible:opacity-100"
                   onClick={async () => {
+                    if (!(await confirm({ title: 'Delete this photo?', body: 'It is removed from the entry and the file is deleted.', danger: true, confirmLabel: 'Delete' }))) return;
                     const { error } = await sb.from('nb_images').delete().eq('id', img.id);
                     if (error) toast.error(friendlyError(error));
                     else await sb.storage.from('notebook').remove([img.path]);

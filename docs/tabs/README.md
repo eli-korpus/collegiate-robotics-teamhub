@@ -1,6 +1,6 @@
 # Tab library
 
-TeamHub ships 28 optional tabs. Pick any combination in the setup wizard; tabs you don't pick add **zero bytes** to
+TeamHub ships 27 optional tabs. Pick any combination in the setup wizard; tabs you don't pick add **zero bytes** to
 your site and **zero tables** to your database. Each tab has one clear purpose and says what it is *not* for, so
 features never overlap.
 
@@ -12,7 +12,6 @@ features never overlap.
 |---|---|---|---|---|---|
 | [Announcements](../../tabs/announcements/README.md) | One-way messages to the team. | Discussion (there are no replies); Questions that need answers; Collecting personal info; A library of links | Posts, an optional image each, and read receipts only for “must read” posts. | Yes | `ann_` |
 | [Attendance](../../tabs/attendance/README.md) | Record who came to practices. | Planning who will come; Scheduling practices | Practice sessions and who was present (absence is never stored). |  | `att_` |
-| [Bulletin Board](../../tabs/bulletin/README.md) | Browse the team's links and resources. | Announcements; Storing files; Discussion | Nothing new: it shows and organizes the program’s single links list. |  | `bul_` |
 | [Calendar](../../tabs/calendar/README.md) | When things happen: practices, meetings, competitions, deadlines and socials. | RSVPs or finding a time that works; Claiming limited slots (drivers, snacks); Discussion | Events with optional repeat rules; iCal feed links for families. |  | `cal_` |
 | [Paperwork Tracker](../../tabs/paperwork/README.md) | Track who has turned in required paperwork. | Uploading or collecting the documents themselves; Asking questions | The list of required forms and who has turned each in. Never the documents. |  | `ppr_` |
 | [Polls & Availability](../../tabs/polls/README.md) | Make a group decision or find a time that works. | Collecting personal info (sizes, allergies, contacts); Claiming limited slots; Required paperwork; Announcements | Polls, answers until 30 days after closing, and the final totals. |  | `poll_` |

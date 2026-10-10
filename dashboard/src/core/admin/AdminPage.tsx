@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { NavLink, Route, Routes } from 'react-router';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Activity, BookOpen, Bot, Boxes, CalendarRange, Database, ExternalLink, HardDrive, IdCard, Link2, MailCheck, Pencil, Plus, Shield, Trash2 } from 'lucide-react';
+import { Activity, BookOpen, Bot, Boxes, CalendarRange, Database, ExternalLink, HardDrive, IdCard, MailCheck, Shield, Trash2 } from 'lucide-react';
 import {
   Badge,
   Banner,
@@ -15,7 +15,6 @@ import {
   Field,
   IconButton,
   Input,
-  LinkCard,
   Meter,
   PageHeader,
   RelativeTime,
@@ -33,21 +32,15 @@ import {
 import {
   AdminOnly,
   friendlyError,
-  isMultiTeam,
-  LinkEditor,
   NoAccess,
   PersonPicker,
   runtime,
-  TOOL_SLOT_LABELS,
-  useLinks,
   useMe,
   usePeople,
   useSchemaStatus,
   useSettingsRow,
   useSupabase,
   Person,
-  TeamBadge,
-  type LinkRow,
 } from '@teamhub/sdk';
 import { agentPrompt } from '@teamhub/sdk/agent-prompt';
 import { TEAMHUB_CREDIT, TEAMHUB_UPSTREAM_REPO } from '@teamhub/config-schema/util';
@@ -63,7 +56,6 @@ const SECTIONS = [
   { path: 'join', label: 'Who can join', icon: MailCheck },
   { path: 'fields', label: 'Profile fields', icon: IdCard },
   { path: 'season', label: 'Season', icon: CalendarRange },
-  { path: 'links', label: 'Tool links', icon: Link2 },
   { path: 'keepalive', label: 'Keep-alive', icon: Activity },
   { path: 'ai', label: 'AI assistant', icon: Bot },
   { path: 'help', label: 'Help', icon: BookOpen },
@@ -95,7 +87,6 @@ export default function AdminPage() {
           <Route path="join" element={<WhoCanJoin />} />
           <Route path="fields" element={<ProfileFieldsAdmin />} />
           <Route path="season" element={<Season />} />
-          <Route path="links" element={<ToolLinksAdmin />} />
           <Route path="keepalive" element={<KeepAlive />} />
           <Route path="ai" element={<AiAssistant />} />
           <Route path="help" element={<Help />} />
@@ -438,6 +429,8 @@ function Admins() {
           variant="primary"
           disabled={!pick.length}
           onClick={async () => {
+            const name = people.data?.get(pick[0])?.name ?? 'this person';
+            if (!(await confirm({ title: `Make ${name} an admin?`, body: 'Admins can do everything: change every setting, see private profile fields, and make or remove other admins.', confirmLabel: 'Make admin' }))) return;
             const { error } = await sb.rpc('people_set_admin', { p_user: pick[0], p_on: true });
             if (error) return toast.error(friendlyError(error));
             setPick([]);
@@ -484,90 +477,6 @@ function Season() {
         </Button>
       </form>
     </Card>
-  );
-}
-
-/** One links table (spec §10.6): pinned tool links by slot + other links. */
-export function ToolLinksAdmin() {
-  const links = useLinks();
-  const sb = useSupabase();
-  const qc = useQueryClient();
-  const me = useMe();
-  const confirm = useConfirm();
-  const [editing, setEditing] = useState<Partial<LinkRow> | null>(null);
-  const pinned = (links.data ?? []).filter((l) => l.slot);
-  // Multi-team programs can add a separate link per team, so every kind of link stays available. "Other" can hold any number.
-  const free = Object.keys(TOOL_SLOT_LABELS).filter((s) => s === 'other' || isMultiTeam() || !pinned.some((l) => l.slot === s));
-  const refresh = () => qc.invalidateQueries({ queryKey: ['core', 'links'] });
-  return (
-    <div className="space-y-4">
-      <p className="text-[13px] text-muted">
-        Tool links appear as quick-link chips in the tabs where they’re useful (e.g. Onshape in the Notebook, the manual in Rules), and all of them show in Team tools on Home.
-        Use <strong>Other</strong> for anything that doesn’t fit a kind. The <strong>Team chat</strong> link is where discussion happens: TeamHub has no chat by design.
-      </p>
-      <div className="grid gap-2 md:grid-cols-2">
-        {pinned.map((l) => (
-          <LinkCard
-            key={l.id}
-            label={l.label}
-            url={l.url}
-            description={l.description}
-            badge={
-              <>
-                <Badge>{TOOL_SLOT_LABELS[l.slot!] ?? l.slot}</Badge>
-                {isMultiTeam() && (l.team_id ? <TeamBadge teamId={l.team_id} /> : <Badge>Whole program</Badge>)}
-              </>
-            }
-            actions={
-              <>
-                <IconButton label="Edit link" size="sm" onClick={() => setEditing(l)}>
-                  <Pencil className="size-4" />
-                </IconButton>
-                <IconButton
-                  label="Delete link"
-                  size="sm"
-                  onClick={async () => {
-                    if (!(await confirm({ title: `Delete “${l.label}”?`, danger: true, confirmLabel: 'Delete' }))) return;
-                    const { error } = await sb.from('links').delete().eq('id', l.id);
-                    if (error) toast.error(friendlyError(error));
-                    refresh();
-                  }}
-                >
-                  <Trash2 className="size-4" />
-                </IconButton>
-              </>
-            }
-          />
-        ))}
-      </div>
-      {free.length > 0 && (
-        <div>
-          <p className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-faint">Add a tool link</p>
-          <div className="flex flex-wrap gap-1.5">
-            {free.map((s) => (
-              <Button key={s} size="sm" icon={<Plus className="size-3.5" />} onClick={() => setEditing({ slot: s, label: s === 'other' ? '' : TOOL_SLOT_LABELS[s] })}>
-                {TOOL_SLOT_LABELS[s]}
-              </Button>
-            ))}
-          </div>
-        </div>
-      )}
-      <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)} title={editing?.id ? 'Edit link' : 'Add link'}>
-        {editing && (
-          <LinkEditor
-            initial={editing}
-            showSlot
-            onCancel={() => setEditing(null)}
-            onSave={async (v) => {
-              const res = editing.id ? await sb.from('links').update(v).eq('id', editing.id) : await sb.from('links').insert({ ...v, created_by: me.id });
-              if (res.error) return void toast.error(friendlyError(res.error));
-              setEditing(null);
-              refresh();
-            }}
-          />
-        )}
-      </Dialog>
-    </div>
   );
 }
 
@@ -666,7 +575,8 @@ function Help() {
           <li>Approving new members: People &gt; Requests.</li>
           <li>Someone's name, teams, role and profile answers: open them in People &gt; Edit. Positions: People &gt; Positions.</li>
           <li>Deactivating or deleting an account, or a password reset link: the menu on their profile.</li>
-          <li>Admins, who can join, extra profile fields, the season label and tool links: the sections above.</li>
+          <li>Admins, who can join, extra profile fields and the season label: the sections above.</li>
+          <li>Team tool links and other links: the Links page (under Program in the sidebar).</li>
           <li>Old files: Storage &amp; usage &gt; Delete old files.</li>
           <li>Everything inside a tab (events, tasks, checklists…): in that tab.</li>
         </ul>

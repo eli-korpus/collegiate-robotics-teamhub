@@ -7,7 +7,7 @@ import { isMultiTeam, teamById, useTeams } from './hooks';
 export function TeamBadge({ teamId, className }: { teamId: string | null | undefined; className?: string }) {
   if (!isMultiTeam()) return null;
   const t = teamById(teamId);
-  if (!t) return <span className={cn('text-[11.5px] text-faint', className)}>All teams</span>;
+  if (!t) return <span className={cn('text-[11.5px] text-faint', className)} title={`For everyone in ${runtime().config.program.name}`}>Everyone</span>;
   return (
     <span className={cn('inline-flex items-center gap-1 text-[11.5px] text-muted', className)}>
       <TeamDot color={`var(--team-${t.shortCode.toLowerCase()}, ${t.color})`} /> {t.name}
@@ -40,8 +40,8 @@ export function TeamScopePicker({
         {programOk && <option value="">Everyone in {runtime().config.program.name}</option>}
         {allowed.map((t) => (
           <option key={t.id} value={t.id}>
-            {t.name}
-            {t.number ? ` (${t.number})` : ''} only
+            Only {t.name}
+            {t.number ? ` (#${t.number})` : ''}
           </option>
         ))}
       </Select>

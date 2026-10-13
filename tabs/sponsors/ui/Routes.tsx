@@ -25,6 +25,7 @@ import {
   safeHref,
 } from '@teamhub/ui';
 import {
+  ScopeVisibility,
   canWith,
   friendlyError,
   ModuleHeader,
@@ -309,6 +310,7 @@ function SponsorDialog({ sponsor, canManage, onClose }: { sponsor: Sponsor | nul
         <Field label="Owner" optional>{() => <PersonPicker value={v.owner ? [v.owner] : []} onChange={([o]) => setV({ ...v, owner: o ?? null })} teamId={v.team_id} />}</Field>
         <Field label="Notes" optional>{(id) => <Textarea id={id} rows={3} maxLength={4000} value={v.notes} onChange={set('notes')} />}</Field>
         <TeamScopePicker value={v.team_id} onChange={(t) => setV({ ...v, team_id: t })} perm="sponsors.manage" />
+        <ScopeVisibility teamId={v.team_id} />
       </fieldset>
     </Dialog>
   );

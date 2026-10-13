@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { ArrowDown, ArrowUp, GripVertical, Sparkles, X } from 'lucide-react';
 import { Button, Card, CardHeader, IconButton, Input, cn, toast } from '@teamhub/ui';
-import { canWith, friendlyError, runtime, useMe, useSupabase, useTeamScope } from '@teamhub/sdk';
+import { canWith, friendlyError, runtime, useMe, useSupabase, useTeamScope, useViewableTeams } from '@teamhub/sdk';
 import type { EventContext } from './event';
 import type { useScoutingStats } from './stats';
 
@@ -18,7 +18,8 @@ export function PickList({ ctx, stats, onTeam }: { ctx: EventContext; stats: Ret
   const qc = useQueryClient();
   const scope = useTeamScope();
   const teams = runtime().config.teams;
-  const ours = teams.find((t) => t.id === scope) ?? teams.find((t) => t.number && ctx.ours.includes(t.number)) ?? teams[0];
+  const mine = useViewableTeams();
+  const ours = teams.find((t) => t.id === scope) ?? mine.find((t) => t.number && ctx.ours.includes(t.number)) ?? teams.find((t) => t.number && ctx.ours.includes(t.number)) ?? mine[0] ?? teams[0];
   const canEdit = canWith(me, 'scouting.manage_picklist', ours.id);
   const q = useQuery({
     queryKey: ['scouting', 'picklist', ctx.code, ours.id],

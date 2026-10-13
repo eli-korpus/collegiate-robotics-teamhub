@@ -12,6 +12,28 @@ Releases with a **Security** section fix a vulnerability. Update as soon as you 
 How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
+### Changed
+
+- **Programs with several teams** are easier to follow:
+  - The team switcher (top left) lists only the teams you can see items for: your own teams, or every team for
+    admins. The "no team picked" view is called **All my teams** (admins: **All teams**). People on just one team see
+    their team's name there instead of a switcher.
+  - Every form's team choice reads **Everyone in <program>** or **Only <team>**, is labeled **Visible to** (except
+    where it means something else, like "Who's expected" and "Required for"), and says who will see the item.
+    Batteries, Code Hub, Driver Practice, Inventory, Skills, Social Media and Sponsors forms now show that line too.
+  - Items for everyone show **Everyone** instead of "All teams" next to them.
+
+### Fixed
+
+- **Switching teams now updates every tab:**
+  - Code Hub shows the picked team's own repository (its "Code repository" team tool), and every team's repository
+    when viewing all teams. It always showed the first one before.
+  - Events follows the team you pick, and an event page opens on your team that's at that event.
+  - Competition Day, the **Next event** widget and the scouting pick list use one of your own teams when viewing all
+    teams, instead of the first team in the program.
+  - "Open Competition Day" on a competition for everyone uses the team you're viewing, not the first team.
+  - The attendance report counts only the viewed team's sessions, so people on two teams aren't marked absent from
+    the other team's practices.
 
 ## [1.1.2] - 2026-10-10
 ### Fixed

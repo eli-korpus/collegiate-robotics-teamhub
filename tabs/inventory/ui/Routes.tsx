@@ -25,7 +25,7 @@ import {
   useConfirm,
   safeHref,
 } from '@teamhub/ui';
-import { canWith, friendlyError, isModuleEnabled, ModuleHeader, ModulePurpose, TeamScopePicker, useCan, useMe, useModuleSettings, useRows, useSupabase, useTeamScope } from '@teamhub/sdk';
+import { ScopeVisibility, canWith, friendlyError, isModuleEnabled, ModuleHeader, ModulePurpose, TeamScopePicker, useCan, useMe, useModuleSettings, useRows, useSupabase, useTeamScope } from '@teamhub/sdk';
 
 export interface Part {
   id: string;
@@ -290,7 +290,8 @@ function PartDialog({ part, categories, perTeam, onClose }: { part: Part | null;
         <Field label="Notes" optional className="sm:col-span-2">{(id) => <Textarea id={id} rows={2} maxLength={500} value={v.notes} onChange={(e) => setV({ ...v, notes: e.target.value })} />}</Field>
         {perTeam && (
           <div className="sm:col-span-2">
-            <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="inventory.manage" label="Belongs to" />
+            <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="inventory.manage" />
+            <ScopeVisibility teamId={v.team_id} />
           </div>
         )}
       </div>

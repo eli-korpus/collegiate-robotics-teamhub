@@ -26,6 +26,7 @@ import {
   safeHref,
 } from '@teamhub/ui';
 import {
+  ScopeVisibility,
   canWith,
   friendlyError,
   ModuleHeader,
@@ -392,6 +393,7 @@ function SkillEditor({ skill, all, onClose }: { skill: Skill | null; all: Skill[
           </fieldset>
         )}
         <TeamScopePicker value={v.team_id} onChange={(t) => setV({ ...v, team_id: t })} perm="skills.manage" />
+        <ScopeVisibility teamId={v.team_id} />
       </div>
     </Dialog>
   );

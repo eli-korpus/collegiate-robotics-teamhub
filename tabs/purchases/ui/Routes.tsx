@@ -196,7 +196,7 @@ function RequestDialog({ onClose, draft, existing }: { onClose: () => void; draf
     >
       <div className="space-y-4">
         {!existing && <ModulePurpose moduleId="purchases" compact />}
-        <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="purchases.request" label="For" />
+        <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="purchases.request" />
         <Field label="Item" required>{(id) => <Input id={id} autoFocus maxLength={200} value={v.item} onChange={(e) => setV({ ...v, item: e.target.value })} placeholder="e.g. goBILDA 5203 motor 312 RPM" />}</Field>
         <Field label="Link" optional>{(id) => <Input id={id} type="url" placeholder="https://" value={v.url} onChange={(e) => setV({ ...v, url: e.target.value })} />}</Field>
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">

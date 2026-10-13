@@ -21,7 +21,7 @@ import {
   useConfirm,
   safeHref,
 } from '@teamhub/ui';
-import { canWith, friendlyError, ModuleHeader, ModulePurpose, Slot, TeamBadge, TeamScopePicker, useCan, useLinks, useMe, useRows, useSupabase, useTeamScope } from '@teamhub/sdk';
+import { ScopeVisibility, canWith, isMultiTeam, teamById, friendlyError, ModuleHeader, ModulePurpose, Slot, TeamBadge, TeamScopePicker, useCan, useLinks, useMe, useRows, useSlotLinks, useSupabase, useTeamScope } from '@teamhub/sdk';
 import { CONTROL_LABEL, CONTROLS, Gamepad, type Control } from './Gamepad';
 
 interface OpMode {
@@ -62,10 +62,11 @@ function useGithub(url: string | undefined) {
 
 export default function CodeHubRoutes() {
   const links = useLinks();
-  const repoUrl = links.data?.find((l) => l.slot === 'code_repo')?.url;
-  const gh = useGithub(repoUrl);
+  const viewed = useSlotLinks(['code_repo']);
   const ops = useRows<OpMode>(['code-hub', 'opmodes'], (sb) => sb.from('code_opmodes').select('*').order('kind').order('sort').order('name'));
   const scope = useTeamScope();
+  // A team's own repo (or the program's) when one team is picked; every repo when viewing all teams.
+  const repos = scope ? viewed : (links.data ?? []).filter((l) => l.slot === 'code_repo');
   const canEdit = useCan('code-hub.edit');
   const me = useMe();
   const [editing, setEditing] = useState<OpMode | 'new' | null>(null);
@@ -118,55 +119,9 @@ export default function CodeHubRoutes() {
             </Card>
           )}
         </div>
-        <Card className="h-fit">
-          <CardHeader icon={<GitCommitHorizontal className="size-4" />} title="Repository" subtitle={gh.data?.repo ?? undefined} />
-          <div className="px-4 pb-4 text-[13px]">
-            {!repoUrl ? (
-              <p className="text-muted">Add your GitHub repository as the “Code repository” team tool on the Links page to see recent commits here.</p>
-            ) : !gh.data && gh.isLoading ? (
-              <Spinner />
-            ) : gh.error ? (
-              <Banner tone="warning">{(gh.error as Error).message}</Banner>
-            ) : !gh.data || gh.data.private ? (
-              <p className="text-muted">
-                This repository is private (or not on GitHub), so activity can't be shown.{' '}
-                <a className="text-accent hover:underline" href={safeHref(repoUrl)} target="_blank" rel="noreferrer">
-                  Open it <ExternalLink className="inline size-3" aria-hidden />
-                </a>
-              </p>
-            ) : (
-              <>
-                {gh.data.pulls.length > 0 && (
-                  <>
-                    <p className="mb-1 text-[12px] font-semibold uppercase tracking-wider text-faint">Open pull requests</p>
-                    <ul className="mb-3 space-y-1">
-                      {gh.data.pulls.map((p) => (
-                        <li key={p.number}>
-                          <a href={safeHref(p.html_url)} target="_blank" rel="noreferrer" className="flex items-start gap-1.5 hover:underline">
-                            <GitPullRequest className="mt-0.5 size-3.5 shrink-0 text-success" /> #{p.number} {p.title}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                )}
-                <p className="mb-1 text-[12px] font-semibold uppercase tracking-wider text-faint">Recent commits</p>
-                <ul className="space-y-1.5">
-                  {gh.data.commits.map((c) => (
-                    <li key={c.sha}>
-                      <a href={safeHref(c.html_url)} target="_blank" rel="noreferrer" className="block hover:underline">
-                        <span className="block truncate">{c.commit.message.split('\n')[0]}</span>
-                        <span className="text-[11.5px] text-faint">
-                          {c.commit.author.name} · <RelativeTime date={c.commit.author.date} />
-                        </span>
-                      </a>
-                    </li>
-                  ))}
-                </ul>
-              </>
-            )}
-          </div>
-        </Card>
+        <div className="h-fit space-y-4">
+          {repos.length ? repos.map((l) => <RepoCard key={l.id} url={l.url} teamId={l.team_id} />) : <RepoCard />}
+        </div>
       </div>
       {editing && <OpModeDialog op={editing === 'new' ? null : editing} onClose={() => setEditing(null)} />}
     </div>
@@ -246,7 +201,8 @@ function OpModeDialog({ op, onClose }: { op: OpMode | null; onClose: () => void 
             )}
           </Field>
           <div>
-            <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="code-hub.edit" label="Team" />
+            <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="code-hub.edit" />
+            <ScopeVisibility teamId={v.team_id} />
           </div>
         </div>
         <Field label="What it does" optional>{(id) => <Textarea id={id} rows={2} maxLength={2000} value={v.description} onChange={(e) => setV({ ...v, description: e.target.value })} />}</Field>
@@ -265,5 +221,61 @@ function OpModeDialog({ op, onClose }: { op: OpMode | null; onClose: () => void 
         )}
       </div>
     </Dialog>
+  );
+}
+
+/** One repository's recent activity: the team being viewed gets its own repo (Links > team tools), "all" shows each. */
+function RepoCard({ url, teamId }: { url?: string; teamId?: string | null }) {
+  const gh = useGithub(url);
+  return (
+    <Card className="h-fit">
+      <CardHeader icon={<GitCommitHorizontal className="size-4" />} title={isMultiTeam() && teamId ? `Repository: ${teamById(teamId)?.name ?? 'Team'}` : 'Repository'} subtitle={gh.data?.repo ?? undefined} />
+      <div className="px-4 pb-4 text-[13px]">
+        {!url ? (
+          <p className="text-muted">Add your GitHub repository as the “Code repository” team tool on the Links page to see recent commits here.</p>
+        ) : !gh.data && gh.isLoading ? (
+          <Spinner />
+        ) : gh.error ? (
+          <Banner tone="warning">{(gh.error as Error).message}</Banner>
+        ) : !gh.data || gh.data.private ? (
+          <p className="text-muted">
+            This repository is private (or not on GitHub), so activity can't be shown.{' '}
+            <a className="text-accent hover:underline" href={safeHref(url)} target="_blank" rel="noreferrer">
+              Open it <ExternalLink className="inline size-3" aria-hidden />
+            </a>
+          </p>
+        ) : (
+          <>
+            {gh.data.pulls.length > 0 && (
+              <>
+                <p className="mb-1 text-[12px] font-semibold uppercase tracking-wider text-faint">Open pull requests</p>
+                <ul className="mb-3 space-y-1">
+                  {gh.data.pulls.map((p) => (
+                    <li key={p.number}>
+                      <a href={safeHref(p.html_url)} target="_blank" rel="noreferrer" className="flex items-start gap-1.5 hover:underline">
+                        <GitPullRequest className="mt-0.5 size-3.5 shrink-0 text-success" /> #{p.number} {p.title}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </>
+            )}
+            <p className="mb-1 text-[12px] font-semibold uppercase tracking-wider text-faint">Recent commits</p>
+            <ul className="space-y-1.5">
+              {gh.data.commits.map((c) => (
+                <li key={c.sha}>
+                  <a href={safeHref(c.html_url)} target="_blank" rel="noreferrer" className="block hover:underline">
+                    <span className="block truncate">{c.commit.message.split('\n')[0]}</span>
+                    <span className="text-[11.5px] text-faint">
+                      {c.commit.author.name} · <RelativeTime date={c.commit.author.date} />
+                    </span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </>
+        )}
+      </div>
+    </Card>
   );
 }

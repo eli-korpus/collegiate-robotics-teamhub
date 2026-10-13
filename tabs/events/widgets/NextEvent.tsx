@@ -2,12 +2,14 @@ import { Link } from 'react-router';
 import { Trophy } from 'lucide-react';
 import { seasonYear } from '@teamhub/config-schema/util';
 import { Card, CardHeader, daysBetween, formatDate, parseDate } from '@teamhub/ui';
-import { runtime, useFtcTeamEvents, useSeason } from '@teamhub/sdk';
+import { runtime, useFtcTeamEvents, useSeason, useViewableTeams } from '@teamhub/sdk';
 
 /** "Next event in 9 days" / "Last event: Rank 4". */
 export default function NextEvent({ teamId }: { teamId: string | null }) {
   const teams = runtime().config.teams.filter((t) => t.number);
-  const team = teams.find((t) => t.id === teamId) ?? teams[0];
+  const mine = useViewableTeams();
+  // When viewing all teams, show one of your own teams rather than the first in the program.
+  const team = teams.find((t) => t.id === teamId) ?? teams.find((t) => mine.some((m) => m.id === t.id)) ?? teams[0];
   const season = seasonYear(useSeason());
   const events = useFtcTeamEvents(team?.number, season);
   if (!team || !events.data) return null;

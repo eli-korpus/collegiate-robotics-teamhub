@@ -227,7 +227,7 @@ function CreatePoll({ eventRef, onClose }: { eventRef: string | null; onClose: (
               </Button>
             ))}
           </div>
-          <TeamScopePicker value={teamId} onChange={setTeamId} perm="polls.create" label="Ask" />
+          <TeamScopePicker value={teamId} onChange={setTeamId} perm="polls.create" />
           {eventRef && (
             <p className="text-[13px] text-muted">
               About: <EntityLink refStr={eventRef} />

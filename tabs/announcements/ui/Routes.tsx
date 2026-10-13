@@ -315,7 +315,7 @@ function Composer({ post, onClose }: { post: Post | null; onClose: () => void })
     >
       <div className="space-y-4">
         {!post && <ModulePurpose moduleId="announcements" compact />}
-        <TeamScopePicker value={teamId} onChange={setTeamId} perm="announcements.post" label="Send to" />
+        <TeamScopePicker value={teamId} onChange={setTeamId} perm="announcements.post" />
         <Field label="Title" required>{(id) => <Input id={id} autoFocus maxLength={140} value={title} onChange={(e) => setTitle(e.target.value)} />}</Field>
         <Field label="Message" required hint="Formatting: **bold**, *italic*, - lists, [links](https://…)">
           {(id) => <Textarea id={id} rows={7} maxLength={8000} value={body} onChange={(e) => setBody(e.target.value)} />}

@@ -1,7 +1,8 @@
+import { useEffect } from 'react';
 import { NavLink, useLocation, useNavigate } from 'react-router';
 import { Check, ChevronsUpDown, Compass, ExternalLink, Home as HomeIcon, Link2, LogOut, MessagesSquare, Monitor, Moon, Search, Settings, Shield, Sun, User, Users } from 'lucide-react';
 import { Avatar, Kbd, Menu, ModKey, SidebarItem, SidebarSection, TeamDot, cn, useMediaQuery, safeHref } from '@teamhub/ui';
-import { canWith, isMultiTeam, runtime, setTeamScope, useCan, useToolLink, useMe, usePeople, useSession, useTeamScope, type LoadedModule } from '@teamhub/sdk';
+import { canWith, isMultiTeam, runtime, setTeamScope, useCan, useToolLink, useMe, usePeople, useSession, useTeamScope, useAllTeamsLabel, useViewableTeams, type LoadedModule } from '@teamhub/sdk';
 import { nav } from '../../generated/nav';
 import { useAvailableUpdate } from './updates';
 import { ProgramLogo, TeamLogo } from '../auth/AuthLayout';
@@ -103,20 +104,25 @@ export function Sidebar({ onNavigate, onSearch }: { onNavigate: () => void; onSe
 function TeamSwitcher() {
   const c = runtime().config;
   const scope = useTeamScope();
-  const me = useMe();
   const multi = isMultiTeam();
-  const current = c.teams.find((t) => t.id === scope);
+  // Only teams this person can see items for: picking any other team would just look empty.
+  const teams = useViewableTeams();
+  const allLabel = useAllTeamsLabel();
+  const stale = multi && scope !== null && !teams.some((t) => t.id === scope);
+  useEffect(() => {
+    if (stale) setTeamScope(null);
+  }, [stale]);
+  const current = c.teams.find((t) => t.id === scope) ?? (multi && teams.length === 1 ? teams[0] : undefined);
   const header = (
     <span className="flex min-w-0 items-center gap-2.5">
       {current ? <TeamLogo teamId={current.id} size={30} /> : <ProgramLogo size={30} />}
       <span className="min-w-0 text-left">
         <span className="block truncate text-[13.5px] font-semibold leading-tight">{current?.name ?? c.program.name}</span>
-        <span className="block truncate text-[11.5px] text-muted">{current ? (current.number ? `#${current.number}` : 'Team') : multi ? 'All teams' : c.teams[0]?.number ? `#${c.teams[0].number}` : ''}</span>
+        <span className="block truncate text-[11.5px] text-muted">{current ? (current.number ? `#${current.number}` : 'Team') : multi ? allLabel : c.teams[0]?.number ? `#${c.teams[0].number}` : ''}</span>
       </span>
     </span>
   );
-  if (!multi) return <div className="flex h-11 items-center px-1">{header}</div>;
-  const mine = new Set(me.memberships.filter((m) => m.status === 'active').map((m) => m.team_id));
+  if (!multi || teams.length < 2) return <div className="flex h-11 items-center px-1">{header}</div>;
   return (
     <Menu
       align="start"
@@ -128,18 +134,18 @@ function TeamSwitcher() {
         </button>
       }
       items={[
-        { label: 'All teams', icon: scope === null ? <Check /> : <span />, onSelect: () => setTeamScope(null) },
-        ...c.teams.map((t) => ({
+        { label: allLabel, icon: scope === null ? <Check /> : <span />, onSelect: () => setTeamScope(null) },
+        ...teams.map((t) => ({
           label: (
             <span className="flex items-center gap-2">
               <TeamDot color={t.color} /> {t.name}
-              {!mine.has(t.id) && <span className="text-[11px] text-faint">(not on this team)</span>}
             </span>
           ),
           icon: scope === t.id ? <Check /> : <span />,
           onSelect: () => setTeamScope(t.id),
         })),
       ]}
+      footer={`Items for everyone in ${c.program.name} show for every team.`}
     />
   );
 }

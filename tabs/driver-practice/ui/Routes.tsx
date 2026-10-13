@@ -28,6 +28,7 @@ import {
   useConfirm,
 } from '@teamhub/ui';
 import {
+  ScopeVisibility,
   canWith,
   friendlyError,
   ModuleHeader,
@@ -258,7 +259,8 @@ function LogDialog({ fields, onClose, run }: { fields: FieldDef[]; onClose: () =
       }
     >
       <div className="space-y-4">
-        <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="driver-practice.log" label="Team" />
+        <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="driver-practice.log" />
+        <ScopeVisibility teamId={v.team_id} />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="Driver" optional>{() => <PersonPicker value={v.driver} onChange={(driver) => setV({ ...v, driver })} />}</Field>
           <Field label="Operator" optional>{() => <PersonPicker value={v.operator} onChange={(operator) => setV({ ...v, operator })} />}</Field>

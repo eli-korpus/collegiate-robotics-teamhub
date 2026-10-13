@@ -42,6 +42,7 @@ import {
   useSeason,
   useSupabase,
   useTeamScope,
+  useViewableTeams,
   type FtcMatch,
 } from '@teamhub/sdk';
 
@@ -66,8 +67,11 @@ interface HistoryRow {
 
 export function useOurTeam() {
   const scope = useTeamScope();
+  const active = useActive();
   const teams = runtime().config.teams.filter((t) => t.number);
-  return teams.find((t) => t.id === scope) ?? teams[0] ?? null;
+  const mine = useViewableTeams().filter((t) => t.number);
+  // The sidebar's team; when viewing all, the first of your teams that's at an event (then your first team).
+  return teams.find((t) => t.id === scope) ?? mine.find((t) => active.data?.some((a) => a.team_id === t.id)) ?? mine[0] ?? teams[0] ?? null;
 }
 
 export const useActive = () => useRows<Active>(['competition-day', 'active'], (sb) => sb.from('comp_active').select('*'));

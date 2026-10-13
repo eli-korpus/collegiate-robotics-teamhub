@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { Box } from 'lucide-react';
 import { Card, CardHeader, StatusPill } from '@teamhub/ui';
 import { useMe } from '@teamhub/sdk';
-import { STATUS, useJobs } from '../ui/Routes';
+import { STATUS, useJobs } from '../ui/data';
 
 /** Requesters: "Your parts: 2 printing". */
 export default function MyParts() {

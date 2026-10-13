@@ -1,13 +1,13 @@
 import { Link } from 'react-router';
 import { NotebookPen } from 'lucide-react';
 import { Card, CardHeader, formatDate } from '@teamhub/ui';
-import { useEntries } from '../ui/data';
+import { useRecentEntries } from '../ui/data';
 
 /** Home widget: notebook entries this week (keeps documentation habits visible). */
 export default function RecentEntries({ teamId }: { teamId: string | null }) {
-  const entries = useEntries();
   const weekAgo = new Date(Date.now() - 7 * 86_400_000).toISOString().slice(0, 10);
-  const list = (entries.data ?? []).filter((e) => e.date >= weekAgo && (!teamId || !e.team_id || e.team_id === teamId));
+  const entries = useRecentEntries(weekAgo);
+  const list = (entries.data ?? []).filter((e) => !teamId || !e.team_id || e.team_id === teamId);
   // Nothing written this week: no card (the Notebook tab is one click away).
   if (!list.length) return null;
   return (

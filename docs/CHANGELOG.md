@@ -13,6 +13,56 @@ How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
 
+## [1.1.3] - 2026-10-13
+### Performance
+
+- **Home loads faster and no longer jumps around.**
+  - Cards load out of sight and appear together (after 1.5 seconds at most), instead of sliding around several
+    times as each one fetched its data. Cards only slide when something actually changes, and never fly in from the
+    corner.
+  - Ten Home cards (Announcements, Competition Day, Inventory, To Manufacture ×2, Purchases, Paperwork, Polls,
+    Sign-ups, Skills, Sponsors, Your tasks) used to download their whole tab just to show the card. On the demo
+    with every tab, Home now downloads 60 files instead of 84, and none of them are tab screens.
+  - The Notebook and Unread announcements cards download titles only, not the full text of every entry and post.
+- **Comes back instantly.** The dashboard remembers what it loaded on this browser for up to a day and shows it right
+  away on the next visit, then refreshes it in the background. It's kept only for the person who's signed in: it's
+  cleared when they sign out or someone else signs in, and after every update of the site.
+- The sidebar no longer loads the whole People directory: it loads only your own picture, and a small count of join
+  requests for people who approve them.
+- Profile pictures whose link has expired show initials instead of a broken image.
+
+### For customized copies
+
+- Data hooks that Home cards share with their tab moved from `ui/Routes.tsx` (`ui/shared.tsx` for Tasks) to a new
+  `ui/data.ts` in the tabs listed above. `ui/Routes.tsx` still re-exports them, so your own code keeps working. If you
+  changed those hooks, Update may ask you to combine the change: keep yours, in `ui/data.ts`.
+- `npm run lint` warns when a Home card imports a tab's screens (`ui/Routes`). Import from `ui/data.ts` instead.
+- A query can stay out of the browser's memory with `meta: { persist: false }` (TeamHub already does this for file
+  links, which expire).
+
+### Changed
+
+- **Programs with several teams** are easier to follow:
+  - The team switcher (top left) lists only the teams you can see items for: your own teams, or every team for
+    admins. The "no team picked" view is called **All my teams** (admins: **All teams**). People on just one team see
+    their team's name there instead of a switcher.
+  - Every form's team choice reads **Everyone in <program>** or **Only <team>**, is labeled **Visible to** (except
+    where it means something else, like "Who's expected" and "Required for"), and says who will see the item.
+    Batteries, Code Hub, Driver Practice, Inventory, Skills, Social Media and Sponsors forms now show that line too.
+  - Items for everyone show **Everyone** instead of "All teams" next to them.
+
+### Fixed
+
+- **Switching teams now updates every tab:**
+  - Code Hub shows the picked team's own repository (its "Code repository" team tool), and every team's repository
+    when viewing all teams. It always showed the first one before.
+  - Events follows the team you pick, and an event page opens on your team that's at that event.
+  - Competition Day, the **Next event** widget and the scouting pick list use one of your own teams when viewing all
+    teams, instead of the first team in the program.
+  - "Open Competition Day" on a competition for everyone uses the team you're viewing, not the first team.
+  - The attendance report counts only the viewed team's sessions, so people on two teams aren't marked absent from
+    the other team's practices.
+
 ## [1.1.2] - 2026-10-10
 ### Fixed
 

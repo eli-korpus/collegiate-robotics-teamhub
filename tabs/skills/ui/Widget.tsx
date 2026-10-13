@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { GraduationCap } from 'lucide-react';
 import { Card, CardHeader, safeHref } from '@teamhub/ui';
 import { useMe } from '@teamhub/sdk';
-import { nextSkills, useSignoffs, useSkills } from './Routes';
+import { nextSkills, useSignoffs, useSkills } from './data';
 
 export default function NextSkills({ teamId }: { teamId: string | null }) {
   const me = useMe();

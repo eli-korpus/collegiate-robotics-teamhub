@@ -25,23 +25,10 @@ import {
   useConfirm,
   safeHref,
 } from '@teamhub/ui';
-import { canWith, friendlyError, isModuleEnabled, ModuleHeader, ModulePurpose, TeamScopePicker, useCan, useMe, useModuleSettings, useRows, useSupabase, useTeamScope } from '@teamhub/sdk';
+import { ScopeVisibility, canWith, friendlyError, isModuleEnabled, ModuleHeader, ModulePurpose, TeamScopePicker, useCan, useMe, useModuleSettings, useSupabase, useTeamScope } from '@teamhub/sdk';
+import { type Part, useParts, isLow } from './data';
+export * from './data';
 
-export interface Part {
-  id: string;
-  team_id: string | null;
-  name: string;
-  sku: string | null;
-  vendor: string | null;
-  url: string | null;
-  location: string | null;
-  qty: number;
-  low_at: number | null;
-  category: string | null;
-  notes: string | null;
-}
-export const useParts = () => useRows<Part>(['inventory', 'items'], (sb) => sb.from('inv_items').select('*').order('name'));
-export const isLow = (p: Part) => p.low_at != null && p.qty <= p.low_at;
 const BATTERY = /batter/i;
 
 export default function InventoryRoutes() {
@@ -290,7 +277,8 @@ function PartDialog({ part, categories, perTeam, onClose }: { part: Part | null;
         <Field label="Notes" optional className="sm:col-span-2">{(id) => <Textarea id={id} rows={2} maxLength={500} value={v.notes} onChange={(e) => setV({ ...v, notes: e.target.value })} />}</Field>
         {perTeam && (
           <div className="sm:col-span-2">
-            <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="inventory.manage" label="Belongs to" />
+            <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="inventory.manage" />
+            <ScopeVisibility teamId={v.team_id} />
           </div>
         )}
       </div>

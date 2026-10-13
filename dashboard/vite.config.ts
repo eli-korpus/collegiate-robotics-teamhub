@@ -95,6 +95,8 @@ export default defineConfig(() => {
   return {
     base: meta.base || '/',
     plugins: [react(), tailwindcss(), teamhubHtml(meta)],
+    // Changes on every build, so data remembered in the browser is dropped after each update (packages/sdk/src/persist.ts).
+    define: { __TEAMHUB_BUILD__: JSON.stringify(Date.now().toString(36)) },
     server: { port: 5173, fs: { allow: [repoRoot] } },
     preview: { port: 4173 },
     build: {

@@ -25,6 +25,7 @@ import {
   safeHref,
 } from '@teamhub/ui';
 import {
+  ScopeVisibility,
   canWith,
   EntityLink,
   friendlyError,
@@ -287,6 +288,7 @@ function PostDialog({ post, draft, onClose }: { post: Post | null; draft: string
           </p>
         )}
         <TeamScopePicker value={v.team_id} onChange={(t) => setV({ ...v, team_id: t })} perm="social.draft" />
+        <ScopeVisibility teamId={v.team_id} />
       </fieldset>
     </Dialog>
   );

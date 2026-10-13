@@ -33,7 +33,6 @@ import {
   safeHref,
 } from '@teamhub/ui';
 import {
-  canWith,
   CommentThread,
   downloadFile,
   friendlyError,
@@ -51,7 +50,6 @@ import {
   useCan,
   useCreateShortcut,
   useMe,
-  useModuleSettings,
   useNewParam,
   usePeople,
   usePositionHolders,
@@ -60,30 +58,11 @@ import {
   useSupabase,
   useTeamScope,
 } from '@teamhub/sdk';
+import { type JobStatus, type Job, STATUS, useJobs, useMfgSettings, canManage } from './data';
+export * from './data';
 
 const ModelViewer = lazy(() => import('./ModelViewer'));
 
-export type JobStatus = 'submitted' | 'queued' | 'in_progress' | 'done' | 'failed' | 'cancelled';
-export interface Job {
-  id: string;
-  team_id: string | null;
-  title: string;
-  method: string;
-  qty: number;
-  material: string | null;
-  color: string | null;
-  priority: number;
-  needed_by: string | null;
-  status: JobStatus;
-  params: string | null;
-  notes: string | null;
-  onshape_url: string | null;
-  keep_files: boolean;
-  requested_by: string | null;
-  assigned_to: string | null;
-  created_at: string;
-  done_at: string | null;
-}
 interface MfgFile {
   id: string;
   job_id: string;
@@ -92,33 +71,8 @@ interface MfgFile {
   size_bytes: number;
   compressed: boolean;
 }
-export interface Method {
-  id: string;
-  name: string;
-  positions: string[];
-}
-interface Settings {
-  methods: Method[];
-  autoDeleteDays: number;
-  maxFileMB: number;
-}
 
-export const STATUS: Record<JobStatus, { label: string; tone: 'neutral' | 'info' | 'accent' | 'success' | 'danger' | 'warning' }> = {
-  submitted: { label: 'Submitted', tone: 'neutral' },
-  queued: { label: 'Queued', tone: 'info' },
-  in_progress: { label: 'In progress', tone: 'accent' },
-  done: { label: 'Done', tone: 'success' },
-  failed: { label: 'Failed', tone: 'danger' },
-  cancelled: { label: 'Cancelled', tone: 'warning' },
-};
-
-export const useJobs = () => useRows<Job>(['manufacture', 'jobs'], (sb) => sb.from('mfg_jobs').select('*').order('priority', { ascending: false }).order('created_at'));
 const useFiles = () => useRows<MfgFile>(['manufacture', 'files'], (sb) => sb.from('mfg_files').select('*'));
-export const useMfgSettings = () => useModuleSettings<Settings>('manufacture');
-
-export function canManage(me: ReturnType<typeof useMe>, j: Pick<Job, 'method' | 'team_id'>) {
-  return canWith(me, `manufacture.manage_${j.method}`, j.team_id) || canWith(me, 'manufacture.delete_any', j.team_id);
-}
 
 export default function ManufactureRoutes() {
   const jobs = useJobs();

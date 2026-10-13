@@ -251,19 +251,18 @@ function Report() {
   const settings = useAttSettings();
   const season = useSeason();
   const nav = useNavigate();
+  // Only the viewed team's sessions (and everyone's), so people on two teams aren't counted for the other one.
+  const shown = useMemo(() => (sessions.data ?? []).filter((s) => !scope || !s.team_id || s.team_id === scope), [sessions.data, scope]);
   const rows = useMemo(
-    () =>
-      people
-        .map((p) => ({ p, st: statsFor(p, sessions.data ?? [], presence.data ?? [], settings.includeMentors) }))
-        .filter((r) => r.st.expected > 0),
-    [people, sessions.data, presence.data, settings.includeMentors],
+    () => people.map((p) => ({ p, st: statsFor(p, shown, presence.data ?? [], settings.includeMentors) })).filter((r) => r.st.expected > 0),
+    [people, shown, presence.data, settings.includeMentors],
   );
   if (sessions.isLoading || presence.isLoading) return <Spinner />;
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between">
         <p className="text-[13px] text-muted">
-          Season {season} · {sessions.data?.length ?? 0} sessions
+          Season {season} · {shown.length} sessions
         </p>
         <Button
           size="sm"

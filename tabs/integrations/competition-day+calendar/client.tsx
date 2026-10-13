@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Timer } from 'lucide-react';
 import { defaultSeasonLabel, seasonYear } from '@teamhub/config-schema/util';
 import { Button, toast } from '@teamhub/ui';
-import { canWith, friendlyError, runtime, setTeamScope, useMe, useSupabase, type IntegrationClient } from '@teamhub/sdk';
+import { canWith, friendlyError, runtime, setTeamScope, useMe, useSupabase, useTeamScope, useViewableTeams, type IntegrationClient } from '@teamhub/sdk';
 
 interface CompetitionEvent {
   kind: string;
@@ -17,9 +17,11 @@ function OpenCompetitionDay({ event, occurrence }: { event: CompetitionEvent; oc
   const me = useMe();
   const nav = useNavigate();
   const qc = useQueryClient();
+  const scope = useTeamScope();
+  const mine = useViewableTeams().filter((t) => t.number);
   if (event.kind !== 'competition' || !event.event_code) return null;
-  // One-team programs may leave the team blank: it's then that team's competition.
-  const teamId = event.team_id ?? runtime().config.teams.find((t) => t.number)?.id ?? null;
+  // A competition for everyone (or a one-team program's): the team being viewed, else your first team.
+  const teamId = event.team_id ?? mine.find((t) => t.id === scope)?.id ?? mine[0]?.id ?? runtime().config.teams.find((t) => t.number)?.id ?? null;
   if (!teamId) return null;
   const canSet = canWith(me, 'competition-day.set_event', teamId);
   return (

@@ -41,6 +41,11 @@ export interface NbImage {
 }
 
 export const useEntries = () => useRows<Entry>(['notebook', 'entries'], (sb) => sb.from('nb_entries').select('*').order('date', { ascending: false }).order('created_at', { ascending: false }));
+/** Home's card: titles of entries since a date, without their text. */
+export const useRecentEntries = (since: string) =>
+  useRows<Pick<Entry, 'id' | 'team_id' | 'title' | 'date'>>(['notebook', 'recent', since], (sb) =>
+    sb.from('nb_entries').select('id, team_id, title, date').gte('date', since).order('date', { ascending: false }).order('created_at', { ascending: false }),
+  );
 export const useSubsystems = () => useRows<Subsystem>(['notebook', 'subsystems'], (sb) => sb.from('nb_subsystems').select('*').order('sort').order('name'));
 export const useImages = (entryIds: string[]) =>
   useRows<NbImage>(['notebook', 'images', entryIds.join(',')], (sb) => sb.from('nb_images').select('*').in('entry_id', entryIds).order('sort'), { enabled: entryIds.length > 0 });

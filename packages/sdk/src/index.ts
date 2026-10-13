@@ -2,6 +2,7 @@ export * from './define';
 export * from './types';
 export * from './runtime';
 export * from './session';
+export * from './persist';
 export * from './hooks';
 export * from './files';
 export * from './refs';

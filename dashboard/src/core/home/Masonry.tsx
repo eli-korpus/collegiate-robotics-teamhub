@@ -1,11 +1,14 @@
-import { useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { cn } from '@teamhub/ui';
 
 /**
  * Home's card layout: each card goes into whichever column is shortest so far, so columns fill evenly and there are
  * never empty holes (a plain grid makes every row as tall as its tallest card). Cards keep their order left to right,
  * stay mounted when the layout changes, and cards that render nothing take no space.
  */
-export function Masonry({ items, minColumn = 340, maxColumns = 3, gap = 16 }: { items: { key: string; node: ReactNode }[]; minColumn?: number; maxColumns?: number; gap?: number }) {
+export function Masonry({ items, minColumn = 340, maxColumns = 3, gap = 16, animate = true }: { items: { key: string; node: ReactNode }[]; minColumn?: number; maxColumns?: number; gap?: number; animate?: boolean }) {
+  // Cards placed in an earlier render slide to new spots; a card's first placement is instant (no flying in from a corner).
+  const placed = useRef(new Set<string>());
   const box = useRef<HTMLDivElement>(null);
   const refs = useRef(new Map<string, HTMLDivElement>());
   const [width, setWidth] = useState(0);
@@ -42,6 +45,10 @@ export function Masonry({ items, minColumn = 340, maxColumns = 3, gap = 16 }: { 
     tops[col] += h + gap;
   }
   const total = Math.max(0, ...tops.map((t) => t - gap));
+  useEffect(() => {
+    if (!animate) return;
+    for (const k of pos.keys()) placed.current.add(k);
+  });
 
   return (
     <div ref={box} className="relative" style={{ height: width ? total : undefined }}>
@@ -54,7 +61,7 @@ export function Masonry({ items, minColumn = 340, maxColumns = 3, gap = 16 }: { 
               if (el) refs.current.set(key, el);
               else refs.current.delete(key);
             }}
-            className="absolute left-0 top-0 transition-transform duration-200 motion-reduce:transition-none"
+            className={cn('absolute left-0 top-0', animate && placed.current.has(key) && 'transition-transform duration-200 motion-reduce:transition-none')}
             style={{ width: width ? colWidth : '100%', transform: p ? `translate(${p.left}px, ${p.top}px)` : undefined, visibility: p ? 'visible' : 'hidden' }}
           >
             {node}

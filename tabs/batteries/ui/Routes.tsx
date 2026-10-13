@@ -20,7 +20,7 @@ import {
   useConfirm,
   validateRequired,
 } from '@teamhub/ui';
-import { canWith, friendlyError, ModuleHeader, ModulePurpose, TeamBadge, TeamScopePicker, useCan, useMe, useSupabase, useTeamScope } from '@teamhub/sdk';
+import { ScopeVisibility, canWith, friendlyError, ModuleHeader, ModulePurpose, TeamBadge, TeamScopePicker, useCan, useMe, useSupabase, useTeamScope } from '@teamhub/sdk';
 import { batteryStatus, STATE_LABEL, useBatLogs, useBatSettings, useBatteries, type Battery, type BatLog } from './data';
 
 export default function BatteriesRoutes() {
@@ -233,7 +233,8 @@ function BatteryDialog({ battery, onClose }: { battery: Battery | null; onClose:
         </div>
         <Field label="Purchased" optional>{(id) => <Input id={id} type="date" value={v.purchased} onChange={(e) => setV({ ...v, purchased: e.target.value })} />}</Field>
         <Field label="Notes" optional>{(id) => <Textarea id={id} rows={2} maxLength={500} value={v.notes} onChange={(e) => setV({ ...v, notes: e.target.value })} />}</Field>
-        <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="batteries.manage" label="Belongs to" />
+        <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="batteries.manage" />
+        <ScopeVisibility teamId={v.team_id} />
         {battery && <Switch checked={v.retired} onChange={(retired) => setV({ ...v, retired })} label="Retired" description="Retired batteries are hidden and never count as needing a charge." />}
       </div>
     </Dialog>

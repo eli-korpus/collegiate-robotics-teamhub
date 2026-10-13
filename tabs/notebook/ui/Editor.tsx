@@ -119,7 +119,7 @@ export function EntryEditor({ entry, draft, onClose, imageCount = 0 }: { entry?:
           <Field label="Title" required>{(id) => <Input id={id} autoFocus maxLength={160} value={v.title} onChange={(e) => setV({ ...v, title: e.target.value })} />}</Field>
           <Field label="Date" required>{(id) => <Input id={id} type="date" value={v.date} onChange={(e) => setV({ ...v, date: e.target.value })} />}</Field>
         </div>
-        <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="notebook.write" label="Team" />
+        <TeamScopePicker value={v.team_id} onChange={(team_id) => setV({ ...v, team_id })} perm="notebook.write" />
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Field label="Subsystem" optional>
             {(id) => (

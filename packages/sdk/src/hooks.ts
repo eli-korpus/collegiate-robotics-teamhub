@@ -58,6 +58,24 @@ export function useTeamScope(): string | null {
   );
 }
 
+/**
+ * The teams this person can see items for: every team for admins, otherwise the teams they're an active member of
+ * (the database hides other teams' items from them, see teamhub_in_team).
+ */
+export function useViewableTeams() {
+  const { me } = useSession();
+  const teams = runtime().config.teams;
+  if (!me || me.isAdmin) return teams;
+  const mine = new Set(me.memberships.filter((m) => m.status === 'active').map((m) => m.team_id));
+  return teams.filter((t) => mine.has(t.id));
+}
+
+/** Name of the "no team picked" view: "All teams" for admins, "All my teams" for everyone else. */
+export function useAllTeamsLabel(): string {
+  const { me } = useSession();
+  return me?.isAdmin ? 'All teams' : 'All my teams';
+}
+
 /** Applies the team scope to a PostgREST query: program-wide rows + the selected team's rows. */
 export function scoped<Q extends { or: (f: string) => Q }>(q: Q, teamId: string | null): Q {
   return teamId ? q.or(`team_id.is.null,team_id.eq.${teamId}`) : q;
@@ -349,6 +367,8 @@ export function useSignedUrls(bucket: string, paths: (string | null | undefined)
   return useQuery({
     queryKey: ['core', 'signed', bucket, list],
     enabled: list.length > 0,
+    // Links expire after an hour: not worth remembering between visits.
+    meta: { persist: false },
     staleTime: 50 * 60_000,
     queryFn: async () => {
       const { data, error } = await sb.storage.from(bucket).createSignedUrls(list, 60 * 60);

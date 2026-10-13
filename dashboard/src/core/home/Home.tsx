@@ -1,4 +1,5 @@
-import { lazy, Suspense, useMemo, useState } from 'react';
+import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useIsFetching } from '@tanstack/react-query';
 import { LayoutGrid } from 'lucide-react';
 import { Button, formatDate, greeting } from '@teamhub/ui';
 import { canWith, runtime, useMe, useSeason, useTeamScope, type WidgetDef } from '@teamhub/sdk';
@@ -54,9 +55,10 @@ export function Home() {
   const today = visible.filter((w) => w.priority === 'today');
   const grid = visible.filter((w) => w.priority !== 'today');
   const first = me.profile.display_name.split(' ')[0];
+  const settle = useSettled();
 
   return (
-    <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
+    <div className="relative mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
       <header className="mb-6 flex flex-wrap items-center gap-4">
         <ProgramLogo size={44} />
         <div className="min-w-0 flex-1">
@@ -72,20 +74,26 @@ export function Home() {
         </Button>
       </header>
 
-      {today.length > 0 && (
-        // The heading hides too when every card in it has nothing to show today.
-        <section aria-label="Today" className="mb-6 [&:not(:has(>div>div:not(:empty)))]:hidden">
-          <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-faint">Today &amp; this week</h2>
-          {/* Cards stretch to fill their row, so one card never leaves empty space beside it. */}
-          <div className="flex flex-wrap gap-3 [&>div:empty]:hidden [&>div]:min-w-[min(100%,300px)] [&>div]:flex-1">
-            {today.map((w) => (
-              <WidgetSlot key={w.key} w={w} teamId={teamId} />
-            ))}
-          </div>
-        </section>
-      )}
+      {settle.showSkeleton && <HomeSkeleton />}
+      {/* Cards load out of sight and appear together, so they don't jump around while each one fetches its data. */}
+      <PendingContext.Provider value={settle.track}>
+        <div data-home-ready={settle.ready || undefined} className={settle.ready ? 'th-anim-fade' : 'pointer-events-none invisible absolute inset-x-4 top-0 sm:inset-x-6'}>
+          {today.length > 0 && (
+            // The heading hides too when every card in it has nothing to show today.
+            <section aria-label="Today" className="mb-6 [&:not(:has(>div>div:not(:empty)))]:hidden">
+              <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-faint">Today &amp; this week</h2>
+              {/* Cards stretch to fill their row, so one card never leaves empty space beside it. */}
+              <div className="flex flex-wrap gap-3 [&>div:empty]:hidden [&>div]:min-w-[min(100%,300px)] [&>div]:flex-1">
+                {today.map((w) => (
+                  <WidgetSlot key={w.key} w={w} teamId={teamId} />
+                ))}
+              </div>
+            </section>
+          )}
 
-      <Masonry items={grid.map((w) => ({ key: w.key, node: <WidgetSlot w={w} teamId={teamId} /> }))} />
+          <Masonry animate={settle.ready} items={grid.map((w) => ({ key: w.key, node: <WidgetSlot w={w} teamId={teamId} /> }))} />
+        </div>
+      </PendingContext.Provider>
 
       {editing && (
         <Suspense fallback={null}>
@@ -100,10 +108,60 @@ function WidgetSlot({ w, teamId }: { w: HomeWidget; teamId: string | null }) {
   const C = w.component;
   return (
     <div>
-      <Suspense fallback={<div className="h-28 animate-pulse rounded-lg bg-bg-subtle" />}>
+      <Suspense fallback={<Pending />}>
         <C teamId={teamId} />
       </Suspense>
     </div>
   );
 }
 
+
+/** Counts Home cards whose code is still downloading (their Suspense fallback is showing). */
+const PendingContext = createContext<(delta: number) => void>(() => {});
+
+function Pending() {
+  const track = useContext(PendingContext);
+  useEffect(() => {
+    track(1);
+    return () => track(-1);
+  }, [track]);
+  return null;
+}
+
+/**
+ * Home is ready once every card's code has arrived and nothing is loading for the first time (a short quiet moment),
+ * or after 1.5 s at most so a slow card (e.g. FTCScout) never holds up the rest. Data remembered from the last visit
+ * counts as loaded, so a returning visitor sees Home at once.
+ */
+function useSettled() {
+  const [pending, setPending] = useState(0);
+  const track = useCallback((d: number) => setPending((p) => p + d), []);
+  const firstLoads = useIsFetching({ predicate: (q) => q.state.data === undefined });
+  const [ready, setReady] = useState(false);
+  const [slow, setSlow] = useState(false);
+  const busy = pending > 0 || firstLoads > 0;
+  useEffect(() => {
+    const skeleton = setTimeout(() => setSlow(true), 200);
+    const cap = setTimeout(() => setReady(true), 1500);
+    return () => {
+      clearTimeout(skeleton);
+      clearTimeout(cap);
+    };
+  }, []);
+  useEffect(() => {
+    if (ready || busy) return;
+    const t = setTimeout(() => setReady(true), 120);
+    return () => clearTimeout(t);
+  }, [ready, busy]);
+  return { ready, track, showSkeleton: slow && !ready };
+}
+
+function HomeSkeleton() {
+  return (
+    <div role="status" aria-label="Loading" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {[0, 1, 2].map((i) => (
+        <div key={i} className="h-40 animate-pulse rounded-lg bg-bg-subtle motion-reduce:animate-none" />
+      ))}
+    </div>
+  );
+}

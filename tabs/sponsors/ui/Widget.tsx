@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { Handshake } from 'lucide-react';
 import { Card, CardHeader, DueDate, addDays, toDateInput } from '@teamhub/ui';
 import { useCan } from '@teamhub/sdk';
-import { useSponsors } from './Routes';
+import { useSponsors } from './data';
 
 /** Follow-ups due in the next week (or overdue), and unthanked committed sponsors. */
 export default function FollowUpsDue({ teamId }: { teamId: string | null }) {

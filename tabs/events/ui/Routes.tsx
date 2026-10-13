@@ -39,12 +39,16 @@ import {
   useSeason,
   useSupabase,
   useTeamScope,
+  useViewableTeams,
   type FtcMatch,
   type FtcTeamEvent,
 } from '@teamhub/sdk';
 
 export function useNumberedTeams() {
-  return runtime().config.teams.filter((t) => t.number);
+  const mine = new Set(useViewableTeams().map((t) => t.id));
+  const numbered = runtime().config.teams.filter((t) => t.number);
+  // The person's own teams first, so every default lands on a team they're on.
+  return [...numbered.filter((t) => mine.has(t.id)), ...numbered.filter((t) => !mine.has(t.id))];
 }
 
 export default function EventsRoutes() {
@@ -71,7 +75,10 @@ function Overview() {
   const label = useSeason();
   const current = seasonYear(label);
   const [season, setSeason] = useState(current);
-  const [teamId, setTeamId] = useState<string>(teams.find((t) => t.id === scope)?.id ?? teams[0]?.id ?? '');
+  // Follows the team picked in the sidebar until someone picks a team here.
+  const [picked, setTeamId] = useState<string | null>(null);
+  useEffect(() => setTeamId(null), [scope]);
+  const teamId = picked ?? teams.find((t) => t.id === scope)?.id ?? teams[0]?.id ?? '';
   const [view, setView] = useState<'season' | 'compare'>('season');
   const team = teams.find((t) => t.id === teamId);
   if (!teams.length)
@@ -221,12 +228,15 @@ function EventPage() {
   const teams = useNumberedTeams();
   const s = Number(season);
   const ev = useFtcEvent(s, code, false);
-  const [teamNumber, setTeamNumber] = useState(teams[0]?.number ?? 0);
+  const scope = useTeamScope();
+  const [picked, setTeamNumber] = useState<number | null>(null);
   if (ev.isLoading) return <Spinner className="m-8" />;
   if (ev.error) return <ErrorState error={ev.error} title="FTCScout is unavailable" retry={() => ev.refetch()} />;
   const e = ev.data;
   if (!e) return <EmptyState title="Event not found" action={<Button onClick={() => nav('/events')}>Back</Button>} />;
   const ours = teams.filter((t) => e.teams.some((x) => x.teamNumber === t.number));
+  // The sidebar's team when it's at this event, else the first of our teams that is.
+  const teamNumber = picked ?? (ours.find((t) => t.id === scope) ?? ours[0] ?? teams.find((t) => t.id === scope) ?? teams[0])?.number ?? 0;
   const us = e.teams.find((x) => x.teamNumber === teamNumber);
   const matches = e.matches.filter((m) => m.teams.some((t) => t.teamNumber === teamNumber));
   const ranked = [...e.teams].filter((t) => t.stats?.rank).sort((a, b) => (a.stats!.rank ?? 999) - (b.stats!.rank ?? 999));

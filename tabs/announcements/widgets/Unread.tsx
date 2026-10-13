@@ -2,11 +2,11 @@ import { Link } from 'react-router';
 import { Megaphone } from 'lucide-react';
 import { Badge, Card, CardHeader, RelativeTime } from '@teamhub/ui';
 import { useLastSeen, useMe } from '@teamhub/sdk';
-import { useMyAcks, usePosts } from '../ui/Routes';
+import { useMyAcks, usePostHeadlines } from '../ui/data';
 
 /** Today strip: unread and must-read announcements. */
 export default function UnreadAnnouncements({ teamId }: { teamId: string | null }) {
-  const posts = usePosts();
+  const posts = usePostHeadlines();
   const acks = useMyAcks();
   const me = useMe();
   const [lastSeen] = useLastSeen('announcements');

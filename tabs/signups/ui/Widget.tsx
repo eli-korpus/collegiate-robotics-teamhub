@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { ClipboardPen } from 'lucide-react';
 import { Card, CardHeader, formatDate } from '@teamhub/ui';
 import { useMe } from '@teamhub/sdk';
-import { isOpen, useClaims, useSheets, useSlots } from './Routes';
+import { isOpen, useClaims, useSheets, useSlots } from './data';
 
 /** Your upcoming sign-ups, plus open sheets with free spots. */
 export default function MySignups({ teamId }: { teamId: string | null }) {

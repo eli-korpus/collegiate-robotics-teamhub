@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { Timer } from 'lucide-react';
 import { Badge, Card, CardHeader, formatTime } from '@teamhub/ui';
 import { matchLabel } from '@teamhub/sdk';
-import { estimate, useActive, useLiveEvent, useOurTeam } from '../ui/Routes';
+import { estimate, useActive, useLiveEvent, useOurTeam } from '../ui/data';
 
 /** Today strip during an event: our next match with an estimated time. */
 export default function NextMatch() {

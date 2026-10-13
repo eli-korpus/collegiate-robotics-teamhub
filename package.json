@@ -26,6 +26,7 @@
     "test": "vitest run --config tools/vitest.config.ts",
     "test:watch": "vitest --config tools/vitest.config.ts",
     "e2e": "playwright test --config tools/playwright.config.ts",
+    "screenshots": "tsx packages/generator/src/cli.ts generate --config tools/showcase/showcase.config.json && npm run build -w @teamhub/dashboard && playwright test --config tools/showcase/playwright.config.ts",
     "ci:matrix": "tsx tools/scripts/ci-matrix.ts",
     "new-module": "tsx tools/scripts/new-module.ts",
     "format": "prettier --write . --ignore-path .gitignore --ignore-path tools/.prettierignore",

@@ -212,7 +212,7 @@ function Live({ active, teamNumber }: { active: Active; teamNumber: number }) {
           ))}
         </div>
       )}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <Card>
           <CardHeader title="Our matches" />
           <ul className="divide-y divide-border px-4 pb-2 text-[13px]">

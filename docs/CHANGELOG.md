@@ -12,6 +12,13 @@ Releases with a **Security** section fix a vulnerability. Update as soon as you 
 How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
+### Fixed
+
+- **Home** keeps its greeting header in place while the cards load: cards that were still loading could show on top
+  of it.
+- **Code Hub** keeps the same column widths when you switch teams: a long commit message no longer squeezes the
+  OpModes card (long messages end in "…", with the full text on hover). Competition Day, Events, Media and the
+  scouting pick list got the same fix.
 
 ## [1.1.3] - 2026-10-13
 ### Performance

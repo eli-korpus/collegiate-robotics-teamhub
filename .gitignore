@@ -21,4 +21,5 @@ playwright-report/
 TEAMHUB_FTC_SPEC.md
 tools/scripts/prune-imports.mjs
 tools/scripts/split-exports.mjs
+tools/showcase/
 .claude/

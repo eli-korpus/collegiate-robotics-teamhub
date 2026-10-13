@@ -85,14 +85,7 @@ absent from the build when the tab is off.
 
 ## Screenshots
 
-The README's images come from `npm run screenshots`. It builds the dashboard for "Riverside Robotics", a made-up
-program (`tools/showcase/showcase.config.json`) with a busy season of made-up data (`tools/showcase/data.ts`; Supabase,
-FTCScout and GitHub are stubbed), captures the screens (`capture.spec.ts`, raw shots in `.teamhub-ci/showcase/`), then
-frames them in a browser window and phone (`compose.spec.ts`) into `docs/screenshots/` and the logo into `docs/assets/`.
-Dates are relative to today, so rerun it before a release to keep the images current. It leaves the generated files
-set to the showcase config: run `npm run build:demo` (or `npm run generate`) afterwards.
-
-For quick checks of any page, `tools/tests/e2e/screens.spec.ts` captures light and dark screenshots for the docs:
+`tools/tests/e2e/screens.spec.ts` captures light and dark screenshots for the docs:
 
 ```sh
 npm run build:demo

@@ -76,8 +76,8 @@ export default function CodeHubRoutes() {
   return (
     <div>
       <ModuleHeader moduleId="code-hub" actions={canEdit && <Button variant="primary" icon={<Plus className="size-4" />} onClick={() => setEditing('new')}>Add OpMode</Button>} />
-      <div className="mx-auto grid grid-cols-1 max-w-6xl gap-4 px-4 py-5 sm:px-6 lg:grid-cols-[3fr_2fr]">
-        <div className="space-y-4">
+      <div className="mx-auto grid grid-cols-1 max-w-6xl gap-4 px-4 py-5 sm:px-6 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
+        <div className="min-w-0 space-y-4">
           <Card>
             <CardHeader icon={<Code2 className="size-4" />} title="OpModes" />
             {ops.isLoading ? (
@@ -119,7 +119,7 @@ export default function CodeHubRoutes() {
             </Card>
           )}
         </div>
-        <div className="h-fit space-y-4">
+        <div className="h-fit min-w-0 space-y-4">
           {repos.length ? repos.map((l) => <RepoCard key={l.id} url={l.url} teamId={l.team_id} />) : <RepoCard />}
         </div>
       </div>
@@ -265,7 +265,7 @@ function RepoCard({ url, teamId }: { url?: string; teamId?: string | null }) {
               {gh.data.commits.map((c) => (
                 <li key={c.sha}>
                   <a href={safeHref(c.html_url)} target="_blank" rel="noreferrer" className="block hover:underline">
-                    <span className="block truncate">{c.commit.message.split('\n')[0]}</span>
+                    <span className="block truncate" title={c.commit.message.split('\n')[0]}>{c.commit.message.split('\n')[0]}</span>
                     <span className="text-[11.5px] text-faint">
                       {c.commit.author.name} · <RelativeTime date={c.commit.author.date} />
                     </span>

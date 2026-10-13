@@ -12,6 +12,8 @@ Releases with a **Security** section fix a vulnerability. Update as soon as you 
 How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
+
+## [1.1.4] - 2026-10-13
 ### Fixed
 
 - **Home** keeps its greeting header in place while the cards load: cards that were still loading could show on top

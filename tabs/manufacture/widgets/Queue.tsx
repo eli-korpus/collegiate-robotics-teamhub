@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { Printer } from 'lucide-react';
 import { Card, CardHeader } from '@teamhub/ui';
 import { useMe } from '@teamhub/sdk';
-import { canManage, useJobs, useMfgSettings } from '../ui/Routes';
+import { canManage, useJobs, useMfgSettings } from '../ui/data';
 
 /** Makers: "Queue: 4 jobs" per method they run. */
 export default function QueueWidget({ teamId }: { teamId: string | null }) {

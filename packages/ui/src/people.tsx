@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Check } from 'lucide-react';
 import { cn } from './cn';
 import { readableOn } from './color';
@@ -48,13 +49,16 @@ function hashColor(s: string): string {
 
 export function Avatar({ name, src, size = 28, className }: { name: string; src?: string | null; size?: number; className?: string }) {
   const bg = hashColor(name);
+  // A picture link that has expired (or fails to load) shows the initials instead of a broken image.
+  const [failed, setFailed] = useState<string | null>(null);
+  const pic = src && failed !== src ? src : null;
   return (
     <span
       className={cn('relative inline-grid shrink-0 place-items-center overflow-hidden rounded-full font-semibold select-none', className)}
-      style={{ width: size, height: size, background: src ? undefined : bg, color: readableOn(bg), fontSize: Math.max(10, size * 0.4) }}
+      style={{ width: size, height: size, background: pic ? undefined : bg, color: readableOn(bg), fontSize: Math.max(10, size * 0.4) }}
       aria-hidden
     >
-      {src ? <img src={src} alt="" className="size-full object-cover" loading="lazy" /> : initials(name)}
+      {pic ? <img src={pic} alt="" className="size-full object-cover" loading="lazy" onError={() => setFailed(pic)} /> : initials(name)}
     </span>
   );
 }

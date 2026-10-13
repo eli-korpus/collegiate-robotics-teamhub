@@ -74,6 +74,9 @@ tabs/robot-log/
    team_id)` and `teamhub_in_team(team_id)` in policies, and test both the allowed and the denied path.
 6. **Stay small.** The client file is always loaded, so keep it to the icon, lazy imports and tiny callbacks. Each
    route chunk must stay under 60 KB gzip.
+   Home cards (`widgets/` or `ui/*Widget.tsx`) load with Home: put the data hooks they share with your screens in
+   `ui/data.ts` and import them from there, never from `ui/Routes` (that would download the whole tab on Home).
+   A Home card that has nothing to show yet returns `null`; Home waits for cards to load before showing them.
 7. **Respect the storage budget.** Prefer links over files. Files go through `<Upload>` (compressed in the browser) and
    are deleted via `teamhub_trash()` when their row is deleted.
 8. **No chat or private messages** (youth protection). Point discussion to the team's chat with `<TeamChatLink>`.

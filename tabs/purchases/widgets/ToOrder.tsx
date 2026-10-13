@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { ShoppingCart } from 'lucide-react';
 import { Card, CardHeader } from '@teamhub/ui';
 import { canWith, useMe } from '@teamhub/sdk';
-import { useRequests } from '../ui/Routes';
+import { useRequests } from '../ui/data';
 
 /** Today strip for orderers: requests waiting to be ordered; for requesters: updates on their requests. */
 export default function ToOrder({ teamId }: { teamId: string | null }) {

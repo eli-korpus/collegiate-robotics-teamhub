@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import type { Session } from '@supabase/supabase-js';
 import { getSupabase, runtime } from './runtime';
 import type { Me, Membership, PositionHolder, Profile } from './types';
+import { clearPersistedCache, restoreQueryCache, startPersisting } from './persist';
 
 interface SessionCtx {
   session: Session | null;
@@ -30,18 +31,30 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let current: string | null = null;
     sb.auth.getSession().then(({ data }) => {
+      current = data.session?.user.id ?? null;
+      // Last visit's data first (only this person's), so the dashboard shows at once and refreshes in the background.
+      if (current) restoreQueryCache(qc, current);
+      else clearPersistedCache();
       setSession(data.session);
       setLoading(false);
     });
     const { data } = sb.auth.onAuthStateChange((event, s) => {
+      const next = s?.user.id ?? null;
+      // Someone else signed in on this browser: never show them the last person's data.
+      if (event === 'SIGNED_OUT' || (current && next && next !== current)) {
+        qc.clear();
+        clearPersistedCache();
+      }
+      current = next;
       setSession(s);
-      if (event === 'SIGNED_OUT') qc.clear();
     });
     return () => data.subscription.unsubscribe();
   }, [sb, qc]);
 
   const uid = session?.user.id ?? null;
+  useEffect(() => (uid ? startPersisting(qc, uid) : undefined), [qc, uid]);
   const meQuery = useQuery({
     queryKey: ['core', 'me', uid],
     enabled: !!uid,

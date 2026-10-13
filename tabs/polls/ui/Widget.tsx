@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import { Vote } from 'lucide-react';
 import { Card, CardHeader } from '@teamhub/ui';
-import { isOpen, useMyVotes, usePolls } from './Routes';
+import { isOpen, useMyVotes, usePolls } from './data';
 
 /** Open polls you haven't answered. */
 export default function OpenPolls({ teamId }: { teamId: string | null }) {

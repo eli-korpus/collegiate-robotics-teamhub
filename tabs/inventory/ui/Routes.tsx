@@ -25,23 +25,10 @@ import {
   useConfirm,
   safeHref,
 } from '@teamhub/ui';
-import { ScopeVisibility, canWith, friendlyError, isModuleEnabled, ModuleHeader, ModulePurpose, TeamScopePicker, useCan, useMe, useModuleSettings, useRows, useSupabase, useTeamScope } from '@teamhub/sdk';
+import { ScopeVisibility, canWith, friendlyError, isModuleEnabled, ModuleHeader, ModulePurpose, TeamScopePicker, useCan, useMe, useModuleSettings, useSupabase, useTeamScope } from '@teamhub/sdk';
+import { type Part, useParts, isLow } from './data';
+export * from './data';
 
-export interface Part {
-  id: string;
-  team_id: string | null;
-  name: string;
-  sku: string | null;
-  vendor: string | null;
-  url: string | null;
-  location: string | null;
-  qty: number;
-  low_at: number | null;
-  category: string | null;
-  notes: string | null;
-}
-export const useParts = () => useRows<Part>(['inventory', 'items'], (sb) => sb.from('inv_items').select('*').order('name'));
-export const isLow = (p: Part) => p.low_at != null && p.qty <= p.low_at;
 const BATTERY = /batter/i;
 
 export default function InventoryRoutes() {

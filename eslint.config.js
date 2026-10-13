@@ -28,6 +28,19 @@ export default tseslint.config(
   { files: ['tools/scripts/**', '**/*.mjs'], languageOptions: { globals: { process: 'readonly', console: 'readonly', URL: 'readonly' } } },
   { files: ['tabs/**/*.{ts,tsx}'], ignores: ['**/*.test.ts', 'tabs/integrations/**'], rules: { 'no-restricted-imports': ['error', moduleBoundary] } },
   {
+    // Home cards load with Home: importing the tab's screens would download the whole tab just to show a card.
+    // A warning, not an error, so a team's own older cards never block an update.
+    files: ['tabs/*/widgets/**/*.{ts,tsx}', 'tabs/*/ui/*Widget.tsx'],
+    ignores: ['tabs/integrations/**'],
+    rules: {
+      // The TypeScript twin of the rule, so the tab-boundary rule above stays an error for these files.
+      '@typescript-eslint/no-restricted-imports': [
+        'warn',
+        { patterns: [{ group: ['**/Routes', '**/ui/shared'], message: 'Home cards import data hooks from ui/data.ts, not the tab screens (they would load the whole tab on Home).' }] },
+      ],
+    },
+  },
+  {
     files: ['tabs/integrations/**/*.{ts,tsx}'],
     rules: {
       'no-restricted-imports': ['error', { patterns: [{ group: ['**/tabs/*', '../../*/**', '**/dashboard/*', '**/setup-wizard/*'], message: 'Integrations talk to tabs only through tables and registries.' }] }],

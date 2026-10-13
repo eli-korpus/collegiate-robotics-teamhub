@@ -39,30 +39,12 @@ import {
   useCreateShortcut,
   useMe,
   useNewParam,
-  useRows,
   useSelectedParam,
   useSupabase,
   useTeamScope,
 } from '@teamhub/sdk';
-
-export type PStatus = 'requested' | 'ordered' | 'received' | 'declined';
-export interface PRequest {
-  id: string;
-  team_id: string | null;
-  item: string;
-  url: string | null;
-  qty: number;
-  est_price: number | null;
-  reason: string | null;
-  urgency: number;
-  status: PStatus;
-  requested_by: string | null;
-  handled_by: string | null;
-  ordered_at: string | null;
-  received_at: string | null;
-  note: string | null;
-  created_at: string;
-}
+import { type PStatus, type PRequest, useRequests } from './data';
+export * from './data';
 
 export const P_STATUS: Record<PStatus, { label: string; tone: 'neutral' | 'info' | 'success' | 'danger' }> = {
   requested: { label: 'Needs ordering', tone: 'neutral' },
@@ -72,7 +54,6 @@ export const P_STATUS: Record<PStatus, { label: string; tone: 'neutral' | 'info'
 };
 const URGENCY = ['Whenever', 'Soon', 'Urgent'];
 
-export const useRequests = () => useRows<PRequest>(['purchases', 'list'], (sb) => sb.from('pur_requests').select('*').order('urgency', { ascending: false }).order('created_at', { ascending: false }));
 const money = (n: number | null) => (n == null ? '' : `$${Number(n).toFixed(2)}`);
 
 export default function PurchasesRoutes() {

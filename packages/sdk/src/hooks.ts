@@ -367,6 +367,8 @@ export function useSignedUrls(bucket: string, paths: (string | null | undefined)
   return useQuery({
     queryKey: ['core', 'signed', bucket, list],
     enabled: list.length > 0,
+    // Links expire after an hour: not worth remembering between visits.
+    meta: { persist: false },
     staleTime: 50 * 60_000,
     queryFn: async () => {
       const { data, error } = await sb.storage.from(bucket).createSignedUrls(list, 60 * 60);

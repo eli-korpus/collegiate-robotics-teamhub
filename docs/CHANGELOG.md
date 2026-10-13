@@ -12,6 +12,32 @@ Releases with a **Security** section fix a vulnerability. Update as soon as you 
 How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
+### Performance
+
+- **Home loads faster and no longer jumps around.**
+  - Cards load out of sight and appear together (after 1.5 seconds at most), instead of sliding around several
+    times as each one fetched its data. Cards only slide when something actually changes, and never fly in from the
+    corner.
+  - Ten Home cards (Announcements, Competition Day, Inventory, To Manufacture ×2, Purchases, Paperwork, Polls,
+    Sign-ups, Skills, Sponsors, Your tasks) used to download their whole tab just to show the card. On the demo
+    with every tab, Home now downloads 60 files instead of 84, and none of them are tab screens.
+  - The Notebook and Unread announcements cards download titles only, not the full text of every entry and post.
+- **Comes back instantly.** The dashboard remembers what it loaded on this browser for up to a day and shows it right
+  away on the next visit, then refreshes it in the background. It's kept only for the person who's signed in: it's
+  cleared when they sign out or someone else signs in, and after every update of the site.
+- The sidebar no longer loads the whole People directory: it loads only your own picture, and a small count of join
+  requests for people who approve them.
+- Profile pictures whose link has expired show initials instead of a broken image.
+
+### For customized copies
+
+- Data hooks that Home cards share with their tab moved from `ui/Routes.tsx` (`ui/shared.tsx` for Tasks) to a new
+  `ui/data.ts` in the tabs listed above. `ui/Routes.tsx` still re-exports them, so your own code keeps working. If you
+  changed those hooks, Update may ask you to combine the change: keep yours, in `ui/data.ts`.
+- `npm run lint` warns when a Home card imports a tab's screens (`ui/Routes`). Import from `ui/data.ts` instead.
+- A query can stay out of the browser's memory with `meta: { persist: false }` (TeamHub already does this for file
+  links, which expire).
+
 ### Changed
 
 - **Programs with several teams** are easier to follow:

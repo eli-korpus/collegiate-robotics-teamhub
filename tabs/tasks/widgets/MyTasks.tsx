@@ -2,7 +2,7 @@ import { Link } from 'react-router';
 import { SquareCheckBig } from 'lucide-react';
 import { Card, CardHeader, DueDate, dueBucket } from '@teamhub/ui';
 import { useMe } from '@teamhub/sdk';
-import { useTasks } from '../ui/shared';
+import { useTasks } from '../ui/data';
 
 /** Today strip: your overdue tasks and tasks due within a week. */
 export default function MyTasks({ teamId }: { teamId: string | null }) {

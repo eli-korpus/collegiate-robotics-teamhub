@@ -1,8 +1,9 @@
 import { useEffect } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { NavLink, useLocation, useNavigate } from 'react-router';
 import { Check, ChevronsUpDown, Compass, ExternalLink, Home as HomeIcon, Link2, LogOut, MessagesSquare, Monitor, Moon, Search, Settings, Shield, Sun, User, Users } from 'lucide-react';
 import { Avatar, Kbd, Menu, ModKey, SidebarItem, SidebarSection, TeamDot, cn, useMediaQuery, safeHref } from '@teamhub/ui';
-import { canWith, isMultiTeam, runtime, setTeamScope, useCan, useToolLink, useMe, usePeople, useSession, useTeamScope, useAllTeamsLabel, useViewableTeams, type LoadedModule } from '@teamhub/sdk';
+import { canWith, isMultiTeam, runtime, setTeamScope, useCan, useToolLink, useMe, useSession, useSignedUrls, useSupabase, useTeamScope, useAllTeamsLabel, useViewableTeams, type LoadedModule } from '@teamhub/sdk';
 import { nav } from '../../generated/nav';
 import { useAvailableUpdate } from './updates';
 import { ProgramLogo, TeamLogo } from '../auth/AuthLayout';
@@ -39,8 +40,7 @@ export function Sidebar({ onNavigate, onSearch }: { onNavigate: () => void; onSe
   const update = useAvailableUpdate();
   const canApprove = useCan('people.approve_members');
   const chat = useToolLink('team_chat');
-  const people = usePeople();
-  const pendingCount = canApprove ? [...(people.data?.values() ?? [])].filter((p) => p.status === 'pending' || p.memberships.some((m) => m.status === 'pending')).length : 0;
+  const pendingCount = usePendingCount(canApprove);
 
   return (
     <nav aria-label="Main" className="flex h-full min-h-0 flex-col">
@@ -154,8 +154,9 @@ function UserMenu() {
   const me = useMe();
   const { signOut } = useSession();
   const nav = useNavigate();
-  const people = usePeople();
-  const avatar = people.data?.get(me.id)?.avatarUrl;
+  // Only this person's picture: the sidebar shouldn't wait for the whole People directory.
+  const pic = useSignedUrls('avatars', [me.profile.avatar_path]);
+  const avatar = me.profile.avatar_path ? pic.data?.get(me.profile.avatar_path) : null;
   const { pref, setPref } = useTheme();
   return (
     <Menu
@@ -178,4 +179,21 @@ function UserMenu() {
       footer={`TeamHub ${runtime().config.version}`}
     />
   );
+}
+
+/** People waiting for approval (new sign-ups and team join requests), without loading the whole directory. */
+function usePendingCount(enabled: boolean): number {
+  const sb = useSupabase();
+  const q = useQuery({
+    queryKey: ['core', 'people-pending'],
+    enabled,
+    staleTime: 60_000,
+    queryFn: async () => {
+      const [p, m] = await Promise.all([sb.from('profiles').select('id').eq('status', 'pending'), sb.from('memberships').select('user_id').eq('status', 'pending')]);
+      if (p.error) throw p.error;
+      if (m.error) throw m.error;
+      return new Set([...(p.data ?? []).map((x) => x.id as string), ...(m.data ?? []).map((x) => x.user_id as string)]).size;
+    },
+  });
+  return enabled ? q.data ?? 0 : 0;
 }

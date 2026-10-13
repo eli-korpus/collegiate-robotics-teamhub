@@ -1,7 +1,7 @@
 import { Link } from 'react-router';
 import { PackageX } from 'lucide-react';
 import { Card, CardHeader } from '@teamhub/ui';
-import { isLow, useParts } from '../ui/Routes';
+import { isLow, useParts } from '../ui/data';
 
 /** "5 items low". */
 export default function LowStock({ teamId }: { teamId: string | null }) {

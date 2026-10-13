@@ -12,6 +12,8 @@ Releases with a **Security** section fix a vulnerability. Update as soon as you 
 How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
+
+## [1.1.3] - 2026-10-13
 ### Performance
 
 - **Home loads faster and no longer jumps around.**

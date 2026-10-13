@@ -281,7 +281,7 @@ function EventPage() {
             ))}
         </div>
       )}
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr]">
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
         <Card>
           <CardHeader title="Our matches" />
           <div className="px-4 pb-4">{matches.length ? <MatchTable matches={matches} us={teamNumber} /> : <p className="text-[13px] text-faint">No matches published yet.</p>}</div>

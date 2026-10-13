@@ -75,9 +75,10 @@ export function Home() {
       </header>
 
       {settle.showSkeleton && <HomeSkeleton />}
-      {/* Cards load out of sight and appear together, so they don't jump around while each one fetches its data. */}
+      {/* Cards load out of sight (below the header, see-through and not clickable) and appear together, so they don't jump
+          around while each one fetches its data. Opacity, not visibility: Masonry marks each placed card visible. */}
       <PendingContext.Provider value={settle.track}>
-        <div data-home-ready={settle.ready || undefined} className={settle.ready ? 'th-anim-fade' : 'pointer-events-none invisible absolute inset-x-4 top-0 sm:inset-x-6'}>
+        <div data-home-ready={settle.ready || undefined} inert={!settle.ready} className={settle.ready ? 'th-anim-fade' : 'absolute inset-x-4 opacity-0 sm:inset-x-6'}>
           {today.length > 0 && (
             // The heading hides too when every card in it has nothing to show today.
             <section aria-label="Today" className="mb-6 [&:not(:has(>div>div:not(:empty)))]:hidden">

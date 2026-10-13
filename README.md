@@ -1,29 +1,115 @@
+<div align="center">
+
+<img src="docs/assets/logo.png" width="84" height="84" alt="TeamHub logo">
+
 # TeamHub FTC
 
-An open-source, bring-your-own-services team dashboard for *FIRST* Tech Challenge teams.
+**One home for your whole *FIRST* Tech Challenge program.**
 
-Created by [FTC Team 23208](https://ftcscout.org/teams/23208) and shared free with every FTC team.
-Using it? [Add your team](https://github.com/elikorpus/teamhub-ftc/issues/new?template=teamhub-team.yml) to the
-[list of teams using TeamHub](docs/TEAMS.md).
+Practices, tasks, the engineering notebook, scouting, competition day and outreach, in one dashboard your
+students actually open. Free and open source, running on your own Supabase and hosting.
 
-TeamHub gives your program one place for practices, tasks, the engineering notebook, scouting, competition day,
-outreach hours and more, with only the tabs you choose. It runs on **your own** free Supabase project and **your
-own** free static host, so there are no accounts with us, no fees and no data leaving your control.
+[![Latest release](https://img.shields.io/github/v/release/elikorpus/teamhub-ftc?style=flat-square&color=2563eb&label=release)](https://github.com/elikorpus/teamhub-ftc/releases)
+[![CI](https://img.shields.io/github/actions/workflow/status/elikorpus/teamhub-ftc/ci.yml?branch=main&style=flat-square&label=tests)](https://github.com/elikorpus/teamhub-ftc/actions/workflows/ci.yml)
+[![MIT license](https://img.shields.io/badge/license-MIT-0f172a?style=flat-square)](LICENSE)
+[![Made by FTC Team 23208](https://img.shields.io/badge/made%20by-FTC%2023208-ea580c?style=flat-square)](https://ftcscout.org/teams/23208)
 
-- **Setup wizard** (`npm run setup`): a friendly local web app that collects your teams, colors, logos and tabs,
-  builds your database for exactly those tabs, creates your admin account and walks you through hosting.
-- **Dashboard**: a fast web app (works great on phones at competitions) built from your choices. Tabs you don't pick
-  add zero bytes to the site and zero tables to the database.
+[**Get started**](#get-started) · [All 27 tabs](docs/tabs/README.md) · [Docs](#documentation) · [Teams using TeamHub](docs/TEAMS.md)
 
-![Outreach Log in light mode](docs/screenshots/light-outreach.png)
+</div>
 
-| | |
-|---|---|
-| ![Find-a-time poll](docs/screenshots/light-polls.png) | ![Sponsors pipeline in dark mode](docs/screenshots/dark-sponsors.png) |
+<br>
+
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/screenshots/hero-dark.png">
+  <img src="docs/screenshots/hero-light.png" alt="TeamHub's Home tab on a laptop and a phone: today's announcements, attendance, tasks, polls, the next competition and the season's outreach at a glance">
+</picture>
+
+<p align="center"><sub>A made-up program with made-up data, showing what a busy week looks like in TeamHub.</sub></p>
+
+## Why teams use TeamHub
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+**Everything in one place**<br>
+Calendar, attendance, tasks, notebook, scouting, outreach hours and more. Choose only the tabs you need; the rest
+add nothing to your site.
+
+</td>
+<td width="33%" valign="top">
+
+**Yours, and free**<br>
+Runs on your own free Supabase project and free hosting (Cloudflare, Vercel, Netlify or GitHub Pages). No accounts
+with us, no fees, no data leaving your control.
+
+</td>
+<td width="33%" valign="top">
+
+**Set up in 30 minutes**<br>
+A friendly setup wizard collects your teams, colors, logos and tabs, builds your database and walks you through
+hosting. No coding needed.
+
+</td>
+</tr>
+<tr>
+<td valign="top">
+
+**Built for competition day**<br>
+Your next match with a live time estimate, who's with and against you, rankings and pit notes, pulled from FTCScout
+and refreshed during the event.
+
+</td>
+<td valign="top">
+
+**Safe for students**<br>
+No chat or private messages, private profile fields only mentors can see, and every form says who will see what you
+type.
+
+</td>
+<td valign="top">
+
+**Fits how your program works**<br>
+Several teams in one dashboard, members, captains and mentors, plus positions like "Outreach Lead" that unlock
+exactly their part.
+
+</td>
+</tr>
+</table>
+
+## A look inside
+
+<table>
+<tr>
+<td width="50%"><img src="docs/screenshots/competition-day.png" alt="Competition Day: next match with alliance partners and opponents, rank, record, match results and pit notes"></td>
+<td width="50%"><img src="docs/screenshots/tasks.png" alt="Tasks board in dark mode with To do, Doing, Review and Done columns"></td>
+</tr>
+<tr>
+<td><b>Competition Day.</b> Your next match, alliances, rankings and pit notes, live from FTCScout.</td>
+<td><b>Tasks.</b> A board for the team and a simple list of what's yours, with due dates and priorities.</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/notebook.png" alt="Engineering Notebook entry with a weighted decision matrix"></td>
+<td><img src="docs/screenshots/calendar.png" alt="Calendar month view with practices, competitions, outreach and deadlines"></td>
+</tr>
+<tr>
+<td><b>Engineering Notebook.</b> Logs, design iterations and decision matrices, ready for judges.</td>
+<td><b>Calendar.</b> Practices, competitions, outreach and deadlines, with feeds for families' phones.</td>
+</tr>
+<tr>
+<td><img src="docs/screenshots/driver-practice.png" alt="Driver Practice chart of scores over time by driver pair"></td>
+<td><img src="docs/screenshots/code-hub.png" alt="Code Hub with OpModes, gamepad controls and recent commits"></td>
+</tr>
+<tr>
+<td><b>Driver Practice.</b> Log runs and watch each driver pair improve.</td>
+<td><b>Code Hub.</b> OpModes, driver controls and each team's latest commits.</td>
+</tr>
+</table>
 
 ## What's inside
 
-28 optional tabs in four groups ([full list](docs/tabs/README.md)):
+27 optional tabs in four groups ([full list](docs/tabs/README.md)):
 
 | Team | Engineering | Competition | Outreach & Business |
 |---|---|---|---|
@@ -37,13 +123,8 @@ Highlights:
 - **Scouting without Google Forms.** Pick the competition and every team, ranking, match and award loads from
   FTCScout and refreshes live during the event. Your scouts fill in team-built pit and match forms on their phones,
   with a checklist showing which teams still need scouting, plus insights, comparisons and a pick list.
-- **Multi-team programs.** One dashboard for teams A, B and C, with a team switcher and per-team colors.
-- **Permissions that match real teams.** Members, captains and mentors, plus positions like "3D Print Farm Manager"
-  or "Outreach Lead" that unlock exactly their part.
 - **Built for the free tier.** Photos are compressed in the browser, old files are cleaned up automatically, and a
   full season with every tab uses about 5 MB of the 500 MB free database.
-- **Safe for students.** No in-app chat or private messages (discussion links to your team's existing chat), private
-  profile fields visible only to mentors, and every form says who will see your answer.
 
 ## Get started
 
@@ -120,6 +201,11 @@ mocked smoke tests: `npm run build:demo && npm run e2e`.
 - The wizard uses your Supabase personal access token only on your computer (in memory, or in
   `~/.teamhub/credentials.json` if you choose "remember"). It's never committed or sent anywhere except Supabase.
 - Found a security issue? Please report it privately; see [SECURITY.md](.github/SECURITY.md).
+
+## Using TeamHub?
+
+We'd love to hear about it. [Add your team](https://github.com/elikorpus/teamhub-ftc/issues/new?template=teamhub-team.yml) to the
+[list of teams using TeamHub](docs/TEAMS.md).
 
 ## License
 

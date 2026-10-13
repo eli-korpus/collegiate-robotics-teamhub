@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
-import { ME, loadGenerated, mockSupabase, watchErrors } from './mock';
+import { ME, loadGenerated, mockSupabase, waitForHome, watchErrors } from './mock';
 
 const { schema } = loadGenerated();
 const modules = Object.keys(schema.modules);
@@ -86,6 +86,7 @@ test.describe('dashboard smoke', () => {
       await mockSupabase(page);
       await page.goto('/');
       await expect(page.getByRole('heading', { name: HOME_GREETING })).toBeVisible();
+      await waitForHome(page);
       const res = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
       const serious = res.violations.filter((v) => v.impact === 'serious' || v.impact === 'critical');
       expect(serious.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).slice(0, 3).join(', ')}`)).toEqual([]);

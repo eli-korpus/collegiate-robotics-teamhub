@@ -103,3 +103,9 @@ export function watchErrors(page: Page): string[] {
   });
   return errors;
 }
+
+/** Home shows its cards together once they've loaded, with a short fade: wait for that before checking colors. */
+export async function waitForHome(page: Page) {
+  await page.locator('[data-home-ready]').waitFor();
+  await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== 'running' || a.effect?.getTiming().iterations === Infinity));
+}

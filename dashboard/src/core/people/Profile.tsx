@@ -48,7 +48,7 @@ export function Profile() {
 
       <div className="mt-6 grid grid-cols-1 gap-4 md:grid-cols-2">
         <Card>
-          <CardHeader title={isMultiTeam() ? 'Teams' : 'Team'} action={canManageTeams && isMultiTeam() && <TeamsButton p={p} />} />
+          <CardHeader title={isMultiTeam() ? 'Teams' : 'Team'} action={isMultiTeam() && (canManageTeams ? <TeamsButton p={p} /> : isSelf && <Button size="sm" variant="ghost" icon={<Pencil className="size-3.5" />} onClick={() => nav('/me')}>Change teams</Button>)} />
           <ul className="space-y-2 px-4 pb-4">
             {p.memberships.map((m) => {
               const t = runtime().config.teams.find((x) => x.id === m.team_id);

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Route, Routes, useNavigate, useSearchParams } from 'react-router';
 import { Users } from 'lucide-react';
-import { Avatar, Checkbox, EmptyState, PageHeader, PositionBadge, SearchInput, Segmented, Select, Spinner, TYPE_LABEL, TeamDot, cn, matches } from '@teamhub/ui';
+import { Avatar, Checkbox, EmptyState, PageHeader, PositionBadge, SearchInput, Segmented, Select, Spinner, TYPE_LABEL, TeamDot, Masonry, cn, matches } from '@teamhub/ui';
 import { isMultiTeam, runtime, useCan, usePeople, usePositions, useTeamScope, type PersonInfo } from '@teamhub/sdk';
 import { Requests } from './Requests';
 import { Positions } from './Positions';
@@ -42,7 +42,10 @@ function PeopleHome() {
   );
 }
 
-const TYPE_ORDER = { mentor: 0, captain: 1, member: 2 } as const;
+const TYPE_ORDER = { mentor: 1, captain: 2, member: 3 } as const;
+// Admins, then mentors, captains and members. Within each, people with positions come first (their cards are bigger).
+const byRank = (rank: (p: PersonInfo) => number) => (a: PersonInfo, b: PersonInfo) =>
+  rank(a) - rank(b) || b.positions.length - a.positions.length || a.name.localeCompare(b.name);
 
 function Directory() {
   const people = usePeople();
@@ -75,13 +78,9 @@ function Directory() {
     team: t,
     members: list
       .filter((p) => p.memberships.some((m) => m.team_id === t.id && m.status !== 'pending'))
-      .sort((a, b) => {
-        const ta = a.memberships.find((m) => m.team_id === t.id)!.type;
-        const tb = b.memberships.find((m) => m.team_id === t.id)!.type;
-        return TYPE_ORDER[ta] - TYPE_ORDER[tb] || a.name.localeCompare(b.name);
-      }),
+      .sort(byRank((p) => (p.isAdmin ? 0 : TYPE_ORDER[p.memberships.find((m) => m.team_id === t.id)!.type]))),
   }));
-  const noTeam = list.filter((p) => !p.memberships.some((m) => m.status !== 'pending'));
+  const noTeam = list.filter((p) => !p.memberships.some((m) => m.status !== 'pending')).sort(byRank((p) => (p.isAdmin ? 0 : 1)));
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6">
@@ -121,22 +120,14 @@ function Directory() {
                       <span className="font-normal text-faint">{g.members.length}</span>
                     </h2>
                   )}
-                  <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                    {g.members.map((p) => (
-                      <PersonCard key={p.id} p={p} teamId={g.team.id} onClick={() => nav(`/people/${p.id}`)} />
-                    ))}
-                  </ul>
+                  <Masonry list {...PEOPLE_COLUMNS} items={g.members.map((p) => ({ key: p.id, node: <PersonCard p={p} teamId={g.team.id} onClick={() => nav(`/people/${p.id}`)} /> }))} />
                 </section>
               ),
           )}
           {noTeam.length > 0 && (
             <section>
               <h2 className="mb-2 text-[13px] font-semibold text-muted">No team</h2>
-              <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                {noTeam.map((p) => (
-                  <PersonCard key={p.id} p={p} onClick={() => nav(`/people/${p.id}`)} />
-                ))}
-              </ul>
+              <Masonry list {...PEOPLE_COLUMNS} items={noTeam.map((p) => ({ key: p.id, node: <PersonCard p={p} onClick={() => nav(`/people/${p.id}`)} /> }))} />
             </section>
           )}
         </div>
@@ -145,28 +136,29 @@ function Directory() {
   );
 }
 
+// Up to three columns of cards; each card goes in the shortest column so cards with positions don't leave gaps.
+const PEOPLE_COLUMNS = { minColumn: 260, gap: 8 };
+
 function PersonCard({ p, teamId, onClick }: { p: PersonInfo; teamId?: string; onClick: () => void }) {
   const m = teamId ? p.memberships.find((x) => x.team_id === teamId) : p.memberships[0];
   return (
-    <li>
-      <button type="button" onClick={onClick} className={cn('flex w-full items-start gap-3 rounded-lg border border-border bg-surface p-3 text-left shadow-sm transition-shadow hover:shadow-md')}>
-        <Avatar name={p.name} src={p.avatarUrl} size={40} />
-        <span className="min-w-0 flex-1">
-          <span className="block truncate text-[14px] font-semibold">{p.name}</span>
-          <span className="block text-[12px] text-muted">
-            {m ? TYPE_LABEL[m.type] : '–'}
-            {p.isAdmin && ' · Admin'}
-          </span>
-          {p.positions.length > 0 && (
-            <span className="mt-1.5 flex flex-wrap gap-1">
-              {p.positions.slice(0, 3).map((x) => (
-                <PositionBadge key={x} name={x} />
-              ))}
-              {p.positions.length > 3 && <span className="text-[11px] text-faint">+{p.positions.length - 3}</span>}
-            </span>
-          )}
+    <button type="button" onClick={onClick} className={cn('flex w-full items-start gap-3 rounded-lg border border-border bg-surface p-3 text-left shadow-sm transition-shadow hover:shadow-md')}>
+      <Avatar name={p.name} src={p.avatarUrl} size={40} />
+      <span className="min-w-0 flex-1">
+        <span className="block truncate text-[14px] font-semibold">{p.name}</span>
+        <span className="block text-[12px] text-muted">
+          {m ? TYPE_LABEL[m.type] : '–'}
+          {p.isAdmin && ' · Admin'}
         </span>
-      </button>
-    </li>
+        {p.positions.length > 0 && (
+          <span className="mt-1.5 flex flex-wrap gap-1">
+            {p.positions.slice(0, 3).map((x) => (
+              <PositionBadge key={x} name={x} />
+            ))}
+            {p.positions.length > 3 && <span className="text-[11px] text-faint">+{p.positions.length - 3}</span>}
+          </span>
+        )}
+      </span>
+    </button>
   );
 }

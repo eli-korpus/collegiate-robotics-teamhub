@@ -1,12 +1,13 @@
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
-import { cn } from '@teamhub/ui';
+import { cn } from './cn';
 
 /**
- * Home's card layout: each card goes into whichever column is shortest so far, so columns fill evenly and there are
+ * Cards of different heights in columns (Home, People and other card lists): each card goes into whichever column is shortest so far, so columns fill evenly and there are
  * never empty holes (a plain grid makes every row as tall as its tallest card). Cards keep their order left to right,
- * stay mounted when the layout changes, and cards that render nothing take no space.
+ * stay mounted when the layout changes, and cards that render nothing take no space. With one column it is a plain
+ * stack. `list` gives it list semantics (role="list" and "listitem") for screen readers.
  */
-export function Masonry({ items, minColumn = 340, maxColumns = 3, gap = 16, animate = true }: { items: { key: string; node: ReactNode }[]; minColumn?: number; maxColumns?: number; gap?: number; animate?: boolean }) {
+export function Masonry({ items, minColumn = 340, maxColumns = 3, gap = 16, animate = true, list = false, className }: { items: { key: string; node: ReactNode }[]; minColumn?: number; maxColumns?: number; gap?: number; animate?: boolean; list?: boolean; className?: string }) {
   // Cards placed in an earlier render slide to new spots; a card's first placement is instant (no flying in from a corner).
   const placed = useRef(new Set<string>());
   const box = useRef<HTMLDivElement>(null);
@@ -51,12 +52,13 @@ export function Masonry({ items, minColumn = 340, maxColumns = 3, gap = 16, anim
   });
 
   return (
-    <div ref={box} className="relative" style={{ height: width ? total : undefined }}>
+    <div ref={box} role={list ? 'list' : undefined} className={cn('relative', className)} style={{ height: width ? total : undefined }}>
       {items.map(({ key, node }) => {
         const p = pos.get(key);
         return (
           <div
             key={key}
+            role={list ? 'listitem' : undefined}
             ref={(el) => {
               if (el) refs.current.set(key, el);
               else refs.current.delete(key);

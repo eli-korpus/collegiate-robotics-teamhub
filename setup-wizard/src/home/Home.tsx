@@ -126,13 +126,25 @@ export function ExistingHome({ server, catalog, onEdit, refresh }: { server: Ser
         <Tile icon={<Upload />} title="Import" body="Restore a backup (e.g. into a new Supabase project)." onClick={() => setDialog('import')} />
         <Tile icon={<CalendarRange />} title="New Season" body="Set the new season label and roll over tabs." onClick={() => setDialog('season')} />
         <Tile icon={<Mail />} title="Email" body={c.features.email ? 'Email confirmation and “Forgot your password?” are on.' : 'Connect an email provider for confirmations and “Forgot your password?”.'} onClick={() => setDialog('email')} />
-        <Tile icon={<ShieldAlert />} title="Danger zone" body="Remove TeamHub from the database." onClick={() => setDialog('danger')} danger />
       </div>
       <div className="mt-10 space-y-6">
         <SiteLinks server={server} />
         <InviteTeam config={c} />
         <AiAssistant config={c} catalog={catalog} />
         <TellUs config={c} />
+        {/* Kept apart from the everyday tools above so it isn't clicked by accident. */}
+        <section className="flex flex-wrap items-center gap-3 rounded-lg border border-danger/40 bg-surface p-4 shadow-sm">
+          <span className="grid size-9 shrink-0 place-items-center rounded-md bg-danger-soft text-danger [&>svg]:size-[18px]">
+            <ShieldAlert />
+          </span>
+          <div className="min-w-0 flex-1">
+            <h2 className="text-[14.5px] font-semibold">Danger zone</h2>
+            <p className="text-[12.5px] text-muted">Remove TeamHub from your Supabase database. You can download a backup first.</p>
+          </div>
+          <Button className="text-danger" onClick={() => setDialog('danger')}>
+            Remove TeamHub…
+          </Button>
+        </section>
         <Credit />
       </div>
       {dialog === 'connect' && <ConnectDialog onClose={() => setDialog(null)} refresh={refresh} />}
@@ -159,7 +171,8 @@ function SiteLinks({ server }: { server: ServerState }) {
   ].filter(Boolean) as { href: string; label: string; hint: string }[];
   return (
     <Section title="Your dashboard" description={c.hosting.url ? undefined : 'Your site gets an address in the setup step “Host it”.'}>
-      <ul className="grid gap-2 sm:grid-cols-2">
+      {/* An odd last link takes the full width, so there's no empty cell beside it. */}
+      <ul className="grid gap-2 sm:grid-cols-2 sm:[&>li:last-child:nth-child(odd)]:col-span-2">
         {links.map((l) => (
           <li key={l.href}>
             <a href={l.href} target="_blank" rel="noreferrer" className="block rounded-md border border-border p-3 hover:bg-bg-subtle">
@@ -178,11 +191,11 @@ function SiteLinks({ server }: { server: ServerState }) {
 /** "owner/name" from a GitHub remote (https or ssh), or null. */
 const githubRepoOf = (remote?: string | null) => remote?.match(/github\.com[:/]([^/]+\/[^/]+?)(?:\.git)?$/)?.[1] ?? null;
 
-function Tile({ icon, title, body, onClick, primary, danger }: { icon: React.ReactNode; title: string; body: string; onClick: () => void; primary?: boolean; danger?: boolean }) {
+function Tile({ icon, title, body, onClick, primary }: { icon: React.ReactNode; title: string; body: string; onClick: () => void; primary?: boolean }) {
   return (
     <button type="button" onClick={onClick} className="text-left">
       <Card className={`flex h-full gap-3 p-4 transition-shadow hover:shadow-md ${primary ? 'border-accent' : ''}`}>
-        <span className={`grid size-9 shrink-0 place-items-center rounded-md [&>svg]:size-[18px] ${danger ? 'bg-danger-soft text-danger' : 'bg-accent-soft text-accent'}`}>{icon}</span>
+        <span className={`grid size-9 shrink-0 place-items-center rounded-md [&>svg]:size-[18px] bg-accent-soft text-accent`}>{icon}</span>
         <span>
           <span className="block font-semibold">{title}</span>
           <span className="block text-[12.5px] text-muted">{body}</span>

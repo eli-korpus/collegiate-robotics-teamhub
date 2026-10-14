@@ -1,11 +1,10 @@
 import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useIsFetching } from '@tanstack/react-query';
 import { LayoutGrid } from 'lucide-react';
-import { Button, formatDate, greeting, useMediaQuery } from '@teamhub/ui';
+import { Button, Masonry, formatDate, greeting, useMediaQuery } from '@teamhub/ui';
 import { canWith, runtime, useMe, useSeason, useTeamScope, type WidgetDef } from '@teamhub/sdk';
 import { ProgramLogo } from '../auth/AuthLayout';
 import { CORE_WIDGETS } from './coreWidgets';
-import { Masonry } from './Masonry';
 
 const CustomizeDialog = lazy(() => import('./CustomizeDialog'));
 

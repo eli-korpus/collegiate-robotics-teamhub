@@ -22,3 +22,4 @@ export * from './markdown';
 export { Markdown } from './markdown-view';
 export { contrast, deriveAccent, readableOn, PRESET_ACCENTS, dominantColor } from './color';
 export * from './taglist';
+export * from './masonry';

@@ -12,6 +12,25 @@ Releases with a **Security** section fix a vulnerability. Update as soon as you 
 How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
+### Added
+
+- **Leave a team yourself.** In programs with several teams, **My profile > Your teams** lists your teams with a
+  **Leave** button, and lets you take back a request to join. Joining still needs approval, like signing up, and you
+  can't leave your last team. To switch teams, ask to join the new one, then leave the old one once you're approved.
+  Needs a database update (`npm run setup` > Update).
+
+### Changed
+
+- **People** lists admins first, then mentors, captains and members. In each group, people with positions come first.
+- The setup wizard's **Danger zone** moved out of the everyday tools to its own full-width box near the bottom of the
+  wizard home, and the "Your dashboard" links no longer leave an empty space.
+- New README image: Home on a laptop and a phone, on a plain white background with rounded corners.
+
+### Fixed
+
+- **People** cards no longer leave uneven gaps under shorter cards. They use the same balanced columns as Home.
+- Private profile answers (fields only you and mentors, or captains, can see) are no longer saved in the browser's
+  cache for quick loading. They're loaded fresh each visit.
 
 ## [1.1.5] - 2026-10-14
 ### Fixed

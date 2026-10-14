@@ -59,6 +59,8 @@ export function useHiddenValues(userId: string) {
   const sb = useSupabase();
   return useQuery({
     queryKey: ['core', 'private', userId],
+    // Private answers (emergency contacts and the like) stay in memory only, never in the browser's saved cache.
+    meta: { persist: false },
     queryFn: async (): Promise<HiddenValues> => {
       const [l, p] = await Promise.all([
         sb.from('profiles_leaders').select('data').eq('user_id', userId).maybeSingle(),

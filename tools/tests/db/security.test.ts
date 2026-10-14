@@ -23,6 +23,13 @@ describe('security review', () => {
     await expect(db.as(memberA, `select teamhub_users_with('people.deactivate', null)`)).rejects.toThrow();
   });
 
+  it('admins can see and do everything on every team, including teams they are not on', async () => {
+    const [r] = await db.as(admin, `select teamhub_in_team($1) seen, teamhub_can('rules.answer', $1) can`, [TEAM_B]);
+    expect(r).toEqual({ seen: true, can: true });
+    const [m] = await db.as(mentorA, `select teamhub_in_team($1) seen, teamhub_can('rules.answer', $1) can`, [TEAM_B]);
+    expect(m).toEqual({ seen: false, can: false });
+  });
+
   it('approval only works on pending requests (no demoting or reviving through it)', async () => {
     await expect(db.as(captainA, `select people_approve($1, $2, 'member')`, [mentorA, TEAM_A])).rejects.toThrow(/No pending request/);
   });
@@ -107,6 +114,34 @@ describe('changing which teams someone is on', () => {
     await expect(db.as(mentorB, 'select people_remove_from_team($1, $2)', [captainA, TEAM_A])).rejects.toThrow();
     // Members can't add themselves to teams.
     await expect(db.as(student, `select people_add_to_team($1, $2, 'member')`, [student, TEAM_A])).rejects.toThrow();
+  });
+
+  it('people can leave a team themselves (but not their last one) and take back a request to join', async () => {
+    const db = await createTestDb();
+    await db.applyConfig(withModules([]), true);
+    const mentor = await db.user('Mentor', { [TEAM_A]: 'mentor' });
+    const both = await db.user('Both', { [TEAM_A]: 'captain', [TEAM_B]: 'member' });
+    const solo = await db.user('Solo', { [TEAM_A]: 'member' });
+    const teams = async (u: string) => (await db.admin('select team_id, status from memberships where user_id = $1 order by team_id', [u])).map((r) => `${r.team_id}:${r.status}`);
+
+    // A team-specific position on the team they leave goes with it.
+    const [pos] = await db.admin(`insert into positions (id, name, source, team_id) values ('leave-test', 'Pit Crew', 'app', $1) returning id`, [TEAM_B]);
+    await db.admin('insert into position_holders (position_id, user_id, team_id) values ($1, $2, $3)', [pos.id, both, TEAM_B]);
+    await db.as(both, 'select people_leave_team($1)', [TEAM_B]);
+    expect(await teams(both)).toEqual([`${TEAM_A}:active`]);
+    expect(await db.admin('select 1 from position_holders where user_id = $1', [both])).toHaveLength(0);
+    // Not their last team, and not a team they aren't on.
+    await expect(db.as(both, 'select people_leave_team($1)', [TEAM_A])).rejects.toThrow(/only team/);
+    await expect(db.as(both, 'select people_leave_team($1)', [TEAM_B])).rejects.toThrow(/not on that team/);
+
+    // A pending request can be taken back even with only one active team.
+    await db.as(solo, `insert into memberships (user_id, team_id, type, requested_type, status) values ($1, $2, 'member', 'member', 'pending')`, [solo, TEAM_B]);
+    await db.as(solo, 'select people_leave_team($1)', [TEAM_B]);
+    expect(await teams(solo)).toEqual([`${TEAM_A}:active`]);
+    // It only ever touches the caller's own memberships.
+    await db.as(mentor, 'select people_leave_team($1)', [TEAM_A]).catch(() => {});
+    expect(await teams(solo)).toEqual([`${TEAM_A}:active`]);
+    expect(await teams(both)).toEqual([`${TEAM_A}:active`]);
   });
 });
 

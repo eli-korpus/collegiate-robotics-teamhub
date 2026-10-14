@@ -12,6 +12,8 @@ Releases with a **Security** section fix a vulnerability. Update as soon as you 
 How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
+
+## [1.1.5] - 2026-10-14
 ### Fixed
 
 - **Home** on computers: the gaps between cards are now the same everywhere. Today's cards and the rest share one

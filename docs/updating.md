@@ -41,8 +41,8 @@ Updates keep your changes. Before updating, the wizard lists the TeamHub files y
 If an update changes the **same lines** your team changed, the wizard stops before changing anything and lists the
 files. You can then either:
 
-- **Ask an AI assistant to combine them:** the wizard gives you a ready-made prompt. The assistant merges the update,
-  keeps your changes, and runs the checks. Then run `npm run setup` > Update again to finish.
+- **Ask an AI assistant to combine them.** The wizard gives you a prompt to paste in. The assistant merges the
+  update, keeps your changes and runs the checks. Then run `npm run setup` > Update again to finish.
 - **Undo your change** to those files (or ask whoever made it), then update again.
 
 ## Undo an update
@@ -63,7 +63,7 @@ figure out what happened:
 | Netlify | Your site > **Deploys** > the previous deploy > **Publish deploy** |
 | GitHub Pages | Your fork > **Actions** > the previous successful "Deploy TeamHub to GitHub Pages" run > **Re-run all jobs** |
 
-A host rollback is temporary: the next push publishes the newest code again. To stay on the old version, also use
+A host rollback is temporary, and the next push publishes the newest code again. To stay on the old version, also use
 **Undo this update** in the wizard. Please [open an issue](https://github.com/elikorpus/teamhub-ftc/issues) describing
 what broke.
 

@@ -29,8 +29,8 @@ website is built from it, and TeamHub updates are merged into it.
 
 ### Naming your copy
 
-We suggest **`<your team or organization>-teamhub`**, in lowercase with hyphens. It makes your copy easy to spot
-among your repositories, tells people what it is at a glance, and gives a tidy address if you host on GitHub Pages.
+We suggest **`<your team or organization>-teamhub`**, in lowercase with hyphens. It's easy to find among your
+repositories, and if you host on GitHub Pages the name becomes part of your site's address.
 
 | Your program | Suggested repository name |
 |---|---|
@@ -53,17 +53,17 @@ redirects the old address, so your copy keeps working. One exception: if you hos
 address includes the repository name, so after renaming, run `npm run setup` > Edit > **Host it** and paste the new
 address.
 
-**Prefer not to use a terminal for this?** In [GitHub Desktop](https://desktop.github.com), choose **File > Clone
+**Without the terminal:** in [GitHub Desktop](https://desktop.github.com), choose **File > Clone
 repository**, pick your fork from the list, then open a terminal in that folder (**Repository > Open in Terminal**)
 and run `npm install` and `npm run setup`.
 
-Clone **your fork**, not `elikorpus/teamhub-ftc` itself: the wizard needs to save your settings to a copy you own.
+Clone **your fork**, not `elikorpus/teamhub-ftc` itself, because the wizard saves your settings to a copy you own.
 If you cloned the original by mistake, fork it on GitHub and clone your fork instead. (If you have the GitHub
 command-line tool `gh` installed and signed in, the wizard's Publish step can create the fork for you.)
 
 ## 1. Welcome
 
-What you'll need: a GitHub account, a free Supabase account, and about 30 minutes. Everything runs on free plans.
+You'll need a GitHub account, a free Supabase account and about 30 minutes. Everything runs on free plans.
 
 ![Welcome step](screenshots/wizard-welcome.png)
 
@@ -73,8 +73,8 @@ Name your program, then add each team. Type an FTC team number and the wizard fi
 FTCScout. Each team gets a short code (A, B, …) and a color that marks its items everywhere in the dashboard.
 
 The program logo (or, without one, the first team's logo) also becomes the browser-tab icon, the phone home-screen
-icon and the **link preview**: the picture, name and description that Discord, iMessage, Slack, WhatsApp and social
-media show when someone shares your site's link. Without any logo, link previews show a TeamHub picture.
+icon and the **link preview** (the picture, name and description that Discord, iMessage, Slack, WhatsApp and social
+media show when someone shares your site's link). Without any logo, link previews show a TeamHub picture.
 
 ![Teams step](screenshots/wizard-teams.png)
 
@@ -87,7 +87,7 @@ the default theme and the season label.
 
 ## 5. Choose tabs
 
-Pick only what your team will use. Presets get you started (**Starter**, **Competitive**, **Everything**), and each
+Pick only what your team will use. You can start from a preset (**Starter**, **Competitive** or **Everything**). Each
 card says what the tab is for, what it stores and roughly how much space it uses. You can add or remove tabs later
 without losing data.
 
@@ -95,7 +95,8 @@ without losing data.
 
 ## 6. Tab options
 
-A few choices per tab, such as whether Attendance tracks hours or allows self check-in. The defaults work well.
+A few choices per tab, such as whether Attendance tracks hours or allows self check-in. The defaults are fine for most
+teams.
 
 ![Tab options step](screenshots/wizard-options.png)
 
@@ -124,18 +125,18 @@ Create a free Supabase project, then paste a personal access token. When creatin
 | Compute size | The free one (Nano). |
 | Enable Data API | **On**, serving the **public** schema (required). |
 | Automatically expose new tables and functions | **Off** (recommended). TeamHub grants its own access either way. |
-| Enable automatic RLS | **On**. An extra safety net; TeamHub enables row-level security on every table anyway. |
+| Enable automatic RLS | **On**. TeamHub turns on row-level security for every table anyway, but this is a good backup. |
 | Postgres type (Advanced) | Regular **Postgres**, not OrioleDB. |
 
 After you pick the project, the wizard checks that the Data API serves the public schema and offers to fix it. It
-shows exactly what it will create, builds your database for only the tabs you picked, and finally tests that your
-website will be able to reach it. The token stays on your computer.
+shows what it will create, sets up the database for the tabs you picked, then checks that your website can reach
+it. The token stays on your computer.
 
 ### The access token: how long it lasts and how to replace it
 
 Make the token at [Account > Access Tokens](https://supabase.com/dashboard/account/tokens) > **Generate new token**.
-Name it "TeamHub wizard" and set **Expires in** to **30 days**. Don't choose "Never": the token can change everything
-in your Supabase account, so a short one is safer if your computer is lost or shared. If you'll make changes all
+Name it "TeamHub wizard" and set **Expires in** to **30 days**. Don't choose "Never". The token can change anything
+in your Supabase account, so a short expiry is safer if your computer is lost or shared. If you'll make changes all
 season, a custom date up to a year is fine. Supabase shows the token only once (it starts with `sbp_`).
 
 Only the wizard uses the token. Your website, logins and data never do, so nothing breaks when it expires. When it
@@ -155,16 +156,16 @@ Create your own admin login, then save your settings to your GitHub copy of Team
 
 ## 13. Host it
 
-Choose Cloudflare, Vercel, Netlify or GitHub Pages and follow the three short steps. Paste your site's address at the
-end and the wizard points Supabase logins at it. Detailed guides: [hosting](hosting/README.md).
+Choose Cloudflare, Vercel, Netlify or GitHub Pages and follow the three steps. At the end, paste your site's address
+so the wizard can point Supabase logins at it. The [hosting guides](hosting/README.md) have more detail.
 
 ![Host it step](screenshots/wizard-host.png)
 
 ## 14–15. Keep-alive and done
 
 The wizard adds a small GitHub workflow that keeps your free Supabase project from pausing, then gives you a join link,
-a printable "How to join" page with a QR code, and a ready-to-paste prompt for customizing the code with an AI
-assistant (see [AGENTS.md](../AGENTS.md)).
+a printable "How to join" page with a QR code, and a prompt you can paste into an AI assistant to customize the code (see
+[AGENTS.md](../AGENTS.md)).
 
 ## Running it again later
 
@@ -180,6 +181,6 @@ finish is offered there, with **Continue editing** or **Discard**). The home scr
 - Links to your dashboard, your Supabase project and your GitHub copy; the invite message with its QR code and
   printable "How to join" page; the AI assistant prompt; and the optional "tell us you're using TeamHub" form.
 
-When **Edit > Review & apply** finishes all three steps, a green "All done" message confirms it worked, with a
-**Back to wizard home** button below it. Going back to wizard home only asks you to discard edits when some changes
+When **Edit > Review & apply** finishes all three steps, it shows a green "All done" message and a
+**Back to wizard home** button. Going back to wizard home only asks you to discard edits when some changes
 haven't been applied yet.

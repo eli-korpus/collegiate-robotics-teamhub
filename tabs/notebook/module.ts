@@ -23,7 +23,7 @@ export default defineModule({
   category: 'engineering',
   icon: 'NotebookPen',
   summary: 'Document engineering work, design iterations and decisions: feeds your portfolio.',
-  purpose: 'The single place to document engineering work, design versions and decisions.',
+  purpose: 'Document engineering work, design versions and decisions.',
   notFor: [
     { text: 'To-dos', goTo: 'tasks' },
     { text: 'Announcements', goTo: 'announcements' },

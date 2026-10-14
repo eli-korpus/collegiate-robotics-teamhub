@@ -1,7 +1,7 @@
 # Contributing to TeamHub FTC
 
-Thanks for helping FTC teams! TeamHub is built so that **any combination of tabs works** and a tab you don't choose
-costs nothing. Every contribution keeps those two promises.
+Thanks for helping! Two things must stay true after every change: **any combination of tabs works**, and a tab a
+team doesn't choose adds nothing to their site or database.
 
 ## Getting started
 
@@ -85,7 +85,7 @@ tabs/robot-log/
 
 ### Integrations
 
-Need behavior that spans two tabs ("practices on the calendar get a Take attendance button")? Create
+For behavior that needs two tabs (for example "practices on the calendar get a Take attendance button"), create
 `tabs/integrations/<a>+<b>/integration.ts` with `defineIntegration({ requires: [a, b], prefix: 'ix_abc_', down })`.
 Prefer the **overlay** pattern (read both sides, store nothing). If you must add a column, make it nullable, add it in
 `migrations/`, and drop it in `down`.
@@ -104,7 +104,7 @@ add-only database rule across versions are described in [docs/releasing.md](../d
 ## Style
 
 - TypeScript strict, Prettier (`npm run format`), function components and hooks.
-- Plain-English UI copy aimed at high-school students: short, specific, no jargon.
+- Write UI text in plain English for high-school students. Keep it short and specific, without jargon.
 - Accessibility: label every control, keep contrast AA (the theme tokens handle color), test keyboard paths.
 
 ## License

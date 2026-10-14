@@ -13,7 +13,7 @@ export default defineModule({
   category: 'engineering',
   icon: 'CodeXml',
   summary: "The software team's home: repo activity, OpModes and driver controls.",
-  purpose: "The software team's home: repo activity, OpModes and controls.",
+  purpose: "The software team's page for repository activity, OpModes and driver controls.",
   notFor: [
     { text: 'Storing code', goTo: 'link:code_repo' },
     { text: 'Documenting design decisions', goTo: 'notebook' },

@@ -13,7 +13,7 @@ export default defineModule({
   category: 'competition',
   icon: 'Timer',
   summary: 'The live screen at an event: next match, partners, opponents, rankings and pit notes.',
-  purpose: 'The live screen at an event.',
+  purpose: 'A live screen for the event you are at.',
   notFor: [
     { text: 'Chat (pit notes are short status text)', goTo: 'link:team_chat' },
     { text: 'Scouting other teams', goTo: 'scouting' },

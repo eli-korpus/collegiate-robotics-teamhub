@@ -1,13 +1,13 @@
 # Security policy
 
-TeamHub is used by youth robotics teams, so we take security reports seriously and respond quickly.
+TeamHub is used by youth robotics teams and holds students' information, so security problems get fixed first.
 
 ## Reporting a vulnerability
 
 Please **don't** open a public issue. Instead, report it privately through GitHub:
 **Security > Report a vulnerability** on the [TeamHub repository](https://github.com/elikorpus/teamhub-ftc/security).
 
-Include what's affected, how to reproduce it, and the impact you expect. You'll get a reply within a few days.
+Include what's affected, how to reproduce it and what someone could do with it. You'll get a reply within a few days.
 
 ## Supported versions
 

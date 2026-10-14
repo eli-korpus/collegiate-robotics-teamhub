@@ -27,4 +27,4 @@ adding the domain.
 ## Limits
 
 GitHub Pages is free for public repositories. Your config only contains public values (the Supabase URL and
-publishable key), so a public fork is safe: the database is protected by row-level security, not by hiding the URL.
+publishable key), so a public fork is safe. Row-level security protects the database, not a hidden URL.

@@ -1,6 +1,7 @@
 # Testing
 
-TeamHub promises that **any combination of tabs works**. The tests are built around that promise.
+Teams can turn on **any combination of tabs**, so most of the tests check that every combination still builds and
+keeps its data safe.
 
 | Command | What it checks | Time |
 |---|---|---|

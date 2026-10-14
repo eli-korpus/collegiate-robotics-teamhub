@@ -1,7 +1,7 @@
 import { createContext, lazy, Suspense, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useIsFetching } from '@tanstack/react-query';
 import { LayoutGrid } from 'lucide-react';
-import { Button, formatDate, greeting } from '@teamhub/ui';
+import { Button, formatDate, greeting, useMediaQuery } from '@teamhub/ui';
 import { canWith, runtime, useMe, useSeason, useTeamScope, type WidgetDef } from '@teamhub/sdk';
 import { ProgramLogo } from '../auth/AuthLayout';
 import { CORE_WIDGETS } from './coreWidgets';
@@ -56,6 +56,7 @@ export function Home() {
   const grid = visible.filter((w) => w.priority !== 'today');
   const first = me.profile.display_name.split(' ')[0];
   const settle = useSettled();
+  const wide = useMediaQuery('(min-width: 1024px)');
 
   return (
     <div className="relative mx-auto w-full max-w-6xl px-4 py-6 sm:px-6">
@@ -79,20 +80,31 @@ export function Home() {
           around while each one fetches its data. Opacity, not visibility: Masonry marks each placed card visible. */}
       <PendingContext.Provider value={settle.track}>
         <div data-home-ready={settle.ready || undefined} inert={!settle.ready} className={settle.ready ? 'th-anim-fade' : 'absolute inset-x-4 opacity-0 sm:inset-x-6'}>
-          {today.length > 0 && (
-            // The heading hides too when every card in it has nothing to show today.
-            <section aria-label="Today" className="mb-6 [&:not(:has(>div>div:not(:empty)))]:hidden">
+          {wide ? (
+            // Desktop: every card shares one set of columns (today's cards first), so the gaps are the same everywhere and
+            // the columns end at about the same height. The heading hides when no card for today has anything to show.
+            <section aria-label="Today" className="[&:not(:has([data-today]:not(:empty)))>h2]:hidden">
               <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-faint">Today &amp; this week</h2>
-              {/* Cards stretch to fill their row, so one card never leaves empty space beside it. */}
-              <div className="flex flex-wrap gap-3 [&>div:empty]:hidden [&>div]:min-w-[min(100%,300px)] [&>div]:flex-1">
-                {today.map((w) => (
-                  <WidgetSlot key={w.key} w={w} teamId={teamId} />
-                ))}
-              </div>
+              <Masonry animate={settle.ready} items={[...today, ...grid].map((w) => ({ key: w.key, node: <WidgetSlot w={w} teamId={teamId} today={w.priority === 'today'} /> }))} />
             </section>
-          )}
+          ) : (
+            <>
+              {today.length > 0 && (
+                // The heading hides too when every card in it has nothing to show today.
+                <section aria-label="Today" className="mb-6 [&:not(:has(>div>div:not(:empty)))]:hidden">
+                  <h2 className="mb-2 text-[12px] font-semibold uppercase tracking-wider text-faint">Today &amp; this week</h2>
+                  {/* Cards stretch to fill their row, so one card never leaves empty space beside it. */}
+                  <div className="flex flex-wrap gap-3 [&>div:empty]:hidden [&>div]:min-w-[min(100%,300px)] [&>div]:flex-1">
+                    {today.map((w) => (
+                      <WidgetSlot key={w.key} w={w} teamId={teamId} />
+                    ))}
+                  </div>
+                </section>
+              )}
 
-          <Masonry animate={settle.ready} items={grid.map((w) => ({ key: w.key, node: <WidgetSlot w={w} teamId={teamId} /> }))} />
+              <Masonry animate={settle.ready} items={grid.map((w) => ({ key: w.key, node: <WidgetSlot w={w} teamId={teamId} /> }))} />
+            </>
+          )}
         </div>
       </PendingContext.Provider>
 
@@ -105,10 +117,10 @@ export function Home() {
   );
 }
 
-function WidgetSlot({ w, teamId }: { w: HomeWidget; teamId: string | null }) {
+function WidgetSlot({ w, teamId, today }: { w: HomeWidget; teamId: string | null; today?: boolean }) {
   const C = w.component;
   return (
-    <div>
+    <div data-today={today || undefined}>
       <Suspense fallback={<Pending />}>
         <C teamId={teamId} />
       </Suspense>

@@ -12,6 +12,8 @@ Releases with a **Security** section fix a vulnerability. Update as soon as you 
 How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
+
+## [1.1.6] - 2026-10-14
 ### Added
 
 - **Leave a team yourself.** In programs with several teams, **My profile > Your teams** lists your teams with a

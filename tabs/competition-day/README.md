@@ -1,6 +1,6 @@
 # Competition Day
 
-**Purpose:** the live screen at an event: no need to keep the FTC website open.
+**Purpose:** a live screen for the event you're at, so you don't need to keep the FTC website open.
 
 - Choose the event your team is at (from your FTCScout schedule).
 - **Next match** with an estimated time (adjusted for how late the field runs), who's with and against you, and their rank/OPR.
@@ -8,7 +8,7 @@
 - Refreshes from FTCScout every minute while the screen is open.
 - **Pit notes:** short status text synced live to everyone ("Intake servo replaced. Test before Q14").
 - **Past events:** when you move on, the last event (its pit notes and final results) is kept. Only admins can delete it.
-- With Checklists and Scouting enabled: shortcuts to your pre-match checklist and "Scout this match".
+- With Checklists and Scouting enabled, there are shortcuts to your pre-match checklist and "Scout this match".
 
 **Not for:** chat (Team chat link), scouting other teams (Scouting).
 

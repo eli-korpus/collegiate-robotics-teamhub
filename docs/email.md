@@ -7,7 +7,7 @@ Turning email on adds two things:
 
 - **Email confirmation:** new members click a link in an email before they can sign in, so you know the address is
   really theirs.
-- **"Forgot your password?"** on the sign-in page: people reset their own password by email.
+- **"Forgot your password?"** on the sign-in page, so people can reset their own password by email.
 
 ## Why you need an email provider
 

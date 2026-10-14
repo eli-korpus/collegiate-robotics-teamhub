@@ -12,6 +12,16 @@ Releases with a **Security** section fix a vulnerability. Update as soon as you 
 How to update your dashboard: [docs/updating.md](updating.md).
 
 ## [Unreleased]
+### Fixed
+
+- **Home** on computers: the gaps between cards are now the same everywhere. Today's cards and the rest share one
+  set of columns, so they no longer leave empty holes, and the columns end at about the same height. Phones and
+  tablets look the same as before.
+
+### Changed
+
+- The README has a new main image (the light theme on a dark background, with an address bar on the phone too), and
+  the README and docs were reworded to be plainer and easier to read.
 
 ## [1.1.4] - 2026-10-13
 ### Fixed

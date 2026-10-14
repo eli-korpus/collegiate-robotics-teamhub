@@ -1,8 +1,8 @@
 # Configuration (`team/teamhub.config.json`)
 
-Everything that makes a dashboard *yours* lives in one JSON file in your fork, `team/teamhub.config.json`, plus your
-logos in `team/branding/`. The setup wizard (`npm run setup`) writes both. You normally never edit them by hand. This
-page documents the format for when you want to look, review a change in a pull request, or fix something manually.
+Your dashboard's settings live in one JSON file in your fork, `team/teamhub.config.json`, plus your
+logos in `team/branding/`. The setup wizard (`npm run setup`) writes both. You normally don't edit them by hand. This
+page describes the format, in case you want to read it, review a change in a pull request or fix something manually.
 
 The file is validated by `packages/config-schema` (zod) every time the app is generated or built.
 

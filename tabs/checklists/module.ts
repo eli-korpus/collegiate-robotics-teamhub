@@ -13,7 +13,7 @@ export default defineModule({
   category: 'competition',
   icon: 'ListChecks',
   summary: 'Pre-match, pit, packing, inspection, judging and portfolio checklists. Run again and again.',
-  purpose: 'Run through a list of steps, again and again.',
+  purpose: 'Lists of steps you go through again and again.',
   notFor: [
     { text: 'Assigning work to people', goTo: 'tasks' },
     { text: 'Interview practice', goTo: 'judging' },

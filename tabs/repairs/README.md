@@ -1,6 +1,6 @@
 # Repair & Issue Log
 
-**Purpose:** record what broke, why, and how it was fixed: useful history and portfolio material.
+**Purpose:** record what broke, why, and how it was fixed. The history helps next time and in the portfolio.
 
 - Report with subsystem, severity, when/where (e.g. "Qual 14"), cause, fix and an optional compressed photo.
 - Open issues are grouped by severity; mark fixed (records who fixed it) or won't fix. Comments on each issue.

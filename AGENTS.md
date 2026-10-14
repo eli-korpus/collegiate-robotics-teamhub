@@ -86,7 +86,7 @@ then enable it with the wizard. Details: `.github/CONTRIBUTING.md`.
 **Connect two tabs:** create an integration in `tabs/integrations/<a>+<b>/` instead of importing one tab from another
 (tabs must never import each other; `npm run lint` checks this).
 
-**Change Home, People, Links or Admin:** `dashboard/src/core/`. Keep these changes small: they're the files most likely to
+**Change Home, People, Links or Admin:** `dashboard/src/core/`. Keep these changes small, because they're the files most likely to
 conflict when you update to new TeamHub releases.
 
 ## Rules that keep the dashboard safe and working
